@@ -1,0 +1,18 @@
+\begin{thebibliography}{1}
+
+\bibitem{franta1977}
+W.~R. Franta and Kurt Maly.
+\newblock An efficient data structure for the simulation event set.
+\newblock {\em Commun. ACM}, 20(8):596--602, 1977.
+
+\bibitem{friedl2006}
+Jeffrey Friedl.
+\newblock {\em Mastering Regular Expressions}.
+\newblock O'Reilly Media, Inc., 2006.
+
+\bibitem{robinson1965}
+J.~A. Robinson.
+\newblock A machine-oriented logic based on the resolution principle.
+\newblock {\em J. ACM}, 12(1):23--41, 1965.
+
+\end{thebibliography}

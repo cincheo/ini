@@ -1,0 +1,1675 @@
+
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+\usepackage{bussproofs}
+\usepackage{listings}
+\usepackage{color}
+% This is the "centered" symbol
+\def\fCenter{{\mbox{\Large$\rightarrow$}}}
+
+\definecolor{LightGrey}{rgb}{0.9,0.9,0.9}
+\lstset{numbers=left, numberstyle=\footnotesize, tabsize=2, backgroundcolor=\color{LightGrey}}
+
+% Optional to turn on the short abbreviations
+\EnableBpAbbreviations
+
+% \alwaysRootAtTop  % makes proofs upside down
+% \alwaysRootAtBottom % -- this is the default setting
+
+\begin{document}
+\thispagestyle{empty}
+
+\title{INI Language Reference Documentation / User Manual}
+\author{Renaud Pawlak, ISEP}
+
+\date{Version pre-alpha 1}
+\maketitle
+\
+
+\tableofcontents
+
+\section{Introduction}
+
+INI is a programming language where all functions are defined with rules. A rule is a pair of (guard, action). The action will be executed only if the guard is evaluated to true in the context of the function. Guards are formed of an optional event part (e.g. \texttt{@event[in parameters](out parameters)}), and of an optional condition part, which includes first order logic expressions. At least one event part or a condition (possibly both) must be defined. When the guard is passed, it triggers the evaluation of the action. The action is a list of sequential statements including variable assignments, function invocations, and return statements. The difference between INI and regular imperative languages is that INI does not include any control structure such as \emph{ifs} or \emph{loops}. All the control is made through rules (i.e. guards and actions evaluation).
+
+For instance, a way to implement a factorial function \texttt{fac(n)} with INI would be through 3 rules:
+
+\begin{enumerate}
+\item an initialization rule that defines and initializes a variable to store the result (\texttt{f}) and a variable to store the current integer to multiply (\texttt{i}).
+\item a rule that multiplies the result by the current integer \texttt{i} and increments it, guarded with the predicate that \texttt{i} is lower or equal to the number \texttt{n} we want to calculate the factorial of.
+\item a termination rule that returns the calculated result \texttt{f}.
+\end{enumerate}
+
+INI defines some default events that can be used in the guards of the rules. The first basic event is \texttt{@init}, which occurs when the function evaluation starts. The \texttt{@init} event is triggered before any other events or rules, even if not placed at the beginning of the function. The second basic event is \texttt{@end}, which occurs once the function ends, that is to say when no rules can apply anymore (all the guards evaluate to false). \texttt{@init} and \texttt{@end}-triggered rules are executed only once and take no parameters. Thus, the following code implements the factorial function in INI.
+
+\begin{lstlisting}
+function fac(n) {
+	@init() {
+		f=1
+		i=1
+	}
+	i <= n {
+		f=f*i++
+	}
+	@end() {
+		return f
+	}
+}
+\end{lstlisting}
+
+One can find the initialization and termination rules at lines 2 and 9. At line 6, the only non-event-triggered rule actually calculates the factorial result. It is important to understand that due to the INI execution semantics, the applicable rules will continue to apply until their guards evaluate to false. Here, \texttt{i<=n} eventually becomes false since \texttt{i++} increments \texttt{i} at each rule execution. Once \texttt{i} equals to \texttt{n}, there are no rules to be executed anymore in the function, and the \texttt{@end} event is triggered, thus making the function return the value stored in \texttt{f}.
+
+\section{Getting started with INI}
+
+\subsection{Installing INI}
+
+The current implementation of INI is an interpreter written in pure Java, which means that INI is easy to install and run on any platform that supports the latest Java version. To install INI, simply unzip the downloadable distribution and add \texttt{<target-dir>/ini/bin} to your path. Then type in the \texttt{ini} command on UNIX-based OS or \texttt{ini.bat} on Windows. If INI does not start, make sure that you have the execution rights on \texttt{<target-dir>/ini/bin/ini}, and that a recent Java version is properly installed (type in java --version in a console to check the version out). If INI is installed, it will produce the following output:
+
+{\scriptsize \begin{lstlisting}[numbers=none]
+Error: Parameter 'file' is required.
+
+Usage: ini [-v|--version] [-a|--pretty-print-ast] [-p|--parse-only]
+           [-d|--debug] [-h|--help]
+           [(-b|--breakpoint) breakpoint1,breakpoint2,...,breakpointN]
+           [(-w|--watch) watch1,watch2,...,watchN ]
+           <file> [parameters1 parameters2 ... parametersN]
+
+  [-v|--version]
+        Print the INI version.
+
+  [-a|--pretty-print-ast]
+        Pretty print the parsed program.
+
+  [-p|--parse-only]
+        Only parse the program without executing it.
+
+  [-d|--debug]
+        Execute the program in debug mode - step through the program.
+
+  [-h|--help]
+        Print this usage message.
+
+  [(-b|--breakpoint) breakpoint1,breakpoint2,...,breakpointN ]
+        Install breakpoints on the program when run in debug mode
+        (ignored when not in debug mode).
+
+  [(-w|--watch) watch1,watch2,...,watchN ]
+        Defines variables to be watched during debug (ignored when
+        not in debug mode).
+
+  <file>
+        The INI file that must be parsed/executed - must contain a
+        main function to be executed.
+
+  [parameters1 parameters2 ... parametersN]
+        The parameters to be passed to the main function.
+\end{lstlisting} }
+
+As you can see, you must provide an INI source file to be executed. Note that this source file must contain a \texttt{main} method that will be used as an entry point to the program. We will now guide you through the writing of your first INI program.
+
+\subsection{Write and run your first INI program}
+
+To write your first INI program, you can use your favorite editor. The convention is to name the source code files such as: \texttt{my\_path/my\_program.ini}, however, INI will not prevent the programmers to use their own file naming conventions at their own risks. Let us now write a simple "hello world" program. We just need a main function that prints out the text on the initialization event. Create a \texttt{hello\_world.ini} file with the following content:
+
+\begin{lstlisting}
+function main() {
+	@init() {
+		println("hello world")
+	}
+}
+\end{lstlisting}
+
+To run this program, type in "\texttt{ini hello\_world.ini}" in a console. The output should be "\texttt{hello world}".
+
+You can now start using rule-based programming. For instance, the following program prints out "\texttt{hello world}" ten times.
+
+\begin{lstlisting}
+function main() {
+	@init() {
+		i = 10
+	}
+	i > 0 {
+		println("hello world")
+		i--
+	}
+}
+\end{lstlisting}
+
+Note that \texttt{println} is part of INI's built-in functions. For a list of these functions, see [...]. Besides using built-in functions, it is possible to use Java objects from INI, as explained in [...].
+
+\section{Some INI examples}
+
+\subsection{Counting occurences in a list\label{sec:counting_occurences_in_a_list}}
+
+In order to illustrate the use of maps and lists with INI, we now show how to implement a simple function that counts the occurences of the elements within a given list. In order to access the counted results for each element, we store them in a map, where each entry's key is the counted element, and the entry's value is the calculated number of occurences of the element.
+
+For implementing this function, we will use INI built-in map types, which allow the programmer to associate keys with values by using a square bracket based syntax (like arrays in most languages). Within an INI map, all the keys and values must be of the same type in order to avoid typing errors. In INI, a list is a \texttt{Map(Int,T)}, which can also be said as \texttt{T*} (list of \texttt{T}). A type alias is defined for strings, which are lists of characters: \texttt{String} $\widehat=$ \texttt{Map(Int,Char)}.
+
+INI provides \emph{type inference} [...], so that the programmer does not need to declare any type (except in some cases as we will see later). For instance, the \texttt{i=0} statement will define the \texttt{i} variable with an \texttt{Int} type. If the programmer tries to set the type of \texttt{i} to any other type within the \texttt{i} definition scope, (for instance with the \texttt{i=0.0} statement that assigns i with a \texttt{Float} type) the INI type checker will raise a type mismatch error. Following the same type inference principles, accessing a variable with the square brackets map access construct will automatically define the type of the variable to be a map. For instance, the \texttt{l[i]} expression tells INI that \texttt{l} is of type \texttt{Map(Int,T)} (i.e. a list of \texttt{T}), where \texttt{T} can be any type.
+
+\begin{lstlisting}
+function countOccurencesAndStoreToMap(l) {
+	@init() {
+		i=0
+	}
+	i < size(l) {
+		c[l[i++]]++
+	}
+	@end() {
+		return c
+	}
+}
+\end{lstlisting}
+
+The \texttt{countOccurencesAndStoreToMap} function shown here simply iterates through the given \texttt{l} variable. As expected, this variable is inferred by INI to be a list, since it is used as such in the expressions \texttt{l[i++]} (line 6) and \texttt{size(l)} (line 5). So, for each element in \texttt{l}, the function accesses the corresponding entry in a \texttt{c} map: c[l[i]] and increments the value of this entry with the \texttt{++} operator (\texttt{c[l[i]]++}). Then, the program goes to the next element of the list with the \texttt{++} operator on \texttt{i} (hence the weird yet concise statement \texttt{c[l[i++]]++} of line 6). The \texttt{++} operator is a typical post increment operator as it is found in C or Java languages.
+
+As shown in the following program, we can now use this function to count the occurences within a list of integers. Note that a program shall define a main function that is run by the INI interpreter.
+
+\begin{lstlisting}
+function main() {
+	@init() {
+		l = [1, 2, 1, 7]
+		println("Counting '"+l+"'")
+		c = countOccurencesAndStoreToMap(l)
+		println("Number of 1: "+c[1])
+		println("Number of 7: "+c[7])
+		println("Number of 3: "+c[3])
+	}
+}
+\end{lstlisting}
+
+Output:
+
+\begin{lstlisting}[numbers=none]
+Counting '[1,2,1,7](0..3)'
+Number of 1: 2
+Number of 7: 1
+Number of 3: null
+\end{lstlisting}
+
+When executing the main function, the \texttt{c} variable is filled with the count of each element in the list \texttt{l}. Note that in that case, the type of \texttt{c} is \texttt{Map(Int,Int)}, because \texttt{l} is of type \texttt{Int*}. However, we can note that nothing prevents the program to count other types of elements. For instance, we can count a list of strings: \texttt{l = ["a","ab","abc","ab","a"]}. In that case, the type of \texttt{c} would be \texttt{Map(String,Int)}. Finally, since strings are defined as lists of characters in INI, we can also count letter occurences in a string, as showed below.
+
+\begin{lstlisting}
+function main() {
+	@init() {
+		s = "This is the string we will count"
+		println("Counting '"+s+"'")
+		c = countOccurencesAndStoreToMap(s)
+		println("Number of e(s): "+c['e'])
+		println("Number of a(s): "+c['a'])
+		println("Number of s(s): "+c['s'])
+		println("Number of i(s): "+c['i'])
+		println("Number of spaces: "+c[' '])
+	}
+}
+\end{lstlisting}
+
+Output:
+
+\begin{lstlisting}[numbers=none]
+Counting 'This is the string we will count'
+Number of e(s): 2
+Number of a(s): null
+Number of s(s): 3
+Number of i(s): 4
+Number of spaces: 6
+\end{lstlisting}
+
+In terms of typing, it means that the \texttt{countOccurencesAndStoreToMap} function is \emph{polymorphic}. A polymorphic function is more generic since it can be applied to several types. More precisely, in our case, the inferred functional type is \texttt{(Map('E,Int))->Void}, where \texttt{'E} is a type parameter. Actually, the INI type inference algorithm finds the most general type so that functions are only typed with the least possible constraints and remain polymorphic when possible. For more details, see [...].
+
+\subsection{Implementing a sort function\label{sec:implementing_a_sort_function}}
+
+With INI, there is a very straightforward way to implement a sort function, which consists of taking advantage of \emph{set expressions}. A set expression allows to select arbitrary objects within a set. These selected objects may follow some criteria given in the second part of the expression. Set expressions are used in guard so that the guard is evaluated to true only if an object that matches the given criteria can be found in the set. Here, to implement the \texttt{sort1} function, we simply select all the indexes \texttt{i} in the \texttt{s} list so that \texttt{s[i]} is greater than \texttt{s[i+1]} (line 2). When this rule matches it simply swaps \texttt{s[i]} and \texttt{s[i+1]}, so that the list will eventually be sorted when the rule cannot apply anymore. In that case, the \texttt{@end} event is triggered and the function returns the sorted list.
+
+\begin{lstlisting}
+function sort1(s) {
+	i of [0..size(s)-2] | s[i] > s[i+1] {
+		swap(s[i],s[i+1])
+	}
+	@end() {
+		return s
+	}
+}
+\end{lstlisting}
+
+Note that this function is polymorphic. Its type is \texttt{(Map(Int,'T))->} \texttt{Map(Int,'T)}, or simpler written \texttt{('T*)->'T*}.
+
+Of course, programmers can also use explicit indexes to iterate on the list to be sorted, leading to more classical code. The following function implements a basic bubble sort with INI. The iteration is done with two rules: one which swaps the current elements (line 7), and one which does not (line 12). A \texttt{swap} boolean flag is used to know if there was a swap during the iteration. If \texttt{swap} is true once the end of the list is reach, we set back the index \texttt{i} to \texttt{0} so that the iteration rules apply all over again (line 15).
+
+\begin{lstlisting}
+function sort2(s) {
+	@init() {
+		i = 0
+		swap = false
+		size = size(s)-1
+	}
+	i < size && s[i] > s[i+1] {
+		swap(s[i],s[i+1])
+		swap = true
+		i++
+	}
+	i < size && s[i] <= s[i+1] {
+		i++
+	}
+	i==size && swap {
+		swap = false
+		i = 0
+	}
+	@end() {
+		return s
+	}
+}
+\end{lstlisting}
+
+As we can see, the first implementation is more intuitive and more concise. The advantage with the second implementation is that the programmer can actually control the way the list is iterated on. With the set expression, there is no warranty on the order the elements will match, which could lead to performance issues. Here the two implementations have a similar complexity of $0(n^2)$. In order to get better complexity, we can for instance implement the well-known Quicksort algorithm [...], as shown here.
+
+
+\begin{lstlisting}
+function quicksort(s,lo,hi){
+	hi>lo && !done{
+		p = partition(s,lo,hi,lo)
+		quicksort(s, lo, p-1)
+		quicksort(s, p+1, hi)
+		done = true
+	}
+	@end() {
+		return s
+	}
+}
+
+function partition(s,lo,hi,pivotIndex){
+	@init() {
+		pivotValue = s[pivotIndex]
+		swap(s[pivotIndex],s[hi])
+		index=lo
+		i=lo
+	}
+	i<hi && s[i]<=pivotValue {
+		swap(s[i],s[index])
+		index++
+		i++
+	}
+	i<hi && s[i]>pivotValue {
+		i++
+	}
+	@end() {
+		swap(s[hi], s[index])
+		return index
+	}
+}
+\end{lstlisting}
+
+This algorithm is more complex to understand but it performs very well for middle-sized lists. The interesting characteristic to point out here is that the quicksort function is recursive. Hence, INI allows both rule-based programming style and functional programming style. Programmers may use one or the other depending on the type of problem they need to solve.
+
+\subsection{Constructing a Fibonacci tree}
+
+A Fibonacci tree is a binary tree defined as follows:
+
+\begin{itemize}
+\item each node contains an integer value $v$
+\item if $v>2$, the values of the two sub-nodes are $v-1$ and $v-2$
+\item if $v=2$, the values of the two sub-nodes are $1$
+\end{itemize}
+
+Fibonacci trees have interesting properties to calculate the Fibonacci series. In particular, for a given node having the value $v$, the corresponding Fibonacci number equals to the number of tree leaves under this node.
+
+In order to construct a Fibonacci tree, the best way is to define a tree type. In INI, it is possible to define structural types that contain fields. Typically, we can define a \texttt{Node} type as follows:
+
+\begin{lstlisting}[numbers=none]
+type Node = [value:Int,left:Node,right:Node]
+\end{lstlisting}
+
+As shown in the code, a node has three fields: an integer value and two nodes corresponding to the left and right sub-nodes (the \texttt{Node} type is recursively defined). Once the programmer has defined such a type, it is possible to construct new instances of it with the following syntax: for instance, \texttt{node = Node[value=1]}. This statement creates a new \texttt{Node} object and initializes the value field to 1. In INI, it is not mandatory to define all the fields when instantiating a type, it simply means that the not initialized fields are undefined (\texttt{null} value). To access the field value of a given type instance, the programmer must use the doted notation. For instance: \texttt{i = node.value}
+
+Before starting the implementation, it is important to note that when the \texttt{Node} type is instantiated, the resulting object is part of a \texttt{Node} set since INI ensures a correspondence between the constructors and the set of objects that has been constructed through them. This can be useful to write guard with set expressions upon type instances.
+
+\begin{lstlisting}
+function fibtree1(v) {
+	@init() {
+		root = Node[value=v]
+	}
+	n of Node | n.value > 2 && !n.left {
+		n.left = Node[value=n.value - 1]
+		n.right = Node[value=n.value - 2]
+	}
+	n of Node | n.value == 2 && !n.left {
+		n.left = Node[value=1]
+		n.right = Node[value=1]
+	}
+	@end() {
+		return root
+	}
+}
+\end{lstlisting}
+
+The \texttt{fibtree1} function proposes a first implementation that uses the \texttt{Node} type and two set expression to construct a tree from a given root value. It takes the initial value \texttt{v} as an argument and first creates the root node of the tree (line 3) with undefined sub-nodes. Then, it defines two rules: one for constructing the sub-nodes for all the nodes having a value greater than 2 (line 5), one for constructing the final nodes when the value equals 2 (line 9). Note the use of \texttt{!n.left} in the two guards. It ensures that the rule will never apply again to a node that has already been handled (i.e. left sub-nodes is already there). Actually, the complete guard should be \texttt{!n.left \&\& !n.right} but it is not necessary since the program ensures that the left and right sub-nodes and always constructed at the same time. Finally when no more rule applies, i.e. all the possible nodes have been constructed, the function returns the root node of the tree.
+
+This implementation works fine, but from a typing perspective, it would be nicer to have different constructors for the regular nodes and for the leaf nodes, since the latter can never have sub-nodes. It would allow better typing of the objects. This can be achieved using algebraic data types, which are supported by INI. Algebraic data types allow for the rigorous definition of complex types, similarly to an AST definition. They are supported by many functional languages such as OCAML, TOM, etc. The algebraic types in INI differ from typical ones because they allow for named field definitions and because the field initializations are not mandatory when constructing a type. Using an algebraic type, we can specify better the tree structure as follows:
+
+\begin{lstlisting}[numbers=none]
+type Tree = Leaf[value:Int]
+          | Node[value:Int,left:Tree,right:Tree]
+\end{lstlisting}
+
+As we an see, we now have a \texttt{Tree} type that provides two constructors: one for regular nodes, and one for leaves. We can slightly change the function implementation:
+
+\begin{lstlisting}
+function fibtree2(v) {
+	@init() v>=2 {
+		root = Node[value=v]
+	}
+	@init() v==1 {
+		root = Leaf[value=v]
+	}
+	n of Node | n.value > 2 && !n.left {
+		n.left = Node[value=n.value - 1]
+		n.right = Node[value=n.value - 2]
+	}
+	n of Node | n.value == 2 && !n.left {
+		n.left = Leaf[value=1]
+		n.right = Leaf[value=1]
+	}
+	@end() {
+		return root
+	}
+}
+\end{lstlisting}
+
+INI provides a match operator \~~that programmers can use to match instances of algebraic types. When a match is done in the guard, the matched object is considered to be an instance of the type constructed with the constructor used in the match expression. For instance, one can replace "\texttt{n of Node | n.value>2 \&\& !n.left}" with "\texttt{n of Node | n \~~Node[value>2, !left]}". Using a match operator in a set expression is not very useful, since here, we already know that \texttt{n} is an element of the \texttt{Node} set. Matching against the \texttt{Node[value>2, !left]} expression is thus redundant. However, using match expression can be useful when programmers want to program using the functional style, for example to define a recursive function with a match switch, like one would proceed in OCAML, for instance. Here is a recursive implementation using functional programming style (note that it does not take a value, but a node \texttt{n}):
+
+\begin{lstlisting}
+function fibtree3(n) {
+	n ~ Node[value==2,!left] {
+		n.left = Leaf[value=1]
+		n.right = Leaf[value=1]
+	}
+	n ~ Node[value>2,!left] {
+		n.left = fibtree3(Node[value=n.value - 1])
+		n.right = fibtree3(Node[value=n.value - 2])
+	}
+	@end() {
+		return n
+	}
+}
+\end{lstlisting}
+
+Finally, here is the \texttt{fibtree4} function, which is a small variation of the \texttt{fibtree3} function. \texttt{fibtree4} creates new nodes to replace the matched node \texttt{n} instead of setting the \texttt{left} and \texttt{right} fields.
+
+\begin{lstlisting}
+function fibtree4(n) {
+	n ~ Node[value==2,!left] {
+		n = Node[left=Leaf[value=1],
+		         right=Leaf[value=1]]
+	}
+	n ~ Node[value>2,!left] {
+		n = Node[left=fibtree4(Node[value=n.value - 1]),
+		         right=fibtree4(Node[value=n.value - 2])]
+	}
+	@end() {
+		return n
+	}
+}
+\end{lstlisting}
+
+\subsection{Programming a simple HTTP server}
+
+In order to illustrate the use of Java objets and the use of asynchronous event-based rules, we will now study a slightly more complex example. The goal of this example is to program a very simple HTTP server, which is not meant to be complete, but to explain basic programming principles in INI. For this example, we will use the \texttt{java.net} API for sockets, and some of the \texttt{java.io} classes. To use Java objects from INI the programmer just need to define bindings from INI functions to Java constructors, methods or fields. For instance, to bind an \texttt{out()} function to the \texttt{System.out} Java writer, you need to define the following binding:
+
+\begin{lstlisting}[numbers=none]
+out()->Writer => "java.lang.System", "out"
+\end{lstlisting}
+
+Note that this binding defines a new function \texttt{out}, which is typed in INI with the functional type \texttt{()->Writer} as indicated in the binding definition. Since the \texttt{Writer} type does not exist in INI, INI will create a new type so that type checking can be performed properly. You can now define a binding for the Java writer's \texttt{println(String)} function. Note that since this function is not static, in INI you must pass the instance as the first parameter of the function:
+
+\begin{lstlisting}[numbers=none]
+java_println(Writer,String)->Void
+	=> "java.io.Writer", "println(..)"
+\end{lstlisting}
+
+Note that we name the binding \texttt{java\_println} to avoid the name clash with the \texttt{println} built-in INI function. Also, note the \texttt{"println(..)"} notation, which means that INI will try to map to the function named \texttt{println}, with the best match in the parameter types. Once the bindings have been defined, the programmer can use them from their INI functions. Bindings must always be declared at the beginning of INI files. For instance:
+
+\begin{lstlisting}
+out()->Writer => "java.lang.System", "out"
+java_println(Writer,String)->Void
+	=> "java.io.Writer", "println(..)"
+
+function main() {
+	@init() {
+		java_println(out(),"hello Java")
+	}
+}
+\end{lstlisting}
+
+Type safety within the INI program is ensured through the binding declarations. It is the task of the programmers to define consistent bindings with regards to the types. Finally, the bindings to Java class constructors are achieved by using \texttt{"new(..)"} for the method name.
+
+For programming our HTTP server, we will need to define a few bindings to Java functions, which we give right away:
+
+{\small \begin{lstlisting}
+socket_server(Int)->ServerSocket
+	=> "java.net.ServerSocket", "new(..)"
+socket_accept(ServerSocket)->Socket
+	=> "java.net.ServerSocket", "accept(..)"
+socket_address(Socket)->InetAddress
+	=> "java.net.Socket", "getInetAddress(..)"
+host_name(InetAddress)->String
+	=> "java.net.InetAddress", "getHostName(..)"
+socket_input_stream(Socket)->InputStream
+	=> "java.net.Socket", "getInputStream(..)"
+socket_output_stream(Socket)->OutputStream
+	=> "java.net.Socket", "getOutputStream(..)"
+reader(InputStream)->Reader
+	=> "java.io.InputStreamReader", "new(..)"
+buffered_reader(Reader)->BufferedReader
+	=> "java.io.BufferedReader", "new(..)"
+data_output_stream(OutputStream)->DataOutputStream
+	=> "java.io.DataOutputStream", "new(..)"
+read_line(BufferedReader)->String
+	=> "java.io.BufferedReader", "readLine(..)"
+write_string(DataOutputStream,String)->Void
+	=> "java.io.DataOutputStream", "writeBytes(..)"
+close(DataOutputStream)->Void
+	=> "java.io.Closeable", "close(..)"
+\end{lstlisting} }
+
+Next, we implement a function \texttt{start\_http\_server} that will use a server socket to listen to some TCP client connections. For those who are not familiar with the TCP socket API, the principles are the following: the programmer must open a server socket and call the \texttt{accept} function on it in order to wait for some client connections. The call to \texttt{accept} is always blocking, meaning that the program will halt until a connection happens. Once a new connection is made by a TCP client, the programs starts again and the \texttt{accept} function returns a  new socket on which the client/server communication can be done. Thus the server may continue to listen to some other client connections on the initial server socket, assuming that the program deals with the client requests in different threads or processes.
+
+\begin{lstlisting}
+function start_http_server(port) {
+	@init() {
+		s = socket_server(port)
+		println("Server started on "+port)
+	}
+	s {
+		// wait for a connection
+		c = socket_accept(s)
+		// here we can deal with the connections
+		...
+	}
+}
+\end{lstlisting}
+
+In code above, the server socket is constructed line 3. You can note the use of the \texttt{s} guard on line 6. This guard allows the \texttt{socket\_accept} function to be called under the condition that the server socket \texttt{s} is actually constructed. Use of such variable existence rules for programming is typical of rule-based programing with INI and allows safer programming since it encourages the programmer to define all the conditions under which actions can be executed.
+
+It would be possible to deal with client connections after the \texttt{socket\_accept} function call, as indicated at lines 9 and 10. However, several client connections would not be able to be handled in parallel. Thus, with INI, the best way to deal with the connections is to use an event-trigerred rule. Event-trigerred rules are asynchronous and execute in different execution threads and straightforwardly allows for multithreaded programs. Here, we can use the \texttt{@update} event on the \texttt{c} variable, which will trigger the action when the variable is updated, as the event name says.
+
+\begin{lstlisting}
+function start_http_server(port) {
+	@init() {
+		s = socket_server(port)
+		clear(c)
+		println("Server started on "+port)
+	}
+	s {
+		c = socket_accept(s)
+	}
+	@update[c]() {
+		// deal with the connections (asynchronous)
+		...
+	}
+}
+\end{lstlisting}
+
+Note the \texttt{clear(c)} statement added at line 4, which is necessary for the \texttt{@update} guard to be correctly installed on the \texttt{c} variable. The \texttt{clear} function is a built-in function and allows for (re)-initialization of a variable content. It is often used to make sure that the variable is defined when \texttt{@update} event is installed, i.e. right after the function's initialization. In order to deal with the client connections we use the input and output streams of the socket produced by the \texttt{socket\_accept} function. For simplicity, we delegate to a \texttt{handle\_http\_request} function.
+
+\begin{lstlisting}
+// Java bindings
+socket_server(Int)->ServerSocket
+	=> "java.net.ServerSocket", "new(..)"
+...
+	
+function main() {
+	@init() {
+		start_http_server(8080)
+	}
+}
+
+function start_http_server(port) {
+	@init() {
+		s = socket_server(port)
+		clear(c)
+		println("Server started on "+port)
+	}
+	s {
+		c = socket_accept(s)
+	}
+	@update[c]() {
+		client = socket_address(c)
+		println(to_string(host_name(client))
+			+" connected to server")
+		in = buffered_reader(reader(
+			socket_input_stream(c)))
+		out = data_output_stream(socket_output_stream(c))
+		handle_http_request(in, out)
+	}		
+}
+
+function handle_http_request(in, out) {
+	line!="" {
+		line = read_line(in)
+	}
+	line ~ regexp("GET (.*) (.*)", path, version) {
+		println("GET FOUND: "+path+" - "+version)
+	}
+	@end() path {
+		// generate an empty response
+		write_string(out, "HTTP/1.0 200 OK\r\n")
+		write_string(out, "Connection: close\r\n")
+		write_string(out, "Server: INI v0\r\n")
+		write_string(out, "Content-Type: text/html\r\n")
+		write_string(out, "Content-Length: 0\r\n\r\n")
+		close(out)
+		println("end of request")
+	}
+	@end() !path {
+		close(out)
+		println("illegal request")
+	}
+}
+\end{lstlisting}
+
+For dealing with HTTP requests, we use the match operator for strings, which allows matching against regular expressions (at line 36). The regular expression seeks for a \texttt{GET} HTTP command. In the HTTP protocol syntax, the \texttt{GET} command is followed by the path and the HTTP version, which are space-separated. In the regular expression \cite{friedl2006} standard used by INI (see [...]), parenthesis produce match outputs, which can be bound to INI variables. Here, \texttt{regexp("GET (.*) (.*)", path, version)} binds the two space-separated expressions following the \texttt{GET} command to the \texttt{path} and \texttt{version} variables. This binding enables the \texttt{@end()} event to trigger the code that generates the HTTP response page, since the guard is only true upon the \texttt{path} condition at line 39. In the case the \texttt{path} variable is not bound, the function ends without responding to the request (line 50).
+
+Finally we can add a function to generate some HTML content. In INI, one can reference functions and pass them as parameters to other functions (similarly to closures in functional languages). Here, for instance, we can make the program more generic by passing a function that will handle the requests. Thus, we can add a \texttt{handler} functional parameter to the \texttt{start\_http\_server} function.
+
+\begin{lstlisting}
+[...]
+
+function start_http_server(port,handler) {
+	@update[c]() {
+		[...]
+		handle_http_request(in, out, handler)
+	}		
+}
+
+function handle_http_request(in, out, handler) {
+	[...]
+	@end() path {
+		body = eval(handler,path)
+		write_string(out, "HTTP/1.0 200 OK\r\n")
+		write_string(out, "Connection: close\r\n")
+		write_string(out, "Server: INI v0\r\n")
+		write_string(out, "Content-Type: text/html\r\n")
+		write_string(out, "Content-Length: "+
+			size(body)+"\r\n\r\n")
+		write_string(out, body)
+		close(out)
+		println("end of request")		
+	}
+	[...]
+}
+\end{lstlisting}
+
+The function referenced by the \texttt{handler} variable is evaluated at line 13, using the \texttt{eval} built-in function. The \texttt{eval} function takes a function as a parameter and the parameter list to be passed to the evaluated function. It returns the result of the evaluated function. In terms of typing, the inferred type of \texttt{eval} depends on the inferred type of the function to be evaluated: \texttt{eval(f:F,param\_list)}:\texttt{(F,T1,T2,...Tn)->T}, where \texttt{F=(T1,T2,...Tn)->T}. Here, we expect the \texttt{handler} function to take a string for the path of the requested URL and to return a string that will be used as the body of the HTTP response. For instance, in the following code, we can define a \texttt{my\_handler} function that generates a "hello world" HTML page. Note the use of the \texttt{@init()} and \texttt{@end()} rules, which can straightforwardly be used to wrap the response into an HTML body. Also, rules can be used to generate different HTML pages depending on the URL's path. Here, \texttt{my\_handler} will return a "hello world" content for the \texttt{test} path (line 5), but an empty content for other paths. Note also the use of the \texttt{clear(path)} statement of line 7 to avoid the infinite application of the rule. One could also change the path value (or other variable value) in the rule to trigger another rule.
+
+\begin{lstlisting}
+function my_handler(path) {
+	@init() {
+		s = "<html><body>"
+	}
+	path == "/test" {
+			s = s + "hello world"
+			clear(path)
+	}
+	@end() {
+		s = s + "</body></html>"
+		return s
+	}
+}
+\end{lstlisting}
+
+Finally, this rule-based function looks similar to a controller in the MVC architecture [...], except that the conditions that trigger the actions are clearly specified in the code. Conditions may hold on the request state (path, parameters, session variables), and possibly on the server state, even though is would probably not be a nice idea to program a statefull HTTP server. To make our server more complete, we should at least deal with the GET parameters and the POST requests and parameters. For sake of simplicity, we will not enter in such details here.
+
+Finally, we can start our HTTP server by passing the right handler function. Note the use of the \texttt{function} keyword at line 3 in the \texttt{main} function, which allows the program to get a function reference on the function named \texttt{my\_handler}.
+
+\begin{lstlisting}
+function main() {
+	@init() {
+		start_http_server(8080, function(my_handler))
+	}
+}
+\end{lstlisting}
+
+\section{Language features}
+
+\subsection{Built-in types}
+
+INI comes with 5 built-in types for numbers: \texttt{Double}, \texttt{Float}, \texttt{Long}, \texttt{Int}, and \texttt{Byte}. They differ on the number of bytes used to encode them (same as Java encoding). INI allows the use of \texttt{Int} and \texttt{Float} literals: e.g.:
+
+\begin{itemize}
+\item \texttt{i = 2}
+\item \texttt{f = 3.1}
+\end{itemize}
+
+For getting other number types, the programmer needs to use the buit-in conversion function that will be described Section [...].
+
+INI comes also with a \texttt{Char} type for single characters (letters and other ASCII characters) and a \texttt{String} type of character lists. Character literals are written between simple quotes and string literals are written between double quotes.
+
+\begin{itemize}
+\item \texttt{c = 'a'}
+\item \texttt{s = "hello"}
+\end{itemize}
+
+\subsection{Functions and rules}
+
+\subsubsection{Syntax}
+
+Functions are defined with the \texttt{function} keyword. Functions have a name that must be unique. The syntax is the following:
+
+\begin{verbatim}
+<function> := function <name>(<parameters>) { <rules> }
+\end{verbatim}
+
+Where \texttt{<name>} is the function name (an unique identifier), \texttt{<parameters>} is a coma-separated list of parameter identifiers, and \texttt{<rules>} is a list of rules that defines the function behavior. INI allows for rule-oriented programming. However, since rules are gathered into functions, it also allows for functional-like programming. The rule syntax is the following:
+
+\begin{verbatim}
+<rule> := <guard> { <body> }
+\end{verbatim}
+
+Thus, the "expanded" function syntax is:
+
+\begin{verbatim}
+function <name>(<parameters>) {
+  <guard1> { <body1> }
+  <guard2> { <body2> }
+  ...
+  <guardN> { <bodyN> }
+}
+\end{verbatim}
+
+\subsubsection{Parameters}
+
+Functions takes parameters which have a unique name within the function scope. Parameters are passed by reference and not by value. If the programmer wants to pass by value, it can be done using the \texttt{copy} built-in function. For instance, the function:
+
+\begin{verbatim}
+function f(a,b,c) { ... }
+\end{verbatim}
+
+Can be invoked with \texttt{f(1,2,"abc")}, if \texttt{f} expects two integers and one string. Parameters can have default values. For instance, the \texttt{a} and \texttt{c} parameters may have default values:
+
+\begin{verbatim}
+function f(a,b=0,c="") { ... }
+\end{verbatim}
+
+In that case, some parameter values are optional when invoked. For instance, \texttt{f(2,1)} invokes \texttt{f} with an empty string for \texttt{c}.
+
+\subsubsection{Returned values}
+
+A function can return a value by using a \texttt{return [<expr>]} statement within a rule body. If \texttt{<expr>} is not defined or if no return statements appear in the function, then the function returns a \texttt{Void} value. For instance:
+
+\begin{lstlisting}
+function f(a,b=0,c="") {
+  ...
+  <guard> {
+    ...
+    return b
+  }
+  ...
+}
+\end{lstlisting}
+
+The return statement at line 5 indicates that the function returns a value of type \texttt{Int} (since \texttt{b} is an integer, as seen in the parameter's default value at line 1). Note that return statements are optional when the function returns no values, but must always be the last statement of a rule.
+
+\subsubsection{Function types}
+
+A function type is noted as \texttt{(T1,T2,...TN)->T}, where \texttt{Ti} is the expected type of the ith parameter, and \texttt{T} is the function's return type.
+
+\subsubsection{The main() function}
+
+The main function is the entry point of the program. There must be one main function per program.
+
+\subsubsection{Built-in Functions}
+
+Here is the list of built-in functions provided by INI. Built-in function have predefined function types, which are given here.
+
+\begin{itemize}
+\item \texttt{clear(v:T)->Void}: initializes or re-initializes a \texttt{v} variable, passed as a parameter.
+\item \texttt{copy(v:T)->T}: copies the content of a \texttt{v} variable, passed as a parameter.
+\item \texttt{eval(f:F,p1:T1,p:T2,...pN:TN)->T}: evaluates a function of type \texttt{F} passed as a reference, passing the parameters \texttt{pi} and returns the value returned by the evaluated function.
+\item \texttt{error(message:String)->Void}: throws an error with the given message. Throwing an error will stop the evaluation, unless it is caught by an error-event-triggered rule.
+\item \texttt{print(v:T)->Void}: writes the textual representation of the passed data on the standard output stream.
+\item \texttt{println(v:T)->Void}: writes the textual representation of the passed data on the standard output stream, and adds a carriage return at the end of the line.
+\item \texttt{read\_keyboard()->String}: reads a line typed in by the user on the standard input stream and returns it.
+\item \texttt{size(Map(K,V))->Int}: returns the size of a map, i.e. the number of elements in it.
+\item \texttt{time()->Long}: returns the current system clock time as a \texttt{Long}.
+\item \texttt{to\_byte(v:T)->Byte}: converts the given variable to a byte value.
+\item \texttt{to\_double(v:T)->Double}: converts the given variable to a double value.
+\item \texttt{to\_float(v:T)->Float}: converts the given variable to a float value.
+\item \texttt{to\_int(v:T)->Int}: converts the given variable to a integer value.
+\item \texttt{to\_long(v:T)->Long}: converts the given variable to a long value.
+\item \texttt{to\_string(v:T)->String}: converts the given variable to a string value.
+\end{itemize}
+
+\subsubsection{Bindings to Java objects\label{subsubsec:bindings}}
+
+INI only provides a minimal set of built-in functions. For all other functions, one can bind new functions to Java APIs. Thus, to use Java objects from INI the programmers just need to define bindings from INI functions to Java constructors, methods or fields. The binding syntax is the following:
+
+\begin{verbatim}
+<name>(<types>) -> <type> => "string1", "string2"
+\end{verbatim}
+
+This binding declares a new function named \texttt{<name>}, that takes parameters typed with the given coma-separated type list (\texttt{<types>}) and returns a typed result. The corresponding Java element that will be used when invoking the function is defined thanks to the two strings following the \texttt{=>} binding operator, where \texttt{string1} is the target Java class fully-qualified name, and where \texttt{string2} is one of the following:
+
+\begin{itemize}
+\item the target field name (belonging to the class),
+\item the target method name (belonging to the class) followed by "(..)" to indicate that it is a method (and not a field),
+\item "new(..)" to indicate that the target is a constructor of the class.
+\end{itemize}
+
+It is not needed to specify if the Java method or field is static, since INI will determine it automatically depending on the parameter types of the function. Non-static members will require to pass an instance of the type of the target class as the first parameter.
+
+For instance, the following code defines two bound functions to call the classical \texttt{System.out.println(..)} method in Java. The \texttt{out()} function binds to the static \texttt{System.out} field, and the \texttt{java\_println()} function binds to the \texttt{Writer.println(String)} non-static method.
+
+{ \small
+\begin{verbatim}
+out()->Writer => "java.lang.System", "out"
+java_println(Writer,String)->Void => "java.io.Writer", "println(..)"
+\end{verbatim} }
+
+Programmers can then invoke both functions, which are well-typed thanks to the binding declarations.
+
+\begin{verbatim}
+java_println(out(),"hello Java")
+\end{verbatim}
+
+\subsection{Rules}
+
+\subsubsection{Syntax}
+
+Each rule has the following syntax:
+
+\begin{verbatim}
+<rule> := <guard> { <body> }
+<body> := <statements> <return_statement_opt>
+<guard> := <event_matcher>
+         | <logical_expr>
+         | <event_matcher> <logical_expr>
+\end{verbatim}
+
+The guard is either a event matcher (for event-triggered rules) or a logical expression, or both. Events will be depicted in the next section, and we will now focus on the logical expression part of the rule.
+
+A logical expression within a guard is formed of variable accesses, function invocations, and literals, composed together with logical operators and/or comparison operators.
+
+\subsubsection{Logical operators}
+
+Allowed logical operators within a guard are:
+
+\begin{itemize}
+\item \texttt{<expr> \&\& <expr>}: logical and, that applies to two boolean logical expressions. Like many languages, when the left-hand-side expression evaluated to false, the right-hand one is not evaluated.
+\item \texttt{<expr> || <expr>}: logical or, that applies to two boolean logical expressions, and that return true without evaluating the right expression if the left one evaluates to true.
+\item \texttt{! <expr>}: the not operator has two meanings depending on the type of the given expression. When \texttt{<expr>} is boolean, it is the logical inversion operator. In all other cases, the not operator will test the existence of a resulting value when evaluating the expression. To use a Java analogy, it would be similar to \texttt{<expr> == null}. Conversely, \texttt{<expr>} in INI will equal to \texttt{!!<expr>} or, in Java, to \texttt{<expr> != null}. Note that if \texttt{<expr>} is an access to an undefined variable, then the resulting value will be \texttt{null} as well.
+\end{itemize}
+
+To illustrate the use of the not operator on non-boolean expression, let us take the following function:
+
+\begin{lstlisting}
+function ping_pong() {
+	!v {
+		println("ping")
+		v=""
+	}
+	v {
+		println("pong")
+		clear(v)
+	}
+}
+\end{lstlisting}
+
+This function triggers an infinite loop (it is actually a ping-pong effect between the two rules). When entering \texttt{ping\_pong}, the \texttt{v} variable is always undefined since it is not a parameter of the function. Thus, the guard \texttt{!v} at line 2 evaluates to \texttt{true}, while the guard \texttt{v} at line 6 evaluates to \texttt{false}. So, INI evaluates the first rule and sets \texttt{v} to an empty string. Since \texttt{v} is not undefined anymore, the first rule cannot apply and the second one applies, leading to clearing the content of \texttt{v} at line 8. Then, the first rule can apply again, starting the endless ping-pong game over again. Note that the rules order is not important. The following program gives exactly the same result:
+
+\begin{lstlisting}
+function ping_pong() {
+	v {
+		println("pong")
+		clear(v)
+	}
+	!v {
+		println("ping")
+		v=""
+	}
+}
+\end{lstlisting}
+
+\subsubsection{Comparison operators}
+
+Comparison operators are binary operators that apply to objects. In INI, using a comparison operator between two object implies that they are of the same type. If not, a typing error will occur.
+
+\begin{itemize}
+\item \texttt{<expr> == <expr>}: compares two objets and returns true if equal in terms of values.
+\item \texttt{<expr> != <expr>}: compares two objets and returns false if equal in terms of values.
+\item \texttt{<expr> > <expr>}: used mainly to compare two numbers, but can actual apply to any comparable objets.
+\item \texttt{<expr> >= <expr>}: used mainly to compare two numbers, but can actual apply to any comparable objets.
+\item \texttt{<expr> < <expr>}: used mainly to compare two numbers, but can actual apply to any comparable objets.
+\item \texttt{<expr> <= <expr>}: used mainly to compare two numbers, but can actual apply to any comparable objets.
+\end{itemize}
+
+\subsubsection{Regular expression match operator\label{subsubsec:regexp}}
+
+In order to match strings in a concise way, INI provides a match operator $\sim$, with can match a string against a regular expression \cite{friedl2006} and bind matching groups (if any) to INI variables. For example:
+
+\texttt{"a b c"} $\sim$ \texttt{regexp("(.) (b) (.)",v1,v2,v3)} will match and be evaluated to \texttt{true}. Since there are three groups (between parenthesis), the three match sub-results will be bound to the given variables \texttt{v1}, \texttt{v2}, and \texttt{v3}. Thus, once the match is done, we will have \texttt{v1="a"}, \texttt{v2="b"}, and \texttt{v3="c"}. For more information on regular expressions as used in INI, read the Javadoc for the \texttt{java.regexp.Pattern} class and refer to \cite{friedl2006}.
+
+Example:
+
+\begin{lstlisting}
+function greetings(sentence) {
+	sentence ~ regexp("Hello (.*)",name)
+		|| sentence ~ regexp("Hi (.*)",name) {
+		println("Hello to "+name)
+		return
+	}
+	sentence ~ regexp("Bye (.*)",name)
+		|| sentence ~ regexp("See you (.*)",name) {
+		println("Bye to "+name)
+		return
+	}
+}
+\end{lstlisting}
+
+This function matches the given sentence to determine who it is said hello or bye to. Typically, the invocation \texttt{greetings("See you Renaud")} will print out \texttt{"Bye to Renaud"}. Note the use of the return statement at lines 5 and 10 to ensure that rules are applied once at best.
+
+\subsection{Event-triggered rules}
+
+Besides rules that are applied because the logical expression of the guard evaluates to true, some rules can also be event-triggered. There are two kinds of parameter which can be defined within an event: in parameter and out parameter. In parameters are used to custom the way the event will behave while the out parameters are used to store data after running the event. In that case, the guard starts with one event match expression, of the form \texttt{@<event>[<in parameters>](<out parameters>)}. All parameters are optinal. For example, we can write the event \texttt{@init} as \texttt{@init[]()} or \texttt{@init()}. On contrary to regular rules, event-trigered rules are asynchronously applies, and can occur in parallel (multithreaded evaluation).
+
+\subsubsection{\texttt{@init} event}
+
+As the name says, \texttt{@init}-trigger rules are invoked when the function starts evaluating. It is the right place to initialize the variables that may need to be used within the other rules. This event takes no parameters.
+
+For example, to repeat a rule n times:
+
+\begin{lstlisting}
+function f(n) {
+  @init() {
+    i=0
+  }
+  i < n {
+    // repeated code here
+    ...
+    i++
+  }
+}
+\end{lstlisting}
+
+Note that event-based rules can also have a predicate for triggering the rule or not. For instance, if \texttt{n <= 0}, one may want to stop the function evaluation and print out a message:
+
+\begin{lstlisting}
+function f(n) {
+  @init() n<=0 {
+    println("wrong repeat value")
+    return
+  }
+  @init() n>0 {
+    i=0
+  }
+  i < n {
+    // repeated code here
+    ...
+    i++
+  }
+}
+\end{lstlisting}
+
+\subsubsection{\texttt{@end} event}
+
+On the contrary to the \texttt{@init} event, \texttt{@end} is triggered when no more rule apply, and when the function is about to return (not including explicit return statements, which do no trigger the \texttt{@end} event). Note that any state change in an \texttt{@end}-triggered rule body will never lead to any other rule re-evaluation, even if the state change makes an existing rule applicable again.
+
+\subsubsection{\texttt{@update} event}
+
+The \texttt{@update[variable = <variable>](variable 1, variable 2)} event occurs when the given variable is modified by the program (i.e. by one of the evaluated rules). For instance, \texttt{@update[variable = a](b,c)} is triggered if the value of \texttt{a} is modified. The old value of \texttt{a} will be kept in the variable \texttt{b} and the new value of \texttt{a} will be kept in the variable \texttt{c}.
+
+\subsubsection{\texttt{@every} event}
+
+The \texttt{@every[time = interval:Int]()} event occurs every \texttt{interval} milliseconds.
+
+\subsubsection{\texttt{@cron} event}
+
+The \texttt{@cron[pattern:String]()} event occurs on times indicated by the \texttt{pattern} UNIX CRON pattern expression. CRON is a task scheduler that allows the concise definition of repetitive task within a single (and simple) CRON pattern \cite{franta1977}. A UNIX crontab-like pattern is a string split in five space separated parts. Each part is intended as:
+
+\begin{enumerate}
+\item Minutes sub-pattern. During which minutes of the hour the event should occur? The values range is from 0 to 59.
+\item Hours sub-pattern. During which hours of the day should the event occur? The values range is from 0 to 23.
+\item Days of month sub-pattern. During which days of the month should the event occur? The values range is from 1 to 31. The special value "L" can be used to recognize the last day of month.
+\item Months sub-pattern. During which months of the year should the event occur? The values range is from 1 (January) to 12 (December), otherwise this sub-pattern allows the aliases "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov" and "dec".
+\item Days of week sub-pattern. During which days of the week should the event occur? The values range is from 0 (Sunday) to 6 (Saturday), otherwise this sub-pattern allows the aliases "sun", "mon", "tue", "wed", "thu", "fri" and "sat".
+\end{enumerate}
+
+Some examples:
+
+\begin{itemize}
+\item \texttt{"5 * * * *"}: This pattern causes the event to occur once every hour, at the begin of the fifth minute (00:05, 01:05, 02:05 etc.).
+\item \texttt{"* * * * *"}: This pattern causes the event to occur every minute.
+\item \texttt{"* 12 * * Mon"}: This pattern causes the event to occur every minute during the 12th hour of Monday.
+\item \texttt{"* 12 16 * Mon"}: This pattern causes the event to occur every minute during the 12th hour of Monday, 16th, but only if the day is the 16th of the month.
+\item \texttt{"59 11 * * 1,2,3,4,5"}: This pattern causes the event to occur at 11:59AM on Monday, Tuesday, Wednesday, Thursday and Friday.
+\item \texttt{"59 11 * * 1-5"}: This pattern is equivalent to the previous one.
+\end{itemize}
+
+\subsubsection{\texttt{@error} event}
+
+The \texttt{@error[message:String]()} event occurs when an error is thrown during the function's evaluation.
+
+\subsubsection{User-defined event}
+Besides the built-in events, INI allows developers to create their own events. For example, we will try to create a simple custom event. This event will copy one file to another file. We need two in parameters: one for source file name and another for destination file name. Besides, we will store the time needed for copy process in the variable \texttt{v} and the result of this process (whether successful or not) in the variable \texttt{s}. In INI, \texttt{t} and \texttt{s} are examples of out parameters.
+\begin{lstlisting}
+
+package ini.ext.events;
+
+import ini.ast.AtPredicate;
+import ini.ast.Rule;
+import ini.eval.IniEval;
+import ini.eval.at.At;
+import ini.eval.data.Data;
+import ini.eval.data.RawData;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+public class AtCopyFile extends At {
+	public String sourceFileName;
+	public String destFileName;
+	public long copyTime;
+	public boolean success = false;
+	Map<String, Data> variables = new 
+        HashMap<String, Data>();
+	Map<Thread, At> threadAt = new HashMap<Thread, At>();
+	@Override
+	public void eval(final IniEval eval) {
+		final Data sfn = getInContext().get("source");
+		sourceFileName = (String) sfn.getValue();
+		final Data dfn = getInContext().get("destination");
+		destFileName = (String) dfn.getValue();
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					long beginTime = System.currentTimeMillis();
+					File sourceFile = new File(sourceFileName);
+					File destFile = new File(destFileName);
+					InputStream in = new 
+                        FileInputStream(sourceFile);
+					OutputStream out = 
+                        new FileOutputStream(destFile);
+					byte[] buffer = new byte[1024];
+					int fLength;
+					while ((fLength = in.read(buffer)) > 0) {
+						out.write(buffer, 0, fLength);
+					}
+					in.close();
+					out.close();
+					long endTime = System.currentTimeMillis();
+					copyTime = endTime - beginTime;
+					success = true;
+					variables.put(getAtPredicate().outParameters.
+                            get(0).toString(),
+							new RawData(copyTime));
+					variables.put(getAtPredicate().outParameters.
+                            get(1).toString(),
+							new RawData(success));
+					this.setName("Demo copy thread");
+					execute(eval, variables);
+					terminate();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
+	}
+}
+\end{lstlisting}
+Now we can write a simple INI program to test this event.
+\begin{lstlisting}
+@copy_file[String, String](Long, Boolean)=>
+                            "ini.ext.events.AtCopyFile"
+function main() {
+ @copy_file[source = "file.exe",destination = 
+                "fileCopy.exe"](t,s){
+  println("Time for copy: " + t + " milliseconds")
+ }
+}
+\end{lstlisting}
+Before using the event, we need to declare it as you see in the first line of our program. The types of configuration and out parameters should be declared. In our example, we have two in parameters with type \texttt{String}. Besides, we have two out parameters, one with type \texttt{Long} and another with type \texttt{Boolean}. Moreover, a source code associated with the event also must be declared. When we run this program, it will copy a file \texttt{file.exe} to a file \texttt{fileCopy.exe}. The time needed for this process (in milliseconds) also will be displayed.
+
+\subsection{Maps, lists, and sets}
+
+\subsubsection{Map definition and access}
+
+Maps are natively supported by INI. A map is automatically defined when accessed through the map access expression that uses square brackets: \texttt{map[key]}. Keys and values within maps are of any type, but shall all be of the same type for a given map. For instance the following statement list is valid:
+
+\begin{lstlisting}[numbers=none]
+m["key1"] = 1
+m["key2"] = 2
+println(m["key2"])
+\end{lstlisting}
+
+On the other hand, the following statement list is not valid because the first line initializes \texttt{m} to be a map of integer values accessed through string keys and:
+
+\begin{itemize}
+\item the key is an integer at line 2,
+\item the value is a string at line 3,
+\item there are no typing errors at line 4.
+\end{itemize}
+
+\begin{lstlisting}
+m["key1"] = 1
+m[1] = 2
+m["key2"] = "test"
+println(m["key2"])
+\end{lstlisting}
+
+Note that the size of a map (i.e. the number of elements in it) can be retrieved with the \texttt{size} built-in function (see Section [...]).  Emptying a map or removing an entry is done with the \texttt{clear} function (not implemented yet).
+
+\subsubsection{List definition and access}
+
+In INI, a list is simply a map where keys are integers.
+
+\subsubsection{Integer sets}
+
+To allow easy iteration on lists, INI provides a constructor for set of integers. A set of integers is defined with two bounds: \texttt{[min..max]}. For instance, the set that contains all the integers between \texttt{0} and \texttt{10} (bounds included) is written \texttt{[0..10]}.
+
+\subsubsection{Set selection expressions\label{subsubsec:setselectionexpressions}}
+
+Set can be used in set selection expressions that allows the programmer to randomly select elements in a set and bind their values to local variables. A selection condition must be used to select the elements upon a given criteria. For instance, to select two integers \texttt{i} and \texttt{j} that are contained within 0 and 10, so that \texttt{i} < \texttt{j}, one can write the following set selection expression:
+
+\begin{lstlisting}[numbers=none]
+i, j of [0..10] | i < j
+\end{lstlisting}
+
+Set selection expressions must be used in guards. The difference between a set selection guard and a regular guard is that the former one will be evaluated to true until all the possible values have been picked from the set. In other words, the guard will stop matching only once none of the set elements fit the selection condition.
+
+Example: sorting the elements of a list (see Section [...]).
+
+\begin{lstlisting}
+function sort1(s) {
+	i of [0..size(s)-2] | s[i] > s[i+1] {
+		swap(s[i],s[i+1])
+	}
+	@end() {
+		return s
+	}
+}
+\end{lstlisting}
+
+As we will see in the next section, set selection expressions can be used to select instances of types that have been constructed by the program. This feature requires the use of user-defined types.
+
+\subsection{User-defined types}
+
+A user-defined type is a way for the programmer to define complex structures. Structures contains values stored in named fields, which need to be explicitly typed when defined by the programmer. Section [...] gives an example that uses types.
+
+\subsubsection{Simple structured types}
+
+To define a new type, the programmer uses the \texttt{type} keyword and sets a name that must be unique, and a set of typed field. Note that in INI, type name must start with an uppercased letter. For example, to define a \texttt{Person} type that has a name and an age, one may want to write:
+
+\begin{lstlisting}[numbers=none]
+type Person = [name:String, age:Int]
+\end{lstlisting}
+
+To use a type, the programmer must instantiate the type using one of its constructor. For a simple type, there is only one constructor named by the name of the type. So, for constructing a new person and store it in a \texttt{p} variable:
+
+\begin{lstlisting}[numbers=none]
+p = Person[name="Renaud", age=37]
+\end{lstlisting}
+
+Later on, the program can access the object's fields using the dotted notation:
+
+\begin{lstlisting}[numbers=none]
+println(""+p.name+" is "+p.age)
+\end{lstlisting}
+
+Note that field initialization is not mandatory. For instance, one can construct a person with undefined age or name.
+
+Finally, types can be recursively defined. For instance, one can use the \texttt{Person} type within the \texttt{Person} type definition itself. For instance, we may want to add two fields for the parents of the person:
+
+\begin{lstlisting}[numbers=none]
+type Person = [name:String, age:Int,
+               father:Person, mother:Person]
+\end{lstlisting}
+
+We may even want to add the children, as a person list:
+
+\begin{lstlisting}[numbers=none]
+type Person = [name:String, age:Int,
+               father:Person, mother:Person,
+               children:Person*]
+\end{lstlisting}
+
+Note that when using such types, INI checks that the used objects work on the right fields with the correct types.
+
+\subsubsection{Algebraic types}
+
+Algebraic types are an extension of simple structured type that allow the definition of types that have different constructors. Algebraic types in INI are not actual pure algebraic types since they contain named fields that do not need to be initialized. However, they are defined and used in a very similar way, as shown in the Fibonacci example of Section [...]. Algebraic types can be related to AST (Abstract Syntax Trees) in the sense that they allow the definition of typed trees structures.
+
+For instance, we can define a type for expressions that include typical arithmetic operations on floating point numbers.
+
+\begin{lstlisting}[numbers=none]
+type Expr = Number[value:Float]
+          | Plus[left:Expr,right:Expr]
+          | Mult[left:Expr,right:Expr]
+          | Div[left:Expr,right:Expr]
+          | Minus[left:Expr,right:Expr]
+          | UMinus[operand:Expr]
+\end{lstlisting}
+
+Once define, the programmer can instantiate any expression using the constructors. For example to instantiate the expression \texttt{-(3.0*2.0+1.0)}:
+
+\begin{lstlisting}
+expr = UMinus[operand=Plus[
+  left=Mult[
+    left=Number[value=3.0],
+    right=Number[value=2.0]],
+  right=Number[value=1.0]]]
+\end{lstlisting}
+
+\subsubsection{Type set selection expressions}
+
+In Section \ref{subsubsec:setselectionexpressions}, we have seen the set selection expression that allows to select values within a set. Each object constructed with a user type constructor is automatically part of an instance set, which is named after the constructor name. Thus, it is possible to select instances using the set selection construct. For example, the following rule raises an error if a number has a undefined value:
+
+\begin{lstlisting}[numbers=none]
+n of Number | !n.value {
+    error("invalid number value")
+}
+\end{lstlisting}
+
+Note that sets are local to the functions that construct the instances.
+
+\subsubsection{Type set match expressions}
+
+In Section \ref{subsubsec:regexp}, we have seen the match operator ($\sim$) for string, which is based on regular expressions. The match operator can also be used to match type instances. It an be used similarly to the match construction in the CAML language. For example, we can use the match operator to implement a basic expression printer (see function \texttt{expr\_str} at line 19) and evaluator (function \texttt{expr\_val} at line 40).
+
+{ \footnotesize
+\begin{lstlisting}
+type Expr = Number[value:Float]
+          | Plus[left:Expr,right:Expr]
+          | Mult[left:Expr,right:Expr]
+          | Div[left:Expr,right:Expr]
+          | Minus[left:Expr,right:Expr]
+          | UMinus[operand:Expr]
+
+function main() {
+	@init() {
+		expr = UMinus[operand=Plus[
+		  left=Mult[
+		    left=Number[value=3.0],
+		    right=Number[value=2.0]],
+	      right=Number[value=1.0]]]
+		println("The value of "+expr_str(expr)+" is "+expr_val(expr))
+	}
+}
+
+function expr_str(expr) {
+	expr ~ Number[value] {
+		return to_string(expr.value)
+	}
+	expr ~ Plus[left,right] {
+		return "("+expr_str(expr.left)+"+"+expr_str(expr.right)+")"
+	}
+	expr ~ Mult[left,right] {
+		return "("+expr_str(expr.left)+"*"+expr_str(expr.right)+")"
+	}
+	expr ~ Minus[left,right] {
+		return "("+expr_str(expr.left)+"-"+expr_str(expr.right)+")"
+	}
+	expr ~ Div[left,right] {
+		return "("+expr_str(expr.left)+"/"+expr_str(expr.right)+")"
+	}
+	expr ~ UMinus[operand] {
+		return "-("+expr_str(expr.operand)+")"
+	}
+}
+
+function expr_val(expr) {
+	expr ~ Number[value] {
+		return expr.value
+	}
+	expr ~ Plus[left,right] {
+		return expr_val(expr.left)+expr_val(expr.right)
+	}
+	expr ~ Mult[left,right] {
+		return expr_val(expr.left)*expr_val(expr.right)
+	}
+	expr ~ Minus[left,right] {
+		return expr_val(expr.left)-expr_val(expr.right)
+	}
+	expr ~ Div[left,right] {
+		return expr_val(expr.left)/expr_val(expr.right)
+	}
+	expr ~ UMinus[operand] {
+		return -expr_val(expr.operand)
+	}
+}
+\end{lstlisting} }
+
+\subsection{Function references and \texttt{eval}}
+
+Functions can be referenced and passed as parameters to other functions. A function reference expression is defined with the function keyword. For instance: \texttt{f = function(my\_function)} creates a reference to \texttt{my\_function} and store it in the \texttt{f} variable. Then the referenced function can be evaluated using the built-in function \texttt{eval}, that takes  a reference to the function to be evaluated followed by the parameters to be passed to the evaluated function.
+
+The following program illustrates the use of function references. It defines a \texttt{sort} function at line 9 that takes a list \texttt{l} to sort and a comparison function to compare the elements of the list. This function is passes in the \texttt{comparator} parameter.
+
+{ \small
+\begin{lstlisting}
+function main() {
+	@init() {
+		l = "a string to sort"
+		sort(l,function(compare))
+		println("result: "+l)
+	}
+}
+
+function sort(l, comparator) {
+	i of [0..size(l)-2] | eval(comparator,l[i],l[i+1]) > 0 {
+		swap(l[i],l[i+1])
+	}
+}
+
+function compare(e1,e2) {
+	e1 > e2 { return 1 }
+	e1 < e2 { return -1 }
+	e1 == e2 { return 0 }
+}
+\end{lstlisting} }
+
+As one can see at line 10, that we invoke the \texttt{eval} function to call the function referenced in \texttt{comparator}. This function takes two elements (here \texttt{l[i]} and \texttt{l[i+1]} are passed) and returns an integer (since the result of \texttt{eval} is compared with 0). At line 4, we can see that the passed comparison function is the \texttt{compare} function defined at line 15, however, any comparison function that takes to elements to compare and returns an integer may be used as a comparator.
+
+\subsection{Imports}
+
+Since all the functions should not be defined within a single file, INI programs can start with a list of import clauses. For example:
+
+\begin{lstlisting}[numbers=none]
+import "ini/examples/lib_io.ini"
+\end{lstlisting}
+
+Imports allow the definition and use of function libraries. In particular, it is recommended to define bindings (see Section \ref{subsubsec:bindings}) within external files and to import them when required.
+
+\section{The INI type system}
+
+\subsection{Definitions}
+
+INI comes with 5 built-in types for numbers: $Double$, $Float$, $Long$, $Int$, and $Byte$. They differ on the number of bytes used to encode them (same as Java encoding). INI comes also with a $Char$ type for single characters (letters and other ASCII characters) and a $Boolean$ type that takes only $true$ and $false$ values.
+Finally, INI provides built-in map types: $Map(K,V)$. Map types are dependent types with a key type $K$ and a value type $V$. When $K=Int$, it means that the type is a list in the INI definition (in reality, it is more of an indexed set). Syntactically, lists can be noted with the * notation:
+
+\begin{center}
+$T* \widehat= Map(Int,T)$
+\end{center}
+
+A list of $Char$ (i.e. a $Char*$) is a $String$ type (note that $String$ and $T*$ types are actually aliases and do not exist as real types in the INI internal type representation).
+
+\begin{center}
+$String \widehat= Char* \widehat= Map(Int,Char)$
+\end{center}
+
+INI types can be ordered with a type relation $\succ$. $A \succ B$ means that $A$ is a super-type of $B$, i.e. $A$ is assignable from $B$, whereas the contrary is not true. By default, number types in INI are ordered so that it is not possible to assign more generic numbers to less generic numbers.
+
+\begin{center}
+$Double \succ Float \succ Long \succ Int \succ Byte$
+\end{center}
+
+\subsection{Type Inference}
+
+As said in Section \ref{sec:counting_occurences_in_a_list}, most types in INI are calculated with the type inference engine, which allows the programmers to say very few about the typing. The kernel of this type inference is based on a Herbrand unification algorithm, as depicted by Robinson in \cite{robinson1965}. The typing algorithm is enhanced with polymorphic function support, abstract data types (or algebraic types) support, and with internal sub-typing for number types.
+
+Thus, INI works with the following steps:
+
+\begin{enumerate}
+\item the parser constructs the AST;
+\item an AST walker constructs the typing rules that should be fulfilled for each AST node and add them to a constraint list;
+\item a unification algorithm is run on the type constraints, if conflicts are detected, they are added to the error list;
+\item if errors are found, they are reported to the user and INI does not proceed to the execution phase.
+\end{enumerate}
+
+\subsection{Type Inference rules}
+
+\subsubsection{Initiation rules}
+
+In order to infer types for the program, we first need some initiation rules. Here is a rule that states that undefined values have any type, i.e. their type is an unconstrained type variable.
+
+\begin{center}
+\AxiomC{}
+\LeftLabel{(NULL)}
+\UIC{$\vdash null: T $}
+\DP
+\end{center}
+
+Note that INI also has an internal \texttt{Void} type for functions returning no values. We then have some rules for literals, which can directly be inferred as resolved types:
+
+\begin{itemize}
+\item string literals such as \texttt{"abc"} will be typed as \texttt{String},
+\item character literals such as \texttt{'a'} will be typed as \texttt{Char},
+\item float literals such as \texttt{3.14} will be typed as \texttt{Float},
+\item integers such as \texttt{1} will be typed as \texttt{Int},
+\item \texttt{true} and \texttt{false} literals will be typed as \texttt{Boolean},
+\end{itemize}
+
+\subsubsection{Assignments}
+
+When an assignment is made from a resolved type (for instance from a literal, such as \texttt{x=2.0}), then the type of the assignee equals to the type of the assignment (for instance \texttt{x:Float}).
+
+\begin{center}
+\AxiomC{$\vdash x:T$} \AxiomC{$\vdash y:T$}
+\LeftLabel{(ASSIGNDEF)}
+\BIC{$\vdash x = (y:T)$}
+\DP
+\end{center}
+
+When the assignment is made from an unresolved type (e.g. \texttt{x=y}), then the type of the assignee is a super-type for the type of the assignment.
+
+\begin{center}
+\AxiomC{$\vdash x:U$} \AxiomC{$\vdash y:V$}
+\LeftLabel{(ASSIGN)}\RightLabel{$[U \succeq V]$}
+\BIC{$\vdash x = y$}
+\DP
+\end{center}
+
+\subsubsection{Logical operators}
+
+Logical operators are easy to deal with since the result must be of the \texttt{Boolean} type. There are no constraints on the operands since undefined values mean \texttt{false} and defined ones mean \texttt{true} from a boolean perspective.
+
+\begin{center}
+\AxiomC{$\vdash x:T$} \AxiomC{$\vdash y:U$}
+\LeftLabel{(LCOMP)}
+\BIC{$\vdash (x \texttt{ op } y):Boolean$}
+\DP
+\end{center}
+\begin{center}with  \texttt{op} $\in \{$\texttt{\&\&, ||}$\}$\end{center}
+
+\subsubsection{Comparison operators}
+
+Comparators imply that the result must be \texttt{Boolean}. Operands must be comparable, which is the case for all objects in INI. Moreover, we enforce that the compared object must be of the same type.
+
+\begin{center}
+\AxiomC{$\vdash x:T$} \AxiomC{$\vdash y:T$}
+\LeftLabel{(COMP)}
+\BIC{$\vdash (x \texttt{ op } y):Boolean$}
+\DP
+\end{center}
+\begin{center}with  \texttt{op} $\in \{$\texttt{==, !=, <, <=, >, >=}$\}$\end{center}
+
+\subsubsection{Division}
+
+Division must occur between two expressions of the same type, which both must be subtypes of \texttt{Double} (e.g. \texttt{Float} or \texttt{Int}). Division returns a \texttt{Float} whatever the operands' type is, thus avoiding loss of precision for integers.
+
+\begin{center}
+\AxiomC{$\vdash x:T$} \AxiomC{$\vdash y:T$}
+\LeftLabel{(DIV)}\RightLabel{$[T \preceq Double]$}
+\BIC{$\vdash (x \texttt{ / } y):Float$}
+\DP
+\end{center}
+
+\subsubsection{Multiplication and minus}
+
+Multiplication and minus operations must occur between two expressions of the same type, which both must be subtypes of \texttt{Double} (e.g. \texttt{Float} or \texttt{Int}). They will return the same type as the operands' type.
+
+\begin{center}
+\AxiomC{$\vdash x:T$} \AxiomC{$\vdash y:T$}
+\LeftLabel{(MULTMINUS)}\RightLabel{$[T \preceq Double]$}
+\BIC{$\vdash (x \texttt{ op } y):T$}
+\DP
+\end{center}
+\begin{center}with  \texttt{op} $\in \{$\texttt{-, *}$\}$\end{center}
+
+
+\subsubsection{The plus operator}
+
+There are two case for the plus operator. In the first case, it is uses as a string concatenation operator. For that, like in Java, the first operand must be of a resolved \texttt{String} type. If it is the case, the type of the second operand does not matter and the overall expression will be typed as a \texttt{String} and the \texttt{String} type will propagate. Typically, the \texttt{"a"+b} expression is a string concatenation case.
+
+\begin{center}
+\AxiomC{$\vdash x:String$} \AxiomC{$\vdash y:T$}
+\LeftLabel{(PLUS1)}
+\BIC{$\vdash (x \texttt{ + } y):String$}
+\DP
+\end{center}
+
+The second case occurs when the type of the first operand's type is undetermined. We then fall back to the arithmetic plus, which behaves exactly like $MULTMINUS$ in terms of typing.
+
+\begin{center}
+\AxiomC{$\vdash x:T$} \AxiomC{$\vdash y:T$}
+\LeftLabel{(PLUS2)}\RightLabel{$[T \preceq Double]$}
+\BIC{$\vdash (x \texttt{ + } y):T$}
+\DP
+\end{center}
+
+\subsubsection{Unary minus (sign inversion)}
+
+The unary minus operator expects an operand which is a number and will return a result of the same type.
+
+\begin{center}
+\AxiomC{$\vdash x:T$}
+\LeftLabel{(UMINUS)}\RightLabel{$[T \preceq Double]$}
+\UIC{$\vdash (\texttt{-} x):T$}
+\DP
+\end{center}
+
+\subsubsection{Post operators}
+
+The post increment/decrement operators both expect an operand which is a number and will return a result of the same type.
+
+\begin{center}
+\AxiomC{$\vdash x:T$}
+\LeftLabel{(POSTOP)}\RightLabel{$[T \preceq Double]$}
+\UIC{$\vdash (x\texttt{ postop}):T$}
+\DP
+\end{center}
+\begin{center}with  \texttt{postop} $\in \{$\texttt{++, --}$\}$\end{center}
+
+\subsubsection{The not operator}
+
+The logical negation operator returns a boolean, but does not force any constraint on the operand (undefined means \texttt{false} and defined means \texttt{true} for non-boolean objects).
+
+\begin{center}
+\AxiomC{$\vdash e:T$}
+\LeftLabel{(NOT)}
+\UIC{$\vdash (\texttt{!}e):Boolean$}
+\DP
+\end{center}
+
+\subsubsection{The match operator}
+
+Within a guard a match operator can be used to match strings with regular expressions and bind the results to some variables. For instance \texttt{"a b c"} $\sim$ \texttt{regexp("(.) (b) (.)",v1,v2,v3)} will match and be evaluated to \texttt{true}. Since there are three groups (between parenthesis), the three match sub-results will be bound to the given variables. Thus, once the match is done, we will have \texttt{v1="a"}, \texttt{v2="b"}, and \texttt{v3="c"}. With regard to typing, all the bound variables are strings.
+
+\begin{center}
+\AxiomC{$\vdash x:String$} \AxiomC{$\vdash y:String$} \AxiomC{$\{\vdash v_i:String\}_{i \in [1..n]}$}
+\LeftLabel{(MATCH1)}
+\TIC{$\vdash (x \sim \texttt{regexp(}y,v_1,v_2,...,v_n\texttt{)}):Boolean$}
+\DP
+\end{center}
+
+A match operator can also be used to match a constructor's instance with some constraints given by boolean logical expressions on the constructor's fields.
+
+\begin{center}
+ \AxiomC{$\{\vdash e_i:Boolean\}_{i \in [1..n]}$}
+\LeftLabel{(MATCH2)} \RightLabel{$ [ \{ freevars(e_i)=\emptyset \}_{i \in [1..n]} ] $}
+\UIC{$\vdash (e \sim C[e_1,e_2,...,e_n]):Boolean$}
+\DP
+\end{center}
+
+\subsubsection{Map access}
+
+A map access node such as \texttt{x[y]} allows to say that the resulting type of the expression is \texttt{V}, if \texttt{x} is of type \texttt{Map(K,V)}.
+
+\begin{center}
+\AxiomC{$\vdash x:Map(K,V)$} \AxiomC{$\vdash y:K$}
+\LeftLabel{(MAPACCESS)}
+\BIC{$\vdash x[y]: V $}
+\DP
+\end{center}
+
+\subsubsection{Field access}
+
+For a field access such as \texttt{x.f}, the type of the accessed expression \texttt{x} must have a field of the right name and type. Note that, when using match expressions, by construction, it is often the case that the type of the accessed expression is already resolved.
+
+\begin{center}
+\AxiomC{$\vdash T.f:V $}
+\LeftLabel{(FIELDACCESS)}
+\UIC{$\vdash (x:T).f: V $}
+\DP
+\end{center}
+
+\subsubsection{Function invocation}
+
+For an invocation, the rule implies some constraints between the function type and the types of the result and of the parameter expressions. To support polymorphism, the function body is evaluated within its own environment, so that each invocation has its own set of constraints.
+
+\begin{center}
+\AxiomC{$\vdash f:T_1,T_2,...,T_n \rightarrow T$}  \AxiomC{$\{\vdash e_i:T_i\}_{i \in [1..n]}$}
+\LeftLabel{(INVOCATION)}\RightLabel{$[new(env)]$}
+\BIC{$\vdash f(e_1,e_2,...,e_n):T_1,T_2,...,T_n \rightarrow T$}
+\DP
+\end{center}
+
+\subsubsection{List definition}
+
+Lists definitions are done with the following syntax: \texttt{[e1, e2, ... en]}, where all the expressions must be of the same type \texttt{T}. Then the type of the resulting list is \texttt{T*} (equivalent to \texttt{Map(Int,T)})
+
+\begin{center}
+\AxiomC{$\{\vdash e_i:T\}_{i \in [1..n]}$}
+\LeftLabel{(LISTDEF)}
+\UIC{$\vdash  \texttt{[}e_1,e_2,...,e_n\texttt{]}:T*$}
+\DP
+\end{center}
+
+\subsubsection{Return statement}
+
+A return statement implies that the enclosing function's return type is \texttt{Void}. Note that, in addition, the function's return type is \texttt{Void} if no return statements appear in the function body.
+
+\begin{center}
+\AxiomC{$\vdash f:\_ \rightarrow Void$}
+\LeftLabel{(RETURN)}
+\UIC{$\vdash (\texttt{return}) \in f$}
+\DP
+\end{center}
+
+A return statement with an expression implies that the enclosing function's return type is of the expression's type.
+
+\begin{center}
+\AxiomC{$\vdash f:\_ \rightarrow T$}  \AxiomC{$\vdash e:T$}
+\LeftLabel{(RETURNEXPR)}
+\BIC{$\vdash (\texttt{return } e) \in f$}
+\DP
+\end{center}
+
+\subsubsection{Type instantiation}
+
+One can construct an instance of an algebraic type using one of its constructor. For instance, a algebraic type defined as: type \texttt{A = C[f1:T1, f2:T2, ... fn,Tn]} has one constructor \texttt{C} with n typed fields. A constructor \texttt{C} of an algebraic type \texttt{A} is typed with a type of the same name (\texttt{C}), with $C \preceq A$. When an instance of \texttt{A} is constructed using \texttt{C} through the expression \texttt{C[f1=e1,f2=e2, ... fn=en]}, then the type of each expression \texttt{ei} must be of the type of the field \texttt{fi}, as declared in the algebraic type definition (i.e. \texttt{Ti}).
+
+\begin{center}
+\AxiomC{$\{ \vdash C.f_i:T_i\}_{i \in [1..n]} $} \AxiomC{$\{\vdash e_i:T_i\}_{i \in [1..n]} $}
+\LeftLabel{(CONSTRUCTOR)}%\RightLabel{$[\{U_i \succeq V_i\}_{i \in [1..n]}]$}
+\BIC{$\vdash \texttt{C[}f_1\texttt{=}e_1\texttt{,} f_2\texttt{=}e_2\texttt{,} ... f_n\texttt{=}e_n\texttt{]} : C $}
+\DP
+\end{center}
+\begin{center}with  $T$, the type that corresponds to the $C$ constructor, which is part of an algebraic type\end{center}
+
+\subsubsection{Integer set declaration}
+
+An integer set declaration allows the programmer to declare a integer domain with min and max bounds. The syntax is \texttt{[e1..e2]} where \texttt{e1} is the min bound and \texttt{e2} is the max one. Both min and max bound expressions must be of type \texttt{Int}, and the resulting type is an \texttt{Set(Int)}.
+
+\begin{center}
+\AxiomC{$\vdash e_1:Int$} \AxiomC{$\vdash e_2:Int$}
+\LeftLabel{(INTSET)}
+\BIC{$\vdash [e_1\texttt{..}e_2]:Set(Int)$}
+\DP
+\end{center}
+
+\subsubsection{Set selection}
+
+Within a set expression, one can select elements in a set, and bind them to variables. In that construct, each variable is of the type of the set elements.
+
+\begin{center}
+\AxiomC{$\{ \vdash e_i:T \}_{i \in [1..n]} $} \AxiomC{$\vdash s:Set(T)$}
+\LeftLabel{(SELECTION1)}
+\BIC{$\vdash e_1,e_2,...e_n \texttt{ of } s$}
+\DP
+\end{center}
+
+A selection operation can also be done within a constructor type \texttt{C}, i.e. it will select instances that has been constructed through this constructor.
+
+\begin{center}
+\AxiomC{$\{ \vdash e_i:C \}_{i \in [1..n]} $}
+\LeftLabel{(SELECTION2)}
+\UIC{$\vdash e_1,e_2,...e_n \texttt{ of }(\texttt{C}:Set(C))$}
+\DP
+\end{center}
+
+\section{Future work}
+
+\subsection{Validations}
+
+In the close future (next releases), we want to add to INI some validations to avoid programming mistakes (besides those already detected by the type inference algorithm). Validations will include:
+
+\begin{itemize}
+\item Detection of accesses to undefined variables. This should be pretty easy. We can only perform local analysis for each rule. The analysis would verify that the guard ensures the used variables existence. For instance \texttt{a\{println(a)\}} will be correct, whereas \texttt{a\{println(b)\}} will not (unless the analysis can decide that \texttt{b} has been initialized by some other means).
+\item Type fields should be mandatory by default. Maybe a syntactic construct should be introduced for optional fields.
+\item Detection of concurrent variable accesses (maybe solved by some embedded transactional construct)
+\end{itemize}
+
+\subsection{Asynchronous rules}
+
+We want to be able to execute a rule asynchronously (potentially in parallel to other rules). We will add a \texttt{@when()} event that will take a conditional expression. For instance, in the following code, the two rules will eventually execute in parallel if \texttt{a \&\& b \&\& c} is true.
+
+\begin{lstlisting}[numbers=none]
+@when(a && b) {
+	// do something
+}
+@when(a && b && c) {
+	// do something
+}
+\end{lstlisting}
+
+\subsection{Persistence and transactions}
+
+We are thinking of embedding persistence and transactions within the language.
+
+\subsection{Aspect-Oriented Programming / Behavioral Reflection / Interceptors}
+
+We are thinking of adding some interception events in the language to allow behavioral reflection. For example:
+
+\begin{lstlisting}[numbers=none]
+@before(function(myfunction),args) {
+	// do something
+}
+@after(function(myfunction),args,result) {
+	// do something
+}
+@around(function(myfunction),args) {
+	// do something
+	result = proceed(function(myfunction), args)
+	// do something
+}
+\end{lstlisting}
+
+This looks like something to do for fun more than something really useful though. We probably need examples of this.
+
+\subsection{Reflection}
+
+We will add a reflective API to allow the self modification of the system. For example:
+
+\begin{lstlisting}[numbers=none]
+// get the functions
+functions = system_functions()
+// remove the f function
+clear(functions["f"]) // or clear(function(f))
+// create a new function f
+eval_string("function f() { ... }")
+\end{lstlisting}
+
+This will need to be synchronized...
+
+Maybe we will also add a full R/W access to the program AST (that's more for fun).
+
+\subsection{\texttt{@file} event}
+
+We will add an event to observe file system modifications.
+
+The \texttt{@file(f1:String, f2: String, ... fn:String)} event occurs when one of the given file \texttt{fi} is modified on the file system. If the file does not exist initially, the event occurs when the file is created. If the file initially exists, the event occurs when it is modified or deleted. If the given file is a directory, the event happens when the content of the directory is modified (i.e. a file within this directory is modified, created, or deleted).
+
+\subsection{Date and Duration type}
+
+We will add a built-in Date type wiIEEEhowto:kopkath + and - operators. Date literals will need to be specified, as well as date formatting. For type consistency, dates may be seen as durations from the initial date.
+
+\bibliographystyle{plain}	% (uses file "plain.bst")
+\bibliography{ini_manual}		% expects file "ini_manual.bib"
+
+\end{document}
+

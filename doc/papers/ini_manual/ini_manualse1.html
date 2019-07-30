@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Introduction</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 31--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualse2.html" >next</a>] [<a 
+href="ini_manualli1.html" >prev</a>] [<a 
+href="ini_manualli1.html#tailini_manualli1.html" >prev-tail</a>] [<a 
+href="#tailini_manualse1.html">tail</a>] [<a 
+href="ini_manual3.html#ini_manualse1.html" >up</a>] </p></div>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a 
+ id="x5-20001"></a>Introduction</h3>
+<!--l. 33--><p class="noindent" >INI is a programming language where all functions are defined with rules. A rule
+is a pair of (guard, action). The action will be executed only if the guard is
+evaluated to true in the context of the function. Guards are formed of an optional
+event part (e.g. <span 
+class="cmtt-10x-x-109">@event(parameters)</span>), and of an optional condition part,
+which includes first order logic expressions. At least one event part or a
+condition (possibly both) must be defined. When the guard is passed, it
+triggers the evaluation of the action. The action is a list of sequential
+statements including variable assignments, function invocations, and
+return statements. The difference between INI and regular imperative
+languages is that INI does not include any control structure such as <span 
+class="cmti-10x-x-109">ifs</span>
+or <span 
+class="cmti-10x-x-109">loops</span>. All the control is made through rules (i.e. guards and actions
+evaluation).
+<!--l. 35--><p class="indent" >   For instance, a way to implement a factorial function <span 
+class="cmtt-10x-x-109">fac(n) </span>with INI would
+be through 3 rules:
+<!--l. 37--><p class="indent" >
+     <ol  class="enumerate1" >
+     <li 
+  class="enumerate" id="x5-2002x1">an initialization rule that defines and initializes a variable to store the
+     result (<span 
+class="cmtt-10x-x-109">f</span>) and a variable to store the current integer to multiply (<span 
+class="cmtt-10x-x-109">i</span>).
+     </li>
+     <li 
+  class="enumerate" id="x5-2004x2">a rule that multiplies the result by the current integer <span 
+class="cmtt-10x-x-109">i </span>and increments
+     it, guarded with the predicate that <span 
+class="cmtt-10x-x-109">i </span>is lower or equal to the number
+     <span 
+class="cmtt-10x-x-109">n </span>we want to calculate the factorial of.
+     </li>
+     <li 
+  class="enumerate" id="x5-2006x3">a termination rule that returns the calculated result <span 
+class="cmtt-10x-x-109">f</span>.</li></ol>
+<!--l. 43--><p class="indent" >   INI defines some default events that can be used in the guards of the rules.
+The first basic event is <span 
+class="cmtt-10x-x-109">@init</span>, which occurs when the function evaluation starts.
+The <span 
+class="cmtt-10x-x-109">@init </span>event is triggered before any other events or rules, even if not placed
+at the beginning of the function. The second basic event is <span 
+class="cmtt-10x-x-109">@end</span>, which occurs
+once the function ends, that is to say when no rules can apply anymore (all the
+guards evaluate to false). <span 
+class="cmtt-10x-x-109">@init </span>and <span 
+class="cmtt-10x-x-109">@end</span>-triggered rules are executed only once
+                                                                     
+
+                                                                     
+and take no parameters. Thus, the following code implements the factorial
+function in INI.
+   <!--l. 45-->
+   <div class="lstlisting" id="listing-1"><span class="label"><a 
+ id="x5-2007r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;fac(n)&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x5-2008r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;@init()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x5-2009r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;f=1&#x00A0;<br /><span class="label"><a 
+ id="x5-2010r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i=1&#x00A0;<br /><span class="label"><a 
+ id="x5-2011r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x5-2012r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;i&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003C;</span>=&#x00A0;n&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x5-2013r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;f=f<span 
+class="cmsy-10x-x-109">*</span>i++&#x00A0;<br /><span class="label"><a 
+ id="x5-2014r8"></a><span 
+class="cmr-9">8</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x5-2015r9"></a><span 
+class="cmr-9">9</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x5-2016r10"></a><span 
+class="cmr-9">10</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;f&#x00A0;<br /><span class="label"><a 
+ id="x5-2017r11"></a><span 
+class="cmr-9">11</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x5-2018r12"></a><span 
+class="cmr-9">12</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 60--><p class="indent" >   One can find the initialization and termination rules at lines 2 and 9. At line
+6, the only non-event-triggered rule actually calculates the factorial result. It is
+important to understand that due to the INI execution semantics, the applicable
+rules will continue to apply until their guards evaluate to false. Here, <span 
+class="cmtt-10x-x-109">i&#x003C;=n</span>
+eventually becomes false since <span 
+class="cmtt-10x-x-109">i++ </span>increments <span 
+class="cmtt-10x-x-109">i </span>at each rule execution. Once <span 
+class="cmtt-10x-x-109">i</span>
+equals to <span 
+class="cmtt-10x-x-109">n</span>, there are no rules to be executed anymore in the function, and the
+<span 
+class="cmtt-10x-x-109">@end </span>event is triggered, thus making the function return the value stored in
+<span 
+class="cmtt-10x-x-109">f</span>.
+                                                                     
+
+                                                                     
+   <!--l. 62--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualse2.html" >next</a>] [<a 
+href="ini_manualli1.html" >prev</a>] [<a 
+href="ini_manualli1.html#tailini_manualli1.html" >prev-tail</a>] [<a 
+href="ini_manualse1.html" >front</a>] [<a 
+href="ini_manual3.html#ini_manualse1.html" >up</a>] </p></div>
+<!--l. 62--><p class="indent" >   <a 
+ id="tailini_manualse1.html"></a>  
+</body></html> 

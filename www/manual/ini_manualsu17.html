@@ -1,0 +1,848 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Type Inference rules</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 1237--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu16.html" >prev</a>] [<a 
+href="ini_manualsu16.html#tailini_manualsu16.html" >prev-tail</a>] [<a 
+href="#tailini_manualsu17.html">tail</a>] [<a 
+href="ini_manualse5.html#ini_manualsu17.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">5.3   </span> <a 
+ id="x26-480005.3"></a>Type Inference rules</h4>
+<!--l. 1239--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.1   </span> <a 
+ id="x26-490005.3.1"></a>Initiation rules</h5>
+<!--l. 1241--><p class="noindent" >In order to infer types for the program, we first need some initiation rules. Here
+is a rule that states that undefined values have any type, i.e. their type is an
+unconstrained type variable.
+<div class="center" 
+>
+<!--l. 1243--><p class="noindent" >
+<!--l. 1247--><p class="noindent" >(NULL) _______________
+         <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">null </span>: <span 
+class="cmmi-10x-x-109">T</span> </div>
+<!--l. 1250--><p class="indent" >   Note that INI also has an internal <span 
+class="cmtt-10x-x-109">Void </span>type for functions returning no
+values. We then have some rules for literals, which can directly be inferred as
+resolved types:
+     <ul class="itemize1">
+     <li class="itemize">string literals such as <span 
+class="cmtt-10x-x-109">"abc" </span>will be typed as <span 
+class="cmtt-10x-x-109">String</span>,
+     </li>
+     <li class="itemize">character literals such as <span 
+class="cmtt-10x-x-109">&#8217;a&#8217; </span>will be typed as <span 
+class="cmtt-10x-x-109">Char</span>,
+     </li>
+     <li class="itemize">float literals such as <span 
+class="cmtt-10x-x-109">3.14 </span>will be typed as <span 
+class="cmtt-10x-x-109">Float</span>,
+     </li>
+     <li class="itemize">integers such as <span 
+class="cmtt-10x-x-109">1 </span>will be typed as <span 
+class="cmtt-10x-x-109">Int</span>,
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">true </span>and <span 
+class="cmtt-10x-x-109">false </span>literals will be typed as <span 
+class="cmtt-10x-x-109">Boolean</span>,</li></ul>
+                                                                     
+
+                                                                     
+<!--l. 1260--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.2   </span> <a 
+ id="x26-500005.3.2"></a>Assignments</h5>
+<!--l. 1262--><p class="noindent" >When an assignment is made from a resolved type (for instance from a literal,
+such as <span 
+class="cmtt-10x-x-109">x=2.0</span>), then the type of the assignee equals to the type of the assignment
+(for instance <span 
+class="cmtt-10x-x-109">x:Float</span>).
+<div class="center" 
+>
+<!--l. 1264--><p class="noindent" >
+<!--l. 1268--><p class="noindent" >               <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>     <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">T</span>
+(ASSIGNDEF) __________________________
+                  <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>= (<span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">T</span>)   </div>
+<!--l. 1271--><p class="indent" >   When the assignment is made from an unresolved type (e.g. <span 
+class="cmtt-10x-x-109">x=y</span>), then the
+type of the assignee is a super-type for the type of the assignment.
+<div class="center" 
+>
+<!--l. 1273--><p class="noindent" >
+<!--l. 1277--><p class="noindent" >           <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">U</span>     <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">V</span>
+(ASSIGN) ___________________________ [<span 
+class="cmmi-10x-x-109">U </span><span 
+class="cmsy-10x-x-109">&#x227D; </span><span 
+class="cmmi-10x-x-109">V </span>]
+                <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>= <span 
+class="cmmi-10x-x-109">y</span>              </div>
+<!--l. 1280--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.3   </span> <a 
+ id="x26-510005.3.3"></a>Logical operators</h5>
+<!--l. 1282--><p class="noindent" >Logical operators are easy to deal with since the result must be of the <span 
+class="cmtt-10x-x-109">Boolean</span>
+type. There are no constraints on the operands since undefined values mean
+<span 
+class="cmtt-10x-x-109">false </span>and defined ones mean <span 
+class="cmtt-10x-x-109">true </span>from a boolean perspective.
+<div class="center" 
+>
+<!--l. 1284--><p class="noindent" >
+<!--l. 1288--><p class="noindent" >            <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>     <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">U</span>
+(LCOMP) ______________________________
+           <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x</span> <span 
+class="cmtt-10x-x-109">op</span> <span 
+class="cmmi-10x-x-109">y</span>) : <span 
+class="cmmi-10x-x-109">Boolean</span> </div>
+<div class="center" 
+>
+<!--l. 1290--><p class="noindent" >
+<!--l. 1290--><p class="noindent" >with <span 
+class="cmtt-10x-x-109">op </span><span 
+class="cmsy-10x-x-109">&#x2208;{</span><span 
+class="cmtt-10x-x-109">&amp;&amp;, ||</span><span 
+class="cmsy-10x-x-109">}</span></div>
+                                                                     
+
+                                                                     
+<!--l. 1292--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.4   </span> <a 
+ id="x26-520005.3.4"></a>Comparison operators</h5>
+<!--l. 1294--><p class="noindent" >Comparators imply that the result must be <span 
+class="cmtt-10x-x-109">Boolean</span>. Operands must be
+comparable, which is the case for all objects in INI. Moreover, we enforce that
+the compared object must be of the same type.
+<div class="center" 
+>
+<!--l. 1296--><p class="noindent" >
+<!--l. 1300--><p class="noindent" >           <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>     <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">T</span>
+(COMP) ______________________________
+         <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x</span> <span 
+class="cmtt-10x-x-109">op</span> <span 
+class="cmmi-10x-x-109">y</span>) : <span 
+class="cmmi-10x-x-109">Boolean</span> </div>
+<div class="center" 
+>
+<!--l. 1302--><p class="noindent" >
+<!--l. 1302--><p class="noindent" >with <span 
+class="cmtt-10x-x-109">op </span><span 
+class="cmsy-10x-x-109">&#x2208;{</span><span 
+class="cmtt-10x-x-109">==, !=, &#x003C;, &#x003C;=, &#x003E;, &#x003E;=</span><span 
+class="cmsy-10x-x-109">}</span></div>
+<!--l. 1304--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.5   </span> <a 
+ id="x26-530005.3.5"></a>Division</h5>
+<!--l. 1306--><p class="noindent" >Division must occur between two expressions of the same type, which
+both must be subtypes of <span 
+class="cmtt-10x-x-109">Double </span>(e.g. <span 
+class="cmtt-10x-x-109">Float </span>or <span 
+class="cmtt-10x-x-109">Int</span>). Division returns a
+<span 
+class="cmtt-10x-x-109">Float </span>whatever the operands&#8217; type is, thus avoiding loss of precision for
+integers.
+<div class="center" 
+>
+<!--l. 1308--><p class="noindent" >
+<!--l. 1312--><p class="noindent" >       <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>     <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">T</span>
+(DIV) __________________________ [<span 
+class="cmmi-10x-x-109">T </span><span 
+class="cmsy-10x-x-109">&#x227C; </span><span 
+class="cmmi-10x-x-109">Double</span>]
+       <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x</span> <span 
+class="cmtt-10x-x-109">/</span> <span 
+class="cmmi-10x-x-109">y</span>) : <span 
+class="cmmi-10x-x-109">Float</span>              </div>
+<!--l. 1315--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.6   </span> <a 
+ id="x26-540005.3.6"></a>Multiplication and minus</h5>
+<!--l. 1317--><p class="noindent" >Multiplication and minus operations must occur between two expressions of the
+same type, which both must be subtypes of <span 
+class="cmtt-10x-x-109">Double </span>(e.g. <span 
+class="cmtt-10x-x-109">Float </span>or <span 
+class="cmtt-10x-x-109">Int</span>). They
+will return the same type as the operands&#8217; type.
+                                                                     
+
+                                                                     
+<div class="center" 
+>
+<!--l. 1319--><p class="noindent" >
+<!--l. 1323--><p class="noindent" >                <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>     <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">T</span>
+(MULTMINUS) __________________________ [<span 
+class="cmmi-10x-x-109">T </span><span 
+class="cmsy-10x-x-109">&#x227C; </span><span 
+class="cmmi-10x-x-109">Double</span>]
+                  <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x</span> <span 
+class="cmtt-10x-x-109">op</span> <span 
+class="cmmi-10x-x-109">y</span>) : <span 
+class="cmmi-10x-x-109">T</span>               </div>
+<div class="center" 
+>
+<!--l. 1325--><p class="noindent" >
+<!--l. 1325--><p class="noindent" >with <span 
+class="cmtt-10x-x-109">op </span><span 
+class="cmsy-10x-x-109">&#x2208;{</span><span 
+class="cmtt-10x-x-109">-, *</span><span 
+class="cmsy-10x-x-109">}</span></div>
+<!--l. 1328--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.7   </span> <a 
+ id="x26-550005.3.7"></a>The plus operator</h5>
+<!--l. 1330--><p class="noindent" >There are two case for the plus operator. In the first case, it is uses as a string
+concatenation operator. For that, like in Java, the first operand must be of a
+resolved <span 
+class="cmtt-10x-x-109">String </span>type. If it is the case, the type of the second operand does not
+matter and the overall expression will be typed as a <span 
+class="cmtt-10x-x-109">String </span>and the <span 
+class="cmtt-10x-x-109">String </span>type
+will propagate. Typically, the <span 
+class="cmtt-10x-x-109">"a"+b </span>expression is a string concatenation
+case.
+<div class="center" 
+>
+<!--l. 1332--><p class="noindent" >
+<!--l. 1336--><p class="noindent" >         <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">String</span>    <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">T</span>
+(PLUS1) _________________________________
+            <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x</span> <span 
+class="cmtt-10x-x-109">+</span> <span 
+class="cmmi-10x-x-109">y</span>) : <span 
+class="cmmi-10x-x-109">String</span>   </div>
+<!--l. 1339--><p class="indent" >   The second case occurs when the type of the first operand&#8217;s type is
+undetermined. We then fall back to the arithmetic plus, which behaves exactly
+like <span 
+class="cmmi-10x-x-109">MULTMINUS </span>in terms of typing.
+<div class="center" 
+>
+<!--l. 1341--><p class="noindent" >
+<!--l. 1345--><p class="noindent" >         <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>     <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">T</span>
+(PLUS2) __________________________ [<span 
+class="cmmi-10x-x-109">T </span><span 
+class="cmsy-10x-x-109">&#x227C; </span><span 
+class="cmmi-10x-x-109">Double</span>]
+            <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x</span> <span 
+class="cmtt-10x-x-109">+</span> <span 
+class="cmmi-10x-x-109">y</span>) : <span 
+class="cmmi-10x-x-109">T</span>                </div>
+                                                                     
+
+                                                                     
+<!--l. 1348--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.8   </span> <a 
+ id="x26-560005.3.8"></a>Unary minus (sign inversion)</h5>
+<!--l. 1350--><p class="noindent" >The unary minus operator expects an operand which is a number and will return
+a result of the same type.
+<div class="center" 
+>
+<!--l. 1352--><p class="noindent" >
+<!--l. 1356--><p class="noindent" >             <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>(UMINUS)__ [<span 
+class="cmmi-10x-x-109">T </span><span 
+class="cmsy-10x-x-109">&#x227C; </span><span 
+class="cmmi-10x-x-109">Double</span>]
+           <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmtt-10x-x-109">-</span><span 
+class="cmmi-10x-x-109">x</span>) : <span 
+class="cmmi-10x-x-109">T</span>              </div>
+<!--l. 1359--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.9   </span> <a 
+ id="x26-570005.3.9"></a>Post operators</h5>
+<!--l. 1361--><p class="noindent" >The post increment/decrement operators both expect an operand which is a
+number and will return a result of the same type.
+<div class="center" 
+>
+<!--l. 1363--><p class="noindent" >
+<!--l. 1367--><p class="noindent" >                <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>(POSTOP)______ [<span 
+class="cmmi-10x-x-109">T </span><span 
+class="cmsy-10x-x-109">&#x227C; </span><span 
+class="cmmi-10x-x-109">Double</span>]
+            <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x</span> <span 
+class="cmtt-10x-x-109">postop</span>) : <span 
+class="cmmi-10x-x-109">T</span>              </div>
+<div class="center" 
+>
+<!--l. 1369--><p class="noindent" >
+<!--l. 1369--><p class="noindent" >with <span 
+class="cmtt-10x-x-109">postop </span><span 
+class="cmsy-10x-x-109">&#x2208;{</span><span 
+class="cmtt-10x-x-109">++, --</span><span 
+class="cmsy-10x-x-109">}</span></div>
+<!--l. 1371--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.10   </span> <a 
+ id="x26-580005.3.10"></a>The not operator</h5>
+<!--l. 1373--><p class="noindent" >The logical negation operator returns a boolean, but does not force any
+constraint on the operand (undefined means <span 
+class="cmtt-10x-x-109">false </span>and defined means <span 
+class="cmtt-10x-x-109">true </span>for
+non-boolean objects).
+<div class="center" 
+>
+<!--l. 1375--><p class="noindent" >
+<!--l. 1379--><p class="noindent" >            <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">e </span>: <span 
+class="cmmi-10x-x-109">T</span>(NOT)______
+        <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmtt-10x-x-109">!</span><span 
+class="cmmi-10x-x-109">e</span>) : <span 
+class="cmmi-10x-x-109">Boolean</span> </div>
+                                                                     
+
+                                                                     
+<!--l. 1382--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.11   </span> <a 
+ id="x26-590005.3.11"></a>The match operator</h5>
+<!--l. 1384--><p class="noindent" >Within a guard a match operator can be used to match strings with regular
+expressions and bind the results to some variables. For instance <span 
+class="cmtt-10x-x-109">"a b c" </span><span 
+class="cmsy-10x-x-109">~</span>
+<span 
+class="cmtt-10x-x-109">regexp("(.) (b) (.)",v1,v2,v3) </span>will match and be evaluated to <span 
+class="cmtt-10x-x-109">true</span>. Since
+there are three groups (between parenthesis), the three match sub-results will be
+bound to the given variables. Thus, once the match is done, we will have <span 
+class="cmtt-10x-x-109">v1="a"</span>,
+<span 
+class="cmtt-10x-x-109">v2="b"</span>, and <span 
+class="cmtt-10x-x-109">v3="c"</span>. With regard to typing, all the bound variables are
+strings.
+<div class="center" 
+>
+<!--l. 1386--><p class="noindent" >
+<!--l. 1390--><p class="noindent" >            <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">String</span>    <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">String</span>    <span 
+class="cmsy-10x-x-109">{&#x22A2; </span><span 
+class="cmmi-10x-x-109">v</span><sub><span 
+class="cmmi-8">i</span></sub> : <span 
+class="cmmi-10x-x-109">String</span><span 
+class="cmsy-10x-x-109">}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>
+(MATCH1) _________________________________________________________________________
+                 <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x </span><span 
+class="cmsy-10x-x-109">~</span> <span 
+class="cmtt-10x-x-109">regexp(</span><span 
+class="cmmi-10x-x-109">y,v</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-10x-x-109">,v</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-10x-x-109">,...,v</span><sub><span 
+class="cmmi-8">n</span></sub><span 
+class="cmtt-10x-x-109">)</span>) : <span 
+class="cmmi-10x-x-109">Boolean</span>      </div>
+<!--l. 1393--><p class="indent" >   A match operator can also be used to match a constructor&#8217;s instance with
+some constraints given by boolean logical expressions on the constructor&#8217;s
+fields.
+<div class="center" 
+>
+<!--l. 1395--><p class="noindent" >
+<!--l. 1399--><p class="noindent" >                 <span 
+class="cmsy-10x-x-109">{&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmmi-8">i</span></sub> : <span 
+class="cmmi-10x-x-109">Boolean</span><span 
+class="cmsy-10x-x-109">}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>
+(MATCH2) _____________________________________________ [<span 
+class="cmsy-10x-x-109">{</span><span 
+class="cmmi-10x-x-109">freevars</span>(<span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmmi-8">i</span></sub>) = <span 
+class="cmsy-10x-x-109">&#x2205;}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>]
+            <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">e </span><span 
+class="cmsy-10x-x-109">~ </span><span 
+class="cmmi-10x-x-109">C</span>[<span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-10x-x-109">,e</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-10x-x-109">,...,e</span><sub><span 
+class="cmmi-8">n</span></sub>]) : <span 
+class="cmmi-10x-x-109">Boolean</span>                         </div>
+<!--l. 1402--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.12   </span> <a 
+ id="x26-600005.3.12"></a>Map access</h5>
+<!--l. 1404--><p class="noindent" >A map access node such as <span 
+class="cmtt-10x-x-109">x[y] </span>allows to say that the resulting type of the
+expression is <span 
+class="cmtt-10x-x-109">V</span>, if <span 
+class="cmtt-10x-x-109">x </span>is of type <span 
+class="cmtt-10x-x-109">Map(K,V)</span>.
+<div class="center" 
+>
+<!--l. 1406--><p class="noindent" >
+<!--l. 1410--><p class="noindent" >                <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">Map</span>(<span 
+class="cmmi-10x-x-109">K,V </span>)    <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">y </span>: <span 
+class="cmmi-10x-x-109">K</span>
+(MAPACCESS) ________________________________________
+                         <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">x</span>[<span 
+class="cmmi-10x-x-109">y</span>] : <span 
+class="cmmi-10x-x-109">V</span>          </div>
+                                                                     
+
+                                                                     
+<!--l. 1413--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.13   </span> <a 
+ id="x26-610005.3.13"></a>Field access</h5>
+<!--l. 1415--><p class="noindent" >For a field access such as <span 
+class="cmtt-10x-x-109">x.f</span>, the type of the accessed expression <span 
+class="cmtt-10x-x-109">x </span>must have a
+field of the right name and type. Note that, when using match expressions, by
+construction, it is often the case that the type of the accessed expression is
+already resolved.
+<div class="center" 
+>
+<!--l. 1417--><p class="noindent" >
+<!--l. 1421--><p class="noindent" >                    <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">T.f </span>: <span 
+class="cmmi-10x-x-109">V</span>
+(FIELDACCESS) _____________________
+                  <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmmi-10x-x-109">x </span>: <span 
+class="cmmi-10x-x-109">T</span>)<span 
+class="cmmi-10x-x-109">.f </span>: <span 
+class="cmmi-10x-x-109">V</span> </div>
+<!--l. 1424--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.14   </span> <a 
+ id="x26-620005.3.14"></a>Function invocation</h5>
+<!--l. 1426--><p class="noindent" >For an invocation, the rule implies some constraints between the function type
+and the types of the result and of the parameter expressions. To support
+polymorphism, the function body is evaluated within its own environment, so
+that each invocation has its own set of constraints.
+<div class="center" 
+>
+<!--l. 1428--><p class="noindent" >
+<!--l. 1432--><p class="noindent" >                 <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">f </span>: <span 
+class="cmmi-10x-x-109">T</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-10x-x-109">,T</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-10x-x-109">,...,T</span><sub><span 
+class="cmmi-8">n</span></sub> <span 
+class="cmsy-10x-x-109">&#x2192; </span><span 
+class="cmmi-10x-x-109">T</span>     <span 
+class="cmsy-10x-x-109">{&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmmi-8">i</span></sub> : <span 
+class="cmmi-10x-x-109">T</span><sub><span 
+class="cmmi-8">i</span></sub><span 
+class="cmsy-10x-x-109">}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>
+(INVOCATION) _____________________________________________________________ [<span 
+class="cmmi-10x-x-109">new</span>(<span 
+class="cmmi-10x-x-109">env</span>)]
+                    <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">f</span>(<span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-10x-x-109">,e</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-10x-x-109">,...,e</span><sub><span 
+class="cmmi-8">n</span></sub>) : <span 
+class="cmmi-10x-x-109">T</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-10x-x-109">,T</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-10x-x-109">,...,T</span><sub><span 
+class="cmmi-8">n</span></sub> <span 
+class="cmsy-10x-x-109">&#x2192; </span><span 
+class="cmmi-10x-x-109">T</span>               </div>
+<!--l. 1435--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.15   </span> <a 
+ id="x26-630005.3.15"></a>List definition</h5>
+<!--l. 1437--><p class="noindent" >Lists definitions are done with the following syntax: <span 
+class="cmtt-10x-x-109">[e1, e2, ... en]</span>, where
+all the expressions must be of the same type <span 
+class="cmtt-10x-x-109">T</span>. Then the type of the resulting list
+is <span 
+class="cmtt-10x-x-109">T* </span>(equivalent to <span 
+class="cmtt-10x-x-109">Map(Int,T)</span>)
+<div class="center" 
+>
+<!--l. 1439--><p class="noindent" >
+<!--l. 1443--><p class="noindent" >              <span 
+class="cmsy-10x-x-109">{&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmmi-8">i</span></sub> : <span 
+class="cmmi-10x-x-109">T</span><span 
+class="cmsy-10x-x-109">}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>
+(LISTDEF) _____________________________
+            <span 
+class="cmsy-10x-x-109">&#x22A2;</span> <span 
+class="cmtt-10x-x-109">[</span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-10x-x-109">,e</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-10x-x-109">,...,e</span><sub><span 
+class="cmmi-8">n</span></sub><span 
+class="cmtt-10x-x-109">]</span> : <span 
+class="cmmi-10x-x-109">T</span><span 
+class="cmsy-10x-x-109">*</span> </div>
+                                                                     
+
+                                                                     
+<!--l. 1446--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.16   </span> <a 
+ id="x26-640005.3.16"></a>Return statement</h5>
+<!--l. 1448--><p class="noindent" >A return statement implies that the enclosing function&#8217;s return type is <span 
+class="cmtt-10x-x-109">Void</span>.
+Note that, in addition, the function&#8217;s return type is <span 
+class="cmtt-10x-x-109">Void </span>if no return statements
+appear in the function body.
+<div class="center" 
+>
+<!--l. 1450--><p class="noindent" >
+<!--l. 1454--><p class="noindent" >            <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">f </span>: _ <span 
+class="cmsy-10x-x-109">&#x2192; </span><span 
+class="cmmi-10x-x-109">V oid</span>
+(RETURN) ______________________
+            <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmtt-10x-x-109">return</span>) <span 
+class="cmsy-10x-x-109">&#x2208; </span><span 
+class="cmmi-10x-x-109">f</span> </div>
+<!--l. 1457--><p class="indent" >   A return statement with an expression implies that the enclosing function&#8217;s
+return type is of the expression&#8217;s type.
+<div class="center" 
+>
+<!--l. 1459--><p class="noindent" >
+<!--l. 1463--><p class="noindent" >                  <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">f </span>: _ <span 
+class="cmsy-10x-x-109">&#x2192; </span><span 
+class="cmmi-10x-x-109">T</span>     <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">e </span>: <span 
+class="cmmi-10x-x-109">T</span>
+(RETURNEXPR) ________________________________
+                     <span 
+class="cmsy-10x-x-109">&#x22A2; </span>(<span 
+class="cmtt-10x-x-109">return</span> <span 
+class="cmmi-10x-x-109">e</span>) <span 
+class="cmsy-10x-x-109">&#x2208; </span><span 
+class="cmmi-10x-x-109">f</span>    </div>
+<!--l. 1466--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.17   </span> <a 
+ id="x26-650005.3.17"></a>Type instantiation</h5>
+<!--l. 1468--><p class="noindent" >One can construct an instance of an algebraic type using one of its constructor.
+For instance, a algebraic type defined as: type <span 
+class="cmtt-10x-x-109">A = C[f1:T1, f2:T2, ...</span>
+<span 
+class="cmtt-10x-x-109">fn,Tn] </span>has one constructor <span 
+class="cmtt-10x-x-109">C </span>with n typed fields. A constructor <span 
+class="cmtt-10x-x-109">C </span>of an
+algebraic type <span 
+class="cmtt-10x-x-109">A </span>is typed with a type of the same name (<span 
+class="cmtt-10x-x-109">C</span>), with <span 
+class="cmmi-10x-x-109">C </span><span 
+class="cmsy-10x-x-109">&#x227C; </span><span 
+class="cmmi-10x-x-109">A</span>.
+When an instance of <span 
+class="cmtt-10x-x-109">A </span>is constructed using <span 
+class="cmtt-10x-x-109">C </span>through the expression
+<span 
+class="cmtt-10x-x-109">C[f1=e1,f2=e2, ... fn=en]</span>, then the type of each expression <span 
+class="cmtt-10x-x-109">ei </span>must be of
+the type of the field <span 
+class="cmtt-10x-x-109">fi</span>, as declared in the algebraic type definition (i.e.
+<span 
+class="cmtt-10x-x-109">Ti</span>).
+<div class="center" 
+>
+<!--l. 1470--><p class="noindent" >
+<!--l. 1474--><p class="noindent" >                    <span 
+class="cmsy-10x-x-109">{&#x22A2; </span><span 
+class="cmmi-10x-x-109">C.f</span><sub><span 
+class="cmmi-8">i</span></sub> : <span 
+class="cmmi-10x-x-109">T</span><sub><span 
+class="cmmi-8">i</span></sub><span 
+class="cmsy-10x-x-109">}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>    <span 
+class="cmsy-10x-x-109">{&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmmi-8">i</span></sub> : <span 
+class="cmmi-10x-x-109">T</span><sub><span 
+class="cmmi-8">i</span></sub><span 
+class="cmsy-10x-x-109">}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>
+(CONSTRUCTOR) ______________________________________________________
+                        <span 
+class="cmsy-10x-x-109">&#x22A2;</span> <span 
+class="cmtt-10x-x-109">C[</span><span 
+class="cmmi-10x-x-109">f</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmtt-10x-x-109">=</span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmtt-10x-x-109">,</span><span 
+class="cmmi-10x-x-109">f</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmtt-10x-x-109">=</span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmtt-10x-x-109">,</span><span 
+class="cmmi-10x-x-109">...f</span><sub><span 
+class="cmmi-8">n</span></sub><span 
+class="cmtt-10x-x-109">=</span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmmi-8">n</span></sub><span 
+class="cmtt-10x-x-109">]</span> : <span 
+class="cmmi-10x-x-109">C</span>     </div>
+                                                                     
+
+                                                                     
+<div class="center" 
+>
+<!--l. 1476--><p class="noindent" >
+<!--l. 1476--><p class="noindent" >with <span 
+class="cmmi-10x-x-109">T</span>, the type that corresponds to the <span 
+class="cmmi-10x-x-109">C </span>constructor, which is part of an
+algebraic type</div>
+<!--l. 1478--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.18   </span> <a 
+ id="x26-660005.3.18"></a>Integer set declaration</h5>
+<!--l. 1480--><p class="noindent" >An integer set declaration allows the programmer to declare a integer domain
+with min and max bounds. The syntax is <span 
+class="cmtt-10x-x-109">[e1..e2] </span>where <span 
+class="cmtt-10x-x-109">e1 </span>is the min bound
+and <span 
+class="cmtt-10x-x-109">e2 </span>is the max one. Both min and max bound expressions must be of type
+<span 
+class="cmtt-10x-x-109">Int</span>, and the resulting type is an <span 
+class="cmtt-10x-x-109">Set(Int)</span>.
+<div class="center" 
+>
+<!--l. 1482--><p class="noindent" >
+<!--l. 1486--><p class="noindent" >           <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">1</span></sub> : <span 
+class="cmmi-10x-x-109">Int</span>    <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">2</span></sub> : <span 
+class="cmmi-10x-x-109">Int</span>
+(INTSET) _________________________________
+            <span 
+class="cmsy-10x-x-109">&#x22A2; </span>[<span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmtt-10x-x-109">..</span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">2</span></sub>] : <span 
+class="cmmi-10x-x-109">Set</span>(<span 
+class="cmmi-10x-x-109">Int</span>)  </div>
+<!--l. 1489--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.19   </span> <a 
+ id="x26-670005.3.19"></a>Set selection</h5>
+<!--l. 1491--><p class="noindent" >Within a set expression, one can select elements in a set, and bind them
+to variables. In that construct, each variable is of the type of the set
+elements.
+<div class="center" 
+>
+<!--l. 1493--><p class="noindent" >
+<!--l. 1497--><p class="noindent" >                <span 
+class="cmsy-10x-x-109">{&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmmi-8">i</span></sub> : <span 
+class="cmmi-10x-x-109">T</span><span 
+class="cmsy-10x-x-109">}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>    <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">s </span>: <span 
+class="cmmi-10x-x-109">Set</span>(<span 
+class="cmmi-10x-x-109">T</span>)
+(SELECTION1) ____________________________________________
+                       <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-10x-x-109">,e</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-10x-x-109">,...e</span><sub><span 
+class="cmmi-8">n</span></sub>  <span 
+class="cmtt-10x-x-109">of</span> <span 
+class="cmmi-10x-x-109">s</span>       </div>
+<!--l. 1500--><p class="indent" >   A selection operation can also be done within a constructor type
+<span 
+class="cmtt-10x-x-109">C</span>, i.e. it will select instances that has been constructed through this
+constructor.
+                                                                     
+
+                                                                     
+<div class="center" 
+>
+<!--l. 1502--><p class="noindent" >
+<!--l. 1506--><p class="noindent" >                      <span 
+class="cmsy-10x-x-109">{&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmmi-8">i</span></sub> : <span 
+class="cmmi-10x-x-109">C</span><span 
+class="cmsy-10x-x-109">}</span><sub><span 
+class="cmmi-8">i</span><span 
+class="cmsy-8">&#x2208;</span><span 
+class="cmr-8">[1</span><span 
+class="cmmi-8">..n</span><span 
+class="cmr-8">]</span></sub>
+(SELECTION2) ________________________________________
+                <span 
+class="cmsy-10x-x-109">&#x22A2; </span><span 
+class="cmmi-10x-x-109">e</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-10x-x-109">,e</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-10x-x-109">,...e</span><sub><span 
+class="cmmi-8">n</span></sub>  <span 
+class="cmtt-10x-x-109">of</span> (<span 
+class="cmtt-10x-x-109">C</span> : <span 
+class="cmmi-10x-x-109">Set</span>(<span 
+class="cmmi-10x-x-109">C</span>)) </div>
+   <!--l. 1509--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu16.html" >prev</a>] [<a 
+href="ini_manualsu16.html#tailini_manualsu16.html" >prev-tail</a>] [<a 
+href="ini_manualsu17.html" >front</a>] [<a 
+href="ini_manualse5.html#ini_manualsu17.html" >up</a>] </p></div>
+<!--l. 1509--><p class="indent" >   <a 
+ id="tailini_manualsu17.html"></a>   
+</body></html> 

@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Validations</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 1511--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu19.html" >next</a>] [<a 
+href="#tailini_manualsu18.html">tail</a>] [<a 
+href="ini_manualse6.html#ini_manualsu18.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">6.1   </span> <a 
+ id="x28-690006.1"></a>Validations</h4>
+<!--l. 1513--><p class="noindent" >In the close future (next releases), we want to add to INI some validations to
+avoid programming mistakes (besides those already detected by the type
+inference algorithm). Validations will include:
+     <ul class="itemize1">
+     <li class="itemize">Detection of accesses to undefined variables. This should be pretty
+     easy. We can only perform local analysis for each rule. The analysis
+     would verify that the guard ensures the used variables existence. For
+     instance <span 
+class="cmtt-10x-x-109">a</span><span 
+class="cmsy-10x-x-109">{</span><span 
+class="cmtt-10x-x-109">println(a)</span><span 
+class="cmsy-10x-x-109">} </span>will be correct, whereas <span 
+class="cmtt-10x-x-109">a</span><span 
+class="cmsy-10x-x-109">{</span><span 
+class="cmtt-10x-x-109">println(b)</span><span 
+class="cmsy-10x-x-109">} </span>will
+     not (unless the analysis can decide that <span 
+class="cmtt-10x-x-109">b </span>has been initialized by some
+     other means).
+     </li>
+     <li class="itemize">Type  fields  should  be  mandatory  by  default.  Maybe  a  syntactic
+     construct should be introduced for optional fields.
+                                                                     
+
+                                                                     
+     </li>
+     <li class="itemize">Detection  of  concurrent  variable  accesses  (maybe  solved  by  some
+     embedded transactional construct)</li></ul>
+                                                                     
+
+                                                                     
+   <!--l. 1521--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu19.html" >next</a>] [<a 
+href="ini_manualsu18.html" >front</a>] [<a 
+href="ini_manualse6.html#ini_manualsu18.html" >up</a>] </p></div>
+<!--l. 1521--><p class="indent" >   <a 
+ id="tailini_manualsu18.html"></a>  
+</body></html> 

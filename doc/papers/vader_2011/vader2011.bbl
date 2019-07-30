@@ -1,0 +1,76 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem{Cheng2009}
+Cheng, B.H.C., de~Lemos, R., Giese, H., Inverardi, P., Magee, J. (eds.):
+  Software Engineering for Self-Adaptive Systems [outcome of a Dagstuhl
+  Seminar], Lecture Notes in Computer Science, vol. 5525. Springer (2009)
+
+\bibitem{Cheng2006}
+Cheng, S.W., Garlan, D., Schmerl, B.: Architecture-based self-adaptation in the
+  presence of multiple objectives. In: Proceedings of the 2006 international
+  workshop on Self-adaptation and self-managing systems. pp. 2--8. SEAMS '06,
+  ACM, New York, NY, USA (2006)
+
+\bibitem{Cirstea2009}
+Cirstea, H., Moreau, P.E., Reilles, A.: {TomML: A Rule Language For Structured
+  Data}. In: {International RuleML Symposium on Rule Interchange and
+  Applications - RuleML 2009}. pp. 262--271. Las Vegas, United States (2009)
+
+\bibitem{Fischer2007}
+Fischer, J., Majumdar, R., Millstein, T.: Tasks: language support for
+  event-driven programming. In: Proceedings of the 2007 ACM SIGPLAN symposium
+  on Partial evaluation and semantics-based program manipulation. pp. 134--143.
+  PEPM '07, ACM, New York, NY, USA (2007)
+
+\bibitem{OpenCV}
+Garage, W.: OpenCV Documentation (Jun 2011),
+  \url{http://opencv.willowgarage.com/wiki/}
+
+\bibitem{Kamina2011}
+Kamina, T., Aotani, T., Masuhara, H.: Eventcj: a context-oriented programming
+  language with declarative event-based context transition. In: Proceedings of
+  the tenth international conference on Aspect-oriented software development.
+  pp. 253--264. AOSD '11, ACM, New York, NY, USA (2011)
+
+\bibitem{Laddaga2006}
+Laddaga, R.: Self adaptive software problems and projects. In: Proceedings of
+  the Second International IEEE Workshop on Software Evolvability. pp. 3--10.
+  IEEE Computer Society, Washington, DC, USA (2006)
+
+\bibitem{Muller2009}
+M\"{u}ller, H.A.: Towards self-adaptive software-intensive systems. In:
+  Proceedings of the joint international and annual ERCIM workshops on
+  Principles of software evolution (IWPSE) and software evolution (Evol)
+  workshops. pp. 7--8. IWPSE-Evol '09, ACM, New York, NY, USA (2009)
+
+\bibitem{Java6Doc}
+Oracle: Java SE 6 Documentation (Jun 2011),
+  \url{http://download.oracle.com/javase/6/docs/}
+
+\bibitem{INI}
+Pawlak, R.: INI Online (Jun 2011), \url{http://perso.isep.fr/rpawlak/ini/}
+
+\bibitem{Psaier2010}
+Psaier, H., Skopik, F., Schall, D., Juszczyk, L., Treiber, M., Dustdar, S.: A
+  programming model for self-adaptive open enterprise systems. In: Proceedings
+  of the 5th International Workshop on Middleware for Service Oriented
+  Computing. pp. 27--32. MW4SOC '10, ACM, New York, NY, USA (2010)
+
+\bibitem{Salehie2009}
+Salehie, M., Tahvildari, L.: Self-adaptive software: Landscape and research
+  challenges. ACM Trans. Auton. Adapt. Syst.  4,  14:1--14:42 (2009)
+
+\bibitem{Wang2005}
+Wang, Q.: Towards a rule model for self-adaptive software. SIGSOFT Softw. Eng.
+  Notes  30,  8-- (2005)
+
+\bibitem{Yoo2007}
+Yoo, C., Jung, W., Park, D., Lee, B., Kim, H., Wu, C.: An adaptive software
+  framework based on service composition. In: Proceedings of the 5th ACIS
+  International Conference on Software Engineering Research, Management \&
+  Applications. pp. 476--484. SERA '07, IEEE Computer Society, Washington, DC,
+  USA (2007)
+
+\end{thebibliography}

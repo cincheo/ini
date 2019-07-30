@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Functions and rules</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 652--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu9.html" >next</a>] [<a 
+href="ini_manualsu7.html" >prev</a>] [<a 
+href="ini_manualsu7.html#tailini_manualsu7.html" >prev-tail</a>] [<a 
+href="#tailini_manualsu8.html">tail</a>] [<a 
+href="ini_manualse4.html#ini_manualsu8.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">4.2   </span> <a 
+ id="x16-130004.2"></a>Functions and rules</h4>
+<!--l. 654--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.1   </span> <a 
+ id="x16-140004.2.1"></a>Syntax</h5>
+<!--l. 656--><p class="noindent" >Functions are defined with the <span 
+class="cmtt-10x-x-109">function </span>keyword. Functions have a name that
+must be unique. The syntax is the following:
+                                                                     
+
+                                                                     
+   <div class="verbatim" id="verbatim-1">
+&#x003C;function&#x003E;&#x00A0;:=&#x00A0;function&#x00A0;&#x003C;name&#x003E;(&#x003C;parameters&#x003E;)&#x00A0;{&#x00A0;&#x003C;rules&#x003E;&#x00A0;}
+</div>
+<!--l. 660--><p class="nopar" >
+<!--l. 662--><p class="indent" >   Where <span 
+class="cmtt-10x-x-109">&#x003C;name&#x003E; </span>is the function name (an unique identifier), <span 
+class="cmtt-10x-x-109">&#x003C;parameters&#x003E; </span>is a
+coma-separated list of parameter identifiers, and <span 
+class="cmtt-10x-x-109">&#x003C;rules&#x003E; </span>is a list of rules that
+defines the function behavior. INI allows for rule-oriented programming.
+However, since rules are gathered into functions, it also allows for functional-like
+programming. The rule syntax is the following:
+                                                                     
+
+                                                                     
+   <div class="verbatim" id="verbatim-2">
+&#x003C;rule&#x003E;&#x00A0;:=&#x00A0;&#x003C;guard&#x003E;&#x00A0;{&#x00A0;&#x003C;body&#x003E;&#x00A0;}
+</div>
+<!--l. 666--><p class="nopar" >
+<!--l. 668--><p class="indent" >   Thus, the &#8221;expanded&#8221; function syntax is:
+                                                                     
+
+                                                                     
+   <div class="verbatim" id="verbatim-3">
+function&#x00A0;&#x003C;name&#x003E;(&#x003C;parameters&#x003E;)&#x00A0;{
+&#x00A0;<br />&#x00A0;&#x00A0;&#x003C;guard1&#x003E;&#x00A0;{&#x00A0;&#x003C;body1&#x003E;&#x00A0;}
+&#x00A0;<br />&#x00A0;&#x00A0;&#x003C;guard2&#x003E;&#x00A0;{&#x00A0;&#x003C;body2&#x003E;&#x00A0;}
+&#x00A0;<br />&#x00A0;&#x00A0;...
+&#x00A0;<br />&#x00A0;&#x00A0;&#x003C;guardN&#x003E;&#x00A0;{&#x00A0;&#x003C;bodyN&#x003E;&#x00A0;}
+&#x00A0;<br />}
+</div>
+<!--l. 677--><p class="nopar" >
+<!--l. 679--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.2   </span> <a 
+ id="x16-150004.2.2"></a>Parameters</h5>
+<!--l. 681--><p class="noindent" >Functions takes parameters which have a unique name within the function scope.
+Parameters are passed by reference and not by value. If the programmer wants to
+pass by value, it can be done using the <span 
+class="cmtt-10x-x-109">copy </span>built-in function. For instance, the
+function:
+                                                                     
+
+                                                                     
+   <div class="verbatim" id="verbatim-4">
+function&#x00A0;f(a,b,c)&#x00A0;{&#x00A0;...&#x00A0;}
+</div>
+<!--l. 685--><p class="nopar" >
+<!--l. 687--><p class="indent" >   Can be invoked with <span 
+class="cmtt-10x-x-109">f(1,2,"abc")</span>, if <span 
+class="cmtt-10x-x-109">f </span>expects two integers and one string.
+Parameters can have default values. For instance, the <span 
+class="cmtt-10x-x-109">a </span>and <span 
+class="cmtt-10x-x-109">c </span>parameters may
+have default values:
+                                                                     
+
+                                                                     
+   <div class="verbatim" id="verbatim-5">
+function&#x00A0;f(a,b=0,c="")&#x00A0;{&#x00A0;...&#x00A0;}
+</div>
+<!--l. 691--><p class="nopar" >
+<!--l. 693--><p class="indent" >   In that case, some parameter values are optional when invoked. For instance,
+<span 
+class="cmtt-10x-x-109">f(2,1) </span>invokes <span 
+class="cmtt-10x-x-109">f </span>with an empty string for <span 
+class="cmtt-10x-x-109">c</span>.
+<!--l. 695--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.3   </span> <a 
+ id="x16-160004.2.3"></a>Returned values</h5>
+<!--l. 697--><p class="noindent" >A function can return a value by using a <span 
+class="cmtt-10x-x-109">return [&#x003C;expr&#x003E;] </span>statement within a
+rule body. If <span 
+class="cmtt-10x-x-109">&#x003C;expr&#x003E; </span>is not defined or if no return statements appear in the
+function, then the function returns a <span 
+class="cmtt-10x-x-109">Void </span>value. For instance:
+   <!--l. 699-->
+   <div class="lstlisting" id="listing-29"><span class="label"><a 
+ id="x16-16001r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;f(a,b=0,c=&#8221;&#8221;)&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x16-16002r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;...&#x00A0;<br /><span class="label"><a 
+ id="x16-16003r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003C;</span>guard<span 
+class="cmmi-10x-x-109">&#x003E;</span>&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x16-16004r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;...&#x00A0;<br /><span class="label"><a 
+ id="x16-16005r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;b&#x00A0;<br /><span class="label"><a 
+ id="x16-16006r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x16-16007r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;...&#x00A0;<br /><span class="label"><a 
+ id="x16-16008r8"></a><span 
+class="cmr-9">8</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 710--><p class="indent" >   The return statement at line 5 indicates that the function returns
+a value of type <span 
+class="cmtt-10x-x-109">Int </span>(since <span 
+class="cmtt-10x-x-109">b </span>is an integer, as seen in the parameter&#8217;s
+default value at line 1). Note that return statements are optional when the
+function returns no values, but must always be the last statement of a
+rule.
+<!--l. 712--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.4   </span> <a 
+ id="x16-170004.2.4"></a>Function types</h5>
+<!--l. 714--><p class="noindent" >A function type is noted as <span 
+class="cmtt-10x-x-109">(T1,T2,...TN)-&#x003E;T</span>, where <span 
+class="cmtt-10x-x-109">Ti </span>is the expected type of
+the ith parameter, and <span 
+class="cmtt-10x-x-109">T </span>is the function&#8217;s return type.
+<!--l. 716--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.5   </span> <a 
+ id="x16-180004.2.5"></a>The main() function</h5>
+<!--l. 718--><p class="noindent" >The main function is the entry point of the program. There must be one main
+function per program.
+                                                                     
+
+                                                                     
+<!--l. 720--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.6   </span> <a 
+ id="x16-190004.2.6"></a>Built-in Functions</h5>
+<!--l. 722--><p class="noindent" >Here is the list of built-in functions provided by INI. Built-in function have
+predefined function types, which are given here.
+     <ul class="itemize1">
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">clear(v:T)-&#x003E;Void</span>: initializes or re-initializes a <span 
+class="cmtt-10x-x-109">v </span>variable, passed as
+     a parameter.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">copy(v:T)-&#x003E;T</span>:  copies  the  content  of  a  <span 
+class="cmtt-10x-x-109">v </span>variable,  passed  as  a
+     parameter.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">eval(f:F,p1:T1,p:T2,...pN:TN)-&#x003E;T</span>: evaluates a function of type <span 
+class="cmtt-10x-x-109">F</span>
+     passed as a reference, passing the parameters <span 
+class="cmtt-10x-x-109">pi </span>and returns the value
+     returned by the evaluated function.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">error(message:String)-&#x003E;Void</span>:  throws  an  error  with  the  given
+     message. Throwing an error will stop the evaluation, unless it is caught
+     by an error-event-triggered rule.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">print(v:T)-&#x003E;Void</span>: writes the textual representation of the passed
+     data on the standard output stream.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">println(v:T)-&#x003E;Void</span>: writes the textual representation of the passed
+     data on the standard output stream, and adds a carriage return at the
+     end of the line.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">read</span><span 
+class="cmtt-10x-x-109">_keyboard()-&#x003E;String</span>: reads a line typed in by the user on the
+     standard input stream and returns it.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">size(Map(K,V))-&#x003E;Int</span>: returns the size of a map, i.e. the number of
+     elements in it.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">time()-&#x003E;Long</span>: returns the current system clock time as a <span 
+class="cmtt-10x-x-109">Long</span>.
+                                                                     
+
+                                                                     
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">to</span><span 
+class="cmtt-10x-x-109">_byte(v:T)-&#x003E;Byte</span>: converts the given variable to a byte value.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">to</span><span 
+class="cmtt-10x-x-109">_double(v:T)-&#x003E;Double</span>:  converts  the  given  variable  to  a  double
+     value.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">to</span><span 
+class="cmtt-10x-x-109">_float(v:T)-&#x003E;Float</span>: converts the given variable to a float value.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">to</span><span 
+class="cmtt-10x-x-109">_int(v:T)-&#x003E;Int</span>: converts the given variable to a integer value.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">to</span><span 
+class="cmtt-10x-x-109">_long(v:T)-&#x003E;Long</span>: converts the given variable to a long value.
+     </li>
+     <li class="itemize"><span 
+class="cmtt-10x-x-109">to</span><span 
+class="cmtt-10x-x-109">_string(v:T)-&#x003E;String</span>:  converts  the  given  variable  to  a  string
+     value.</li></ul>
+<!--l. 742--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.7   </span> <a 
+ id="x16-200004.2.7"></a>Bindings to Java objects</h5>
+<!--l. 744--><p class="noindent" >INI only provides a minimal set of built-in functions. For all other functions, one
+can bind new functions to Java APIs. Thus, to use Java objects from INI the
+programmers just need to define bindings from INI functions to Java
+constructors, methods or fields. The binding syntax is the following:
+                                                                     
+
+                                                                     
+   <div class="verbatim" id="verbatim-6">
+&#x003C;name&#x003E;(&#x003C;types&#x003E;)&#x00A0;-&#x003E;&#x00A0;&#x003C;type&#x003E;&#x00A0;=&#x003E;&#x00A0;"string1",&#x00A0;"string2"
+</div>
+<!--l. 748--><p class="nopar" >
+<!--l. 750--><p class="indent" >   This binding declares a new function named <span 
+class="cmtt-10x-x-109">&#x003C;name&#x003E;</span>, that takes parameters
+typed with the given coma-separated type list (<span 
+class="cmtt-10x-x-109">&#x003C;types&#x003E;</span>) and returns a typed
+result. The corresponding Java element that will be used when invoking the
+function is defined thanks to the two strings following the <span 
+class="cmtt-10x-x-109">=&#x003E; </span>binding operator,
+where <span 
+class="cmtt-10x-x-109">string1 </span>is the target Java class fully-qualified name, and where <span 
+class="cmtt-10x-x-109">string2</span>
+is one of the following:
+     <ul class="itemize1">
+     <li class="itemize">the target field name (belonging to the class),
+     </li>
+     <li class="itemize">the target method name (belonging to the class) followed by &#8221;(..)&#8221; to
+     indicate that it is a method (and not a field),
+     </li>
+     <li class="itemize">&#8221;new(..)&#8221; to indicate that the target is a constructor of the class.</li></ul>
+<!--l. 758--><p class="indent" >   It is not needed to specify if the Java method or field is static, since INI will
+determine it automatically depending on the parameter types of the function.
+Non-static members will require to pass an instance of the type of the target
+class as the first parameter.
+<!--l. 760--><p class="indent" >   For instance, the following code defines two bound functions to call the
+classical <span 
+class="cmtt-10x-x-109">System.out.println(..) </span>method in Java. The <span 
+class="cmtt-10x-x-109">out() </span>function binds to
+the static <span 
+class="cmtt-10x-x-109">System.out </span>field, and the <span 
+class="cmtt-10x-x-109">java</span><span 
+class="cmtt-10x-x-109">_println() </span>function binds to the
+<span 
+class="cmtt-10x-x-109">Writer.println(String) </span>non-static method.
+                                                                     
+
+                                                                     
+   <div class="verbatim" id="verbatim-7">
+out()-&#x003E;Writer&#x00A0;=&#x003E;&#x00A0;"java.lang.System",&#x00A0;"out"
+&#x00A0;<br />java_println(Writer,String)-&#x003E;Void&#x00A0;=&#x003E;&#x00A0;"java.io.Writer",&#x00A0;"println(..)"
+</div>
+<!--l. 766--><p class="nopar" >
+<!--l. 768--><p class="indent" >   Programmers can then invoke both functions, which are well-typed thanks to
+the binding declarations.
+                                                                     
+
+                                                                     
+   <div class="verbatim" id="verbatim-8">
+java_println(out(),"hello&#x00A0;Java")
+</div>
+<!--l. 772--><p class="nopar" >
+                                                                     
+
+                                                                     
+   <!--l. 774--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu9.html" >next</a>] [<a 
+href="ini_manualsu7.html" >prev</a>] [<a 
+href="ini_manualsu7.html#tailini_manualsu7.html" >prev-tail</a>] [<a 
+href="ini_manualsu8.html" >front</a>] [<a 
+href="ini_manualse4.html#ini_manualsu8.html" >up</a>] </p></div>
+<!--l. 774--><p class="indent" >   <a 
+ id="tailini_manualsu8.html"></a>   
+</body></html> 

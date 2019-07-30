@@ -1,0 +1,654 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Installing INI</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 64--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu2.html" >next</a>] [<a 
+href="#tailini_manualsu1.html">tail</a>] [<a 
+href="ini_manualse2.html#ini_manualsu1.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">2.1   </span> <a 
+ id="x7-40002.1"></a>Installing INI</h4>
+<!--l. 66--><p class="noindent" >The current implementation of INI is an interpreter written in pure Java, which
+means that INI is easy to install and run on any platform that supports the
+latest Java version. To install INI, simply unzip the downloadable distribution
+and add <span 
+class="cmtt-10x-x-109">&#x003C;target-dir&#x003E;/ini/bin </span>to your path. Then type in the <span 
+class="cmtt-10x-x-109">ini </span>command
+on UNIX-based OS or <span 
+class="cmtt-10x-x-109">ini.bat </span>on Windows. If INI does not start, make sure
+that you have the execution rights on <span 
+class="cmtt-10x-x-109">&#x003C;target-dir&#x003E;/ini/bin/ini</span>, and that a
+recent Java version is properly installed (type in java &#8211;version in a console to
+check the version out). If INI is installed, it will produce the following
+output:
+   <!--l. 68-->
+   <div class="lstlisting" id="listing-2"><span class="label"><a 
+ id="x7-4001r1"></a></span><span 
+class="cmr-8">Error</span><span 
+class="cmr-8">:</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">Parameter</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#8217;</span><span 
+class="cmr-8">file</span><span 
+class="cmr-8">&#8217;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">is</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">required</span><span 
+class="cmr-8">.</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4002r2"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4003r3"></a></span><span 
+class="cmr-8">Usage</span><span 
+class="cmr-8">:</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">ini</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">v</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">version</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">a</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">pretty</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">print</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">ast</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">p</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">parse</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">only</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4004r4"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">d</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">debug</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">h</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">help</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4005r5"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[(</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">b</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">breakpoint</span><span 
+class="cmr-8">)</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">breakpoint1</span><span 
+class="cmr-8">,</span><span 
+class="cmr-8">breakpoint2</span><span 
+class="cmr-8">,...,</span><span 
+class="cmr-8">breakpointN</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4006r6"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[(</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">w</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">watch</span><span 
+class="cmr-8">)</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">watch1</span><span 
+class="cmr-8">,</span><span 
+class="cmr-8">watch2</span><span 
+class="cmr-8">,...,</span><span 
+class="cmr-8">watchN</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4007r7"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmmi-8">&#x003C;</span><span 
+class="cmr-8">file</span><span 
+class="cmmi-8">&#x003E;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmr-8">parameters1</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">parameters2</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">...</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">parametersN</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4008r8"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4009r9"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">v</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">version</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4010r10"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">Print</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">the</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">INI</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">version</span><span 
+class="cmr-8">.</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4011r11"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4012r12"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">a</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">pretty</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">print</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">ast</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4013r13"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">Pretty</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">print</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">the</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">parsed</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">program</span><span 
+class="cmr-8">.</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4014r14"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4015r15"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">p</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">parse</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">only</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4016r16"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">Only</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">parse</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">the</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">program</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">without</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">executing</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">it</span><span 
+class="cmr-8">.</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4017r17"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4018r18"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">d</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">debug</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4019r19"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">Execute</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">the</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">program</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">in</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">debug</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">mode</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">step</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">through</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">the</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">program</span><span 
+class="cmr-8">.</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4020r20"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4021r21"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">h</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">help</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4022r22"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">Print</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">this</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">usage</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">message</span><span 
+class="cmr-8">.</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4023r23"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4024r24"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[(</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">b</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">breakpoint</span><span 
+class="cmr-8">)</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">breakpoint1</span><span 
+class="cmr-8">,</span><span 
+class="cmr-8">breakpoint2</span><span 
+class="cmr-8">,...,</span><span 
+class="cmr-8">breakpointN</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4025r25"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">Install</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">breakpoints</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">on</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">the</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">program</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">when</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">run</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">in</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">debug</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">mode</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4026r26"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">(</span><span 
+class="cmr-8">ignored</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">when</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">not</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">in</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">debug</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">mode</span><span 
+class="cmr-8">).</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4027r27"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4028r28"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[(</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">w</span><span 
+class="cmsy-8">|</span><span 
+class="cmsy-8">-</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">watch</span><span 
+class="cmr-8">)</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">watch1</span><span 
+class="cmr-8">,</span><span 
+class="cmr-8">watch2</span><span 
+class="cmr-8">,...,</span><span 
+class="cmr-8">watchN</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4029r29"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">Defines</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">variables</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">to</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">be</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">watched</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">during</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">debug</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">(</span><span 
+class="cmr-8">ignored</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">when</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4030r30"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">not</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">in</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">debug</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">mode</span><span 
+class="cmr-8">).</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4031r31"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4032r32"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmmi-8">&#x003C;</span><span 
+class="cmr-8">file</span><span 
+class="cmmi-8">&#x003E;</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4033r33"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">The</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">INI</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">file</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">that</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">must</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">be</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">parsed</span><span 
+class="cmr-8">/</span><span 
+class="cmr-8">executed</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmsy-8">-</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">must</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">contain</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">a</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4034r34"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">main</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">function</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">to</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">be</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">executed</span><span 
+class="cmr-8">.</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4035r35"></a></span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4036r36"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">[</span><span 
+class="cmr-8">parameters1</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">parameters2</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">...</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">parametersN</span><span 
+class="cmr-8">]</span><span 
+class="cmr-8">&#x00A0;</span><br /><span class="label"><a 
+ id="x7-4037r37"></a></span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">The</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">parameters</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">to</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">be</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">passed</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">to</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">the</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">main</span><span 
+class="cmr-8">&#x00A0;</span><span 
+class="cmr-8">function</span><span 
+class="cmr-8">.</span>
+   
+   </div>
+<!--l. 108--><p class="indent" >   As you can see, you must provide an INI source file to be executed. Note that
+this source file must contain a <span 
+class="cmtt-10x-x-109">main </span>method that will be used as an entry point to
+the program. We will now guide you through the writing of your first INI
+program.
+                                                                     
+
+                                                                     
+   <!--l. 110--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu2.html" >next</a>] [<a 
+href="ini_manualsu1.html" >front</a>] [<a 
+href="ini_manualse2.html#ini_manualsu1.html" >up</a>] </p></div>
+<!--l. 110--><p class="indent" >   <a 
+ id="tailini_manualsu1.html"></a>  
+</body></html> 

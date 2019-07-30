@@ -1,0 +1,379 @@
+
+%%%%%%%%%%%%%%%%%%%%%%% file vader2011.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is the LaTeX source for the instructions to authors using
+% the LaTeX document class 'llncs.cls' for contributions to
+% the Lecture Notes in Computer Sciences series.
+% http://www.springer.com/lncs       Springer Heidelberg 2006/05/04
+%
+% It may be used as a template for your own input - copy it
+% to a new file with a new name and use it as the basis
+% for your article.
+%
+% NB: the document class 'llncs' has its own and detailed documentation, see
+% ftp://ftp.springer.de/data/pubftp/pub/tex/latex/llncs/latex2e/llncsdoc.pdf
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[runningheads,a4paper]{llncs}
+
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+% This is the "centered" symbol
+\def\fCenter{{\mbox{\Large$\rightarrow$}}}
+\definecolor{LightGrey}{rgb}{0.9,0.9,0.9}
+%\lstset{numbers=left, numberstyle=\tiny, numbersep=2pt, basicstyle=\ttfamily\footnotesize, tabsize=2, backgroundcolor=\color{LightGrey}}
+\lstset{numbers=left, numberstyle=\tiny, numbersep=2pt, basicstyle=\ttfamily\footnotesize, language=Java, tabsize=2, backgroundcolor=\color{LightGrey}}
+\usepackage{url}
+\urldef{\mailsa}\path|{le-truong.giang, olivier.hermant,|
+\urldef{\mailsb}\path|matthieu.manceny, renaud.pawlak}@isep.fr|
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+\begin{document}
+
+\mainmatter  % start of an individual contribution
+
+% first the title is needed
+\title{Dynamic Adaptation through Event Reconfiguration}
+
+% a short form should be given in case it is too long for the running head
+\titlerunning{Dynamic Adaptation through Event Reconfiguration}
+
+% the name(s) of the author(s) follow(s) next
+%
+% NB: Chinese authors should write their first names(s) in front of
+% their surnames. This ensures that the names appear correctly in
+% the running heads and the author index.
+%
+\author{Le Truong Giang
+, Olivier Hermant
+\\ Matthieu Manceny and Renaud Pawlak}
+%
+\authorrunning{}
+% (feature abused for this document to repeat the title also on left hand pages)
+
+% the affiliations are given next; don't give your e-mail address
+% unless you accept that it will be published
+\institute{LISITE - ISEP, 28 rue Notre-Dame des Champs,\\
+75006 Paris, France\\
+\mailsa\\
+\mailsb\\
+}
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+%\toctitle{Dynamic adaptation through event reconfiguration}
+%\tocauthor{Authors' Instructions}
+\maketitle
+
+
+\begin{abstract}
+\emph{
+We introduce a new programming language called INI, which eases the development of self-adaptive software. INI combines both rule-based and event-based programming paradigms, by allowing the definitions of rules that can be triggered by events. Besides reacting to existing events, INI programmers can also write their own support for new events in Java or in C. Since events in INI are asynchronous, the programming model is inherently multithreaded, which implies that INI provides a simple but convenient language-level support for synchronization. Besides synchronization support, the key point with INI events is that they come with a configuration layer, which is set up through input parameters passed to the events when created. Additionally, events can be stopped, reconfigured, and restarted at runtime by the program itself. Ultimately, this re-configuration can be triggered by other events, thus allowing the program to adapt to new operational environments.
+}
+\keywords{Adaptive systems, rule-based programming, event-based programming, reconfiguration}
+\end{abstract}
+
+
+\section{Introduction}
+The role of software in our society has become more and more important and to satisfy higher demands from customers, software systems must become more versatile, flexible, resilient, dependable, robust, energy-eficient, recoverable, customizable, configurable, and self-optimizing \cite{Cheng2009}. However, developing and maintaining software systems is hard and resource-consuming because they are operating in an environment that is not well defined or predictable. Consequently, software systems need a new and innovative approach for evolving and running. One of the most promising approaches to achieve such properties is to equip software systems with self-adaptation and self-management mechanisms \cite{Muller2009}.
+
+In recent years, with the development of autonomic computing, software engineering researcher has been motivated to pay more attention to design and develop self-adaptive software systems. The most important difference between traditional software and adaptive software is related to the assumption of dynamic environment \cite{Yoo2007}. Most self-adaptive software use rules explicitly or implicitly to decide how to react to monitored events happening during execution~\cite{Wang2005}. Therefore, one of the current research trends is to develop a programming language to easily express and capture those changes so that the systems can modify their behavior at runtime. In this paper, we introduce a new programming language called INI, which we designed to assess rule-based and event-based oriented programming. In INI, we allow programmers to define events, which need to be captured and monitored. Events are usually executed asynchronously but can synchronize on other events with intuitive language constructs. Moreover, events can be reconfigured at runtime through a well-defined reconfiguration mechanism. As a result, when something happens during execution, INI program can capture and adapt to these changes automatically by reconfiguring its events.
+
+The rest of this paper is organized as follows. In Section \ref{sec:Related work}, we give an overview of related work. In Section \ref{sec:INI}, we discuss events in INI, including its syntax, built-in events and user-defined events. Events synchronization and reconfiguration are shown in Section \ref{sec:SyncAndReconf}. In this section, we also demonstrate the capabilities of INI in handling variabilities in the operational environment with a small example. Finally, some conclusions and future work are presented in Section \ref{sec:Conclusion}.
+
+\section{Related work}\label{sec:Related work}
+
+A general overview of research and problems on self-adaptive software can be found in \cite{Laddaga2006,Salehie2009}. The key aspect of self-adaptive software is that code behavior is evaluated or tested at runtime, which may lead to a run-time change in behavior~\cite{Laddaga2006}. As a result, the run-time code should contain the following mechanisms:
+\begin{itemize}
+\item A mechanism to detect changes during execution
+\item A mechanism to switch algorithms and operations due to these above changes
+\end{itemize}
+
+Laddaga \cite{Laddaga2006} discussed two useful paradigms for utilizing self-adaptive software. One of these is the planning paradigm, and the other is the control paradigm. In \cite{Wang2005}, Wang proposed a Rule Model for self-adaptive software, which includes three key concepts (event, parameter, and rule). In Wang's paper, rules were used to adjust software's behavior at runtime.
+Psaier \emph{et al.} \cite{Psaier2010} presented a middleware for programming and adapting complex service-oriented systems. Their approach was based on monitoring and real-time intervention to regulate interactions based on behavior policies.
+
+%Yoo \emph{et al.} \cite{Yoo2007} presented an adaptive software framework based on service composition. Their framework uses broker to composite services and blackboard architecture to share and change rules. Cervantes \emph{et al.} \cite{Cervantes2004} described a service-oriented component model for autonomous adaptation to dynamic availability. In this component model, the execution environment manages an application that is described as an abstract composition that can adapt and evolve at run time depending on available functionality.
+
+Cheng \emph{et al.} \cite{Cheng2006} introduced a new language of adaptation, which ultimate aim is to automate human tasks in system management to achieve high-level stakeholder objectives. They claimed that such a language is expressive enough to describe human expertise and the flexibility and robustness to capture complex and potentially dynamic preferences.
+
+In our work, we develop INI by combining both rule-based and event-based programming styles. INI takes inspirations from existing rule-based languages~\cite{Cirstea2009}, and event-based programming as described above through event-triggered rules. With rule-based programming, an action is executed only if its guard is evaluated to true in the context of the function. With event-based programming, we allow programmers to write their own events to capture and monitor changes happening during execution. Moreover, we fully support events synchronization and reconfiguration. Although several event-based programming languages have been proposed so far~\cite{Fischer2007,Kamina2011}, their support for writing self-adaptive software are limited. To our knowledge, no languages support event reconfiguration at runtime. The key feature of INI compared to all the languages we have studied is that events are dynamically reconfigurable. This feature allows INI programs to automatically reconfigure themselves to adapt to changes in the environment.
+
+\section{Programming with INI} \label{sec:INI}
+
+The current INI implementation is implemented in Java and runs on Java but its syntax and semantics are not Java's. All functions are written with rules in combination with event expressions. Each rule is defined explicitly with a guard and an action. The action will be executed only if the guard is evaluated to true in the context of the function. In other words, the guard triggers the evaluation of the action. Along with rules, programmers can use events in INI to capture changes when their programs are running. In this paper, we focus on event-triggered rules since we use them as the main mechanism for self-adaptation.
+
+\subsection{Events in INI} \label{sec:overviewEvent}
+
+\vspace{-10pt}
+
+\begin{table}[h]
+\centering
+\begin{tabular} {|l|l|l|}
+\hline
+\textbf{Built-in event kind} & \textbf{Meaning}\\
+\hline
+\texttt{@init()} & The \texttt{@init} event is invoked when the function\\
+~ & starts evaluating.\\
+\hline
+\texttt{@end()} & On the contrary to the \texttt{@init} event, the \texttt{@end} event\\
+~ & is triggered when no more event can be applied and\\
+~ & when the function is about to return.\\
+\hline
+\texttt{@every[time:Integer]()} & The \texttt{@every} event occurs periodically as specified by\\
+~ & its input parameter (in milliseconds).\\
+\hline
+\texttt{@update[variable:T]} & The \texttt{@update} event is invoked when a specific\\
+\texttt{(oldValue:T,newValue:T)} & variable is changed during execution (e.g., by one of\\
+~ & the evaluated events).\\
+\hline
+\end{tabular}
+\\~
+\caption{Some built-in events in INI}
+\label{tab:Events}
+\end{table}
+
+\vspace{-20pt}
+
+An event is defined as something happening during the execution of the program, which should be monitored and handled. In INI, events start with \texttt{@}, have a kind, and can take parameters. Optionally, an event can also be bound to an id, so that other parts of the program can refer to it. There are two kinds of parameters that can be used with events. The first one is input parameters, which can be understood as configuration parameters to tune the event execution. The second one is output parameters, which are some data or results we may need to monitor. These parameters may be optional. Syntactically, each event-driven rule is written as:
+
+\begin{lstlisting}[numbers=none]
+id:@eventKind[inputParam1=value1, inputParam2=value2, ...]
+             (outputParam1, outputParam2, ...) {
+     <statements>
+}
+\end{lstlisting}
+
+To allow programmers to write code more easily and conveniently, INI comes with some common built-in event kinds such as \texttt{@init}, \texttt{@end}, \texttt{@every}, \texttt{@update}. The meanings of these events are given in Table \ref{tab:Events}. For example, the following code creates an \texttt{@every} event-driven rule called \texttt{e}, which increments \texttt{v} every second. The \texttt{@update} event-driven rule \texttt{u} triggers the action (event handler) that prints out the \texttt{v} variable value when it changes, i.e. every second.
+
+\begin{lstlisting}[numbers=none]
+e: @every[time=1000]() { v = v + 1 }
+u: @update[variable=v](oldv, newv) { println("v=" + newv) }
+\end{lstlisting}
+
+Beyond to built-in events, we also allow programmers to write their own event kinds in Java or in C and integrate them into an INI program as explained in the next section.
+
+%%\vspace{-40pt}
+
+\subsection{Example}
+
+In this section, we discuss a sample INI program, written in an event-driven style. In our example, we use a video camera to detect the movement of a ball, get its positions in space periodically, and save them into a CSV file.
+
+To do so, we first need to define a new event kind to detect the ball and send its position to the program when detected. Our event has one input parameter called \texttt{frequency}. This parameter is applied to set how long the event should sleep between two image detections (time unit is in milliseconds). Besides, we have three output parameters \texttt{(r,x,y)}, which are the current radius and coordinates of the detected ball in the captured image. In Java, we need to subclass the \texttt{ini.event.Event} class to define the behavior of our new event as shown in the code below.
+
+%\begin{figure}[h!]
+\begin{lstlisting}
+public class BallDetection extends ini.event.Event {
+  Thread ballDetectionThread;
+  @Override public void eval(final IniEval eval) {
+    (ballDetectionThread = new Thread() {
+      @Override public void run() {
+        ...
+        do {
+          try {
+            // Sleep as long as the configuration indicates
+            sleep(getInContext().get("frequency")
+              .getNumber().longValue());
+            // Use OpenCV to detect the ball
+              ...
+            // Write data to output parameters
+            variables.put(outParameters.get(0), r);
+            variables.put(outParameters.get(1), x);
+            variables.put(outParameters.get(2), y);
+            // Execute the event action
+            execute(eval,variables);
+          } catch (Exception e) {...}
+        } while (!checkTerminated());	
+      }
+    }).start();
+  }
+  @Override public void terminate() {...}
+}
+\end{lstlisting}
+%\centering
+%  \caption{Writing user-defined event in Java for INI}
+%  \label{fig:userdefinedEvent}
+%\end{figure}
+
+In the \texttt{BallDetection} class, the method \texttt{eval} will be upcalled by the INI evaluator when the program uses our event. It creates a thread that sleeps accordingly to the event configuration (line 10), detects the ball using the OpenCV library (line 13) \cite{OpenCV} and write the results in output parameters to be passed to the INI program (lines 15-17). The event-triggered action is executed at line 19 using the \texttt{execute} method provided by the API, which by default runs asynchronously. Finally, the method \texttt{terminate} is overridden to stop the event-driven rule: INI upcalls this method when the program exits or forces the rule to shutdown. To understand more about built-in events in INI and how to write user-defined events, interested readers may refer to INI Language Reference Documentation~\cite{INI}.
+
+\vspace{-10pt}
+
+\begin{figure}[!h]
+\begin{lstlisting}
+import "lib_io.ini"
+@ballDetection[frequency:Integer](Float, Integer, Integer)
+  => "ini.ext.events.BallDetection"
+function main() {
+  @init() { f = file("ballData.csv") }
+  // Use our event get notified for ball detection
+  @ballDetection[frequency = 1](r,x,y){
+    case {
+      !file_exists(f) {
+        // Create a new CSV file to store data
+        create_file(f)
+        fprint(f, "Time, r, x, y \r\n")
+      }
+    }
+    fprint(f,""+time()+","+r +","+x+","+y+"\r\n")
+  }
+}
+\end{lstlisting}
+\centering
+  \caption{A sample INI program with event-driven style}
+  \label{fig:sample}
+\end{figure}
+
+\vspace{-10pt}
+
+In Figure \ref{fig:sample}, we then write the actual INI program, which binds our Java user-defined to the \texttt{@ballDetection} event kind (lines 2-3). In the \texttt{@init} event, we define a variable \texttt{f}, which indicates the CSV file we want to store data in after collecting the ball positions over time. In our program, the \texttt{@ballDetection} event is triggered periodically, i.e. each millisecond. If a ball is detected, we check whether the CSV file exists or not (line 9). If the file does not exist, we create a new one and write the header. Finally, we write the data to the file (line 15), including the time when the ball was detected and its position.
+
+\section{Events synchronization and reconfiguration} \label{sec:SyncAndReconf}
+
+The event reconfiguration mechanism is developed in INI so that we can modify the input parameters (configuration) of the event-triggered rules at runtime. For example, an event can be notified for a change in the environment and decide to reconfigure another event to adapt the program to the new environment. However, to achieve safe reconfiguration, synchronization among events is also essential. In this section, we first explain event synchronization, and then discuss event reconfiguration, which we illustrate using our ball-detection example.
+
+\subsection{Events synchronization}
+
+Except for the \texttt{@init} and \texttt{@end} events, most INI events are executed asynchronously by default. From an implementation perspective, it means that each event handler runs in its own thread, potentially simultaneously to other events. In many cases, a given event may want to synchronize to other events, for instance to ensure that a shared variable accessed both for reading and writing has a consistent state, or also to ensure that all event threads have terminated before reconfiguring the associated event-triggered rule. Thus, INI provides a specific language construct: the symbol \texttt{\$} along with the list of identifiers of target events with which we want to synchronize. In INI, synchronizing with target events means that the synchronizing event must wait for all the target event threads to be terminated before running. For example, the following code ensures that the event \texttt{e0} synchronizes \texttt{N} target events.
+
+\begin{lstlisting}[numbers=none]
+$(e1,e2,...,eN) e0:@eventKind[...](...) { <statements> }
+\end{lstlisting}
+
+Note that one of the target events can also be synchronized with \texttt{e0}. Cross-synchroni\-zation of events means that their executions are mutually exclusive. We now precisely define the semantics of synchronization in INI.
+
+To implement synchronization in INI, we use one lock and one $count$ variable associated with each event. The lock is an instance of \texttt{java.util.concurrent. locks.ReentrantLock} and is used to avoid concurrent execution when required. We use the functions \texttt{lock} (blocking),  \texttt{tryLock} (non-blocking and returns true of false depending on whether the locking was successful or not), and  \texttt{unlock}. For more details, refer to the Java document of the methods of the same names in the \texttt{ReentrantLock} class~\cite{Java6Doc}. The $count$ variable holds the number of threads currently executing for the associated event. We use the following notation: for an event \begin{math} e_i \end{math}, \begin{math} l_{i} \end{math} is its associated lock and \begin{math} count_i \end{math} its associated thread counting variable.
+
+\begin{algorithm}[h!]
+\caption{Our algorithm to execute $e_0$ synchronized with ($e_1, e_2, ... e_n$)}
+\begin{algorithmic}[1]
+\REPEAT
+%\STATE \COMMENT{Lock $l_0$ and try to lock all the events $e_0$ is synchronized on}
+\STATE $allLocked := true$
+\STATE $lock(l_{0})$
+\FOR {$i := 1$ \textbf{to} $N$ \textbf{step} $1$}
+\IF{$\neg$ $tryLock(l_{i})$}
+%\STATE \COMMENT{$l_i$ is already locked $\Rightarrow$ unlock all and retry}
+\STATE $allLocked := false$
+\FOR {$i := 1$ \textbf{to} $i-1$ \textbf{step} $1$}
+\STATE $unlock(l_{j})$
+\ENDFOR
+\STATE $unlock(l_{0})$
+%\STATE \COMMENT{Sleep between 1 and 5 milliseconds before retry}
+\STATE $sleep(randomBetween(1,5))$
+\STATE \textbf{break}
+\ENDIF
+\ENDFOR
+\UNTIL $\neg allLocked$
+%\STATE \COMMENT{Wait until all the events are terminated}
+\FOR {$i := 1$ \textbf{to} $N$ \textbf{step} $1$}
+\STATE \textbf{wait-until} $count_{i}=0$
+\ENDFOR
+\STATE $count_{0} := count_{0}+1$
+%\STATE \COMMENT{Release the locks for all events}
+\FOR {$i := 1$ \textbf{to} $N$ \textbf{step} $1$}
+\STATE $unlock(l_{i})$
+\ENDFOR
+\STATE $unlock(l_{0})$
+%\STATE \COMMENT{Actually execute the current event}
+\STATE $eval(e_{0})$
+\STATE $count_{0} := count_{0}-1$
+\end{algorithmic}
+\end{algorithm}
+
+Let (\begin{math} e_{1}, e_{2}, ..., e_{N} \end{math}) be the list of target events with which \begin{math} e_0 \end{math} synchronizes. To execute the event \begin{math} e_0 \end{math} in INI, we apply Algorithm 1, which also applies to any event execution in the INI system. We can see that the execution of events in INI includes four steps. First, \begin{math} e_0 \end{math} locks its own lock and tries to lock all target events (lines 1-15). When all events are locked, the event \begin{math} e_0 \end{math} needs to wait until all other events are terminated (lines 16-18). The \texttt{wait-until} mechanism in our algorithm is currently implemented with Java monitors and thread notification. Next, the number of threads executing for event \begin{math} e_0 \end{math} is incremented and locks for all events are released (lines 19-23). Finally, the event can be actually evaluated and when it is terminated, the number of running threads for it is decremented (lines 24-25).
+
+\subsection{Example using synchronization}
+
+Let us take again our example shown in Figure \ref{fig:sample}. Assuming that after we collect data about positions of a ball in space, we need to upload the CSV file to an FTP server. To do this, we create a new \texttt{@every} event as shown in Figure \ref{fig:upload}. Inside this event, first, we compress data and then upload the compressed file. Since we collect data periodically, we use a timestamp (line 4) to distinguish data at different time.
+\begin{figure}[h]
+\begin{lstlisting}
+  ...
+  // Compress and upload the collected data to an FTP server
+  @every[time = 5000](){
+    t = time()
+    zip(file_name(f), "" + t + "ballData.zip")
+    upload_ftp("ftp_address", "user_name", "password", "" + t
+      + "ballData.zip", "" + t + "uploadedBallData.zip")
+  }
+\end{lstlisting}
+\centering
+  \caption{An event used to upload collected data}
+  \label{fig:upload}
+\end{figure}
+
+By default, the two events \texttt{@ballDetection} and \texttt{@every} will be executed asynchronously. However, it is essential that when we collect data (\texttt{@ballDetec\-tion}), the uploading process (\texttt{@every}) should not happen and vice versa. In other words, these two events need to be mutually exclusive. To ensure this, the programmer needs to modify the program at lines 7 of Figure~\ref{fig:sample} and 3 of Figure~\ref{fig:upload} by naming the two events and use their identifiers to cross-synchronize them, as it is shown in the following code:
+
+\begin{lstlisting}[numbers=none]
+$(e) b:@ballDetection[frequency = 1](r,x,y) { ...
+$(b) e:@every[time = 5000](){ ...
+\end{lstlisting}
+
+\subsection{Event reconfiguration}
+
+In this section, we will demonstrate the capabilities of INI in handling changes happening in the environment though the event-reconfiguration mechanism. Event reconfiguration consists of changing the values of the event-triggered rule input parameters. Programmers can call the built-in function \texttt{reconfigure(eventId, [inputParam1=value1, inputParam2=value2,...])} to reconfigure their events. Moreover, we also allow programmers to stop and restart events with the built-in functions \texttt{stop\_event(eventId)} and \texttt{restart\_event(eventId)}. Typically, it is required to stop an event before reconfiguring it.
+
+Let us now consider that our ball-detection example of Section \ref{sec:INI} runs in an embedded environment where the power is supplied by a battery. One way to take into account this new constraint is to adapt the data-collection frequency to the power level. First, we add a new user-defined event kind called \texttt{@powerAlarm}, which notifies the program each time the power level passes a given threshold both ways, when charging or discharging. This event has one input parameter named \texttt{threshold}, and one output parameter named \texttt{currentLevel}, which tells us if the level is currently lower or greater than the threshold. When the program below is running, if it detects that the power-level is lower than 50\% (configured line 1), it stops the event \texttt{b:@ballDetection} (line 4), then changes the value of its input parameter (i.e., \texttt{frequency}) to 1000 (line 5), and finally restarts it  (line 6). Conversely, if the power goes over the threshold the value for the parameter \texttt{frequency} is set again to 1 (lines 8 - 10). The event \texttt{@powerAlarm} is synchronized with events \texttt{b:@ballDetection} and \texttt{e:@every} as specified by \texttt{\$(b,e)} at line~1 in order to avoid unfinished detection or upload jobs to be stopped.
+
+%\begin{figure}[h!]
+\begin{lstlisting}
+  ...
+  // Adapt the ball detection frequency at the 50% threshold
+  $(b,e) a:@alarmPower[threshold = 0.5](currentLevel) {
+    case {
+      currentLevel < threshold {
+        stop_event(b)
+        reconfigure(b, [frequency = 1000])
+        restart_event(b)
+      } default {
+        stop_event(b)
+        reconfigure(b, [frequency = 1])
+        restart_event(b)
+      }
+    }
+  }
+  \end{lstlisting}
+%  \centering
+%  \caption{An event to reconfigure other events when the power is half down/up}
+%  \label{fig:powerAlarm}
+%\end{figure}
+
+Finally in the following code, we show how to add an event-triggered rule that stops all other events when the threshold goes below 10\%.
+
+%\begin{figure}[h!]
+\begin{lstlisting}
+  $(b,e) @alarmPower[threshold = 0.1](currentLevel) {
+    case {
+      currentLevel < threshold { stop_events([b, e, a]) }
+      default { restart_events([b, e, a]) }
+    }
+  }
+\end{lstlisting}
+%\centering
+%  \caption{An event used to stop all events when the power of our system is drained}
+%  \label{fig:urgentCase}
+%\end{figure}
+
+\section{Conclusion and future work}\label{sec:Conclusion}
+
+In this paper, we introduced a new language called INI, which can be used to write self-adaptive software through events synchronization and reconfiguration mechanisms. Programs written in INI may dynamically change their behavior or improve their operation depending on dynamic operational conditions of the environment. With the example that we used along the paper to demonstrate the capabilities of INI, we can see that using INI to write new event-driven rules does not require too much effort. The programmers can capture the changes during execution by writing their own user-defined events and then define suitable actions inside them. The changes necessary to take into account new constraints can thus be localized and encapsulated within some rules, which implies code maintainability and robustness with regard to changes.
+
+For future work, we will improve INI so that it can handle changes in environment more efficiently. For example, as stated in \cite{Cheng2006}, we need a mechanism to handle failure during adaptation execution. If a failure happens when our systems try to adapt to the environment, it is essential to recover from that failure. Besides, we will define formal semantics for validating and verifying useful properties of INI programs and prove the soundness of its type system. Moreover, we also have a plan to perform more case studies to evaluate the capabilities of INI.
+\bibliographystyle{splncs03} % expects file "splncs03.bst"
+\bibliography{mybib} % expects file "mybif.bib"
+
+%\begin{thebibliography}{4}
+
+%\end{thebibliography}
+\end{document}

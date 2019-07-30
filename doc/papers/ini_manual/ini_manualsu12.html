@@ -1,0 +1,1023 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>User-defined types</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 1013--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu13.html" >next</a>] [<a 
+href="ini_manualsu11.html" >prev</a>] [<a 
+href="ini_manualsu11.html#tailini_manualsu11.html" >prev-tail</a>] [<a 
+href="#tailini_manualsu12.html">tail</a>] [<a 
+href="ini_manualse4.html#ini_manualsu12.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">4.6   </span> <a 
+ id="x20-380004.6"></a>User-defined types</h4>
+<!--l. 1015--><p class="noindent" >A user-defined type is a way for the programmer to define complex structures.
+Structures contains values stored in named fields, which need to be explicitly
+typed when defined by the programmer. Section [...] gives an example that uses
+types.
+<!--l. 1017--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.6.1   </span> <a 
+ id="x20-390004.6.1"></a>Simple structured types</h5>
+<!--l. 1019--><p class="noindent" >To define a new type, the programmer uses the <span 
+class="cmtt-10x-x-109">type </span>keyword and sets a name
+that must be unique, and a set of typed field. Note that in INI, type name must
+start with an uppercased letter. For example, to define a <span 
+class="cmtt-10x-x-109">Person </span>type that has a
+name and an age, one may want to write:
+   <!--l. 1021-->
+   <div class="lstlisting" id="listing-39"><span class="label"><a 
+ id="x20-39001r1"></a></span>type&#x00A0;Person&#x00A0;=&#x00A0;[name:String,&#x00A0;age:Int]
+   
+   </div>
+<!--l. 1025--><p class="indent" >   To use a type, the programmer must instantiate the type using one of its
+constructor. For a simple type, there is only one constructor named by the
+name of the type. So, for constructing a new person and store it in a <span 
+class="cmtt-10x-x-109">p</span>
+variable:
+   <!--l. 1027-->
+   <div class="lstlisting" id="listing-40"><span class="label"><a 
+ id="x20-39002r1"></a></span>p&#x00A0;=&#x00A0;Person[name=&#8221;Renaud&#8221;,&#x00A0;age=37]
+   
+   </div>
+<!--l. 1031--><p class="indent" >   Later on, the program can access the object&#8217;s fields using the dotted
+notation:
+   <!--l. 1033-->
+   <div class="lstlisting" id="listing-41"><span class="label"><a 
+ id="x20-39003r1"></a></span>println(&#8221;&#8221;+p.name+&#8221;&#x00A0;is&#x00A0;&#8221;+p.age)
+   
+                                                                     
+
+                                                                     
+   </div>
+<!--l. 1037--><p class="indent" >   Note that field initialization is not mandatory. For instance, one can construct
+a person with undefined age or name.
+<!--l. 1039--><p class="indent" >   Finally, types can be recursively defined. For instance, one can use the <span 
+class="cmtt-10x-x-109">Person</span>
+type within the <span 
+class="cmtt-10x-x-109">Person </span>type definition itself. For instance, we may want to add
+two fields for the parents of the person:
+   <!--l. 1041-->
+   <div class="lstlisting" id="listing-42"><span class="label"><a 
+ id="x20-39004r1"></a></span>type&#x00A0;Person&#x00A0;=&#x00A0;[name:String,&#x00A0;age:Int,&#x00A0;<br /><span class="label"><a 
+ id="x20-39005r2"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;father:Person,&#x00A0;mother:Person]
+   
+   </div>
+<!--l. 1046--><p class="indent" >   We may even want to add the children, as a person list:
+   <!--l. 1048-->
+   <div class="lstlisting" id="listing-43"><span class="label"><a 
+ id="x20-39006r1"></a></span>type&#x00A0;Person&#x00A0;=&#x00A0;[name:String,&#x00A0;age:Int,&#x00A0;<br /><span class="label"><a 
+ id="x20-39007r2"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;father:Person,&#x00A0;mother:Person,&#x00A0;<br /><span class="label"><a 
+ id="x20-39008r3"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;children:Person<span 
+class="cmsy-10x-x-109">*</span>]
+   
+   </div>
+<!--l. 1054--><p class="indent" >   Note that when using such types, INI checks that the used objects work on
+the right fields with the correct types.
+<!--l. 1056--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.6.2   </span> <a 
+ id="x20-400004.6.2"></a>Algebraic types</h5>
+<!--l. 1058--><p class="noindent" >Algebraic types are an extension of simple structured type that allow the
+definition of types that have different constructors. Algebraic types in INI are not
+actual pure algebraic types since they contain named fields that do not need to
+be initialized. However, they are defined and used in a very similar way, as shown
+in the Fibonacci example of Section [...]. Algebraic types can be related to AST
+(Abstract Syntax Trees) in the sense that they allow the definition of typed trees
+structures.
+<!--l. 1060--><p class="indent" >   For instance, we can define a type for expressions that include typical
+arithmetic operations on floating point numbers.
+   <!--l. 1062-->
+   <div class="lstlisting" id="listing-44"><span class="label"><a 
+ id="x20-40001r1"></a></span>type&#x00A0;Expr&#x00A0;=&#x00A0;Number[value:Float]&#x00A0;<br /><span class="label"><a 
+ id="x20-40002r2"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;Plus[left:Expr,right:Expr]&#x00A0;<br /><span class="label"><a 
+ id="x20-40003r3"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;Mult[left:Expr,right:Expr]&#x00A0;<br /><span class="label"><a 
+ id="x20-40004r4"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;Div[left:Expr,right:Expr]&#x00A0;<br /><span class="label"><a 
+ id="x20-40005r5"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;Minus[left:Expr,right:Expr]&#x00A0;<br /><span class="label"><a 
+ id="x20-40006r6"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;UMinus[operand:Expr]
+   
+   </div>
+<!--l. 1071--><p class="indent" >   Once define, the programmer can instantiate any expression using the
+constructors. For example to instantiate the expression <span 
+class="cmtt-10x-x-109">-(3.0*2.0+1.0)</span>:
+   <!--l. 1073-->
+                                                                     
+
+                                                                     
+   <div class="lstlisting" id="listing-45"><span class="label"><a 
+ id="x20-40007r1"></a><span 
+class="cmr-9">1</span></span>expr&#x00A0;=&#x00A0;UMinus[operand=Plus[&#x00A0;<br /><span class="label"><a 
+ id="x20-40008r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;left=Mult[&#x00A0;<br /><span class="label"><a 
+ id="x20-40009r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;left=Number[value=3.0],&#x00A0;<br /><span class="label"><a 
+ id="x20-40010r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;right=Number[value=2.0]],&#x00A0;<br /><span class="label"><a 
+ id="x20-40011r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;right=Number[value=1.0]]]
+   
+   </div>
+<!--l. 1081--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.6.3   </span> <a 
+ id="x20-410004.6.3"></a>Type set selection expressions</h5>
+<!--l. 1083--><p class="noindent" >In Section <a 
+href="ini_manualsu11.html#x19-370004.5.4">4.5.4<!--tex4ht:ref: subsubsec:setselectionexpressions --></a>, we have seen the set selection expression that allows to select
+values within a set. Each object constructed with a user type constructor is
+automatically part of an instance set, which is named after the constructor name.
+Thus, it is possible to select instances using the set selection construct. For
+example, the following rule raises an error if a number has a undefined
+value:
+   <!--l. 1085-->
+   <div class="lstlisting" id="listing-46"><span class="label"><a 
+ id="x20-41001r1"></a></span>n&#x00A0;of&#x00A0;Number&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;!n.value&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x20-41002r2"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;error(&#8221;invalid&#x00A0;number&#x00A0;value&#8221;)&#x00A0;<br /><span class="label"><a 
+ id="x20-41003r3"></a></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 1091--><p class="indent" >   Note that sets are local to the functions that construct the instances.
+<!--l. 1093--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">4.6.4   </span> <a 
+ id="x20-420004.6.4"></a>Type set match expressions</h5>
+<!--l. 1095--><p class="noindent" >In Section <a 
+href="ini_manualsu9.html#x17-250004.3.4">4.3.4<!--tex4ht:ref: subsubsec:regexp --></a>, we have seen the match operator (<span 
+class="cmsy-10x-x-109">~</span>) for string, which is based
+on regular expressions. The match operator can also be used to match type
+instances. It an be used similarly to the match construction in the CAML
+language. For example, we can use the match operator to implement a basic
+expression printer (see function <span 
+class="cmtt-10x-x-109">expr</span><span 
+class="cmtt-10x-x-109">_str </span>at line 19) and evaluator (function
+<span 
+class="cmtt-10x-x-109">expr</span><span 
+class="cmtt-10x-x-109">_val </span>at line 40).
+   <!--l. 1098-->
+   <div class="lstlisting" id="listing-47"><span class="label"><a 
+ id="x20-42001r1"></a><span 
+class="cmr-9">1</span></span><span 
+class="cmr-9">type</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">=</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Number</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Float</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42002r2"></a><span 
+class="cmr-9">2</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">|</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Plus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42003r3"></a><span 
+class="cmr-9">3</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">|</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Mult</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42004r4"></a><span 
+class="cmr-9">4</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">|</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Div</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42005r5"></a><span 
+class="cmr-9">5</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">|</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Minus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42006r6"></a><span 
+class="cmr-9">6</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">|</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">UMinus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">operand</span><span 
+class="cmr-9">:</span><span 
+class="cmr-9">Expr</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42007r7"></a><span 
+class="cmr-9">7</span></span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42008r8"></a><span 
+class="cmr-9">8</span></span><span 
+class="cmr-9">function</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">main</span><span 
+class="cmr-9">()</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42009r9"></a><span 
+class="cmr-9">9</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">@init</span><span 
+class="cmr-9">()</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42010r10"></a><span 
+class="cmr-9">10</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">=</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">UMinus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">operand</span><span 
+class="cmr-9">=</span><span 
+class="cmr-9">Plus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42011r11"></a><span 
+class="cmr-9">11</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">=</span><span 
+class="cmr-9">Mult</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42012r12"></a><span 
+class="cmr-9">12</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">=</span><span 
+class="cmr-9">Number</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">=3.0],</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42013r13"></a><span 
+class="cmr-9">13</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">=</span><span 
+class="cmr-9">Number</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">=2.0]],</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42014r14"></a><span 
+class="cmr-9">14</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">=</span><span 
+class="cmr-9">Number</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">=1.0]]]</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42015r15"></a><span 
+class="cmr-9">15</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">println</span><span 
+class="cmr-9">(&#8221;</span><span 
+class="cmr-9">The</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">of</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">)+&#8221;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">is</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">))</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42016r16"></a><span 
+class="cmr-9">16</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42017r17"></a><span 
+class="cmr-9">17</span></span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42018r18"></a><span 
+class="cmr-9">18</span></span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42019r19"></a><span 
+class="cmr-9">19</span></span><span 
+class="cmr-9">function</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">)</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42020r20"></a><span 
+class="cmr-9">20</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Number</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42021r21"></a><span 
+class="cmr-9">21</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">to</span><span 
+class="cmr-9">_string</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">)</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42022r22"></a><span 
+class="cmr-9">22</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42023r23"></a><span 
+class="cmr-9">23</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Plus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42024r24"></a><span 
+class="cmr-9">24</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#8221;(&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">)+&#8221;+&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">)+&#8221;)&#8221;</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42025r25"></a><span 
+class="cmr-9">25</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42026r26"></a><span 
+class="cmr-9">26</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Mult</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42027r27"></a><span 
+class="cmr-9">27</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#8221;(&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">)+&#8221;</span><span 
+class="cmsy-9">*</span><span 
+class="cmr-9">&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">)+&#8221;)&#8221;</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42028r28"></a><span 
+class="cmr-9">28</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42029r29"></a><span 
+class="cmr-9">29</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Minus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42030r30"></a><span 
+class="cmr-9">30</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#8221;(&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">)+&#8221;</span><span 
+class="cmsy-9">-</span><span 
+class="cmr-9">&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">)+&#8221;)&#8221;</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42031r31"></a><span 
+class="cmr-9">31</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42032r32"></a><span 
+class="cmr-9">32</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Div</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42033r33"></a><span 
+class="cmr-9">33</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#8221;(&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">)+&#8221;/&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">)+&#8221;)&#8221;</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42034r34"></a><span 
+class="cmr-9">34</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42035r35"></a><span 
+class="cmr-9">35</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">UMinus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">operand</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42036r36"></a><span 
+class="cmr-9">36</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#8221;</span><span 
+class="cmsy-9">-</span><span 
+class="cmr-9">(&#8221;+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_str</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">operand</span><span 
+class="cmr-9">)+&#8221;)&#8221;</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42037r37"></a><span 
+class="cmr-9">37</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42038r38"></a><span 
+class="cmr-9">38</span></span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42039r39"></a><span 
+class="cmr-9">39</span></span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42040r40"></a><span 
+class="cmr-9">40</span></span><span 
+class="cmr-9">function</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">)</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42041r41"></a><span 
+class="cmr-9">41</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Number</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42042r42"></a><span 
+class="cmr-9">42</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">value</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42043r43"></a><span 
+class="cmr-9">43</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42044r44"></a><span 
+class="cmr-9">44</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Plus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42045r45"></a><span 
+class="cmr-9">45</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">)+</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">)</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42046r46"></a><span 
+class="cmr-9">46</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42047r47"></a><span 
+class="cmr-9">47</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Mult</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42048r48"></a><span 
+class="cmr-9">48</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">)</span><span 
+class="cmsy-9">*</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">)</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42049r49"></a><span 
+class="cmr-9">49</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42050r50"></a><span 
+class="cmr-9">50</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Minus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42051r51"></a><span 
+class="cmr-9">51</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">)</span><span 
+class="cmsy-9">-</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">)</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42052r52"></a><span 
+class="cmr-9">52</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42053r53"></a><span 
+class="cmr-9">53</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">Div</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">,</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42054r54"></a><span 
+class="cmr-9">54</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">left</span><span 
+class="cmr-9">)/</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">right</span><span 
+class="cmr-9">)</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42055r55"></a><span 
+class="cmr-9">55</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42056r56"></a><span 
+class="cmr-9">56</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x02DC;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">UMinus</span><span 
+class="cmr-9">[</span><span 
+class="cmr-9">operand</span><span 
+class="cmr-9">]</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">{</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42057r57"></a><span 
+class="cmr-9">57</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">return</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">-</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">_val</span><span 
+class="cmr-9">(</span><span 
+class="cmr-9">expr</span><span 
+class="cmr-9">.</span><span 
+class="cmr-9">operand</span><span 
+class="cmr-9">)</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42058r58"></a><span 
+class="cmr-9">58</span></span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmr-9">&#x00A0;</span><span 
+class="cmsy-9">}</span><span 
+class="cmr-9">&#x00A0;</span><br /><span class="label"><a 
+ id="x20-42059r59"></a><span 
+class="cmr-9">59</span></span><span 
+class="cmsy-9">}</span>
+   
+   </div>
+                                                                     
+
+                                                                     
+   <!--l. 1160--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu13.html" >next</a>] [<a 
+href="ini_manualsu11.html" >prev</a>] [<a 
+href="ini_manualsu11.html#tailini_manualsu11.html" >prev-tail</a>] [<a 
+href="ini_manualsu12.html" >front</a>] [<a 
+href="ini_manualse4.html#ini_manualsu12.html" >up</a>] </p></div>
+<!--l. 1160--><p class="indent" >   <a 
+ id="tailini_manualsu12.html"></a>   
+</body></html> 

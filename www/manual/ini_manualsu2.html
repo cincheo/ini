@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Write and run your first INI program</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 110--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu1.html" >prev</a>] [<a 
+href="ini_manualsu1.html#tailini_manualsu1.html" >prev-tail</a>] [<a 
+href="#tailini_manualsu2.html">tail</a>] [<a 
+href="ini_manualse2.html#ini_manualsu2.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">2.2   </span> <a 
+ id="x8-50002.2"></a>Write and run your first INI program</h4>
+<!--l. 112--><p class="noindent" >To write your first INI program, you can use your favorite editor. The
+convention is to name the source code files such as: <span 
+class="cmtt-10x-x-109">my</span><span 
+class="cmtt-10x-x-109">_path/my</span><span 
+class="cmtt-10x-x-109">_program.ini</span>,
+however, INI will not prevent the programmers to use their own file naming
+conventions at their own risks. Let us now write a simple &#8221;hello world&#8221;
+program. We just need a main function that prints out the text on the
+initialization event. Create a <span 
+class="cmtt-10x-x-109">hello</span><span 
+class="cmtt-10x-x-109">_world.ini </span>file with the following
+content:
+   <!--l. 114-->
+   <div class="lstlisting" id="listing-3"><span class="label"><a 
+ id="x8-5001r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;main()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5002r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;@init()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5003r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;println(&#8221;hello&#x00A0;world&#8221;)&#x00A0;<br /><span class="label"><a 
+ id="x8-5004r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5005r5"></a><span 
+class="cmr-9">5</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 122--><p class="indent" >   To run this program, type in &#8221;<span 
+class="cmtt-10x-x-109">ini hello</span><span 
+class="cmtt-10x-x-109">_world.ini</span>&#8221; in a console. The
+output should be &#8221;<span 
+class="cmtt-10x-x-109">hello world</span>&#8221;.
+<!--l. 124--><p class="indent" >   You can now start using rule-based programming. For instance, the following
+program prints out &#8221;<span 
+class="cmtt-10x-x-109">hello world</span>&#8221; ten times.
+   <!--l. 126-->
+   <div class="lstlisting" id="listing-4"><span class="label"><a 
+ id="x8-5006r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;main()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5007r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;@init()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5008r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i&#x00A0;=&#x00A0;10&#x00A0;<br /><span class="label"><a 
+ id="x8-5009r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5010r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;i&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003E;</span>&#x00A0;0&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5011r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;println(&#8221;hello&#x00A0;world&#8221;)&#x00A0;<br /><span class="label"><a 
+ id="x8-5012r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i<span 
+class="cmsy-10x-x-109">-</span><span 
+class="cmsy-10x-x-109">-</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5013r8"></a><span 
+class="cmr-9">8</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x8-5014r9"></a><span 
+class="cmr-9">9</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 138--><p class="indent" >   Note that <span 
+class="cmtt-10x-x-109">println </span>is part of INI&#8217;s built-in functions. For a list of these
+functions, see [...]. Besides using built-in functions, it is possible to use Java
+objects from INI, as explained in [...].
+   <!--l. 140--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu1.html" >prev</a>] [<a 
+href="ini_manualsu1.html#tailini_manualsu1.html" >prev-tail</a>] [<a 
+href="ini_manualsu2.html" >front</a>] [<a 
+href="ini_manualse2.html#ini_manualsu2.html" >up</a>] </p></div>
+<!--l. 140--><p class="indent" >   <a 
+ id="tailini_manualsu2.html"></a>  
+</body></html> 

@@ -1,0 +1,29 @@
+<project name="testl" default="build.parser">
+
+	<property name="javacCommand" value="javac" />
+
+	<!-- Directory definition -->
+
+	<property name="src" value="${basedir}/src" />
+	<property name="build" value="${basedir}/build" />
+
+	<!-- Classpath definition -->
+
+	<path id="classpath">
+		<fileset dir="${basedir}/lib">
+			<include name="java_cup_v10k.zip" />
+			<include name="JFlex.jar" />
+		</fileset>
+
+		<pathelement location="${build}" />
+	</path>
+
+	<!-- ================================== -->
+	<!--              COMPILE               -->
+	<!-- ================================== -->
+
+	<target name="build.parser">
+		<java classname="testl.parser.GenParser" classpathref="classpath" fork="yes" dir="${src}/testl/parser" failonerror="yes" />
+	</target>
+		
+</project>

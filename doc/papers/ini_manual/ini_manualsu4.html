@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Implementing a sort function</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 220--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu5.html" >next</a>] [<a 
+href="ini_manualsu3.html" >prev</a>] [<a 
+href="ini_manualsu3.html#tailini_manualsu3.html" >prev-tail</a>] [<a 
+href="#tailini_manualsu4.html">tail</a>] [<a 
+href="ini_manualse3.html#ini_manualsu4.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">3.2   </span> <a 
+ id="x11-80003.2"></a>Implementing a sort function</h4>
+<!--l. 222--><p class="noindent" >With INI, there is a very straightforward way to implement a sort function,
+which consists of taking advantage of <span 
+class="cmti-10x-x-109">set expressions</span>. A set expression allows to
+select arbitrary objects within a set. These selected objects may follow some
+criteria given in the second part of the expression. Set expressions are used in
+guard so that the guard is evaluated to true only if an object that matches the
+given criteria can be found in the set. Here, to implement the <span 
+class="cmtt-10x-x-109">sort1 </span>function, we
+simply select all the indexes <span 
+class="cmtt-10x-x-109">i </span>in the <span 
+class="cmtt-10x-x-109">s </span>list so that <span 
+class="cmtt-10x-x-109">s[i] </span>is greater than <span 
+class="cmtt-10x-x-109">s[i+1]</span>
+(line 2). When this rule matches it simply swaps <span 
+class="cmtt-10x-x-109">s[i] </span>and <span 
+class="cmtt-10x-x-109">s[i+1]</span>, so that the
+list will eventually be sorted when the rule cannot apply anymore. In that
+case, the <span 
+class="cmtt-10x-x-109">@end </span>event is triggered and the function returns the sorted
+list.
+   <!--l. 224-->
+   <div class="lstlisting" id="listing-10"><span class="label"><a 
+ id="x11-8001r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;sort1(s)&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8002r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;i&#x00A0;of&#x00A0;[0..size(s)<span 
+class="cmsy-10x-x-109">-</span>2]&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;s[i]&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003E;</span>&#x00A0;s[i+1]&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8003r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;swap(s[i],s[i+1])&#x00A0;<br /><span class="label"><a 
+ id="x11-8004r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8005r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8006r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;s&#x00A0;<br /><span class="label"><a 
+ id="x11-8007r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8008r8"></a><span 
+class="cmr-9">8</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 235--><p class="indent" >   Note that this function is polymorphic. Its type is <span 
+class="cmtt-10x-x-109">(Map(Int,&#8217;T))-&#x003E;</span>
+<span 
+class="cmtt-10x-x-109">Map(Int,&#8217;T)</span>, or simpler written <span 
+class="cmtt-10x-x-109">(&#8217;T*)-&#x003E;&#8217;T*</span>.
+<!--l. 237--><p class="indent" >   Of course, programmers can also use explicit indexes to iterate on the list to
+be sorted, leading to more classical code. The following function implements a
+basic bubble sort with INI. The iteration is done with two rules: one
+which swaps the current elements (line 7), and one which does not (line
+12). A <span 
+class="cmtt-10x-x-109">swap </span>boolean flag is used to know if there was a swap during the
+iteration. If <span 
+class="cmtt-10x-x-109">swap </span>is true once the end of the list is reach, we set back
+the index <span 
+class="cmtt-10x-x-109">i </span>to <span 
+class="cmtt-10x-x-109">0 </span>so that the iteration rules apply all over again (line
+15).
+   <!--l. 239-->
+   <div class="lstlisting" id="listing-11"><span class="label"><a 
+ id="x11-8009r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;sort2(s)&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8010r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;@init()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8011r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i&#x00A0;=&#x00A0;0&#x00A0;<br /><span class="label"><a 
+ id="x11-8012r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;swap&#x00A0;=&#x00A0;false&#x00A0;<br /><span class="label"><a 
+ id="x11-8013r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;size&#x00A0;=&#x00A0;size(s)<span 
+class="cmsy-10x-x-109">-</span>1&#x00A0;<br /><span class="label"><a 
+ id="x11-8014r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8015r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;i&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003C;</span>&#x00A0;size&#x00A0;&amp;&amp;&#x00A0;s[i]&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003E;</span>&#x00A0;s[i+1]&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8016r8"></a><span 
+class="cmr-9">8</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;swap(s[i],s[i+1])&#x00A0;<br /><span class="label"><a 
+ id="x11-8017r9"></a><span 
+class="cmr-9">9</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;swap&#x00A0;=&#x00A0;true&#x00A0;<br /><span class="label"><a 
+ id="x11-8018r10"></a><span 
+class="cmr-9">10</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i++&#x00A0;<br /><span class="label"><a 
+ id="x11-8019r11"></a><span 
+class="cmr-9">11</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8020r12"></a><span 
+class="cmr-9">12</span></span>&#x00A0;&#x00A0;i&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003C;</span>&#x00A0;size&#x00A0;&amp;&amp;&#x00A0;s[i]&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003C;</span>=&#x00A0;s[i+1]&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8021r13"></a><span 
+class="cmr-9">13</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i++&#x00A0;<br /><span class="label"><a 
+ id="x11-8022r14"></a><span 
+class="cmr-9">14</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8023r15"></a><span 
+class="cmr-9">15</span></span>&#x00A0;&#x00A0;i==size&#x00A0;&amp;&amp;&#x00A0;swap&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8024r16"></a><span 
+class="cmr-9">16</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;swap&#x00A0;=&#x00A0;false&#x00A0;<br /><span class="label"><a 
+ id="x11-8025r17"></a><span 
+class="cmr-9">17</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i&#x00A0;=&#x00A0;0&#x00A0;<br /><span class="label"><a 
+ id="x11-8026r18"></a><span 
+class="cmr-9">18</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8027r19"></a><span 
+class="cmr-9">19</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8028r20"></a><span 
+class="cmr-9">20</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;s&#x00A0;<br /><span class="label"><a 
+ id="x11-8029r21"></a><span 
+class="cmr-9">21</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8030r22"></a><span 
+class="cmr-9">22</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 264--><p class="indent" >   As we can see, the first implementation is more intuitive and more concise.
+The advantage with the second implementation is that the programmer can
+                                                                     
+
+                                                                     
+actually control the way the list is iterated on. With the set expression, there is
+no warranty on the order the elements will match, which could lead to
+performance issues. Here the two implementations have a similar complexity of
+0(<span 
+class="cmmi-10x-x-109">n</span><sup><span 
+class="cmr-8">2</span></sup>). In order to get better complexity, we can for instance implement the
+well-known Quicksort algorithm [...], as shown here.
+   <!--l. 267-->
+   <div class="lstlisting" id="listing-12"><span class="label"><a 
+ id="x11-8031r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;quicksort(s,lo,hi)<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8032r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;hi<span 
+class="cmmi-10x-x-109">&#x003E;</span>lo&#x00A0;&amp;&amp;&#x00A0;!done<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8033r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;p&#x00A0;=&#x00A0;partition(s,lo,hi,lo)&#x00A0;<br /><span class="label"><a 
+ id="x11-8034r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;quicksort(s,&#x00A0;lo,&#x00A0;p<span 
+class="cmsy-10x-x-109">-</span>1)&#x00A0;<br /><span class="label"><a 
+ id="x11-8035r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;quicksort(s,&#x00A0;p+1,&#x00A0;hi)&#x00A0;<br /><span class="label"><a 
+ id="x11-8036r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;done&#x00A0;=&#x00A0;true&#x00A0;<br /><span class="label"><a 
+ id="x11-8037r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8038r8"></a><span 
+class="cmr-9">8</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8039r9"></a><span 
+class="cmr-9">9</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;s&#x00A0;<br /><span class="label"><a 
+ id="x11-8040r10"></a><span 
+class="cmr-9">10</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8041r11"></a><span 
+class="cmr-9">11</span></span><span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8042r12"></a><span 
+class="cmr-9">12</span></span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8043r13"></a><span 
+class="cmr-9">13</span></span>function&#x00A0;partition(s,lo,hi,pivotIndex)<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8044r14"></a><span 
+class="cmr-9">14</span></span>&#x00A0;&#x00A0;@init()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8045r15"></a><span 
+class="cmr-9">15</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;pivotValue&#x00A0;=&#x00A0;s[pivotIndex]&#x00A0;<br /><span class="label"><a 
+ id="x11-8046r16"></a><span 
+class="cmr-9">16</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;swap(s[pivotIndex],s[hi])&#x00A0;<br /><span class="label"><a 
+ id="x11-8047r17"></a><span 
+class="cmr-9">17</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;index=lo&#x00A0;<br /><span class="label"><a 
+ id="x11-8048r18"></a><span 
+class="cmr-9">18</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i=lo&#x00A0;<br /><span class="label"><a 
+ id="x11-8049r19"></a><span 
+class="cmr-9">19</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8050r20"></a><span 
+class="cmr-9">20</span></span>&#x00A0;&#x00A0;i<span 
+class="cmmi-10x-x-109">&#x003C;</span>hi&#x00A0;&amp;&amp;&#x00A0;s[i]<span 
+class="cmmi-10x-x-109">&#x003C;</span>=pivotValue&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8051r21"></a><span 
+class="cmr-9">21</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;swap(s[i],s[index])&#x00A0;<br /><span class="label"><a 
+ id="x11-8052r22"></a><span 
+class="cmr-9">22</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;index++&#x00A0;<br /><span class="label"><a 
+ id="x11-8053r23"></a><span 
+class="cmr-9">23</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i++&#x00A0;<br /><span class="label"><a 
+ id="x11-8054r24"></a><span 
+class="cmr-9">24</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8055r25"></a><span 
+class="cmr-9">25</span></span>&#x00A0;&#x00A0;i<span 
+class="cmmi-10x-x-109">&#x003C;</span>hi&#x00A0;&amp;&amp;&#x00A0;s[i]<span 
+class="cmmi-10x-x-109">&#x003E;</span>pivotValue&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8056r26"></a><span 
+class="cmr-9">26</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;i++&#x00A0;<br /><span class="label"><a 
+ id="x11-8057r27"></a><span 
+class="cmr-9">27</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8058r28"></a><span 
+class="cmr-9">28</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8059r29"></a><span 
+class="cmr-9">29</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;swap(s[hi],&#x00A0;s[index])&#x00A0;<br /><span class="label"><a 
+ id="x11-8060r30"></a><span 
+class="cmr-9">30</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;index&#x00A0;<br /><span class="label"><a 
+ id="x11-8061r31"></a><span 
+class="cmr-9">31</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x11-8062r32"></a><span 
+class="cmr-9">32</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 302--><p class="indent" >   This algorithm is more complex to understand but it performs very well for
+middle-sized lists. The interesting characteristic to point out here is that
+the quicksort function is recursive. Hence, INI allows both rule-based
+programming style and functional programming style. Programmers may
+use one or the other depending on the type of problem they need to
+solve.
+                                                                     
+
+                                                                     
+   <!--l. 304--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu5.html" >next</a>] [<a 
+href="ini_manualsu3.html" >prev</a>] [<a 
+href="ini_manualsu3.html#tailini_manualsu3.html" >prev-tail</a>] [<a 
+href="ini_manualsu4.html" >front</a>] [<a 
+href="ini_manualse3.html#ini_manualsu4.html" >up</a>] </p></div>
+<!--l. 304--><p class="indent" >   <a 
+ id="tailini_manualsu4.html"></a>  
+</body></html> 

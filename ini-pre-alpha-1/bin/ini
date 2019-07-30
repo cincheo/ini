@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# this UNIX launcher requires to be located in the INI project root directory
+
+# uncomment and change the path if Java is not in your path yet
+# export PATH=$PATH:/usr/local/java/bin
+
+java -classpath bin/ini.jar:lib/java_cup_v10k.zip:lib/JFlex.jar:lib/JSAP-2.1.jar:lib/cron4j-2.2.3.jar:lib/servlet-api-2.5.jar:lib/jetty.jar ini.Main $*

@@ -1,0 +1,73 @@
+\contentsline {section}{\numberline {1}Introduction}{3}
+\contentsline {section}{\numberline {2}Getting started with INI}{4}
+\contentsline {subsection}{\numberline {2.1}Installing INI}{4}
+\contentsline {subsection}{\numberline {2.2}Write and run your first INI program}{5}
+\contentsline {section}{\numberline {3}Some INI examples}{6}
+\contentsline {subsection}{\numberline {3.1}Counting occurences in a list}{6}
+\contentsline {subsection}{\numberline {3.2}Implementing a sort function}{9}
+\contentsline {subsection}{\numberline {3.3}Constructing a Fibonacci tree}{11}
+\contentsline {subsection}{\numberline {3.4}Programming a simple HTTP server}{15}
+\contentsline {section}{\numberline {4}Language features}{22}
+\contentsline {subsection}{\numberline {4.1}Built-in types}{22}
+\contentsline {subsection}{\numberline {4.2}Functions and rules}{22}
+\contentsline {subsubsection}{\numberline {4.2.1}Syntax}{22}
+\contentsline {subsubsection}{\numberline {4.2.2}Parameters}{23}
+\contentsline {subsubsection}{\numberline {4.2.3}Returned values}{23}
+\contentsline {subsubsection}{\numberline {4.2.4}Function types}{24}
+\contentsline {subsubsection}{\numberline {4.2.5}The main() function}{24}
+\contentsline {subsubsection}{\numberline {4.2.6}Built-in Functions}{24}
+\contentsline {subsubsection}{\numberline {4.2.7}Bindings to Java objects}{25}
+\contentsline {subsection}{\numberline {4.3}Rules}{26}
+\contentsline {subsubsection}{\numberline {4.3.1}Syntax}{26}
+\contentsline {subsubsection}{\numberline {4.3.2}Logical operators}{27}
+\contentsline {subsubsection}{\numberline {4.3.3}Comparison operators}{28}
+\contentsline {subsubsection}{\numberline {4.3.4}Regular expression match operator}{28}
+\contentsline {subsection}{\numberline {4.4}Event-triggered rules}{29}
+\contentsline {subsubsection}{\numberline {4.4.1}\texttt {@init} event}{29}
+\contentsline {subsubsection}{\numberline {4.4.2}\texttt {@end} event}{30}
+\contentsline {subsubsection}{\numberline {4.4.3}\texttt {@update} event}{30}
+\contentsline {subsubsection}{\numberline {4.4.4}\texttt {@every} event}{31}
+\contentsline {subsubsection}{\numberline {4.4.5}\texttt {@cron} event}{31}
+\contentsline {subsubsection}{\numberline {4.4.6}\texttt {@error} event}{32}
+\contentsline {subsection}{\numberline {4.5}Maps, lists, and sets}{32}
+\contentsline {subsubsection}{\numberline {4.5.1}Map definition and access}{32}
+\contentsline {subsubsection}{\numberline {4.5.2}List definition and access}{33}
+\contentsline {subsubsection}{\numberline {4.5.3}Integer sets}{33}
+\contentsline {subsubsection}{\numberline {4.5.4}Set selection expressions}{33}
+\contentsline {subsection}{\numberline {4.6}User-defined types}{34}
+\contentsline {subsubsection}{\numberline {4.6.1}Simple structured types}{34}
+\contentsline {subsubsection}{\numberline {4.6.2}Algebraic types}{35}
+\contentsline {subsubsection}{\numberline {4.6.3}Type set selection expressions}{35}
+\contentsline {subsubsection}{\numberline {4.6.4}Type set match expressions}{36}
+\contentsline {subsection}{\numberline {4.7}Function references and \texttt {eval}}{37}
+\contentsline {subsection}{\numberline {4.8}Imports}{38}
+\contentsline {section}{\numberline {5}The INI type system}{38}
+\contentsline {subsection}{\numberline {5.1}Definitions}{38}
+\contentsline {subsection}{\numberline {5.2}Type Inference}{39}
+\contentsline {subsection}{\numberline {5.3}Type Inference rules}{39}
+\contentsline {subsubsection}{\numberline {5.3.1}Initiation rules}{39}
+\contentsline {subsubsection}{\numberline {5.3.2}Assignments}{40}
+\contentsline {subsubsection}{\numberline {5.3.3}Logical operators}{40}
+\contentsline {subsubsection}{\numberline {5.3.4}Comparison operators}{41}
+\contentsline {subsubsection}{\numberline {5.3.5}Division}{41}
+\contentsline {subsubsection}{\numberline {5.3.6}Multiplication and minus}{41}
+\contentsline {subsubsection}{\numberline {5.3.7}The plus operator}{41}
+\contentsline {subsubsection}{\numberline {5.3.8}Unary minus (sign inversion)}{42}
+\contentsline {subsubsection}{\numberline {5.3.9}Post operators}{42}
+\contentsline {subsubsection}{\numberline {5.3.10}The not operator}{42}
+\contentsline {subsubsection}{\numberline {5.3.11}The match operator}{42}
+\contentsline {subsubsection}{\numberline {5.3.12}Map access}{43}
+\contentsline {subsubsection}{\numberline {5.3.13}Field access}{43}
+\contentsline {subsubsection}{\numberline {5.3.14}Function invocation}{43}
+\contentsline {subsubsection}{\numberline {5.3.15}List definition}{43}
+\contentsline {subsubsection}{\numberline {5.3.16}Return statement}{44}
+\contentsline {subsubsection}{\numberline {5.3.17}Type instantiation}{44}
+\contentsline {subsubsection}{\numberline {5.3.18}Integer set declaration}{44}
+\contentsline {subsubsection}{\numberline {5.3.19}Set selection}{45}
+\contentsline {section}{\numberline {6}Future work}{45}
+\contentsline {subsection}{\numberline {6.1}Validations}{45}
+\contentsline {subsection}{\numberline {6.2}Asynchronous rules}{45}
+\contentsline {subsection}{\numberline {6.3}Persistence and transactions}{46}
+\contentsline {subsection}{\numberline {6.4}Aspect-Oriented Programming / Behavioral Reflection / Interceptors}{46}
+\contentsline {subsection}{\numberline {6.5}Reflection}{46}
+\contentsline {subsection}{\numberline {6.6}\texttt {@file} event}{47}

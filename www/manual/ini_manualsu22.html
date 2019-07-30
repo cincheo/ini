@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Reflection</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 1558--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu23.html" >next</a>] [<a 
+href="ini_manualsu21.html" >prev</a>] [<a 
+href="ini_manualsu21.html#tailini_manualsu21.html" >prev-tail</a>] [<a 
+href="#tailini_manualsu22.html">tail</a>] [<a 
+href="ini_manualse6.html#ini_manualsu22.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">6.5   </span> <a 
+ id="x32-730006.5"></a>Reflection</h4>
+<!--l. 1560--><p class="noindent" >We will add a reflective API to allow the self modification of the system. For
+example:
+   <!--l. 1562-->
+   <div class="lstlisting" id="listing-52"><span class="label"><a 
+ id="x32-73001r1"></a></span>//&#x00A0;get&#x00A0;the&#x00A0;functions&#x00A0;<br /><span class="label"><a 
+ id="x32-73002r2"></a></span>functions&#x00A0;=&#x00A0;system_functions()&#x00A0;<br /><span class="label"><a 
+ id="x32-73003r3"></a></span>//&#x00A0;remove&#x00A0;the&#x00A0;f&#x00A0;function&#x00A0;<br /><span class="label"><a 
+ id="x32-73004r4"></a></span>clear(functions[&#8221;f&#8221;])&#x00A0;//&#x00A0;or&#x00A0;clear(function(f))&#x00A0;<br /><span class="label"><a 
+ id="x32-73005r5"></a></span>//&#x00A0;create&#x00A0;a&#x00A0;new&#x00A0;function&#x00A0;f&#x00A0;<br /><span class="label"><a 
+ id="x32-73006r6"></a></span>eval_string(&#8221;function&#x00A0;f()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;...&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#8221;)
+   
+   </div>
+<!--l. 1571--><p class="indent" >   This will need to be synchronized...
+<!--l. 1573--><p class="indent" >   Maybe we will also add a full R/W access to the program AST (that&#8217;s more
+for fun).
+                                                                     
+
+                                                                     
+   <!--l. 1575--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu23.html" >next</a>] [<a 
+href="ini_manualsu21.html" >prev</a>] [<a 
+href="ini_manualsu21.html#tailini_manualsu21.html" >prev-tail</a>] [<a 
+href="ini_manualsu22.html" >front</a>] [<a 
+href="ini_manualse6.html#ini_manualsu22.html" >up</a>] </p></div>
+<!--l. 1575--><p class="indent" >   <a 
+ id="tailini_manualsu22.html"></a>  
+</body></html> 

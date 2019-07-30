@@ -1,0 +1,693 @@
+
+/*
+ * This source code file is the exclusive property of its author. No copy or 
+ * usage of the source code is permitted unless the author contractually 
+ * allows it under the terms of a well-defined agreement.
+ */
+
+import java.util.*;
+import java.io.*;
+import ini.ast.*;
+import ini.eval.function.*;
+import ini.eval.at.*;
+
+parser code {:
+
+	public Ast ast;
+	public PrintStream out = System.out;
+	public PrintStream err = System.err;
+
+	public Map<String,Function> parsedFunctionMap=new HashMap<String,Function>();
+	public List<UserType> parsedTypes=new ArrayList<UserType>();
+	public List<Function> parsedFunctionList=new ArrayList<Function>();
+	public List<Binding> parsedBindingList=new ArrayList<Binding>();
+	public List<AtBinding> parsedAtBindingList=new ArrayList<AtBinding>();
+	public List<Import> parsedImportList=new ArrayList<Import>();
+
+	protected static IniParser createParser(String fileName) throws java.io.FileNotFoundException {
+      IniScanner scanner= new IniScanner(new java.io.FileReader(fileName));
+      scanner.setFileName(fileName);
+      IniParser parser= new IniParser(scanner);
+      parser.ast = new Ast(parser);
+      return parser;
+	}
+
+	protected static IniParser createParser(Ast ast, String fileName) throws java.io.FileNotFoundException {
+      IniScanner scanner= new IniScanner(new java.io.FileReader(fileName));
+      scanner.setFileName(fileName);
+      IniParser parser= new IniParser(scanner);
+      parser.ast = ast;
+      return parser;
+	}
+
+	public static IniParser parseFile(String fileName) throws java.io.FileNotFoundException {
+      IniScanner scanner= new IniScanner(new java.io.FileReader(fileName));
+      scanner.setFileName(fileName);
+	  IniParser parser= new IniParser(scanner);
+      parser.ast = new Ast(parser);
+      try {
+    	parser.parse();
+	  	for (Binding b : parser.parsedBindingList) {
+			IniFunction.functions.put(b.name, new BoundJavaFunction(b));
+	  	}
+	  	for (AtBinding b : parser.parsedAtBindingList) {
+			//At.atPredicates.put(b.name, ((At)Class.forName(b.className).newInstance()).getClass());
+			At.atPredicates.put(b.name, (Class<? extends At>)Class.forName(b.className));
+	  	}
+	  } catch(Exception e) {
+	  	e.printStackTrace();
+	  	parser.errors.add(new SyntaxError(null, "internal parser error"));
+	  }
+      return parser;
+	}
+
+	public static IniParser parseCode(String code,PrintStream out,PrintStream err) throws Exception {
+		IniScanner scanner= new IniScanner(new java.io.StringReader(code));
+		scanner.setFileName("<none>");
+		IniParser parser= new IniParser(scanner);
+		parser.out = out;
+		parser.err = err;
+      parser.ast = new Ast(parser);
+      try {
+		parser.parse();
+		for (Binding b : parser.parsedBindingList) {
+			IniFunction.functions.put(b.name, new BoundJavaFunction(b));
+		}
+	  } catch(Exception e) {
+		if(parser.errors.size()==0) {
+			e.printStackTrace();
+			parser.errors.add(new SyntaxError(null, "internal parser error"));
+		}
+	  }
+		return parser;
+	}
+
+	public static IniParser parseCode(String code) throws Exception {
+		return parseCode(code,System.out,System.err);
+	}
+	
+	public ini.type.AstAttrib attrib() throws Exception {
+		return ini.Main.attrib(this);
+	}
+	
+	public void evalMainFunction() throws Exception {
+		ini.Main.evalMainFunction(this,null);
+	}
+	
+	
+	public List<SyntaxError> errors = new ArrayList<SyntaxError>();
+	
+  public void syntax_error(java_cup.runtime.Symbol current) {
+    //errors.add(new SyntaxError("syntax error: '"+current.value + "' is not expected", at " + (current.left+1)+"("+(current.right+1)+")" );
+    errors.add(new SyntaxError((Token)current.value, "'"+current.value + "' is not expected"));
+  }
+  
+  	public void printErrors(PrintStream out) {
+		for (SyntaxError error : errors) {
+			out.println(error.toString());
+		}
+	}
+
+	public boolean hasErrors() {
+		return !errors.isEmpty();
+	}
+  
+  
+  
+:};
+
+terminal COL, COMMA, DOT, DOTDOT;
+terminal LPAREN, RPAREN, LCPAREN, RCPAREN, LSPAREN, RSPAREN;
+terminal LT, LTE, GTE, GT, ASSIGN, EQUALS, NOTEQUALS, MULT, DIV, MINUS, MINUSMINUS, PLUS, PLUSPLUS;
+terminal OROR, ANDAND, AND, NOT, TUBE, IMPLIES, MATCHES;
+terminal AT, ARROW_RIGHT;
+terminal INT, NUM, TRUE, FALSE, STRING, CHAR;
+terminal IDENTIFIER, TIDENTIFIER;
+terminal QUESTION, DOLLAR;
+// keywords
+terminal IMPORT, FUNCTION, PROCESS, OF, RETURN, TYPE, THIS, CASE, DEFAULT;
+
+non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
+non terminal function, param_list_opt, param_list, param;
+non terminal import_list_opt, import_list, import_decl;
+non terminal binding_list_opt, binding_list, binding, type_list_opt, type_list, type, at_binding_conf_type;
+non terminal var_list;
+non terminal statement_list_opt, statement_list, statement, expr, ret_expr_opt;
+non terminal assignment_expr, var_access, sync_var_access, set_var_access, single_string, string_expr, case_expr;
+non terminal invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
+non terminal rule_list_opt, rule_list, rule, rule_body, guard;
+non terminal logical_expr_opt, logical_expr, algebraic_expr, set_logical_expr, boolean_literal;
+non terminal set_decl, constructor_expr, assignment_list;
+non terminal at_expr, at_binding, at_params_conf_opt;
+non terminal usertype, constructor_list, constructor, list_constructor, constructor_or_type;
+non terminal field_list_opt, field_list, field;
+non terminal constructor_match_expr;
+non terminal field_match_expr_list_opt, field_match_expr_list;
+non terminal list_concat_expr;
+
+precedence left DOLLAR;
+precedence left OROR;
+precedence left ANDAND;
+precedence left MATCHES;
+precedence left NOT;
+precedence left PLUS, MINUS;
+precedence left MULT, DIV;
+precedence left PLUSPLUS, MINUSMINUS;
+precedence left EQUALS, GT, GTE, LT, LTE, NOTEQUALS;
+
+start with ini_program;
+
+/***************************************************************/
+/***                      INI GRAMMAR                         **/    
+/***************************************************************/
+
+ini_program ::= import_list_opt binding_list_opt program_elt_list_opt;
+
+program_elt_list_opt ::= program_elt_list | ;
+
+program_elt_list ::= program_elt_list program_elt | program_elt ;
+
+program_elt ::= function | usertype ;
+
+import_list_opt ::= import_list | ;
+
+import_list ::= import_list import_decl:i
+	{:
+		parser.parsedImportList.add((Import)i);
+	:}
+	| import_decl:i
+	{:
+		parser.parsedImportList.add((Import)i);
+	:}
+;
+
+import_decl ::= IMPORT:itoken STRING:filePath
+	{:
+		Import i = new Import(parser, (Token)itoken, filePath.toString());
+		try {
+			IniParser localParser = IniParser.createParser(parser.ast,filePath.toString());
+			localParser.parse();
+			parser.parsedFunctionMap.putAll(localParser.parsedFunctionMap);
+			parser.parsedBindingList.addAll(localParser.parsedBindingList);
+			parser.parsedFunctionList.addAll(localParser.parsedFunctionList);
+		} catch (java.io.FileNotFoundException e) {
+			throw new RuntimeException("Cannot import file '" + i.filePath + "'" 
+				+ (i.token != null ? " at " + i.token.getLocation() : ""));
+		}
+		RESULT = i;
+	:}
+;
+
+
+binding_list_opt ::= binding_list | ;
+
+binding_list ::= binding_list binding:b
+	{:
+		parser.parsedBindingList.add((Binding)b);
+	:}
+	| binding:b
+	{:
+		parser.parsedBindingList.add((Binding)b);
+	:}
+	| binding_list at_binding:b
+	{:
+		parser.parsedAtBindingList.add((AtBinding)b);
+	:}
+	| at_binding:b
+	{:
+		parser.parsedAtBindingList.add((AtBinding)b);
+	:}
+;
+
+binding ::= IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN ARROW_RIGHT type:rtype IMPLIES STRING:className COMMA STRING:methodName
+	{:
+		RESULT = new Binding(parser, (Token)name, name.toString(), (List)types, (TypeVariable)rtype, className.toString(), methodName.toString());
+	:}
+;
+
+at_binding_conf_type ::=
+|LSPAREN type_list_opt:ct RSPAREN
+{:
+	RESULT = ct;
+:}
+;
+
+at_binding ::= AT IDENTIFIER:name at_binding_conf_type:ct LPAREN:ft type_list_opt:rt RPAREN IMPLIES STRING:className
+	{:
+		RESULT = new AtBinding(parser, (Token)name, name.toString(), (List)ct, (List) rt, className.toString());
+	:}
+;
+
+function ::= FUNCTION:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
+	{:
+		//System.out.println("created function "+name);
+		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (List)rules);
+		parser.parsedFunctionMap.put(f.name,f);
+		parser.parsedFunctionList.add(f);
+	:} 
+	| PROCESS:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
+	{:
+		//System.out.println("created function "+name);
+		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (List)rules);
+		parser.parsedFunctionMap.put(f.name,f);
+		parser.parsedFunctionList.add(f);
+	:} 
+;
+
+param_list_opt ::= param_list:l {: RESULT = l; :}
+	| {: RESULT = new ArrayList(); :}
+;
+
+param_list ::= param_list:l COMMA param:p
+	{:
+		List list=(List)l;
+		list.add(p);
+		RESULT=list;
+	:}
+		| param:p
+	{:
+		List l=new ArrayList();
+		l.add(p);
+		RESULT=l;
+	:}
+;
+
+param ::= IDENTIFIER:i ASSIGN:a expr:e 
+	{:
+		RESULT = new Parameter(parser,(Token)i,i.toString(),(Expression)e);
+	:}
+	| IDENTIFIER:i 
+	{:
+		RESULT = new Parameter(parser,(Token)i,i.toString());
+	:}
+;
+
+statement_list_opt ::= statement_list:l {: RESULT=l; :}
+	| 
+;
+
+statement_list ::= statement_list:l statement:s
+	{:
+		Sequence seq=(Sequence)l;
+		seq.last().setNext(s);
+		RESULT = seq;
+	:}
+	| statement:s
+	{:
+		Sequence seq=new Sequence(s);
+		RESULT=seq;
+	:}
+;
+
+rule_list_opt ::= rule_list:rl {: RESULT=rl; :}
+	| {: RESULT=new ArrayList(); :} 
+;
+
+rule_list ::= rule_list:l rule:r
+	{:
+		List list=(List)l;
+		list.add(r);
+		RESULT = list;
+	:}
+	| rule:r
+	{:
+		List l=new ArrayList();
+		l.add(r);
+		RESULT=l;
+	:}
+;
+
+var_list ::= var_list:l COMMA IDENTIFIER:i
+	{:
+		List list=(List)l;
+		list.add(new Variable(parser,(Token)i,i.toString()));
+		RESULT=list;
+	:}
+		| IDENTIFIER:i
+	{:
+		List l=new ArrayList();
+		l.add(new Variable(parser,(Token)i,i.toString()));
+		RESULT=l;
+	:}
+;
+
+type_list_opt ::= type_list:l {: RESULT = l; :} | ;
+
+type_list ::= type_list:l COMMA type:t
+	{:
+		List list=(List)l;
+		list.add(t);
+		RESULT=list;
+	:}
+		| type:t
+	{:
+		List l=new ArrayList();
+		l.add(t);
+		RESULT=l;
+	:}
+;
+
+type ::= TIDENTIFIER:i {: RESULT = new TypeVariable(parser,(Token)i,i.toString()); :}
+	| type:t MULT {: RESULT = new TypeVariable(parser,((TypeVariable)t).token,(TypeVariable)t); :}
+;
+
+assignment_expr ::= var_access:v ASSIGN:a expr:e
+	{:
+		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
+	:}
+	| var_access:v ASSIGN:a boolean_literal:e 
+	{: 
+		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
+	:}
+	| set_var_access:v ASSIGN:a set_decl:e 
+	{: 
+		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
+	:}
+;
+
+set_var_access ::= TIDENTIFIER:v {: RESULT = new Variable(parser,(Token)v,v.toString()); :}
+;
+
+boolean_literal ::= TRUE:e {: RESULT=new BooleanLiteral(parser,(Token)e,true); :}
+	| FALSE:e {: RESULT=new BooleanLiteral(parser,(Token)e,false); :}
+;
+
+var_access ::= IDENTIFIER:v {: RESULT = new Variable(parser,(Token)v,v.toString()); :}
+	| var_access:v LSPAREN:t expr:e RSPAREN {: RESULT = new ArrayAccess(parser,(Token)t,(VariableAccess)v,(Expression)e); :}
+	| var_access:v LSPAREN:t expr:min DOTDOT expr:max RSPAREN {: RESULT = new SubArrayAccess(parser,(Token)t,(VariableAccess)v,(Expression)min,(Expression)max); :}
+	| var_access:v DOT:t IDENTIFIER:i {: RESULT = new FieldAccess(parser,(Token)t,(VariableAccess)v,i.toString()); :}
+;
+
+string_expr ::= single_string:s {: RESULT=s; :}
+	| single_string:e1 PLUS:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.PLUS,(Expression)e1,(Expression)e2); :}
+;
+
+single_string ::= STRING:s {: RESULT=new StringLiteral(parser,(Token)s,s.toString()); :}
+;
+
+list_expr ::= LSPAREN:open arg_list_opt:l RSPAREN:close
+	{:
+		RESULT = new ListExpression(parser,(Token)open,(List)l);
+	:}
+;
+
+constructor_expr ::= TIDENTIFIER:s LSPAREN assignment_list:l RSPAREN
+	{:
+		RESULT = new SetConstructor(parser,(Token)s,s.toString(),(List)l);
+	:}/*
+	| LSPAREN:c assignment_list:l RSPAREN
+	{:
+		RESULT = new SetConstructor(parser,(Token)c,null,(List)l);
+	:}*/
+;
+
+constructor_match_expr ::= TIDENTIFIER:s LSPAREN field_match_expr_list_opt:l RSPAREN 
+	{:
+		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),(List)l);	
+	:} | TIDENTIFIER:s 
+	{:
+		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),null);	
+	:};
+
+assignment_list ::= assignment_list:l COMMA IDENTIFIER:f ASSIGN:a expr:e
+	{:
+		List list=(List)l;
+		list.add(new Assignment(parser,(Token)f,new Variable(parser,(Token)f,f.toString()),(Expression)e));
+		RESULT=list;
+	:}
+		| IDENTIFIER:f ASSIGN:a expr:e
+	{:
+		List list=new ArrayList();
+		list.add(new Assignment(parser,(Token)f,new Variable(parser,(Token)f,f.toString()),(Expression)e));
+		RESULT=list;
+	:}
+;
+
+statement ::= pre_post_op:e {: RESULT = e; :}
+	| assignment_expr:e {: RESULT = e; :} 
+	| invocation:e {: RESULT = e; :}
+	| case_expr:e {: RESULT = e; :}
+;
+
+expr ::= var_access:e {: RESULT=e; :}
+	| var_access:v ASSIGN:a expr:e 
+	{:
+		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
+	:}
+	| sync_var_access:e {: RESULT=e; :} 
+    | THIS:t {: RESULT = new ThisLiteral(parser,(Token)t); :}
+	| invocation:e {: RESULT=e; :}
+	| CHAR:c {: RESULT = new CharLiteral(parser,(Token)c,c.toString().charAt(0)); :}
+	| algebraic_expr:e {: RESULT=e; :}
+	| string_expr:e {: RESULT=e; :}
+	| list_expr:l {: RESULT=l; :}
+	| constructor_expr: e {: RESULT=e; :}
+	| set_decl:e {: RESULT = e; :}
+	| set_var_access:e {: RESULT = e; :}
+	| FUNCTION:f LPAREN IDENTIFIER:i RPAREN {: RESULT = new FunctionLiteral(parser,(Token)f,i.toString()); :}
+	| list_concat_expr:e {: RESULT = e; :}
+;
+
+/*list_concat_expr ::= list_concat_expr:e1 AND:op var_access:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
+	| list_concat_expr:e1 AND:op invocation:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
+	| list_expr:e1 AND:op list_concat_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
+;*/	
+
+
+list_concat_expr ::= list_expr:e1 AND:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
+	| var_access:e1 AND:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
+;
+
+algebraic_expr ::= NUM:e {: RESULT=new NumberLiteral(parser,(Token)e,Double.parseDouble(e.toString())); :}
+	| INT:e {: RESULT=new NumberLiteral(parser,(Token)e,Integer.parseInt(e.toString())); :} 
+	| pre_post_op:op {: RESULT=op; :}
+	| expr:e1 PLUS:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.PLUS,(Expression)e1,(Expression)e2); :}
+	| expr:e1 MINUS:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MINUS,(Expression)e1,(Expression)e2); :}
+	| MINUS:op expr:e {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.MINUS,(Expression)e); :}
+	| expr:e1 MULT:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MULT,(Expression)e1,(Expression)e2); :}
+	| expr:e1 DIV:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.DIV,(Expression)e1,(Expression)e2); :}
+	| LPAREN algebraic_expr:e RPAREN {: RESULT=e; :}
+;
+
+logical_expr ::= boolean_literal:e {: RESULT=e; :}
+	| var_access:e {: RESULT=e; :} 
+	| var_access:v ASSIGN:a logical_expr:e 
+	{:
+		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
+	:}
+	| sync_var_access:e {: RESULT=e; :} 
+	| invocation:e {: RESULT=e; :}
+	| logical_expr:e1 ANDAND:op logical_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.AND,(Expression)e1,(Expression)e2); :}
+	| logical_expr:e1 OROR:op logical_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.OR,(Expression)e1,(Expression)e2); :}
+	| NOT:op logical_expr:e {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.NOT,(Expression)e); :}
+	| QUESTION:op logical_expr:e {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.OPT,(Expression)e); :}
+	| expr:e1 EQUALS:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.EQUALS,(Expression)e1,(Expression)e2); :}
+	| expr:e1 NOTEQUALS:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.NOTEQUALS,(Expression)e1,(Expression)e2); :}
+	| expr:e1 LT:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.LT,(Expression)e1,(Expression)e2); :}
+	| expr:e1 LTE:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.LTE,(Expression)e1,(Expression)e2); :}
+	| expr:e1 GT:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.GT,(Expression)e1,(Expression)e2); :}
+	| expr:e1 GTE:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.GTE,(Expression)e1,(Expression)e2); :}
+	| expr:e1 MATCHES:op invocation:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MATCHES,(Expression)e1,(Expression)e2); :}
+	| expr:e1 MATCHES:op constructor_match_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MATCHES,(Expression)e1,(ConstructorMatchExpression)e2); :}
+	| LPAREN logical_expr:e RPAREN {: RESULT=e; :}
+;
+
+case_expr ::= CASE:c LCPAREN rule_list_opt:l DEFAULT LCPAREN statement_list_opt:s RCPAREN RCPAREN 
+	{:
+		RESULT = new CaseStatement(parser,(Token)c, (List)l,(Sequence)s); 
+	:}
+	| CASE:c LCPAREN rule_list_opt:l RCPAREN 
+	{:
+		RESULT = new CaseStatement(parser,(Token)c, (List)l,null); 
+	:}
+;
+
+field_match_expr_list_opt ::= field_match_expr_list:l {: RESULT = l; :} 
+	| {: RESULT = new ArrayList(); :};
+
+field_match_expr_list ::= field_match_expr_list:l COMMA logical_expr:f
+	{:
+		List list=(List)l;
+		list.add(f);
+		RESULT=list;
+	:}
+		| logical_expr:f
+	{:
+		List l=new ArrayList();
+		l.add(f);
+		RESULT=l;
+	:}
+;
+
+at_params_conf_opt ::= LSPAREN arg_list_opt:l RSPAREN
+{:
+	RESULT = (List)l;
+:}
+|
+{:
+	RESULT = new ArrayList();
+:}
+;
+
+at_expr ::= IDENTIFIER:id COL AT:at IDENTIFIER:name at_params_conf_opt:cp LPAREN arg_list_opt:rp RPAREN
+{: 
+	RESULT = new AtPredicate(parser,(Token)at,name.toString(),(List)cp,(List)rp, id.toString());
+:}
+| AT:at IDENTIFIER:name at_params_conf_opt:cp LPAREN arg_list_opt:rp RPAREN
+{: 
+	RESULT = new AtPredicate(parser,(Token)at,name.toString(),(List)cp,(List)rp, null);
+:}
+;
+
+pre_post_op ::= var_access:e PLUSPLUS:op {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.POST_INC,(Expression)e); :}
+	| var_access:e MINUSMINUS:op {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.POST_DEC,(Expression)e); :}
+;
+
+invocation ::= IDENTIFIER:i LPAREN arg_list_opt:l RPAREN
+	{:
+		RESULT = new Invocation(parser,(Token)i,i.toString(),(List)l);
+	:}
+;
+
+arg_list_opt ::= arg_list:l {: RESULT=l; :} | {: RESULT=new ArrayList(); :}
+;
+
+arg_list ::= arg_list:l COMMA expr:e
+	{:
+		List list=(List)l;
+		list.add(e);
+		RESULT=list;
+	:}
+	| expr:e
+	{:
+		List list=new ArrayList();
+		list.add(e);
+		RESULT=list;
+	:}
+;
+
+rule ::= at_expr:at logical_expr_opt:g LCPAREN rule_body:l RCPAREN
+	{:
+		RESULT = new Rule(parser,((AstNode)at).token(),(AtPredicate)at,(Expression)g,(Sequence)l, null);
+	:}
+	| DOLLAR LPAREN arg_list_opt:el RPAREN at_expr:at logical_expr_opt:g LCPAREN rule_body:l RCPAREN
+	{:
+		RESULT = new Rule(parser,((AstNode)at).token(),(AtPredicate)at,(Expression)g,(Sequence)l, (List)el);
+	:}
+	| guard:g LCPAREN rule_body:l RCPAREN
+	{:
+		RESULT = new Rule(parser,((AstNode)g).token(),null,(Expression)g,(Sequence)l, null);
+	:}
+;
+
+rule_body ::= statement_list_opt:l ret_expr_opt:ret 
+	{:
+		if(ret!=null) {
+			if(l!=null) {
+				((Sequence)l).last().setNext(ret);
+			} else {
+				l = new Sequence(ret);
+			}
+		}
+		RESULT = l;
+	:}
+;		
+
+logical_expr_opt ::= logical_expr:e {: RESULT = e; :} | ;
+
+ret_expr_opt ::= RETURN:r expr:e {: RESULT = new ReturnStatement(parser,(Token)r,(Expression)e); :}
+	| RETURN:r boolean_literal:e {: RESULT = new ReturnStatement(parser,(Token)r,(Expression)e); :}
+	| RETURN:r {: RESULT = new ReturnStatement(parser,(Token)r,null); :}
+	| 
+;
+
+guard ::= logical_expr:e {: RESULT=e; :}
+	| set_logical_expr:e {: RESULT=e; :}
+;
+
+set_logical_expr ::= var_list:l OF:of set_decl:s TUBE logical_expr:e
+	{:
+		RESULT = new SetExpression(parser,(Token)of,(List)l,(Expression)s,(Expression)e);
+	:}
+	| var_list:l OF:of set_var_access:s TUBE logical_expr:e
+	{:
+		RESULT = new SetExpression(parser,(Token)of,(List)l,(Expression)s,(Expression)e);
+	:}	
+;
+
+set_decl ::= LSPAREN:l expr:lb DOTDOT expr:ub RSPAREN:r {:
+	RESULT = new SetDeclaration(parser,(Token)l,(Expression)lb,(Expression)ub);
+:}
+;
+
+usertype ::= TYPE:t TIDENTIFIER:i ASSIGN constructor_list:l
+	{:
+		UserType type = new UserType(parser,(Token)t,i.toString(),(List)l);
+		parser.parsedTypes.add(type);
+	:}
+;
+
+constructor_list ::= constructor_list:l TUBE constructor:c
+	{:
+		List list=(List)l;
+		list.add(c);
+		RESULT=list;
+	:}
+	| constructor:c
+	{:
+		List list=new ArrayList();
+		list.add(c);
+		RESULT=list;
+	:}
+;
+
+constructor ::= TIDENTIFIER:i LSPAREN field_list_opt: l RSPAREN 
+	{:
+		RESULT = new Constructor(parser,(Token)i,i.toString(),(List)l);
+	:}
+	| LSPAREN:i field_list_opt: l RSPAREN
+	{:
+		RESULT = new Constructor(parser,(Token)i,null,(List)l);
+	:}
+;
+
+constructor_or_type ::= constructor:c
+	{:
+		RESULT = c;
+	:}
+	| TIDENTIFIER:i 
+	{:
+		RESULT = new Constructor(parser,(Token)i,i.toString(),null);
+	:}
+;
+
+list_constructor ::= constructor_or_type:c {: RESULT = c; :}
+	| list_constructor:c MULT:m 
+	{: 
+		RESULT = new Constructor(parser,(Token)m,(Constructor)c);
+	:}
+;
+
+field_list_opt ::= field_list:l {: RESULT = l; :}
+	| {: RESULT = new ArrayList(); :}
+;
+
+field_list ::= field_list:l COMMA field:f
+	{:
+		List list=(List)l;
+		list.add(f);
+		RESULT=list;
+	:}
+		| field:f
+	{:
+		List l=new ArrayList();
+		l.add(f);
+		RESULT=l;
+	:}
+;
+
+field ::= IDENTIFIER:i COL list_constructor:c 
+	{:
+		RESULT = new Field(parser,(Token)i,i.toString(),(Constructor)c);
+	:}
+;

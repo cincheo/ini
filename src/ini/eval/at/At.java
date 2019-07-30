@@ -1,0 +1,204 @@
+package ini.eval.at;
+
+import ini.ast.Assignment;
+import ini.ast.AtPredicate;
+import ini.ast.Expression;
+import ini.ast.Rule;
+import ini.ast.Variable;
+import ini.eval.IniEval;
+import ini.eval.IniThread;
+import ini.eval.data.Data;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+public abstract class At {
+	protected boolean terminated = false;
+	public static Map<String, Class<? extends At>> atPredicates = new HashMap<String, Class<? extends At>>();
+	public List<At> synchronizedAts = new ArrayList<At>();
+	private ThreadPoolExecutor threadExecutor;
+	private int currentThreadCount = 0;
+	private Map<String, Data> inContext = new HashMap<String, Data>();
+	private Rule rule;
+	private AtPredicate atPredicate;
+
+	public static boolean checkAllTerminated(List<At> ats) {
+		if (ats == null)
+			return true;
+		for (At at : ats) {
+			if (!at.checkTerminated()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static void destroyAll(List<At> ats) {
+		if (ats == null)
+			return;
+		for (At at : ats) {
+			at.destroy();
+		}
+	}
+
+	static int currentId = 1;
+	int id;
+	static {
+		atPredicates.put("update", AtUpdate.class);
+		atPredicates.put("update_sync", AtUpdateSync.class);
+		atPredicates.put("every", AtEvery.class);
+		atPredicates.put("cron", AtCron.class);
+		atPredicates.put("read_keyboard", AtReadKeyboard.class);
+		atPredicates.put("consume", AtConsume.class);
+	}
+
+	public abstract void eval(IniEval eval);
+
+	public At() {
+		id = currentId++;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public boolean checkTerminated() {
+		return terminated;
+	}
+
+	public void terminate() {
+		if (threadExecutor != null) {
+			try {
+				threadExecutor.shutdown();
+				while (!threadExecutor.awaitTermination(100,
+						TimeUnit.MILLISECONDS)) {
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		terminated = true;
+	}
+
+	public void restart(IniEval eval) {
+		terminated = false;
+		threadExecutor = null;
+		eval(eval);
+	}
+
+	public void execute(IniEval eval, Map<String, Data> variables) {
+		// System.out.println(">>>> Excute: " + eval);
+		getThreadExecutor().execute(new IniThread(eval, this, rule, variables));
+		// System.out.println(">>>> Excute 2: " + this);
+	}
+
+	public ThreadPoolExecutor getThreadExecutor() {
+		if (threadExecutor == null) {
+			threadExecutor = (ThreadPoolExecutor) Executors
+					.newCachedThreadPool();
+			threadExecutor
+					.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+						@Override
+						public void rejectedExecution(Runnable r,
+								ThreadPoolExecutor executor) {
+							// System.out.println("REJECTED");
+						}
+					});
+		}
+		return threadExecutor;
+	}
+
+	public void destroy() {
+		if (threadExecutor != null && !threadExecutor.isShutdown()) {
+			threadExecutor.shutdownNow();
+//			try {
+//				threadExecutor.shutdown();
+//				while (!threadExecutor.awaitTermination(100,
+//						TimeUnit.MILLISECONDS)) {
+//
+//				}
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+		}
+	}
+
+	private void pushThread() {
+		// System.out.println("enter " + this);
+		currentThreadCount++;
+		// System.out.println("push: " + this + "," + currentThreadCount);
+	}
+
+	public synchronized void popThread() {
+		// System.out.println("exit " + this);
+		currentThreadCount--;
+		// System.out.println("pop: " + this + "," + currentThreadCount);
+		notifyAll();
+	}
+
+	private synchronized void isEmpty() {
+		while (currentThreadCount > 0) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void isEmptySynchronizedAts() {
+		// System.out.println("all ats: " + synchronizedAts);
+		for (At at : synchronizedAts) {
+			at.isEmpty();
+		}
+	}
+
+	Object monitor = new Object();
+
+	public void safelyEnter() {
+		// System.out.println("safely enter 1 " + this + " >>>");
+		synchronized (monitor) {
+			// System.out.println("safely enter 2 " + this + " >>>");
+			isEmptySynchronizedAts();
+			pushThread();
+			monitor.notifyAll();
+		}
+		// System.out.println("safely enter 3 " + this + " >>>");
+	}
+
+	public void parseInParameters(final IniEval eval,
+			List<Expression> inParameters) {
+		for (Expression e : inParameters) {
+			Assignment a = (Assignment) e;
+			inContext
+					.put(((Variable) a.assignee).name, eval.eval(a.assignment));
+		}
+	}
+
+	public Map<String, Data> getInContext() {
+		return inContext;
+	}
+
+	public Rule getRule() {
+		return rule;
+	}
+
+	public void setRule(Rule rule) {
+		this.rule = rule;
+	}
+
+	public AtPredicate getAtPredicate() {
+		return atPredicate;
+	}
+
+	public void setAtPredicate(AtPredicate atPredicate) {
+		this.atPredicate = atPredicate;
+	}
+
+}

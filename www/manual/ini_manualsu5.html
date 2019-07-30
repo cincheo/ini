@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>Constructing a Fibonacci tree</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,frames,3,info --> 
+<meta name="src" content="ini_manual.tex"> 
+<meta name="date" content="2010-09-12 12:23:00"> 
+<link rel="stylesheet" type="text/css" href="ini_manual.css"> 
+</head><body 
+>
+   <!--l. 304--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu6.html" >next</a>] [<a 
+href="ini_manualsu4.html" >prev</a>] [<a 
+href="ini_manualsu4.html#tailini_manualsu4.html" >prev-tail</a>] [<a 
+href="#tailini_manualsu5.html">tail</a>] [<a 
+href="ini_manualse3.html#ini_manualsu5.html" >up</a>] </p></div>
+   <h4 class="subsectionHead"><span class="titlemark">3.3   </span> <a 
+ id="x12-90003.3"></a>Constructing a Fibonacci tree</h4>
+<!--l. 306--><p class="noindent" >A Fibonacci tree is a binary tree defined as follows:
+     <ul class="itemize1">
+     <li class="itemize">each node contains an integer value <span 
+class="cmmi-10x-x-109">v</span>
+     </li>
+     <li class="itemize">if <span 
+class="cmmi-10x-x-109">v &#x003E; </span>2, the values of the two sub-nodes are <span 
+class="cmmi-10x-x-109">v </span><span 
+class="cmsy-10x-x-109">- </span>1 and <span 
+class="cmmi-10x-x-109">v </span><span 
+class="cmsy-10x-x-109">- </span>2
+     </li>
+     <li class="itemize">if <span 
+class="cmmi-10x-x-109">v </span>= 2, the values of the two sub-nodes are 1</li></ul>
+<!--l. 314--><p class="indent" >   Fibonacci trees have interesting properties to calculate the Fibonacci series.
+In particular, for a given node having the value <span 
+class="cmmi-10x-x-109">v</span>, the corresponding Fibonacci
+number equals to the number of tree leaves under this node.
+<!--l. 316--><p class="indent" >   In order to construct a Fibonacci tree, the best way is to define a tree type.
+In INI, it is possible to define structural types that contain fields. Typically, we
+can define a <span 
+class="cmtt-10x-x-109">Node </span>type as follows:
+   <!--l. 318-->
+   <div class="lstlisting" id="listing-13"><span class="label"><a 
+ id="x12-9001r1"></a></span>type&#x00A0;Node&#x00A0;=&#x00A0;[value:Int,left:Node,right:Node]
+   
+   </div>
+<!--l. 322--><p class="indent" >   As shown in the code, a node has three fields: an integer value and two nodes
+corresponding to the left and right sub-nodes (the <span 
+class="cmtt-10x-x-109">Node </span>type is recursively
+defined). Once the programmer has defined such a type, it is possible to
+construct new instances of it with the following syntax: for instance,
+<span 
+class="cmtt-10x-x-109">node = Node[value=1]</span>. This statement creates a new <span 
+class="cmtt-10x-x-109">Node </span>object and
+initializes the value field to 1. In INI, it is not mandatory to define all the
+fields when instantiating a type, it simply means that the not initialized
+fields are undefined (<span 
+class="cmtt-10x-x-109">null </span>value). To access the field value of a given type
+instance, the programmer must use the doted notation. For instance: <span 
+class="cmtt-10x-x-109">i =</span>
+<span 
+class="cmtt-10x-x-109">node.value</span>
+                                                                     
+
+                                                                     
+<!--l. 324--><p class="indent" >   Before starting the implementation, it is important to note that when the
+<span 
+class="cmtt-10x-x-109">Node </span>type is instantiated, the resulting object is part of a <span 
+class="cmtt-10x-x-109">Node </span>set since INI
+ensures a correspondence between the constructors and the set of objects that
+has been constructed through them. This can be useful to write guard with set
+expressions upon type instances.
+   <!--l. 326-->
+   <div class="lstlisting" id="listing-14"><span class="label"><a 
+ id="x12-9002r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;fibtree1(v)&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9003r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;@init()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9004r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;root&#x00A0;=&#x00A0;Node[value=v]&#x00A0;<br /><span class="label"><a 
+ id="x12-9005r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9006r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;n&#x00A0;of&#x00A0;Node&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;n.value&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003E;</span>&#x00A0;2&#x00A0;&amp;&amp;&#x00A0;!n.left&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9007r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.left&#x00A0;=&#x00A0;Node[value=n.value&#x00A0;<span 
+class="cmsy-10x-x-109">-</span>&#x00A0;1]&#x00A0;<br /><span class="label"><a 
+ id="x12-9008r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.right&#x00A0;=&#x00A0;Node[value=n.value&#x00A0;<span 
+class="cmsy-10x-x-109">-</span>&#x00A0;2]&#x00A0;<br /><span class="label"><a 
+ id="x12-9009r8"></a><span 
+class="cmr-9">8</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9010r9"></a><span 
+class="cmr-9">9</span></span>&#x00A0;&#x00A0;n&#x00A0;of&#x00A0;Node&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;n.value&#x00A0;==&#x00A0;2&#x00A0;&amp;&amp;&#x00A0;!n.left&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9011r10"></a><span 
+class="cmr-9">10</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.left&#x00A0;=&#x00A0;Node[value=1]&#x00A0;<br /><span class="label"><a 
+ id="x12-9012r11"></a><span 
+class="cmr-9">11</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.right&#x00A0;=&#x00A0;Node[value=1]&#x00A0;<br /><span class="label"><a 
+ id="x12-9013r12"></a><span 
+class="cmr-9">12</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9014r13"></a><span 
+class="cmr-9">13</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9015r14"></a><span 
+class="cmr-9">14</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;root&#x00A0;<br /><span class="label"><a 
+ id="x12-9016r15"></a><span 
+class="cmr-9">15</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9017r16"></a><span 
+class="cmr-9">16</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 345--><p class="indent" >   The <span 
+class="cmtt-10x-x-109">fibtree1 </span>function proposes a first implementation that uses the
+<span 
+class="cmtt-10x-x-109">Node </span>type and two set expression to construct a tree from a given root
+value. It takes the initial value <span 
+class="cmtt-10x-x-109">v </span>as an argument and first creates the root
+node of the tree (line 3) with undefined sub-nodes. Then, it defines two
+rules: one for constructing the sub-nodes for all the nodes having a value
+greater than 2 (line 5), one for constructing the final nodes when the value
+equals 2 (line 9). Note the use of <span 
+class="cmtt-10x-x-109">!n.left </span>in the two guards. It ensures
+that the rule will never apply again to a node that has already been
+handled (i.e. left sub-nodes is already there). Actually, the complete
+guard should be <span 
+class="cmtt-10x-x-109">!n.left &amp;&amp; !n.right </span>but it is not necessary since the
+program ensures that the left and right sub-nodes and always constructed at
+the same time. Finally when no more rule applies, i.e. all the possible
+nodes have been constructed, the function returns the root node of the
+tree.
+<!--l. 347--><p class="indent" >   This implementation works fine, but from a typing perspective, it would be
+nicer to have different constructors for the regular nodes and for the leaf nodes,
+since the latter can never have sub-nodes. It would allow better typing of the
+objects. This can be achieved using algebraic data types, which are supported by
+INI. Algebraic data types allow for the rigorous definition of complex types,
+similarly to an AST definition. They are supported by many functional
+languages such as OCAML, TOM, etc. The algebraic types in INI differ
+from typical ones because they allow for named field definitions and
+because the field initializations are not mandatory when constructing a
+type. Using an algebraic type, we can specify better the tree structure as
+follows:
+   <!--l. 349-->
+   <div class="lstlisting" id="listing-15"><span class="label"><a 
+ id="x12-9018r1"></a></span>type&#x00A0;Tree&#x00A0;=&#x00A0;Leaf[value:Int]&#x00A0;<br /><span class="label"><a 
+ id="x12-9019r2"></a></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;Node[value:Int,left:Tree,right:Tree]
+   
+   </div>
+                                                                     
+
+                                                                     
+<!--l. 354--><p class="indent" >   As we an see, we now have a <span 
+class="cmtt-10x-x-109">Tree </span>type that provides two constructors: one
+for regular nodes, and one for leaves. We can slightly change the function
+implementation:
+   <!--l. 356-->
+   <div class="lstlisting" id="listing-16"><span class="label"><a 
+ id="x12-9020r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;fibtree2(v)&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9021r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;@init()&#x00A0;v<span 
+class="cmmi-10x-x-109">&#x003E;</span>=2&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9022r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;root&#x00A0;=&#x00A0;Node[value=v]&#x00A0;<br /><span class="label"><a 
+ id="x12-9023r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9024r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;@init()&#x00A0;v==1&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9025r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;root&#x00A0;=&#x00A0;Leaf[value=v]&#x00A0;<br /><span class="label"><a 
+ id="x12-9026r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9027r8"></a><span 
+class="cmr-9">8</span></span>&#x00A0;&#x00A0;n&#x00A0;of&#x00A0;Node&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;n.value&#x00A0;<span 
+class="cmmi-10x-x-109">&#x003E;</span>&#x00A0;2&#x00A0;&amp;&amp;&#x00A0;!n.left&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9028r9"></a><span 
+class="cmr-9">9</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.left&#x00A0;=&#x00A0;Node[value=n.value&#x00A0;<span 
+class="cmsy-10x-x-109">-</span>&#x00A0;1]&#x00A0;<br /><span class="label"><a 
+ id="x12-9029r10"></a><span 
+class="cmr-9">10</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.right&#x00A0;=&#x00A0;Node[value=n.value&#x00A0;<span 
+class="cmsy-10x-x-109">-</span>&#x00A0;2]&#x00A0;<br /><span class="label"><a 
+ id="x12-9030r11"></a><span 
+class="cmr-9">11</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9031r12"></a><span 
+class="cmr-9">12</span></span>&#x00A0;&#x00A0;n&#x00A0;of&#x00A0;Node&#x00A0;<span 
+class="cmsy-10x-x-109">|</span>&#x00A0;n.value&#x00A0;==&#x00A0;2&#x00A0;&amp;&amp;&#x00A0;!n.left&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9032r13"></a><span 
+class="cmr-9">13</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.left&#x00A0;=&#x00A0;Leaf[value=1]&#x00A0;<br /><span class="label"><a 
+ id="x12-9033r14"></a><span 
+class="cmr-9">14</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.right&#x00A0;=&#x00A0;Leaf[value=1]&#x00A0;<br /><span class="label"><a 
+ id="x12-9034r15"></a><span 
+class="cmr-9">15</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9035r16"></a><span 
+class="cmr-9">16</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9036r17"></a><span 
+class="cmr-9">17</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;root&#x00A0;<br /><span class="label"><a 
+ id="x12-9037r18"></a><span 
+class="cmr-9">18</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9038r19"></a><span 
+class="cmr-9">19</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 378--><p class="indent" >   INI provides a match operator <img 
+src="ini_manual1x.png" alt="&#x02DC;  "  class="tilde" >that programmers can use to match
+instances of algebraic types. When a match is done in the guard, the matched
+object is considered to be an instance of the type constructed with the
+constructor used in the match expression. For instance, one can replace &#8221;<span 
+class="cmtt-10x-x-109">n of</span>
+<span 
+class="cmtt-10x-x-109">Node | n.value&#x003E;2 &amp;&amp; !n.left</span>&#8221; with &#8221;<span 
+class="cmtt-10x-x-109">n of Node | n </span><img 
+src="ini_manual2x.png" alt="~  "  class="tilde" ><span 
+class="cmtt-10x-x-109">Node[value&#x003E;2,</span>
+<span 
+class="cmtt-10x-x-109">!left]</span>&#8221;. Using a match operator in a set expression is not very useful, since
+here, we already know that <span 
+class="cmtt-10x-x-109">n </span>is an element of the <span 
+class="cmtt-10x-x-109">Node </span>set. Matching against the
+<span 
+class="cmtt-10x-x-109">Node[value&#x003E;2, !left] </span>expression is thus redundant. However, using match
+expression can be useful when programmers want to program using the
+functional style, for example to define a recursive function with a match
+switch, like one would proceed in OCAML, for instance. Here is a recursive
+implementation using functional programming style (note that it does not take a
+value, but a node <span 
+class="cmtt-10x-x-109">n</span>):
+   <!--l. 380-->
+   <div class="lstlisting" id="listing-17"><span class="label"><a 
+ id="x12-9039r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;fibtree3(n)&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9040r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;n&#x00A0;&#x02DC;&#x00A0;Node[value==2,!left]&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9041r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.left&#x00A0;=&#x00A0;Leaf[value=1]&#x00A0;<br /><span class="label"><a 
+ id="x12-9042r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.right&#x00A0;=&#x00A0;Leaf[value=1]&#x00A0;<br /><span class="label"><a 
+ id="x12-9043r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9044r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;n&#x00A0;&#x02DC;&#x00A0;Node[value<span 
+class="cmmi-10x-x-109">&#x003E;</span>2,!left]&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9045r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.left&#x00A0;=&#x00A0;fibtree3(Node[value=n.value&#x00A0;<span 
+class="cmsy-10x-x-109">-</span>&#x00A0;1])&#x00A0;<br /><span class="label"><a 
+ id="x12-9046r8"></a><span 
+class="cmr-9">8</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n.right&#x00A0;=&#x00A0;fibtree3(Node[value=n.value&#x00A0;<span 
+class="cmsy-10x-x-109">-</span>&#x00A0;2])&#x00A0;<br /><span class="label"><a 
+ id="x12-9047r9"></a><span 
+class="cmr-9">9</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9048r10"></a><span 
+class="cmr-9">10</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9049r11"></a><span 
+class="cmr-9">11</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;n&#x00A0;<br /><span class="label"><a 
+ id="x12-9050r12"></a><span 
+class="cmr-9">12</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9051r13"></a><span 
+class="cmr-9">13</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+<!--l. 396--><p class="indent" >   Finally, here is the <span 
+class="cmtt-10x-x-109">fibtree4 </span>function, which is a small variation of the
+<span 
+class="cmtt-10x-x-109">fibtree3 </span>function. <span 
+class="cmtt-10x-x-109">fibtree4 </span>creates new nodes to replace the matched node <span 
+class="cmtt-10x-x-109">n</span>
+instead of setting the <span 
+class="cmtt-10x-x-109">left </span>and <span 
+class="cmtt-10x-x-109">right </span>fields.
+   <!--l. 398-->
+   <div class="lstlisting" id="listing-18"><span class="label"><a 
+ id="x12-9052r1"></a><span 
+class="cmr-9">1</span></span>function&#x00A0;fibtree4(n)&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9053r2"></a><span 
+class="cmr-9">2</span></span>&#x00A0;&#x00A0;n&#x00A0;&#x02DC;&#x00A0;Node[value==2,!left]&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9054r3"></a><span 
+class="cmr-9">3</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n&#x00A0;=&#x00A0;Node[left=Leaf[value=1],&#x00A0;<br /><span class="label"><a 
+ id="x12-9055r4"></a><span 
+class="cmr-9">4</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;right=Leaf[value=1]]&#x00A0;<br /><span class="label"><a 
+ id="x12-9056r5"></a><span 
+class="cmr-9">5</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9057r6"></a><span 
+class="cmr-9">6</span></span>&#x00A0;&#x00A0;n&#x00A0;&#x02DC;&#x00A0;Node[value<span 
+class="cmmi-10x-x-109">&#x003E;</span>2,!left]&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9058r7"></a><span 
+class="cmr-9">7</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;n&#x00A0;=&#x00A0;Node[left=fibtree4(Node[value=n.value&#x00A0;<span 
+class="cmsy-10x-x-109">-</span>&#x00A0;1]),&#x00A0;<br /><span class="label"><a 
+ id="x12-9059r8"></a><span 
+class="cmr-9">8</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;right=fibtree4(Node[value=n.value&#x00A0;<span 
+class="cmsy-10x-x-109">-</span>&#x00A0;2])]&#x00A0;<br /><span class="label"><a 
+ id="x12-9060r9"></a><span 
+class="cmr-9">9</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9061r10"></a><span 
+class="cmr-9">10</span></span>&#x00A0;&#x00A0;@end()&#x00A0;<span 
+class="cmsy-10x-x-109">{</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9062r11"></a><span 
+class="cmr-9">11</span></span>&#x00A0;&#x00A0;&#x00A0;&#x00A0;return&#x00A0;n&#x00A0;<br /><span class="label"><a 
+ id="x12-9063r12"></a><span 
+class="cmr-9">12</span></span>&#x00A0;&#x00A0;<span 
+class="cmsy-10x-x-109">}</span>&#x00A0;<br /><span class="label"><a 
+ id="x12-9064r13"></a><span 
+class="cmr-9">13</span></span><span 
+class="cmsy-10x-x-109">}</span>
+   
+   </div>
+                                                                     
+
+                                                                     
+   <!--l. 414--><div class="crosslinks"><p class="noindent">[<a 
+href="ini_manualsu6.html" >next</a>] [<a 
+href="ini_manualsu4.html" >prev</a>] [<a 
+href="ini_manualsu4.html#tailini_manualsu4.html" >prev-tail</a>] [<a 
+href="ini_manualsu5.html" >front</a>] [<a 
+href="ini_manualse3.html#ini_manualsu5.html" >up</a>] </p></div>
+<!--l. 414--><p class="indent" >   <a 
+ id="tailini_manualsu5.html"></a>  
+</body></html> 
