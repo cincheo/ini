@@ -1,5 +1,6 @@
 package ini.broker;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,29 +21,46 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+
+import ini.eval.data.Data;
+import ini.eval.data.RawData;
 
 public class KafkaClient {
 
-	static class TypedObject {
-		private String type;
-		private String json;
-		public TypedObject(Object object) {
-			this.type = object.getClass().getTypeName();
-			this.json = new Gson().toJson(object);
-		}
-		public Object getObject() {
-			try {
-				return new Gson().fromJson(json, Class.forName(type));
-			} catch (Exception e) {
-				e.printStackTrace();
-				return new Gson().fromJson(json, String.class);
-			}
-		}
-	}
-	
+	/*
+	 * static class TypedObject { private String type; private String json;
+	 * public TypedObject(Object object) { this.type =
+	 * object.getClass().getTypeName(); this.json = new Gson().toJson(object); }
+	 * public Object getObject() { try { return new Gson().fromJson(json,
+	 * Class.forName(type)); } catch (Exception e) { e.printStackTrace(); return
+	 * new Gson().fromJson(json, String.class); } } }
+	 */
+
 	private final static boolean VERBOSE = false;
 	// private final static String TOPIC = "my-example-topic";
 	private final static String BOOTSTRAP_SERVERS = "localhost:9092,localhost:9093,localhost:9094";
+	
+/*	static {
+
+		Gson gson = new GsonBuilder();
+		TypeAdapter<RawData> typeAdapter = new JsonDeserializer<RawData>() {
+
+			@Override
+			public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+					throws JsonParseException {
+				JsonObject jsonObject = json.getAsJsonObject();
+				
+				return null;
+			}
+			
+		}).create();
+		
+	}*/
 
 	private static Producer<Long, String> createProducer() {
 		Properties props = new Properties();
@@ -69,12 +87,12 @@ public class KafkaClient {
 		return consumer;
 	}
 
-	public static void runProducer(final String topic, final Object message) throws Exception {
+	public static void runProducer(final String topic, final RawData message) throws Exception {
 		final Producer<Long, String> producer = createProducer();
 		long time = System.currentTimeMillis();
 
 		try {
-			final ProducerRecord<Long, String> record = new ProducerRecord<>(topic, new Gson().toJson(new TypedObject(message)));
+			final ProducerRecord<Long, String> record = new ProducerRecord<>(topic, new Gson().toJson(message));
 
 			RecordMetadata metadata = producer.send(record).get();
 
@@ -90,9 +108,9 @@ public class KafkaClient {
 		}
 	}
 
-	public static List<Object> runConsumer(final String topic) throws InterruptedException {
+	public static List<RawData> runConsumer(final String topic) throws InterruptedException {
 		final Consumer<Long, String> consumer = createConsumer(topic);
-		List<Object> result = new ArrayList<>();
+		List<RawData> result = new ArrayList<>();
 		while (true) {
 			if (VERBOSE) {
 				System.out.println("Consumer polling from topic " + topic);
@@ -108,9 +126,22 @@ public class KafkaClient {
 								record.partition(), record.offset());
 					}
 					try {
-						result.add(new Gson().fromJson(record.value(), TypedObject.class).getObject());
-					} catch(Exception e) {
-						System.err.println("error deserializing: "+record.value() + " - ignoring");
+						result.add(new GsonBuilder().registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
+							@Override
+							public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+									throws JsonParseException {
+								if(type.equals(Data.class)) {
+									return new Gson().fromJson(json, RawData.class);
+								} else {
+									return new Gson().fromJson(json, type);
+								}
+							}
+							
+						}
+						).create().fromJson(record.value(), RawData.class));
+					} catch (Exception e) {
+						System.err.println("error deserializing: " + record.value() + " - ignoring");
+						e.printStackTrace();
 					}
 				});
 				consumer.commitAsync();

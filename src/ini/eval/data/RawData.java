@@ -26,9 +26,9 @@ public class RawData implements Data {
 
 	private boolean explodedString = false;
 
-	private List<DataObserver> dataObservers;
+	private transient List<DataObserver> dataObservers;
 
-	private Constructor constructor;
+	private transient Constructor constructor;
 
 	@Override
 	public Constructor getConstructor() {
@@ -137,6 +137,12 @@ public class RawData implements Data {
 		} else {
 			return new RawData(object);
 		}
+	}
+
+	public static RawData rawCopy(Data data) {
+		RawData d = new RawData(null);
+		d.copyData(data);
+		return d;
 	}
 
 	public static Object dataToObject(Type type, Data data) {
@@ -432,8 +438,11 @@ public class RawData implements Data {
 			}
 			ret.append(array ? "]" : "}");
 		} else {
-			if (value != null)
+			if (value != null && Number.class.isAssignableFrom(value.getClass())) {
+				ret.append(""+value);
+			} else {
 				ret.append("\"" + value + "\"");
+			}
 		}
 		return ret.toString();
 	}

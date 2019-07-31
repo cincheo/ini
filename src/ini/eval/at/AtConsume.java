@@ -22,11 +22,11 @@ public class AtConsume extends At {
 				do {
 					try {
 						Data d = getInContext().get("channel");
-						List<Object> values = KafkaClient.runConsumer(d.getValue());
-						for(Object value : values) {
+						List<RawData> values = KafkaClient.runConsumer(d.getValue());
+						for(RawData value : values) {
 							Map<String, Data> variables = new HashMap<String, Data>();
 							variables.put(getAtPredicate().outParameters.get(0).toString(),
-									new RawData(value));
+									value);
 							execute(eval, variables);
 						}
 					} catch (InterruptedException e) {

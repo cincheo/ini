@@ -7,6 +7,7 @@ import ini.ast.Invocation;
 import ini.broker.KafkaClient;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
+import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.type.Type;
 import ini.type.TypingConstraint;
@@ -16,9 +17,9 @@ public class ProduceFunction extends IniFunction {
 	@Override
 	public Data eval(IniEval eval, List<Expression> params) {
 		String topic = eval.eval(params.get(0)).getValue();
-		Object message = eval.eval(params.get(1)).getValue();
+		Data message = eval.eval(params.get(1));
 		try {
-			KafkaClient.runProducer(topic, message);
+			KafkaClient.runProducer(topic, RawData.rawCopy(message));
 		}
 		catch(Exception e) {
 			throw new RuntimeException(e);
