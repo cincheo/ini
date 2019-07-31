@@ -163,8 +163,9 @@ public class RawData implements Data {
 				e.printStackTrace();
 			}
 		}
-		if (data.getReferences() == null) {
-			return data.getValue();
+		Object value = data.getValue();
+		if (data.getReferences() == null || data.getReferences().isEmpty()) {
+			return value;
 		} else {
 			if (data.isIndexedSet() && ((Integer) data.minIndex()) > 0) {
 				List<Object> l = new ArrayList<Object>();
