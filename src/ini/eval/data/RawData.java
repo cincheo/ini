@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class RawData implements Data {
 
 	private Kind kind = Kind.REGULAR;
 
-	private boolean explodedString = false;
+	private transient boolean explodedString = false;
 
 	private transient List<DataObserver> dataObservers;
 
@@ -241,6 +242,34 @@ public class RawData implements Data {
 		return true;
 	}
 
+	/**
+	 * If this data is an integer set, tries to transform all keys into integers to make
+	 * it a list. This is used mostly because JSON serialization of data will
+	 * loose integer keys and transform them to strings. So we have to transform
+	 * them back to integers if possible.
+	 * 
+	 * @return
+	 */
+	public RawData tryNumerizeKeys() {
+		if (references != null && kind == Kind.INT_SET) {
+			Map<Object, Data> newRefs = new HashMap<>();
+			boolean numerizable = true;
+			for (Entry<Object, Data> entry : references.entrySet()) {
+				try {
+					int key = Integer.parseInt(entry.getKey().toString());
+					newRefs.put(key, entry.getValue());
+				} catch (Exception e) {
+					numerizable = false;
+					break;
+				}
+			}
+			if (numerizable && references.size() == newRefs.size()) {
+				references = newRefs;
+			}
+		}
+		return this;
+	}
+
 	@SuppressWarnings("unchecked")
 	public Object minIndex() {
 		if (references == null) {
@@ -439,7 +468,7 @@ public class RawData implements Data {
 			ret.append(array ? "]" : "}");
 		} else {
 			if (value != null && Number.class.isAssignableFrom(value.getClass())) {
-				ret.append(""+value);
+				ret.append("" + value);
 			} else {
 				ret.append("\"" + value + "\"");
 			}

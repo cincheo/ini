@@ -44,23 +44,36 @@ public class KafkaClient {
 	private final static boolean VERBOSE = false;
 	// private final static String TOPIC = "my-example-topic";
 	private final static String BOOTSTRAP_SERVERS = "localhost:9092,localhost:9093,localhost:9094";
-	
-/*	static {
 
-		Gson gson = new GsonBuilder();
-		TypeAdapter<RawData> typeAdapter = new JsonDeserializer<RawData>() {
+	private final static GsonBuilder gsonBuilder = new GsonBuilder();
 
+	static {
+		gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
 			@Override
 			public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 					throws JsonParseException {
-				JsonObject jsonObject = json.getAsJsonObject();
-				
-				return null;
+				return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys();
 			}
-			
-		}).create();
-		
-	}*/
+		});
+
+	}
+
+	/*
+	 * static {
+	 * 
+	 * Gson gson = new GsonBuilder(); TypeAdapter<RawData> typeAdapter = new
+	 * JsonDeserializer<RawData>() {
+	 * 
+	 * @Override public RawData deserialize(JsonElement json, Type type,
+	 * JsonDeserializationContext context) throws JsonParseException {
+	 * JsonObject jsonObject = json.getAsJsonObject();
+	 * 
+	 * return null; }
+	 * 
+	 * }).create();
+	 * 
+	 * }
+	 */
 
 	private static Producer<Long, String> createProducer() {
 		Properties props = new Properties();
@@ -108,9 +121,9 @@ public class KafkaClient {
 		}
 	}
 
-	public static List<RawData> runConsumer(final String topic) throws InterruptedException {
+	public static List<Data> runConsumer(final String topic) throws InterruptedException {
 		final Consumer<Long, String> consumer = createConsumer(topic);
-		List<RawData> result = new ArrayList<>();
+		List<Data> result = new ArrayList<>();
 		while (true) {
 			if (VERBOSE) {
 				System.out.println("Consumer polling from topic " + topic);
@@ -126,19 +139,7 @@ public class KafkaClient {
 								record.partition(), record.offset());
 					}
 					try {
-						result.add(new GsonBuilder().registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
-							@Override
-							public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
-									throws JsonParseException {
-								if(type.equals(Data.class)) {
-									return new Gson().fromJson(json, RawData.class);
-								} else {
-									return new Gson().fromJson(json, type);
-								}
-							}
-							
-						}
-						).create().fromJson(record.value(), RawData.class));
+						result.add(gsonBuilder.create().fromJson(record.value(), Data.class));
 					} catch (Exception e) {
 						System.err.println("error deserializing: " + record.value() + " - ignoring");
 						e.printStackTrace();

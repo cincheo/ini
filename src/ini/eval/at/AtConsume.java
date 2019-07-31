@@ -22,8 +22,8 @@ public class AtConsume extends At {
 				do {
 					try {
 						Data d = getInContext().get("channel");
-						List<RawData> values = KafkaClient.runConsumer(d.getValue());
-						for(RawData value : values) {
+						List<Data> values = KafkaClient.runConsumer(d.getValue());
+						for(Data value : values) {
 							Map<String, Data> variables = new HashMap<String, Data>();
 							variables.put(getAtPredicate().outParameters.get(0).toString(),
 									value);
