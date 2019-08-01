@@ -17,12 +17,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/java_cup_v10k.zip"/>
-	<classpathentry kind="lib" path="lib/JFlex.jar"/>
-	<classpathentry kind="lib" path="lib/cron4j-2.2.3.jar"/>
-	<classpathentry kind="lib" path="lib/jetty.jar"/>
-	<classpathentry kind="lib" path="lib/servlet-api-2.5.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
