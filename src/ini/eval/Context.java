@@ -1,13 +1,12 @@
 package ini.eval;
 
-import ini.ast.Function;
-import ini.eval.data.Data;
-import ini.eval.data.DataReference;
-
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
+
+import ini.ast.Function;
+import ini.eval.data.Data;
+import ini.eval.data.DataReference;
 
 public class Context {
 
