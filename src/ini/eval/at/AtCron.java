@@ -2,7 +2,6 @@ package ini.eval.at;
 
 import ini.eval.IniEval;
 import ini.eval.IniThread;
-import ini.eval.data.Data;
 import it.sauronsoftware.cron4j.Scheduler;
 
 public class AtCron extends At {
@@ -18,11 +17,6 @@ public class AtCron extends At {
 		Scheduler s = new Scheduler();
 		s.schedule(pattern, new IniThread(eval, this, getRule()));
 		s.start();
-	}
-
-	@Override
-	public boolean checkTerminated() {
-		return terminated;
 	}
 
 }

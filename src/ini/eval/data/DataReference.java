@@ -66,6 +66,13 @@ public class DataReference implements Data {
 	}
 
 	@Override
+	public boolean isNumber() {
+		if (isPending())
+			return false;
+		return referencedData.isNumber();
+	}
+
+	@Override
 	public boolean isArray() {
 		if (isPending())
 			return false;

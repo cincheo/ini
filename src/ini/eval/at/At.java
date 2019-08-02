@@ -73,17 +73,22 @@ public abstract class At {
 	}
 
 	public void terminate() {
-		if (threadExecutor != null) {
-			try {
-				threadExecutor.shutdown();
-				while (!threadExecutor.awaitTermination(100,
-						TimeUnit.MILLISECONDS)) {
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
 		terminated = true;
+		// we stop the executor in another thread in case we are in the tread of
+		// a running task that would prevent proper shutdown
+		new Thread() {
+			public void run() {
+				if (threadExecutor != null) {
+					try {
+						threadExecutor.shutdown();
+						while (!threadExecutor.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+						}
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}.start();
 	}
 
 	public void restart(IniEval eval) {
@@ -100,33 +105,38 @@ public abstract class At {
 
 	public ThreadPoolExecutor getThreadExecutor() {
 		if (threadExecutor == null) {
-			threadExecutor = (ThreadPoolExecutor) Executors
-					.newCachedThreadPool();
-			threadExecutor
-					.setRejectedExecutionHandler(new RejectedExecutionHandler() {
-						@Override
-						public void rejectedExecution(Runnable r,
-								ThreadPoolExecutor executor) {
-							// System.out.println("REJECTED");
-						}
-					});
+			threadExecutor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+			threadExecutor.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+				@Override
+				public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+					// System.out.println("REJECTED");
+				}
+			});
 		}
 		return threadExecutor;
 	}
 
 	public void destroy() {
-		if (threadExecutor != null && !threadExecutor.isShutdown()) {
-			threadExecutor.shutdownNow();
-//			try {
-//				threadExecutor.shutdown();
-//				while (!threadExecutor.awaitTermination(100,
-//						TimeUnit.MILLISECONDS)) {
-//
-//				}
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-		}
+		// we stop the executor in another thread in case we are in the tread of
+		// a running task that would prevent proper shutdown
+		new Thread() {
+			public void run() {
+				if (threadExecutor != null) {
+					if (threadExecutor != null && !threadExecutor.isShutdown()) {
+						threadExecutor.shutdownNow();
+						// try {
+						// threadExecutor.shutdown();
+						// while (!threadExecutor.awaitTermination(100,
+						// TimeUnit.MILLISECONDS)) {
+						//
+						// }
+						// } catch (InterruptedException e) {
+						// e.printStackTrace();
+						// }
+					}
+				}
+			}
+		}.start();
 	}
 
 	private void pushThread() {
@@ -172,12 +182,10 @@ public abstract class At {
 		// System.out.println("safely enter 3 " + this + " >>>");
 	}
 
-	public void parseInParameters(final IniEval eval,
-			List<Expression> inParameters) {
+	public void parseInParameters(final IniEval eval, List<Expression> inParameters) {
 		for (Expression e : inParameters) {
 			Assignment a = (Assignment) e;
-			inContext
-					.put(((Variable) a.assignee).name, eval.eval(a.assignment));
+			inContext.put(((Variable) a.assignee).name, eval.eval(a.assignment));
 		}
 	}
 

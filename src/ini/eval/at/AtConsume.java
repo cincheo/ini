@@ -4,10 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.kafka.common.errors.InterruptException;
+
 import ini.broker.KafkaClient;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
-import ini.eval.data.RawData;
 
 public class AtConsume extends At {
 	
@@ -30,7 +31,8 @@ public class AtConsume extends At {
 							execute(eval, variables);
 						}
 					} catch (InterruptedException e) {
-						//System.out.println("INTERUPTED");
+						break;
+					} catch (InterruptException e) {
 						break;
 					}
 				} while (!checkTerminated());
@@ -42,9 +44,9 @@ public class AtConsume extends At {
 
 	@Override
 	public void terminate() {
-		super.terminate();
+		// TODO: interrupt properly 
 		mainThread.interrupt();
-		//mainThread = null;
+		super.terminate();
 	}
 
 }

@@ -76,7 +76,5 @@
 			<artifactId>jetty-server</artifactId>
 			<version>9.4.19.v20190610</version>
 		</dependency>
-
-
 	</dependencies>
 </project>

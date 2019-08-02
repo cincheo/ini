@@ -49,8 +49,8 @@ public abstract class IniFunction {
 		functions.put("read_keyboard", new ReadKeyboardFunction());
 		functions.put("zip", new ZipFunction());
 		functions.put("upload_ftp", new UploadFTPFunction());
-		functions.put("stop_event", new KillAt());
-		functions.put("restart_event", new RestartAtFunction());
+		functions.put("stop", new KillAt());
+		functions.put("restart", new RestartAtFunction());
 		functions.put("reconfigure", new ReconfigureAtFunction());
 		functions.put("to_json", new ToJsonFunction());
 		functions.put("produce", new ProduceFunction());

@@ -21,6 +21,8 @@ public interface Data {
 
 	boolean isBoolean();
 
+	boolean isNumber();
+	
 	boolean isTrueOrDefined();
 
 	boolean isIndexedSet();

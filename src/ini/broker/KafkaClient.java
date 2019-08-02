@@ -1,5 +1,6 @@
 package ini.broker;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,8 +27,15 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 import ini.eval.data.Data;
+import ini.eval.data.Data.Kind;
 import ini.eval.data.RawData;
 
 public class KafkaClient {
@@ -52,10 +60,27 @@ public class KafkaClient {
 			@Override
 			public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 					throws JsonParseException {
-				return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys();
+				RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys();
+				if(data.isNumber()) {
+					if(!json.getAsJsonObject().get("value").toString().contains(".")) {
+						data.setValue(json.getAsJsonObject().get("value").getAsLong());
+					}
+				}
+				return data;
 			}
 		});
-
+/*		gsonBuilder.registerTypeAdapter(Double.class, new TypeAdapter<Double>() {
+			@Override
+			public Double read(JsonReader reader) throws IOException {
+				return null;
+			}
+			@Override
+			public void write(JsonWriter writer, Double number) throws IOException {
+				System.out.println("Writing: "+number);
+				writer.jsonValue(""+number);
+			}
+		});*/
+		
 	}
 
 	/*

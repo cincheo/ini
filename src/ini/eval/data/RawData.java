@@ -223,6 +223,11 @@ public class RawData implements Data {
 	public boolean isBoolean() {
 		return (value instanceof Boolean);
 	}
+	
+	@Override
+	public boolean isNumber() {
+		return (value instanceof Number);
+	}
 
 	public boolean isTrueOrDefined() {
 		if (isBoolean()) {

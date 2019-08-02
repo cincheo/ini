@@ -17,7 +17,6 @@ public class AtEvery extends At {
 						sleep(getInContext().get("time").getNumber()
 								.longValue());
 					} catch (InterruptedException e) {
-						//System.out.println("INTERUPTED");
 						break;
 					}
 					execute(eval, null);
@@ -25,13 +24,6 @@ public class AtEvery extends At {
 			}
 		};
 		mainThread.start();
-	}
-
-	@Override
-	public void terminate() {
-		super.terminate();
-		mainThread.interrupt();
-		//mainThread = null;
 	}
 
 }
