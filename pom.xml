@@ -69,7 +69,7 @@
 								<property name="compile_classpath" refid="maven.compile.classpath" />
 								<property name="outputDir" value="${project.build.outputDirectory}" />
 								<property name="sourceDir" value="${project.build.sourceDirectory}" />
-								<ant antfile="${basedir}/build.xml" target="gen-parser" />
+								<ant antfile="${basedir}/build.xml" target="build.parser" />
 							</target>
 						</configuration>
 						<goals>
