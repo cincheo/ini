@@ -32,20 +32,25 @@ By default, INI uses Kafka as a distributed broker for inter-process communicati
 
 Build with:
 
-% cd {ini_root_dir}
-% maven generate-sources # first build only (will generate INI parser)
-% maven install
+```console
+$ cd {ini_root_dir}
+$ maven generate-sources # first build only (will generate INI parser)
+$ maven install
+```
 
 Lauch INI program (UNIX-based):
 
-% cd {ini_root_dir}
-% bin/ini {ini_file}
+```console
+$ cd {ini_root_dir}
+$ bin/ini {ini_file}
+```
 
 ## Use with Kafka
 
 In order to use the @consume event, you need Kafka up and running. For local testing, install and run Kafka as described on the official site.
 
-% cd kafka_2.12-2.2.0
-% bin/zookeeper-server-start.sh config/zookeeper.properties
-% bin/kafka-server-start.sh config/server.properties
-
+```console
+$ cd kafka_2.12-2.2.0
+$ bin/zookeeper-server-start.sh config/zookeeper.properties
+$ bin/kafka-server-start.sh config/server.properties
+```
