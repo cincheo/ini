@@ -13,4 +13,18 @@ public class TestEvents extends IniTestCase {
 						out));
 	}
 
+	public void testUpdate() {
+		testFile("ini/test/events/update.ini",
+				(p, out) -> assertEquals(
+						"1->2\n2->3\n3->4\nend\n",
+						out));
+	}
+
+	public void testUpdateAsync() {
+		testFile("ini/test/events/update_async.ini", 50, 
+				(p, out) -> assertEquals(
+						"end\n***",
+						out));
+	}
+	
 }

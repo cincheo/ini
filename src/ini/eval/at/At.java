@@ -51,7 +51,6 @@ public abstract class At {
 	int id;
 	static {
 		atPredicates.put("update", AtUpdate.class);
-		atPredicates.put("update_sync", AtUpdateSync.class);
 		atPredicates.put("every", AtEvery.class);
 		atPredicates.put("cron", AtCron.class);
 		atPredicates.put("read_keyboard", AtReadKeyboard.class);
