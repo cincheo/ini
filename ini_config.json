@@ -1,0 +1,13 @@
+{
+	environments: {
+		development: {
+			bootstrapBrokerServers: "localhost:9092,localhost:9093,localhost:9094"
+		},
+		test: {
+			bootstrapBrokerServers: "localhost:9092,localhost:9093,localhost:9094"
+		},
+		production: {
+			bootstrapBrokerServers: "localhost:9092,localhost:9093,localhost:9094"
+		}
+	}
+}

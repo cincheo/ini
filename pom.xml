@@ -10,7 +10,7 @@
 			<name>Renaud Pawlak</name>
 			<email>renaud.pawlak@gmail.com</email>
 		</developer>
-	</developers>	
+	</developers>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
@@ -165,5 +165,11 @@
 			<artifactId>jetty-server</artifactId>
 			<version>9.4.19.v20190610</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 	</dependencies>
 </project>

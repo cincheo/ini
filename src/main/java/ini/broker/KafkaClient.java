@@ -27,6 +27,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
+import ini.Main;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
 
@@ -43,7 +44,6 @@ public class KafkaClient {
 
 	private final static boolean VERBOSE = false;
 	// private final static String TOPIC = "my-example-topic";
-	private final static String BOOTSTRAP_SERVERS = "localhost:9092,localhost:9093,localhost:9094";
 
 	private final static GsonBuilder gsonBuilder = new GsonBuilder();
 
@@ -94,7 +94,7 @@ public class KafkaClient {
 
 	private static Producer<Long, String> createProducer() {
 		Properties props = new Properties();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Main.configuration.environments.get(Main.environment).bootstrapBrokerServers);
 		props.put(ProducerConfig.CLIENT_ID_CONFIG, "IniProducer");
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -103,7 +103,7 @@ public class KafkaClient {
 
 	private static Consumer<Long, String> createConsumer(String topic) {
 		final Properties props = new Properties();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Main.configuration.environments.get(Main.environment).bootstrapBrokerServers);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, "IniConsumer");
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
