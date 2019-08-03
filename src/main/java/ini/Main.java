@@ -57,7 +57,7 @@ public class Main {
 						.setHelp("Defines variables to be watched during debug (ignored when not in debug mode)."));
 
 		jsap.registerParameter(
-				new FlaggedOption("env").setStringParser(JSAP.STRING_PARSER).setRequired(false).setList(false).setHelp(
+				new FlaggedOption("env").setLongFlag("env").setStringParser(JSAP.STRING_PARSER).setRequired(false).setList(false).setHelp(
 						"The environment name to be used, as defined in the 'ini_conf.json' file. Overrides the value defined in the INI_ENV system environment variable."));
 
 		jsap.registerParameter(new UnflaggedOption("file").setStringParser(JSAP.STRING_PARSER).setRequired(true)

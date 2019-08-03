@@ -1,10 +1,4 @@
 
-## Context
-
-INI is a tiny process-based language that was designed to build distributed applications in a simple way.
-INI was first created and design by Renaud Pawlak as a side research project.
-It was extended by Truang Giang Lee during his PhD to introduce better control and synchronization on events, as well as formal verification of INI programs. His PhD was co-supervised by Renaud Rioboo (research director), Renaud Pawlak, Mathieu Manceny, and Olivier Hermant.
-
 ## About INI
 
 ### Language Design Philosophy
@@ -26,9 +20,66 @@ By default, INI uses Kafka as a distributed broker for inter-process communicati
 - Reactive and event-driven: programmers can easily declare events to which processes will react
 - Type inference and user types: programmers can define complex structured types and the type checker will enforce the correct usage of the structure
 - Rule-based: processes and programs rely on rules for readability purpose
-- Functional style: programmers familiar with functional programming can use functions in a minimalist way
+- Functional style: programmers familiar with functional programming can use functions and recursion
+
+## Examples
+
+The following INI program creates a process that will be notified every 1000 ms by the @every event. It will then apply the rule to print a tick and increment the tick count hold by the i variable.
+
+```python
+process main() {
+	@init() {
+		i = 1
+	}
+	@every[time=1000]() {
+		println("tick "+(i++))
+	}
+}
+```
+
+In the following program, the main process creates two sub-processes p1 and p2. These 3 processes produce and consumes in 3 channels in order to create a pipeline that will increment the transmitted value twice.
+
+> main --c1--> p1 --c2--> p2 --c--> main
+
+
+```python
+process main() {
+	@init() {
+		p1("c1")
+		p2("c2")
+		println("processes started")
+		produce("c1", 1)
+	}
+	@consume[channel="c"](v) {
+		println("end of pipeline: "+v)
+	}
+}
+
+process p1(name) {
+	@consume[channel="c1"](v) {
+		println(name+": "+v)
+		produce("c2", v+1)
+	}
+}
+
+process p2(name) {
+	@consume[channel="c2"](v) {
+		println(name+": "+v)
+		produce("c", v+1)
+	}
+}
+```
+
 
 ## Getting started
+
+Install and start Apache Kafka:
+
+```console
+$ cd kafka_{version}
+$ bin/zookeeper-server-start.sh config/zookeeper.properties
+$ bin/kafka-server-start.sh config/server.properties
+```
 
 Build with:
 
@@ -45,12 +96,14 @@ $ cd {ini_root_dir}
 $ bin/ini {ini_file}
 ```
 
-## Use with Kafka
+## Using with Kafka
 
-In order to use the @consume event, you need Kafka up and running. For local testing, install and run Kafka as described on the official site.
+For development (JUnit tests), INI uses the "development" environment, which uses a locally installed Kafka broker. 
+In order to use another Kafka instance, modify the "ini_config.json" configuration file to set the right connection parameters. Typically once moving an INI program to production, you should modify the "production" environment to connect to the production Kafka instance. Then you should ask INI to use the production environment by setting the "INI_ENV" system environment variable to "production", or by using the "--env" option when running INI.
 
-```console
-$ cd kafka_2.12-2.2.0
-$ bin/zookeeper-server-start.sh config/zookeeper.properties
-$ bin/kafka-server-start.sh config/server.properties
-```
+## Origins of INI
+
+INI was first created and design by Renaud Pawlak as a side research project.
+
+It was extended by Truang Giang Lee during his PhD to introduce better control and synchronization on events, as well as formal verification of INI programs using model checking. His PhD was co-supervised by Renaud Rioboo (research director), Renaud Pawlak, Mathieu Manceny, and Olivier Hermant.
+
