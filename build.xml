@@ -14,7 +14,6 @@
 	<!-- ================================== -->
 
 	<target name="build.parser">
-		<!--<java classname="ini.parser.GenParser" classpathref="classpath" fork="yes" dir="${src}/ini/parser" failonerror="yes" />-->
 		<echo>Generating INI parser...</echo>
 		<echo message="compile classpath: ${compile_classpath}" />
 		<java classname="java_cup.Main" fork="true" failonerror="true" classpath="${compile_classpath}">
@@ -24,15 +23,15 @@
 			<arg value="ini.parser" />
 			<arg value="-parser" />
 			<arg value="IniParser" />
-			<arg value="src/ini/parser/ini.cup" />
+			<arg value="src/main/java/ini/parser/ini.cup" />
 		</java>
-		<move file="IniParser.java" todir="src/ini/parser" overwrite="true">
+		<move file="IniParser.java" todir="src/main/java/ini/parser" overwrite="true">
 		</move>
-		<move file="sym.java" todir="src/ini/parser" overwrite="true">
+		<move file="sym.java" todir="src/main/java/ini/parser" overwrite="true">
 		</move>
 		<echo>Generating INI lexer...</echo>
 		<java classname="JFlex.Main" fork="true" failonerror="true" classpath="${compile_classpath}">
-			<arg value="src/ini/parser/ini.lex" />
+			<arg value="src/main/java/ini/parser/ini.lex" />
 		</java>
 
 	</target>
