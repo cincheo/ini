@@ -26,7 +26,7 @@ By default, INI uses Kafka as a distributed broker for inter-process communicati
 
 The following INI program creates a process that will be notified every 1000 ms by the @every event. It will then apply the rule to print a tick and increment the tick count hold by the i variable.
 
-```python
+```javascript
 process main() {
 	@init() {
 		i = 1
@@ -42,7 +42,7 @@ In the following program, the main process creates two sub-processes p1 and p2. 
 > main --c1--> p1 --c2--> p2 --c--> main
 
 
-```python
+```javascript
 process main() {
 	@init() {
 		p1("c1")
