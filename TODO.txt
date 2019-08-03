@@ -1,4 +1,47 @@
 
+
+Map to Pi Calculus (https://en.wikipedia.org/wiki/%CE%A0-calculus)
+
+process main() {
+	@init() {
+		p1(x)
+		p2(x)
+		p3(x)
+	}
+}
+
+process p1(x) {
+	@init() {
+		produce(x, "z");
+	}
+}
+
+process p2(x) {
+	c:@consume[channel=x](y) {
+		produce(y, x)
+		// anonymous process...
+		process(x) {
+			c:@consume[channel=x](y) {
+				stop(c)
+			}
+		}(x)
+		stop(c)
+	}
+}
+
+process p3(x) {
+	c:@consume[channel="z"](v) {
+		produce(v, v)
+		stop(c)
+	}
+}
+
+```
+
+
+
+
+
 Nokia Java ME
 
 http://library.forum.nokia.com/index.jsp?topic=/Java_Developers_Library/GUID-660EC670-B7DB-4005-BF2D-411E5C0B3867_overview-d0e41497.html

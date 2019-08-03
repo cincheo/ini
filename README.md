@@ -43,7 +43,7 @@ In the following program, the main process creates two sub-processes p1 and p2. 
 
 
 ```javascript
-process main() {
+agent main() {
 	@init() {
 		p1("c1")
 		p2("c2")
@@ -55,21 +55,20 @@ process main() {
 	}
 }
 
-process p1(name) {
+agent p1(name) {
 	@consume[channel="c1"](v) {
 		println(name+": "+v)
 		produce("c2", v+1)
 	}
 }
 
-process p2(name) {
+agent p2(name) {
 	@consume[channel="c2"](v) {
 		println(name+": "+v)
 		produce("c", v+1)
 	}
 }
 ```
-
 
 ## Getting started
 
