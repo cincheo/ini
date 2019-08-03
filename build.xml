@@ -9,167 +9,32 @@
 	<property name="examples" value="${basedir}/examples" />
 	<property name="doc" value="${basedir}/doc" />
 
-	<!-- Classpath definition -->
-
-	<path id="classpath">
-		<fileset dir="${basedir}/lib">
-			<include name="java_cup_v10k.zip" />
-			<include name="JFlex.jar" />
-			<include name="JSAP-2.1.jar" />
-			<include name="jetty.jar" />
-			<include name="servlet-api-2.5.jar" />
-			<include name="cron4j-2.2.3.jar" />
-			<include name="jna.jar" />
-			<include name="javacv.jar" />
-			<include name="gson-2.6.2.jar" />
-		</fileset>
-
-		<pathelement location="${build}" />
-	</path>
-
 	<!-- ================================== -->
-	<!--              EXECUTE               -->
-	<!-- ================================== -->
-
-	<target name="example.test">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/test.ini" />
-		</java>
-	</target>
-
-	<target name="example.fac">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/fac.ini" />
-		</java>
-	</target>
-
-	<target name="example.ping_pong">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/ping_pong.ini" />
-		</java>
-	</target>
-	
-	<target name="example.read_keyboard">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/read_keyboard.ini" />
-		</java>
-	</target>
-
-	<target name="example.lcss">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/lcss.ini" />
-		</java>
-	</target>
-	
-	<target name="example.detect_ball">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/detect_ball.ini" />
-		</java>
-	</target>
-	
-	<target name="example.copy_file">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/copy_file.ini" />
-		</java>
-	</target>
-	
-	<target name="example.comparator">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/comparator.ini" />
-		</java>
-	</target>
-
-	<target name="example.timer">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/timer.ini" />
-		</java>
-	</target>
-
-	<target name="example.sort">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/sort.ini" />
-		</java>
-	</target>
-
-	<target name="example.count_occurences">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/count_occurences.ini" />
-		</java>
-	</target>
-
-	<target name="example.fibonacci">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/fibonacci.ini" />
-		</java>
-	</target>
-
-	<target name="example.pretty_printer">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/pretty_printer.ini" />
-		</java>
-	</target>
-	
-	<target name="example.algebraic_expressions">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/algebraic_expressions.ini" />
-		</java>
-	</target>
-
-	<target name="example.queens_1">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/queens/queens_1.ini" />
-		</java>
-	</target>
-
-	<target name="example.queens_2">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/queens/queens_2.ini" />
-		</java>
-	</target>
-	
-	<target name="example.unpublished.io">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/unpublished/io.ini" />
-		</java>
-	</target>
-
-	<target name="example.unpublished.web_service">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/unpublished/web_service.ini" />
-		</java>
-	</target>
-	
-	<target name="example.unpublished.http_server">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/unpublished/http_server.ini" />
-		</java>
-	</target>
-
-	<target name="example.http_server.http_server">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/http_server/http_server.ini" />
-		</java>
-	</target>
-	
-	<target name="example.unpublished.update">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/examples/unpublished/update.ini" />
-		</java>
-	</target>
-	
-	<target name="testfile.ini">
-		<java classname="ini.Main" classpathref="classpath" fork="yes" failonerror="yes">
-			<arg value="ini/testfile.ini" />
-		</java>
-	</target>
-
-	
-	<!-- ================================== -->
-	<!--              COMPILE               -->
+	<!--          GENERATE PARSER           -->
 	<!-- ================================== -->
 
 	<target name="build.parser">
-		<java classname="ini.parser.GenParser" classpathref="classpath" fork="yes" dir="${src}/ini/parser" failonerror="yes" />
+		<!--<java classname="ini.parser.GenParser" classpathref="classpath" fork="yes" dir="${src}/ini/parser" failonerror="yes" />-->
+		<echo>Generating INI parser...</echo>
+		<echo message="compile classpath: ${compile_classpath}" />
+		<java classname="java_cup.Main" fork="true" failonerror="true" classpath="${compile_classpath}">
+			<arg value="-expect" />
+			<arg value="0" />
+			<arg value="-package" />
+			<arg value="ini.parser" />
+			<arg value="-parser" />
+			<arg value="IniParser" />
+			<arg value="src/ini/parser/ini.cup" />
+		</java>
+		<move file="IniParser.java" todir="src/ini/parser" overwrite="true">
+		</move>
+		<move file="sym.java" todir="src/ini/parser" overwrite="true">
+		</move>
+		<echo>Generating INI lexer...</echo>
+		<java classname="JFlex.Main" fork="true" failonerror="true" classpath="${compile_classpath}">
+			<arg value="src/ini/parser/ini.lex" />
+		</java>
+
 	</target>
 	
 	<!-- ================================== -->
@@ -181,14 +46,6 @@
 	</target>
 
 	<!-- ================================== -->
-	<!--               JAR                  -->
-	<!-- ================================== -->
-
-	<target name="jar">
-		<jar destfile="bin/ini.jar" basedir="${build}" />
-	</target>
-	
-	<!-- ================================== -->
 	<!--               VERSION              -->
 	<!-- ================================== -->
 
@@ -197,7 +54,7 @@
 			<zipfileset dir="bin" prefix="bin"/>
 			<zipfileset dir="ini" prefix="ini"/>
 			<zipfileset dir="lib" prefix="lib" excludes="jetty.jar, servlet-api-2.5.jar"/>
-		    <fileset dir="." includes="READ_ME.txt"/>
+		    <fileset dir="." includes="README.md"/>
 		</zip>
 	</target>
 		
@@ -230,23 +87,4 @@
 		<copy file="${doc}/papers/ini_manual/ini_manual.pdf" todir="www/manual" />
 	</target>
 
-	<!-- ================================== -->
-	<!--               TEST                 -->
-	<!-- ================================== -->
-	<target name="test">
-		<junit errorproperty="tests.failed" failureproperty="tests.failed">
-			<classpath>
-				<path refid="classpath" />
-				<pathelement path="/Applications/eclipse/plugins/org.junit_3.8.2.v200706111738/junit.jar" />
-			</classpath>
-			<test name="ini.test.TestFields"/>
-			<test name="ini.test.TestTypeDeclarations"/>
-			<test name="ini.test.TestFunctions"/>
-			<test name="ini.test.TestArrays"/>
-			<test name="ini.test.TestExamples"/>
-            <formatter type="brief" usefile="false"/>
-		</junit>
-	</target>
-
-	
 </project>
