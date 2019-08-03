@@ -22,7 +22,7 @@ public class EvalFunction extends IniFunction {
 
 	@Override
 	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		return parser.ast._;
+		return parser.ast.ANY;
 	}
 
 	

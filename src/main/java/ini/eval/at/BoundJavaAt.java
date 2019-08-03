@@ -1,8 +1,6 @@
 package ini.eval.at;
 
 import ini.ast.AtBinding;
-import ini.ast.AtPredicate;
-import ini.ast.Rule;
 import ini.eval.IniEval;
 
 public class BoundJavaAt extends At {

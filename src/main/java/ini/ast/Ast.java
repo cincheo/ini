@@ -67,7 +67,7 @@ public class Ast {
 		return constructors.containsKey(name);
 	}
 
-	public final Type _ = new Type(parser);
+	public final Type ANY = new Type(parser);
 
 	public Map<String, Type> types = new HashMap<String, Type>();
 	public Map<String, Type> aliases = new HashMap<String, Type>();

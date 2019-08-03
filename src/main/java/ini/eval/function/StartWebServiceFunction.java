@@ -41,7 +41,7 @@ public class StartWebServiceFunction extends IniFunction {
 
 	@Override
 	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		return parser.ast.getFunctionalType(parser.ast.VOID, parser.ast.INT, parser.ast.getFunctionalType(parser.ast.VOID,parser.ast.STRING,parser.ast._));
+		return parser.ast.getFunctionalType(parser.ast.VOID, parser.ast.INT, parser.ast.getFunctionalType(parser.ast.VOID,parser.ast.STRING,parser.ast.ANY));
 	}
 	
 	public class Handler extends AbstractHandler {

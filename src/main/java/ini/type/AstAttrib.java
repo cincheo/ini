@@ -333,7 +333,7 @@ public class AstAttrib {
 				ft = IniFunction.functions.get(invocation.name).getType(parser,
 						constraints, invocation);
 
-				if (ft == parser.ast._) {
+				if (ft == parser.ast.ANY) {
 					for (int i = 0; i < invocation.arguments.size(); i++) {
 						eval(invocation.arguments.get(i));
 					}
@@ -349,7 +349,7 @@ public class AstAttrib {
 						} else {
 							for (int i = 0; i < ft.getTypeParameters().size(); i++) {
 								t2 = eval(invocation.arguments.get(i));
-								if (ft.getTypeParameters().get(i) != parser.ast._) {
+								if (ft.getTypeParameters().get(i) != parser.ast.ANY) {
 									constraints.add(new TypingConstraint(
 											TypingConstraint.Kind.EQ, t2,
 											ft.getTypeParameters().get(i),
@@ -364,7 +364,7 @@ public class AstAttrib {
 						}
 					}
 
-					if (ft.getReturnType() != parser.ast._) {
+					if (ft.getReturnType() != parser.ast.ANY) {
 						result = ft.getReturnType();
 					} else {
 						result = new Type(parser);

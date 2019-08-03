@@ -1,8 +1,5 @@
 package ini.eval.data;
 
-import ini.ast.Constructor;
-import ini.type.Type;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -11,11 +8,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import ini.ast.Constructor;
+import ini.type.Type;
 
 public class RawData implements Data {
 
@@ -284,7 +283,7 @@ public class RawData implements Data {
 		if (references.containsKey(Data.LOWER_BOUND_KEY)) {
 			return references.get(Data.LOWER_BOUND_KEY).getValue();
 		} else {
-			return Collections.min((Set) references.keySet());
+			return Collections.min((Set)references.keySet());
 		}
 	}
 

@@ -1,5 +1,17 @@
 package ini.eval;
 
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.martiansoftware.jsap.JSAPResult;
+
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
 import ini.ast.AstNode;
@@ -35,21 +47,6 @@ import ini.eval.data.DataReference;
 import ini.eval.data.RawData;
 import ini.eval.function.IniFunction;
 import ini.parser.IniParser;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.martiansoftware.jsap.JSAPResult;
 
 public class IniEval {
 
@@ -142,8 +139,8 @@ public class IniEval {
 					break;
 				case GT:
 					try {
-						result = new RawData(((Comparable) eval(b.left)
-								.getValue()).compareTo(((Comparable) eval(
+						result = new RawData(((Comparable<Object>) eval(b.left)
+								.getValue()).compareTo(((Comparable<Object>) eval(
 								b.right).getValue())) > 0);
 					} catch (NullPointerException e) {
 						result = new RawData(false);
@@ -151,8 +148,8 @@ public class IniEval {
 					break;
 				case GTE:
 					try {
-						result = new RawData(((Comparable) eval(b.left)
-								.getValue()).compareTo(((Comparable) eval(
+						result = new RawData(((Comparable<Object>) eval(b.left)
+								.getValue()).compareTo(((Comparable<Object>) eval(
 								b.right).getValue())) >= 0);
 					} catch (NullPointerException e) {
 						result = new RawData(false);
@@ -160,8 +157,8 @@ public class IniEval {
 					break;
 				case LT:
 					try {
-						result = new RawData(((Comparable) eval(b.left)
-								.getValue()).compareTo(((Comparable) eval(
+						result = new RawData(((Comparable<Object>) eval(b.left)
+								.getValue()).compareTo(((Comparable<Object>) eval(
 								b.right).getValue())) < 0);
 					} catch (NullPointerException e) {
 						result = new RawData(false);
@@ -169,8 +166,8 @@ public class IniEval {
 					break;
 				case LTE:
 					try {
-						result = new RawData(((Comparable) eval(b.left)
-								.getValue()).compareTo(((Comparable) eval(
+						result = new RawData(((Comparable<Object>) eval(b.left)
+								.getValue()).compareTo(((Comparable<Object>) eval(
 								b.right).getValue())) <= 0);
 					} catch (NullPointerException e) {
 						result = new RawData(false);

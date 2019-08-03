@@ -59,18 +59,15 @@ public class Ini2Pml {
 			Assignment a = (Assignment) node;
 			// System.out.println(">>>>>>>>>>>>" + observedVariables +
 			// a.assignee.toString());
-			if (!exclusiveNodes.contains(a)
-					&& observedVariables.contains(a.assignee.toString())) {
+			if (!exclusiveNodes.contains(a) && observedVariables.contains(a.assignee.toString())) {
 				out.append("atomic {\n");
 			}
 			generate(a.assignee, out);
 			out.append("=");
 			generate(a.assignment, out);
 			out.append(";\n");
-			if (!exclusiveNodes.contains(a)
-					&& observedVariables.contains(a.assignee.toString())) {
-				out.append("chan_" + a.assignee.toString() + "!"
-						+ a.assignee.toString() + "\n");
+			if (!exclusiveNodes.contains(a) && observedVariables.contains(a.assignee.toString())) {
+				out.append("chan_" + a.assignee.toString() + "!" + a.assignee.toString() + "\n");
 				out.append("}\n");
 			}
 			// System.out.println("check type:" + a.assignee +
@@ -195,8 +192,7 @@ public class Ini2Pml {
 					break;
 				case UPDATE:
 					// Generate monitor proctype for the variable
-					String observedVariable = r.atPredicate.inParameters.get(0)
-							.toString().split("=")[1];
+					String observedVariable = r.atPredicate.inParameters.get(0).toString().split("=")[1];
 					// observedVariables.add(observedVariable);
 					rendezvousChannels.add("chan_" + observedVariable);
 					String tempVariable = "temp_" + observedVariable;
@@ -208,11 +204,9 @@ public class Ini2Pml {
 					// out.append("endU:\n");
 					out.append("do\n");
 					out.append(":: atomic {\n");
-					out.append("chan_" + observedVariable + " ? "
-							+ tempVariable + "->\n");
+					out.append("chan_" + observedVariable + " ? " + tempVariable + "->\n");
 					out.append("if\n");
-					out.append("::(" + tempVariable + " != " + observedVariable
-							+ ")->\n");
+					out.append("::(" + tempVariable + " != " + observedVariable + ")->\n");
 					generateStatements(r.statements, out);
 					out.append(":: else -> skip;\n");
 					out.append("fi;\n");
@@ -220,6 +214,7 @@ public class Ini2Pml {
 					out.append("od;\n");
 					out.append("}\n");
 					break;
+				default:
 				}
 			}
 
@@ -350,8 +345,7 @@ public class Ini2Pml {
 			break;
 
 		default:
-			throw new RuntimeException("unsuported syntax node: " + node + " ("
-					+ node.getClass() + ")");
+			throw new RuntimeException("unsuported syntax node: " + node + " (" + node.getClass() + ")");
 
 		}
 
@@ -382,7 +376,7 @@ public class Ini2Pml {
 			variableDeclaration.append("bool ");
 		}
 	}
-	
+
 	public String convertType(Type type) {
 		if (type == parser.ast.INT || type == parser.ast.LONG) {
 			return "byte";
@@ -394,20 +388,18 @@ public class Ini2Pml {
 
 	public void generateRendezvousChannels() {
 		for (String s : observedVariables) {
-			variableDeclaration.append("chan chan_" + s
-					+ "= [0] of {" + convertType(variableTypes.get(s)) + "}\n");
+			variableDeclaration.append("chan chan_" + s + "= [0] of {" + convertType(variableTypes.get(s)) + "}\n");
 		}
 	}
 
 	public void generateBufferedChannels(int capacity) {
 		for (String s : observedVariables) {
-			variableDeclaration.append("chan chan_" + s
-					+ "= [" + capacity +"] of {" + convertType(variableTypes.get(s)) + "}\n");
+			variableDeclaration
+					.append("chan chan_" + s + "= [" + capacity + "] of {" + convertType(variableTypes.get(s)) + "}\n");
 		}
 	}
 
-	public void generateNotification(Sequence<Statement> s, String variable,
-			StringBuffer out) {
+	public void generateNotification(Sequence<Statement> s, String variable, StringBuffer out) {
 		if (observedVariables.contains(variable)) {
 			out.append("atomic {\n");
 		}
@@ -424,8 +416,7 @@ public class Ini2Pml {
 			Function f = (Function) node;
 			for (Rule r : f.atRules) {
 				if (r.atPredicate.kind.equals(AtPredicate.Kind.UPDATE)) {
-					String observedVariable = r.atPredicate.inParameters.get(0)
-							.toString().split("=")[1];
+					String observedVariable = r.atPredicate.inParameters.get(0).toString().split("=")[1];
 					observedVariables.add(observedVariable);
 				}
 			}
