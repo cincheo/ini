@@ -13,6 +13,7 @@ By default, INI uses Kafka as a distributed broker for inter-process communicati
 
 - IoT/Robotics
 - Distributed Computing
+- Multi-Agent Systems
 
 ### INI Main Features
 
@@ -78,14 +79,10 @@ process main() {
 }
 ```
 
+Since processes are asynchronous, they cannot return values like functions do. So, process communicate through channels (similarly to Pi calculus and most agent-based systems). Processes can produce data in channels using the ``produce`` function, and consume data from channel using the ``@consume`` event.
+
 In the following program, the ``main`` process creates two sub-processes by calling ``p``. Each sub-process consumes a data from an ``in`` channel and produces the incremented result to an ``out`` channel.
 Thus, it creates a pipeline that ultimately sends back the data incremented twice to the main process, as explained below.
-
-- ``main`` creates two sub-processes ``p("c1", "c2")`` and ``p("c2", "c")``,
-- ``main`` sends the data 1 to the ``"c1"`` channel (``produce("c1", 1)``),
-- ``1`` is consumed from ``"c1"`` by ``p("c1", "c2")``, and ``2`` is produced to ``"c2"``,
-- ``2`` is consumed from ``"c2"`` by ``p("c2", "c")``, and ``3`` is produced to ``"c"``,
-- finally, ``3`` is consumed from ``"c"`` by ``main``, and the pipeline stops there.
 
 ```javascript
 process main() {
@@ -109,6 +106,16 @@ process p(in, out) {
 	}
 }
 ```
+
+The above program behaves as depicted here:
+
+- ``main`` creates two sub-processes ``p("c1", "c2")`` and ``p("c2", "c")``,
+- ``main`` sends the data 1 to the ``"c1"`` channel (``produce("c1", 1)``),
+- ``1`` is consumed from ``"c1"`` by ``p("c1", "c2")``, and ``2`` is produced to ``"c2"``,
+- ``2`` is consumed from ``"c2"`` by ``p("c2", "c")``, and ``3`` is produced to ``"c"``,
+- finally, ``3`` is consumed from ``"c"`` by ``main``, and the pipeline stops there.
+
+Note the use of the ``stop`` function in the ``@consume`` event rules. This is not mandatory but if you don't stop the consumer, the process will never end. Here, we want the processes to terminate once they have handled the data.
 
 ## Getting started
 
