@@ -24,7 +24,48 @@ By default, INI uses Kafka as a distributed broker for inter-process communicati
 
 ## Examples
 
-The following INI program creates a process that will be notified every 1000ms by the ``@every`` event. It then applies the rule to print a tick and increments the tick count hold by the ``i`` variable.
+### Functions
+
+For pure local calculations, INI programmers can define functions. These are meant to be extremely simple, because for heavy and distributed computations, programmers shall use processes, that we will show in the next section.
+
+Here is a typical factorial calculation with INI. Note the absence of a switch in the body of the function. 
+
+```javascript
+function fac(n) {
+	n == 1 {
+		return 1
+	}
+	n > 1 {
+		return n * fac2(n-1)
+	}
+}
+```
+
+Note that INI has a peculiar execution semantics since only rules (rule = condition + action) are allowed within a function. All the rules continue to be executed until none is applicable anymore or if the function has returned a value (using an explicit ``return`` statement).
+In practice, it means that one can use a rule-based flavor to program a function. For instance, here is the factorial implementation with a rule-based style.
+
+```javascript
+function fac(n) {
+	@init() {
+		f=1
+		i=2
+	}
+	i <= n {
+		f=f*i++
+	}
+	@end() {
+		return f
+	}
+}
+```
+
+Note the ``@init`` and ``@end`` rules, which are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. Note that this programming style is not purely functional and is not encouraged. However, it can be quite convenient in various cases, especially to implement looping in a simple way.
+
+### Processes
+
+In INI, processes look pretty similar to functions but actually implement a quite different execution semantics. On contrary to a function, a process always runs asynchronously and reacts to its environment through events. A process definition can only contain rules and event rules, i.e. actions that are triggered when a condition is fulfilled, or when an event is fired. By default, a process will never end, unless none of the rules can apply anymore and all the events are terminated (or are one-shot events). 
+
+The following INI program creates a process that will be notified every 1000ms by the ``@every`` event. It then evaluate the rule's action to print a tick and increments the tick count hold by the ``i`` variable.
 
 ```javascript
 process main() {
