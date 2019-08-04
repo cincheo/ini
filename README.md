@@ -24,7 +24,7 @@ By default, INI uses Kafka as a distributed broker for inter-process communicati
 
 ## Examples
 
-The following INI program creates a process that will be notified every 1000 ms by the @every event. It will then apply the rule to print a tick and increment the tick count hold by the i variable.
+The following INI program creates a process that will be notified every 1000ms by the ``@every`` event. It then applies the rule to print a tick and increments the tick count hold by the ``i`` variable.
 
 ```javascript
 process main() {
@@ -37,35 +37,34 @@ process main() {
 }
 ```
 
-In the following program, the main process creates two sub-processes p1 and p2. These 3 processes produce and consumes in 3 channels in order to create a pipeline that will increment the transmitted value twice.
+In the following program, the ``main`` process creates two sub-processes by calling ``p``. Each sub-process consumes a data from an ``in`` channel and produces the incremented result to an ``out`` channel.
+Thus, it creates a pipeline that ultimately sends back the data incremented twice to the main process, as explained below.
 
-> main --c1--> p1 --c2--> p2 --c--> main
-
+- ``main`` creates two sub-processes ``p("c1", "c2")`` and ``p("c2", "c")``,
+- ``main`` sends the data 1 to the ``"c1"`` channel (``produce("c1", 1)``),
+- ``1`` is consumed from ``"c1"`` by ``p("c1", "c2")``, and ``2`` is produced to ``"c2"``,
+- ``2`` is consumed from ``"c2"`` by ``p("c2", "c")``, and ``3`` is produced to ``"c"``,
+- finally, ``3`` is consumed from ``"c"`` by ``main``, and the pipeline stops there.
 
 ```javascript
-agent main() {
+process main() {
 	@init() {
-		p1("c1")
-		p2("c2")
+		p("c1", "c2")
+		p("c2", "c")
 		println("processes started")
 		produce("c1", 1)
 	}
-	@consume[channel="c"](v) {
+	c:@consume[channel="c"](v) {
 		println("end of pipeline: "+v)
+		stop(c)
 	}
 }
 
-agent p1(name) {
-	@consume[channel="c1"](v) {
-		println(name+": "+v)
-		produce("c2", v+1)
-	}
-}
-
-agent p2(name) {
-	@consume[channel="c2"](v) {
-		println(name+": "+v)
-		produce("c", v+1)
+process p(in, out) {
+	c:@consume[channel=in](v) {
+		println(in+": "+v)
+		produce(out, v+1)
+		stop(c)
 	}
 }
 ```
