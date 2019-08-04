@@ -131,7 +131,6 @@ Build with:
 
 ```console
 $ cd {ini_root_dir}
-$ maven generate-sources # first build only (will generate INI parser)
 $ maven install
 ```
 
