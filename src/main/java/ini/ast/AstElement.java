@@ -1,5 +1,6 @@
 package ini.ast;
 
+import ini.Main;
 import ini.parser.IniParser;
 import ini.type.Type;
 
@@ -10,10 +11,12 @@ import java.util.List;
 
 public abstract class AstElement implements AstNode {
 
-	public IniParser parser;
-	public Token token;
+	transient public IniParser parser;
+	transient public Token token;
 	public int nodeTypeId = -1;
-	public Type type;
+	transient public Type type;
+	public String owner = Main.node;
+	public List<Expression> annotations;
 	
 	@Override
 	public int nodeTypeId() {

@@ -1,12 +1,11 @@
 package ini.eval.at;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.kafka.common.errors.InterruptException;
 
-import ini.broker.KafkaClient;
+import ini.broker.DefaultBrokerClient;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 
@@ -23,13 +22,23 @@ public class AtConsume extends At {
 				do {
 					try {
 						Data d = getInContext().get("channel");
-						List<Data> values = KafkaClient.runConsumer(d.getValue());
+						
+						//System.out.println("CCCC: "+d.getValue());
+						
+						DefaultBrokerClient.getInstance().consume(d.getValue(), value -> {
+							Map<String, Data> variables = new HashMap<String, Data>();
+							variables.put(getAtPredicate().outParameters.get(0).toString(),
+									value);
+							execute(eval, variables);
+						});
+						
+						/*List<Data> values = KafkaClient.runConsumer(d.getValue());
 						for(Data value : values) {
 							Map<String, Data> variables = new HashMap<String, Data>();
 							variables.put(getAtPredicate().outParameters.get(0).toString(),
 									value);
 							execute(eval, variables);
-						}
+						}*/
 					} catch (InterruptedException e) {
 						break;
 					} catch (InterruptException e) {

@@ -1,9 +1,9 @@
 package ini.ast;
 
-import ini.parser.IniParser;
-
 import java.io.PrintStream;
 import java.util.List;
+
+import ini.parser.IniParser;
 
 public class Invocation extends NamedElement implements Statement, Expression {
 

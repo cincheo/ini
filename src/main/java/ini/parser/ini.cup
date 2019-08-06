@@ -543,9 +543,11 @@ pre_post_op ::= var_access:e PLUSPLUS:op {: RESULT=new UnaryOperator(parser,(Tok
 	| var_access:e MINUSMINUS:op {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.POST_DEC,(Expression)e); :}
 ;
 
-invocation ::= IDENTIFIER:i LPAREN arg_list_opt:l RPAREN
+invocation ::= IDENTIFIER:i LPAREN arg_list_opt:l RPAREN at_params_conf_opt:cp
 	{:
-		RESULT = new Invocation(parser,(Token)i,i.toString(),(List)l);
+		Invocation inv = new Invocation(parser,(Token)i,i.toString(),(List)l);
+		inv.annotations = (List)cp;
+		RESULT = inv;
 	:}
 ;
 

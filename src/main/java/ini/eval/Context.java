@@ -74,4 +74,8 @@ public class Context {
 		}
 	}
 
+	public Map<String, Data> getVariables() {
+		return variables;
+	}
+
 }

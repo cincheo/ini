@@ -5,7 +5,7 @@
 
 INI has been designed to keep distributed computing as simple as it can be. It natively handles processes, deployment, communication and synchronization, so that the programmers do not have to care about these issues by writing complex code.
 
-INI is not meant to be a general-purpose language that will address all programming issues programmers can face, but to efficiently build data pipelines or calculations that require multiple distributed processes to collaborate around a broker.
+INI is not meant to be a general-purpose language. It will not address all programming issues programmers can face. On the other hand, it will help programmers to efficiently build data pipelines or calculations that require multiple distributed processes to collaborate around a broker.
 
 By default, INI uses Kafka as a distributed broker for inter-process communication.
 
@@ -42,7 +42,7 @@ function fac(n) {
 }
 ```
 
-Note that INI has a peculiar execution semantics since only rules (rule = condition + action) are allowed within a function. All the rules continue to be executed until none is applicable anymore or if the function has returned a value (using an explicit ``return`` statement).
+In INI, only rules (``rule := condition|event { action }``) are allowed within a function. All the rules continue to be executed until none is applicable anymore or if the function has returned (using an explicit ``return`` statement).
 In practice, it means that one can use a rule-based flavor to program a function. For instance, here is the factorial implementation with a rule-based style.
 
 ```javascript

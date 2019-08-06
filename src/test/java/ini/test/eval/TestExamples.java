@@ -32,5 +32,8 @@ public class TestExamples extends IniTestCase {
 						"<html>\n    <head>\n    </head>\n    <body bgcolor=\"white\" width=\"100%\">\nthis is a body text example \n        <b>\nthis is a strong text\n        </b>\n    </body>\n</html>\n{name:\"html\",content:[{name:\"head\"},{name:\"body\",attr:[{name:\"bgcolor\",value:\"white\"},{name:\"width\",value:\"100%\"}],content:[{name:\"false\",text:\"this is a body text example \"},{name:\"b\",content:[{name:\"false\",text:\"this is a strong text\"}]}]}]}\n",
 						out));
 	}
-
+	
+	public void testProcessCommunication() {
+		testFile("ini/examples/process_communication.ini", (p, out) -> assertEquals("processes started\nc1: 1\nc2: 2.0\nend of pipeline: 3.0\n", out));
+	}
 }

@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import com.martiansoftware.jsap.JSAPResult;
 
+import ini.Main;
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
 import ini.ast.AstNode;
@@ -41,6 +42,9 @@ import ini.ast.SubArrayAccess;
 import ini.ast.UnaryOperator;
 import ini.ast.Variable;
 import ini.ast.VariableAccess;
+import ini.broker.CoreBrokerClient;
+import ini.broker.FetchRequest;
+import ini.broker.SpawnRequest;
 import ini.eval.at.At;
 import ini.eval.data.Data;
 import ini.eval.data.DataReference;
@@ -80,8 +84,8 @@ public class IniEval {
 			switch (node.nodeTypeId()) {
 
 			case AstNode.ARRAY_ACCESS:
-				result = eval(((ArrayAccess) node).variableAccess).get(
-						eval(((ArrayAccess) node).indexExpression).getValue());
+				result = eval(((ArrayAccess) node).variableAccess)
+						.get(eval(((ArrayAccess) node).indexExpression).getValue());
 				break;
 
 			case AstNode.ASSIGNMENT:
@@ -119,73 +123,64 @@ public class IniEval {
 					}
 					break;
 				case DIV:
-					result = new RawData(eval(b.left).getNumber().doubleValue()
-							/ eval(b.right).getNumber().doubleValue());
+					result = new RawData(
+							eval(b.left).getNumber().doubleValue() / eval(b.right).getNumber().doubleValue());
 					break;
 				case MULT:
-					result = new RawData(mult(eval(b.left).getNumber(),
-							eval(b.right).getNumber()));
+					result = new RawData(mult(eval(b.left).getNumber(), eval(b.right).getNumber()));
 					break;
 				case EQUALS:
 					result = new RawData(eval(b.left).equals(eval(b.right)));
 					break;
 				case NOTEQUALS:
 					try {
-						result = new RawData(!eval(b.left).getValue().equals(
-								eval(b.right).getValue()));
+						result = new RawData(!eval(b.left).getValue().equals(eval(b.right).getValue()));
 					} catch (NullPointerException e) {
 						result = new RawData(true);
 					}
 					break;
 				case GT:
 					try {
-						result = new RawData(((Comparable<Object>) eval(b.left)
-								.getValue()).compareTo(((Comparable<Object>) eval(
-								b.right).getValue())) > 0);
+						result = new RawData(((Comparable<Object>) eval(b.left).getValue())
+								.compareTo(((Comparable<Object>) eval(b.right).getValue())) > 0);
 					} catch (NullPointerException e) {
 						result = new RawData(false);
 					}
 					break;
 				case GTE:
 					try {
-						result = new RawData(((Comparable<Object>) eval(b.left)
-								.getValue()).compareTo(((Comparable<Object>) eval(
-								b.right).getValue())) >= 0);
+						result = new RawData(((Comparable<Object>) eval(b.left).getValue())
+								.compareTo(((Comparable<Object>) eval(b.right).getValue())) >= 0);
 					} catch (NullPointerException e) {
 						result = new RawData(false);
 					}
 					break;
 				case LT:
 					try {
-						result = new RawData(((Comparable<Object>) eval(b.left)
-								.getValue()).compareTo(((Comparable<Object>) eval(
-								b.right).getValue())) < 0);
+						result = new RawData(((Comparable<Object>) eval(b.left).getValue())
+								.compareTo(((Comparable<Object>) eval(b.right).getValue())) < 0);
 					} catch (NullPointerException e) {
 						result = new RawData(false);
 					}
 					break;
 				case LTE:
 					try {
-						result = new RawData(((Comparable<Object>) eval(b.left)
-								.getValue()).compareTo(((Comparable<Object>) eval(
-								b.right).getValue())) <= 0);
+						result = new RawData(((Comparable<Object>) eval(b.left).getValue())
+								.compareTo(((Comparable<Object>) eval(b.right).getValue())) <= 0);
 					} catch (NullPointerException e) {
 						result = new RawData(false);
 					}
 					break;
 				case MINUS:
-					result = new RawData(minus(eval(b.left).getNumber(),
-							eval(b.right).getNumber()));
+					result = new RawData(minus(eval(b.left).getNumber(), eval(b.right).getNumber()));
 					break;
 				case PLUS:
 					d = eval(b.left);
 					Object o = d.getValue();
 					if (o instanceof String) {
-						result = new RawData((String) o
-								+ eval(b.right).toPrettyString());
+						result = new RawData((String) o + eval(b.right).toPrettyString());
 					} else {
-						result = new RawData(plus(eval(b.left).getNumber(),
-								eval(b.right).getNumber()));
+						result = new RawData(plus(eval(b.left).getNumber(), eval(b.right).getNumber()));
 					}
 					break;
 				case MATCHES:
@@ -201,8 +196,7 @@ public class IniEval {
 
 			case AstNode.BOOLEAN_LITERAL:
 				result = new RawData(((BooleanLiteral) node).value);
-				result.setConstructor(parser.ast
-						.getOrCreatePrimitive("Boolean"));
+				result.setConstructor(parser.ast.getOrCreatePrimitive("Boolean"));
 				break;
 
 			case AstNode.CHAR_LITERAL:
@@ -211,8 +205,7 @@ public class IniEval {
 				break;
 
 			case AstNode.FIELD_ACCESS:
-				result = eval(((FieldAccess) node).variableAccess).get(
-						((FieldAccess) node).fieldName);
+				result = eval(((FieldAccess) node).variableAccess).get(((FieldAccess) node).fieldName);
 				break;
 
 			case AstNode.FUNCTION:
@@ -228,8 +221,7 @@ public class IniEval {
 					Map<Rule, At> atMap = new HashMap<Rule, At>();
 					for (Rule rule : f.atRules) {
 						// At at = At.atPredicates.get(rule.atPredicate.name);
-						Class<? extends At> c = At.atPredicates
-								.get(rule.atPredicate.name);
+						Class<? extends At> c = At.atPredicates.get(rule.atPredicate.name);
 						At at = null;
 						try {
 							at = c.newInstance();
@@ -237,16 +229,13 @@ public class IniEval {
 							at.setAtPredicate(rule.atPredicate);
 							ats.add(at);
 							if (rule.atPredicate.identifier != null) {
-								invocationStack.peek().bind(
-										rule.atPredicate.identifier,
-										new RawData(at));
+								invocationStack.peek().bind(rule.atPredicate.identifier, new RawData(at));
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 						if (at == null) {
-							throw new RuntimeException("unknown @ predicate '"
-									+ rule.atPredicate.name + "'");
+							throw new RuntimeException("unknown @ predicate '" + rule.atPredicate.name + "'");
 						}
 						atMap.put(rule, at);
 					}
@@ -255,15 +244,14 @@ public class IniEval {
 						Rule evalRule = itr.next();
 						At evalAt = atMap.get(evalRule);
 						List<Expression> synchronizedAtsNames = evalRule.synchronizedAtsNames;
-						if(synchronizedAtsNames != null) {
+						if (synchronizedAtsNames != null) {
 							for (Expression e : synchronizedAtsNames) {
-								evalAt.synchronizedAts.add((At) this.eval(e)
-										.getValue());
-							}	
+								evalAt.synchronizedAts.add((At) this.eval(e).getValue());
+							}
 						}
-						
+
 						evaluationStack.push(evalRule.atPredicate);
-						evalAt.parseInParameters(this,evalRule.atPredicate.inParameters);
+						evalAt.parseInParameters(this, evalRule.atPredicate.inParameters);
 						evalAt.eval(this);
 						evaluationStack.pop();
 					}
@@ -285,12 +273,9 @@ public class IniEval {
 				} catch (RuntimeException e) {
 					boolean caught = false;
 					for (Rule rule : f.errorRules) {
-						if (rule.guard == null
-								|| eval(rule.guard).isTrueOrDefined()) {
-							invocationStack
-									.peek()
-									.bind(((Variable) rule.atPredicate.inParameters
-											.get(0)).name, new RawData(e));
+						if (rule.guard == null || eval(rule.guard).isTrueOrDefined()) {
+							invocationStack.peek().bind(((Variable) rule.atPredicate.inParameters.get(0)).name,
+									new RawData(e));
 							Sequence<Statement> s = rule.statements;
 							while (s != null) {
 								eval(s.get());
@@ -306,63 +291,123 @@ public class IniEval {
 				break;
 
 			case AstNode.FUNCTION_LITERAL:
-				if (!parser.parsedFunctionMap
-						.containsKey(((FunctionLiteral) node).name)) {
-					throw new RuntimeException("'"
-							+ ((FunctionLiteral) node).name
-							+ "' is not a declared function");
+				if (!parser.parsedFunctionMap.containsKey(((FunctionLiteral) node).name)) {
+					throw new RuntimeException("'" + ((FunctionLiteral) node).name + "' is not a declared function");
 				}
 				result = new RawData(((FunctionLiteral) node).name);
 				break;
 
 			case AstNode.INVOCATION:
 				Invocation invocation = (Invocation) node;
-				// try built-in INI functions first
-				if (IniFunction.functions.containsKey(invocation.name)) {
-					result = IniFunction.functions.get(invocation.name).eval(
-							this, invocation.arguments);
-				} else {
-					f = parser.parsedFunctionMap.get(invocation.name);
-					if (f == null) {
-						throw new RuntimeException("undefined function at "
-								+ node);
-					}
-					if (f.parameters.size() < invocation.arguments.size()) {
-						throw new RuntimeException(
-								"wrong number of parameters at " + node);
-					}
-					Context ctx = new Context(f);
-					for (int i = 0; i < f.parameters.size(); i++) {
-						if (i > invocation.arguments.size() - 1) {
-							if (f.parameters.get(i).defaultValue == null) {
-								throw new RuntimeException(
-										"no value or default value given for parameter '"
-												+ f.parameters.get(i).name
-												+ "' at " + node);
-							} else {
-								invocationStack.push(ctx);
-								ctx.bind(f.parameters.get(i).name,
-										eval(f.parameters.get(i).defaultValue));
-								invocationStack.pop();
+				boolean spawned = false;
+				// first check if function/process needs to be spawned
+				if (invocation.annotations != null && !invocation.annotations.isEmpty()) {
+					for (Expression e : invocation.annotations) {
+						if (e instanceof Assignment) {
+							Assignment a = (Assignment) e;
+							String name = a.assignee.toString();
+							if ("node".equals(name)) {
+								String targetNode = eval(a.assignment).getValue();
+								List<Data> arguments = new ArrayList<>();
+								if (IniFunction.functions.containsKey(invocation.name)) {
+									for (Expression argument : invocation.arguments) {
+										arguments.add(eval(argument));
+									}
+									// TODO: parse-time
+									throw new RuntimeException("cannot spawn a function... please only spawn processes");
+								} else {
+									Data argument = null;
+									f = parser.parsedFunctionMap.get(invocation.name);
+									for (int i = 0; i < f.parameters.size(); i++) {
+										if (i > invocation.arguments.size() - 1) {
+											if (f.parameters.get(i).defaultValue == null) {
+												throw new RuntimeException(
+														"no value or default value given for parameter '"
+																+ f.parameters.get(i).name + "' at " + node);
+											} else {
+												argument = eval(f.parameters.get(i).defaultValue);
+											}
+										} else {
+											argument = eval(invocation.arguments.get(i));
+										}
+										arguments.add(argument);
+									}
+									// TODO: parse-time
+									if(!f.isProcess()) {
+										throw new RuntimeException("cannot spawn a function... please only spawn processes");
+									}
+								}
+								Main.log("spawn request to " + targetNode + " / " + invocation.name + " - " + arguments);
+								CoreBrokerClient.sendSpawnRequest(targetNode,
+										new SpawnRequest(invocation.name, arguments));
+								spawned = true;
 							}
-						} else {
-							ctx.bind(f.parameters.get(i).name,
-									eval(invocation.arguments.get(i)));
 						}
 					}
-					invocationStack.push(ctx);
-					if(f.isProcess()) {
-						IniEval child = fork();
-						new Thread(new Runnable() {
-							@Override
-							public void run() {
-								child.eval(f);
-							}
-						}).start();
+				}
+				if (!spawned) {
+					// try built-in INI functions first
+					if (IniFunction.functions.containsKey(invocation.name)) {
+						result = IniFunction.functions.get(invocation.name).eval(this, invocation.arguments);
 					} else {
-						eval(f);
+						f = parser.parsedFunctionMap.get(invocation.name);
+						if (f == null) {
+							if (!Main.node.equals(invocation.owner)) {
+								CoreBrokerClient.sendFetchRequest(invocation.owner, new FetchRequest(invocation.name),
+										request -> {
+											if (parser.parsedFunctionMap.containsKey(request.function.name)) {
+												Function oldf = parser.parsedFunctionMap.get(request.function.name);
+												parser.parsedFunctionMap.remove(request.function.name);
+												parser.parsedFunctionList.remove(oldf);
+											}
+											parser.parsedFunctionMap.put(request.function.name, request.function);
+											parser.parsedFunctionList.add(request.function);
+											Main.log("deployed function:");
+											if(Main.verbose) {
+												request.function.prettyPrint(System.out);
+											}
+										});
+							}
+							f = parser.parsedFunctionMap.get(invocation.name);
+							System.out.println("f after fetch: " + f + " - " + invocation.arguments);
+							if (f == null) {
+								throw new RuntimeException("undefined function at " + node);
+							}
+						}
+						if (f.parameters.size() < invocation.arguments.size()) {
+							throw new RuntimeException("wrong number of parameters at " + node);
+						}
+						Context ctx = new Context(f);
+						for (int i = 0; i < f.parameters.size(); i++) {
+							if (i > invocation.arguments.size() - 1) {
+								if (f.parameters.get(i).defaultValue == null) {
+									throw new RuntimeException("no value or default value given for parameter '"
+											+ f.parameters.get(i).name + "' at " + node);
+								} else {
+									invocationStack.push(ctx);
+									ctx.bind(f.parameters.get(i).name, eval(f.parameters.get(i).defaultValue));
+									invocationStack.pop();
+								}
+							} else {
+								ctx.bind(f.parameters.get(i).name, eval(invocation.arguments.get(i)));
+							}
+						}
+						invocationStack.push(ctx);
+
+						if (f.isProcess()) {
+							final Function function = f;
+							IniEval child = fork();
+							new Thread(new Runnable() {
+								@Override
+								public void run() {
+									child.eval(function);
+								}
+							}).start();
+						} else {
+							result = eval(f);
+						}
+						invocationStack.pop();
 					}
-					invocationStack.pop();
 				}
 				break;
 
@@ -379,20 +424,15 @@ public class IniEval {
 			case AstNode.NUMBER_LITERAL:
 				result = new RawData(((NumberLiteral) node).value);
 				if (((NumberLiteral) node).value instanceof Integer) {
-					result.setConstructor(parser.ast
-							.getOrCreatePrimitive("Int"));
+					result.setConstructor(parser.ast.getOrCreatePrimitive("Int"));
 				} else if (((NumberLiteral) node).value instanceof Float) {
-					result.setConstructor(parser.ast
-							.getOrCreatePrimitive("Float"));
+					result.setConstructor(parser.ast.getOrCreatePrimitive("Float"));
 				} else if (((NumberLiteral) node).value instanceof Double) {
-					result.setConstructor(parser.ast
-							.getOrCreatePrimitive("Float"));
+					result.setConstructor(parser.ast.getOrCreatePrimitive("Float"));
 				} else if (((NumberLiteral) node).value instanceof Byte) {
-					result.setConstructor(parser.ast
-							.getOrCreatePrimitive("Byte"));
+					result.setConstructor(parser.ast.getOrCreatePrimitive("Byte"));
 				} else if (((NumberLiteral) node).value instanceof Long) {
-					result.setConstructor(parser.ast
-							.getOrCreatePrimitive("Long"));
+					result.setConstructor(parser.ast.getOrCreatePrimitive("Long"));
 				}
 				break;
 
@@ -408,8 +448,7 @@ public class IniEval {
 				List<Rule> caseRules = ((CaseStatement) node).cases;
 				Rule matchedRule = null;
 				for (Rule rule : caseRules) {
-					if (((Rule) rule).guard != null
-							&& eval(((Rule) rule).guard).isTrueOrDefined()) {
+					if (((Rule) rule).guard != null && eval(((Rule) rule).guard).isTrueOrDefined()) {
 						matchedRule = rule;
 						eval(matchedRule);
 						break;
@@ -425,8 +464,7 @@ public class IniEval {
 				break;
 
 			case AstNode.RULE:
-				if (((Rule) node).guard == null
-						|| eval(((Rule) node).guard).isTrueOrDefined()) {
+				if (((Rule) node).guard == null || eval(((Rule) node).guard).isTrueOrDefined()) {
 					invocationStack.peek().noRulesApplied = false;
 					Sequence<Statement> s = ((Rule) node).statements;
 					while (s != null) {
@@ -443,10 +481,8 @@ public class IniEval {
 					d.set(((Variable) a.assignee).name, eval(a.assignment));
 				}
 				if (constructorName != null) {
-					Data set = invocationStack.peek().getOrCreate(
-							constructorName);
-					d.setConstructor(parser.ast
-							.getFirstLevelConstructor(constructorName));
+					Data set = invocationStack.peek().getOrCreate(constructorName);
+					d.setConstructor(parser.ast.getFirstLevelConstructor(constructorName));
 					set.set(d, d);
 				}
 				result = d;
@@ -455,20 +491,18 @@ public class IniEval {
 			case AstNode.SET_DECLARATION:
 				d = new RawData(null);
 				d.setKind(Data.Kind.INT_SET);
-				d.set(Data.LOWER_BOUND_KEY,
-						eval(((SetDeclaration) node).lowerBound));
-				d.set(Data.UPPER_BOUND_KEY,
-						eval(((SetDeclaration) node).upperBound));
-				if (d.get(Data.UPPER_BOUND_KEY).getNumber().intValue() < d
-						.get(Data.LOWER_BOUND_KEY).getNumber().intValue()) {
+				d.set(Data.LOWER_BOUND_KEY, eval(((SetDeclaration) node).lowerBound));
+				d.set(Data.UPPER_BOUND_KEY, eval(((SetDeclaration) node).upperBound));
+				if (d.get(Data.UPPER_BOUND_KEY).getNumber().intValue() < d.get(Data.LOWER_BOUND_KEY).getNumber()
+						.intValue()) {
 					throw new RuntimeException("invalid set bounds");
 				}
 				result = d;
 				break;
 
 			case AstNode.SET_EXPRESSION:
-				SetIterator it = new SetIterator(invocationStack.peek(),
-						(SetExpression) node, eval(((SetExpression) node).set));
+				SetIterator it = new SetIterator(invocationStack.peek(), (SetExpression) node,
+						eval(((SetExpression) node).set));
 				result = new RawData(false);
 				while (it.nextElement()) {
 					d = eval(((SetExpression) node).expression);
@@ -489,9 +523,8 @@ public class IniEval {
 			case AstNode.SUB_ARRAY_ACCESS:
 				SubArrayAccess sub = (SubArrayAccess) node;
 				d = eval(sub.variableAccess);
-				result = d.subArray((Integer) eval(sub.minExpression)
-						.getValue(), (Integer) eval(sub.maxExpression)
-						.getValue());
+				result = d.subArray((Integer) eval(sub.minExpression).getValue(),
+						(Integer) eval(sub.maxExpression).getValue());
 				break;
 
 			case AstNode.THIS_LITERAL:
@@ -529,8 +562,7 @@ public class IniEval {
 				break;
 
 			case AstNode.VARIABLE:
-				result = invocationStack.peek().getOrCreate(
-						((Variable) node).name);
+				result = invocationStack.peek().getOrCreate(((Variable) node).name);
 				break;
 
 			default:
@@ -543,10 +575,10 @@ public class IniEval {
 		} catch (ReturnException e) {
 			evaluationStack.pop();
 			throw e;
-		} catch(Exception e) {
-			//printNode(System.err, evaluationStack.peek());
-			//System.err.println();
-			//printInvocationStackTrace(System.err);
+		} catch (Exception e) {
+			// printNode(System.err, evaluationStack.peek());
+			// System.err.println();
+			// printInvocationStackTrace(System.err);
 			throw new RuntimeException(evaluationStack.peek().toString(), e);
 		}
 		return result;
@@ -569,13 +601,9 @@ public class IniEval {
 			out.println();
 		}
 	}
-	
+
 	public void printNode(PrintStream out, AstNode node) {
-		out.print("'"
-				+ node
-				+ "'"
-				+ (node != null && node.token() != null ? " at "
-						+ node.token().getLocation() : ""));
+		out.print("'" + node + "'" + (node != null && node.token() != null ? " at " + node.token().getLocation() : ""));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -589,13 +617,10 @@ public class IniEval {
 	}
 
 	@SuppressWarnings("unchecked")
-	<T1, T2> T1 getFirstEnclosingNode(Class<T1> nodeType,
-			Class<T2> parentNodeType) {
+	<T1, T2> T1 getFirstEnclosingNode(Class<T1> nodeType, Class<T2> parentNodeType) {
 		for (int i = evaluationStack.size() - 1; i >= 0; i--) {
 			if (nodeType.isAssignableFrom(evaluationStack.get(i).getClass())) {
-				if (i > 0
-						&& parentNodeType.isAssignableFrom(evaluationStack.get(
-								i - 1).getClass())) {
+				if (i > 0 && parentNodeType.isAssignableFrom(evaluationStack.get(i - 1).getClass())) {
 					return (T1) evaluationStack.get(i);
 				}
 			}
@@ -604,11 +629,9 @@ public class IniEval {
 	}
 
 	void expandPostIncrement(UnaryOperator postIncrement) {
-		Assignment a = new Assignment(parser, null,
-				(VariableAccess) postIncrement.operand, new BinaryOperator(
-						null, postIncrement.token(), BinaryOperator.Kind.PLUS,
-						postIncrement.operand, new NumberLiteral(parser,
-								postIncrement.token(), 1)));
+		Assignment a = new Assignment(parser, null, (VariableAccess) postIncrement.operand,
+				new BinaryOperator(null, postIncrement.token(), BinaryOperator.Kind.PLUS, postIncrement.operand,
+						new NumberLiteral(parser, postIncrement.token(), 1)));
 		postIncrement.expanded = true;
 		Rule r = getFirstEnclosingNode(Rule.class);
 		Statement s = getFirstEnclosingNode(Statement.class, Rule.class);
@@ -616,11 +639,9 @@ public class IniEval {
 	}
 
 	void expandPostDecrement(UnaryOperator postDecrement) {
-		Assignment a = new Assignment(parser, null,
-				(VariableAccess) postDecrement.operand, new BinaryOperator(
-						null, postDecrement.token(), BinaryOperator.Kind.MINUS,
-						postDecrement.operand, new NumberLiteral(parser,
-								postDecrement.token(), 1)));
+		Assignment a = new Assignment(parser, null, (VariableAccess) postDecrement.operand,
+				new BinaryOperator(null, postDecrement.token(), BinaryOperator.Kind.MINUS, postDecrement.operand,
+						new NumberLiteral(parser, postDecrement.token(), 1)));
 		postDecrement.expanded = true;
 		Rule r = getFirstEnclosingNode(Rule.class);
 		Statement s = getFirstEnclosingNode(Statement.class, Rule.class);
@@ -628,8 +649,7 @@ public class IniEval {
 	}
 
 	public IniEval fork() {
-		IniEval forkedEval = new IniEval(this.parser, new Context(
-				invocationStack.peek()), this.config);
+		IniEval forkedEval = new IniEval(this.parser, new Context(invocationStack.peek()), this.config);
 		forkedEvals.add(forkedEval);
 		return forkedEval;
 	}
@@ -644,20 +664,16 @@ public class IniEval {
 					result = new RawData(false);
 					return;
 				}
-				Pattern p = Pattern.compile(eval(i.arguments.get(0)).getValue()
-						.toString());
+				Pattern p = Pattern.compile(eval(i.arguments.get(0)).getValue().toString());
 				Matcher m = p.matcher(dataToMatch.getValue().toString());
 				boolean b = m.matches();
 				if (b) {
 					for (int index = 1; index < i.arguments.size(); index++) {
 						if (index <= m.groupCount()) {
-							invocationStack.peek().bind(
-									((Variable) i.arguments.get(index)).name,
+							invocationStack.peek().bind(((Variable) i.arguments.get(index)).name,
 									new RawData(m.group(index)));
 						} else {
-							invocationStack.peek().bind(
-									((Variable) i.arguments.get(index)).name,
-									new RawData(null));
+							invocationStack.peek().bind(((Variable) i.arguments.get(index)).name, new RawData(null));
 						}
 					}
 				}
@@ -676,11 +692,9 @@ public class IniEval {
 				return;
 			}
 			if (constructor == null) {
-				throw new RuntimeException("type '" + e.name
-						+ "' does not exist");
+				throw new RuntimeException("type '" + e.name + "' does not exist");
 			}
-			if (toMatch != null && constructor != null
-					&& constructor != toMatch) {
+			if (toMatch != null && constructor != null && constructor != toMatch) {
 				result = new RawData(false);
 				return;
 			}
@@ -700,8 +714,7 @@ public class IniEval {
 				}
 				invocationStack.pop();
 			} else {
-				throw new RuntimeException("constructor '" + e.name
-						+ "' does not exist");
+				throw new RuntimeException("constructor '" + e.name + "' does not exist");
 			}
 			/*
 			 * System.out.println("===> "+c); System.out.println("===>
@@ -720,21 +733,17 @@ public class IniEval {
 			throw new RuntimeException("undefined function " + function);
 		}
 		if (f.parameters.size() < params.length) {
-			throw new RuntimeException("wrong number of parameters for "
-					+ function);
+			throw new RuntimeException("wrong number of parameters for " + function);
 		}
 		Context ctx = new Context(f);
 		for (int i = 0; i < f.parameters.size(); i++) {
 			if (i > params.length - 1) {
 				if (f.parameters.get(i).defaultValue == null) {
-					throw new RuntimeException(
-							"no value or default value given for parameter '"
-									+ f.parameters.get(i).name + "' for "
-									+ function);
+					throw new RuntimeException("no value or default value given for parameter '"
+							+ f.parameters.get(i).name + "' for " + function);
 				} else {
 					invocationStack.push(ctx);
-					ctx.bind(f.parameters.get(i).name,
-							eval(f.parameters.get(i).defaultValue));
+					ctx.bind(f.parameters.get(i).name, eval(f.parameters.get(i).defaultValue));
 					invocationStack.pop();
 				}
 			} else {

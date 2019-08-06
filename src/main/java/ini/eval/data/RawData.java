@@ -13,7 +13,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import ini.ast.Assignment;
+import ini.ast.BooleanLiteral;
 import ini.ast.Constructor;
+import ini.ast.Expression;
+import ini.ast.ListExpression;
+import ini.ast.NumberLiteral;
+import ini.ast.StringLiteral;
+import ini.ast.Variable;
+import ini.parser.IniParser;
 import ini.type.Type;
 
 public class RawData implements Data {
@@ -145,6 +153,43 @@ public class RawData implements Data {
 		return d;
 	}
 
+	public static Expression dataToExpression(IniParser parser, Data data) {
+		Object value = data.getValue();
+		if (data.getReferences() == null || data.getReferences().isEmpty()) {
+			if (value instanceof String) {
+				return new StringLiteral(parser, null, (String) value);
+			} else if (value instanceof Number) {
+				return new NumberLiteral(parser, null, (Number) value);
+			} else if (value instanceof Boolean) {
+				return new BooleanLiteral(parser, null, (Boolean) value);
+			} else {
+				throw new RuntimeException("unhandled data");
+			}
+		} else {
+			if (data.isIndexedSet() && ((Integer) data.minIndex()) > 0) {
+				List<Expression> l = new ArrayList<Expression>();
+				ListExpression expression = new ListExpression(parser, null, l);
+				for (int i = 0; i < (Integer) data.maxIndex(); i++) {
+					if (i < (Integer) data.minIndex()) {
+						l.add(null);
+					} else {
+						l.add(dataToExpression(parser, data.getReferences().get(i)));
+					}
+				}
+				return expression;
+			} else {
+				List<Expression> l = new ArrayList<Expression>();
+				ListExpression expression = new ListExpression(parser, null, l);
+				for (Entry<Object, Data> e : data.getReferences().entrySet()) {
+					l.add(new Assignment(parser, null, new Variable(parser, null, (String) e.getKey()),
+							dataToExpression(parser, e.getValue())));
+				}
+				return expression;
+			}
+		}
+
+	}
+
 	public static Object dataToObject(Type type, Data data) {
 		if (data.isArray() && type != null && type.getName().equals("Map")) {
 			try {
@@ -222,7 +267,7 @@ public class RawData implements Data {
 	public boolean isBoolean() {
 		return (value instanceof Boolean);
 	}
-	
+
 	@Override
 	public boolean isNumber() {
 		return (value instanceof Number);
@@ -248,10 +293,10 @@ public class RawData implements Data {
 	}
 
 	/**
-	 * If this data is an integer set, tries to transform all keys into integers to make
-	 * it a list. This is used mostly because JSON serialization of data will
-	 * loose integer keys and transform them to strings. So we have to transform
-	 * them back to integers if possible.
+	 * If this data is an integer set, tries to transform all keys into integers
+	 * to make it a list. This is used mostly because JSON serialization of data
+	 * will loose integer keys and transform them to strings. So we have to
+	 * transform them back to integers if possible.
 	 * 
 	 * @return
 	 */
@@ -283,7 +328,7 @@ public class RawData implements Data {
 		if (references.containsKey(Data.LOWER_BOUND_KEY)) {
 			return references.get(Data.LOWER_BOUND_KEY).getValue();
 		} else {
-			return Collections.min((Set)references.keySet());
+			return Collections.min((Set) references.keySet());
 		}
 	}
 

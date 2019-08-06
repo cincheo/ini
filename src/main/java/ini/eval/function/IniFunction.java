@@ -54,6 +54,7 @@ public abstract class IniFunction {
 		functions.put("reconfigure", new ReconfigureAtFunction());
 		functions.put("to_json", new ToJsonFunction());
 		functions.put("produce", new ProduceFunction());
+		functions.put("spawn", new SpawnFunction());
 	}
 	
 	public abstract Data eval(IniEval eval, List<Expression> params);

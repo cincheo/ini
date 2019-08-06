@@ -85,7 +85,7 @@ public class Function extends NamedElement {
 		return "function " + name;
 	}
 	
-	public Type functionType=null;
+	transient public Type functionType=null;
 	
 	public Type getFunctionType() {
 		functionType = new Type(parser,"function");

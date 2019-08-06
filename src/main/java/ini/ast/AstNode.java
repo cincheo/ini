@@ -4,6 +4,15 @@ import ini.type.Type;
 
 import java.io.PrintStream;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+
 public interface AstNode {
 
 	int NODE = 0;
@@ -47,4 +56,101 @@ public interface AstNode {
 	Type getType();
 
 	void setType(Type type);
+
+	public static Class<?> getClass(int nodeTypeId) {
+		switch (nodeTypeId) {
+		case AstNode.ARRAY_ACCESS:
+			return ArrayAccess.class;
+		case AstNode.ASSIGNMENT:
+			return Assignment.class;
+		case AstNode.AT_BINDING:
+			return AtBinding.class;
+		case AstNode.AT_PREDICATE:
+			return AtPredicate.class;
+		case AstNode.BINARY_OPERATOR:
+			return BinaryOperator.class;
+		case AstNode.BINDING:
+			return Binding.class;
+		case AstNode.BOOLEAN_LITERAL:
+			return BooleanLiteral.class;
+		case AstNode.CASE_STATEMENT:
+			return CaseStatement.class;
+		case AstNode.CHAR_LITERAL:
+			return CharLiteral.class;
+		case AstNode.CONSTRUCTOR:
+			return Constructor.class;
+		case AstNode.CONSTRUCTOR_MATCH_EXPRESSION:
+			return ConstructorMatchExpression.class;
+		case AstNode.FIELD_ACCESS:
+			return FieldAccess.class;
+		case AstNode.FUNCTION:
+			return Function.class;
+		case AstNode.FUNCTION_LITERAL:
+			return FunctionLiteral.class;
+		case AstNode.IMPORT:
+			return Import.class;
+		case AstNode.INVOCATION:
+			return Invocation.class;
+		case AstNode.LIST_EXPRESSION:
+			return ListExpression.class;
+		case AstNode.NUMBER_LITERAL:
+			return NumberLiteral.class;
+		case AstNode.PARAMETER:
+			return Parameter.class;
+		case AstNode.RETURN_STATEMENT:
+			return ReturnStatement.class;
+		case AstNode.RULE:
+			return Rule.class;
+		case AstNode.SET_CONSTRUCTOR:
+			return SetConstructor.class;
+		case AstNode.SET_DECLARATION:
+			return SetDeclaration.class;
+		case AstNode.SET_EXPRESSION:
+			return SetExpression.class;
+		case AstNode.STRING_LITERAL:
+			return StringLiteral.class;
+		case AstNode.SUB_ARRAY_ACCESS:
+			return SubArrayAccess.class;
+		case AstNode.THIS_LITERAL:
+			return ThisLiteral.class;
+		case AstNode.UNARY_OPERATOR:
+			return UnaryOperator.class;
+		case AstNode.USER_TYPE:
+			return UserType.class;
+		case AstNode.VARIABLE:
+			return Variable.class;
+		default:
+			return null;
+		}
+	}
+	
+	public static String toJson(AstNode node) {
+		return new Gson().toJson(node);
+	}
+	
+	public static AstNode fromJson(String json, Class<? extends AstNode> nodeType) {
+		return new GsonBuilder().registerTypeAdapter(AstNode.class, new AstNodeDeserializer())
+				.registerTypeAdapter(VariableAccess.class, new AstNodeDeserializer())
+				.registerTypeAdapter(Expression.class, new AstNodeDeserializer())
+				.registerTypeAdapter(Statement.class, new AstNodeDeserializer()).create()
+				.fromJson(json, nodeType);
+	}
 }
+
+class AstNodeDeserializer implements JsonDeserializer<AstNode> {
+
+	// private static final String CLASSNAME = "className";
+
+	@Override
+	public AstNode deserialize(final JsonElement jsonElement, final java.lang.reflect.Type type,
+			final JsonDeserializationContext deserializationContext) throws JsonParseException {
+
+		final JsonObject jsonObject = jsonElement.getAsJsonObject();
+		final JsonPrimitive prim = (JsonPrimitive) jsonObject.get("nodeTypeId");
+		final int nodeTypeId = prim.getAsInt();
+		final Class<?> clazz = AstNode.getClass(nodeTypeId);
+		return deserializationContext.deserialize(jsonObject, clazz);
+	}
+
+}
+
