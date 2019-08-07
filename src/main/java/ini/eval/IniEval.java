@@ -369,7 +369,7 @@ public class IniEval {
 										});
 							}
 							f = parser.parsedFunctionMap.get(invocation.name);
-							System.out.println("f after fetch: " + f + " - " + invocation.arguments);
+							Main.log("f after fetch: " + f + " - " + invocation.arguments);
 							if (f == null) {
 								throw new RuntimeException("undefined function at " + node);
 							}

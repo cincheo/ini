@@ -25,12 +25,7 @@ public class DefaultBrokerClient {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys();
-					if (data.isNumber()) {
-						if (!json.getAsJsonObject().get("value").toString().contains(".")) {
-							data.setValue(json.getAsJsonObject().get("value").getAsLong());
-						}
-					}
+					RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo();
 					return data;
 				}
 			});

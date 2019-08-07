@@ -92,6 +92,7 @@ public class Main {
 
 		JSAPResult commandLineConfig = jsap.parse(args);
 
+		verbose = commandLineConfig.getBoolean("verbose");
 		if (commandLineConfig.getBoolean("help")) {
 			printUsage(System.out, jsap);
 			System.exit(0);

@@ -69,6 +69,10 @@ public class Function extends NamedElement {
 			r.prettyPrint(out);
 			out.println();
 		}
+		for (Rule r : atRules) {
+			r.prettyPrint(out);
+			out.println();
+		}
 		for (Rule r : endRules) {
 			r.prettyPrint(out);
 			out.println();

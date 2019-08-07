@@ -26,6 +26,9 @@ import ini.type.Type;
 
 public class RawData implements Data {
 
+	// for serialization / deserialization
+	private String typeInfo;
+
 	private Object value;
 
 	private Map<Object, Data> references;
@@ -320,6 +323,27 @@ public class RawData implements Data {
 		return this;
 	}
 
+	public RawData applyTypeInfo() {
+		if (value == null || typeInfo == null) {
+			return this;
+		}
+		switch (typeInfo) {
+		case "java.lang.Integer":
+			value = ((Number) value).intValue();
+			break;
+		case "java.lang.Long":
+			value = ((Number) value).longValue();
+			break;
+		case "java.lang.Double":
+			value = ((Number) value).doubleValue();
+			break;
+		case "java.lang.Float":
+			value = ((Number) value).floatValue();
+			break;
+		}
+		return this;
+	}
+
 	@SuppressWarnings("unchecked")
 	public Object minIndex() {
 		if (references == null) {
@@ -359,6 +383,11 @@ public class RawData implements Data {
 		}
 		Object oldValue = this.value;
 		this.value = value;
+		if (value != null) {
+			this.typeInfo = value.getClass().getName();
+		} else {
+			this.typeInfo = null;
+		}
 		notifyDataObservers(oldValue);
 	}
 
@@ -413,6 +442,7 @@ public class RawData implements Data {
 		// System.out.println(this + ":" + data);
 		Data oldData = new RawData(this.value);
 		this.value = data.getValue();
+		this.typeInfo = data.getTypeInfo();
 		this.explodedString = false; // because getData implodes the string
 		this.kind = data.getKind();
 		if (data.getReferences() != null) {
@@ -698,6 +728,10 @@ public class RawData implements Data {
 	@Override
 	public Data rest() {
 		return subArray(1, getSize() - 1);
+	}
+
+	public String getTypeInfo() {
+		return typeInfo;
 	}
 
 }

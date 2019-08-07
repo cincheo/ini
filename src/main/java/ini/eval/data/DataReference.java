@@ -323,4 +323,12 @@ public class DataReference implements Data {
 		return referencedData.concat(data);
 	}
 
+	@Override
+	public String getTypeInfo() {
+		if (isPending()) {
+			return null;
+		}
+		return referencedData.getTypeInfo();
+	}
+	
 }

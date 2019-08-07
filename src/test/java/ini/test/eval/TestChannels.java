@@ -34,4 +34,8 @@ public class TestChannels extends IniTestCase {
 		testFile("ini/test/channels/channel6.ini", (p, out) -> assertEquals("double value = 1.0\n", out));
 	}
 
+	public void _testProcessCommunication() {
+		testFile("ini/examples/process_communication.ini", (p, out) -> assertEquals("processes started\nc1: 1\nc2: 2\nend of pipeline: 3\n", out));
+	}
+	
 }
