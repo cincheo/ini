@@ -40,13 +40,7 @@ public class CoreBrokerClient {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys();
-					if (data.isNumber()) {
-						if (!json.getAsJsonObject().get("value").toString().contains(".")) {
-							data.setValue(json.getAsJsonObject().get("value").getAsLong());
-						}
-					}
-					return data;
+					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo();
 				}
 			});
 			spawnRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE,
