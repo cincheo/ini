@@ -5,6 +5,8 @@ import java.io.PrintStream;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.martiansoftware.jsap.FlaggedOption;
@@ -27,6 +29,8 @@ import ini.type.AstAttrib;
 
 public class Main {
 
+	public static final Logger LOGGER = LoggerFactory.getLogger("ini");
+
 	public static Configuration configuration;
 
 	public static String environment = "development";
@@ -34,13 +38,9 @@ public class Main {
 	public static String node = "main";
 
 	public static final String VERSION = "pre-alpha 2";
-	
-	public static boolean verbose = false;
-	
-	public static void log(String msg) {
-		if(verbose) {
-			System.out.println("[CORE] "+msg);
-		}
+
+	public static EnvironmentConfiguration getEnvironmentConfiguration() {
+		return configuration.environments.get(environment);
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -48,9 +48,6 @@ public class Main {
 		JSAP jsap = new JSAP();
 
 		jsap.registerParameter(new Switch("version").setLongFlag("version").setHelp("Print the INI version and exit."));
-
-		jsap.registerParameter(new Switch("verbose").setShortFlag('v').setLongFlag("verbose")
-				.setHelp("Print some information about INI and its environment before running the program."));
 
 		jsap.registerParameter(new Switch("pretty-print-ast").setShortFlag('a').setLongFlag("pretty-print-ast")
 				.setHelp("Pretty print the parsed program."));
@@ -92,14 +89,11 @@ public class Main {
 
 		JSAPResult commandLineConfig = jsap.parse(args);
 
-		verbose = commandLineConfig.getBoolean("verbose");
 		if (commandLineConfig.getBoolean("help")) {
 			printUsage(System.out, jsap);
 			System.exit(0);
 		}
-		if (commandLineConfig.getBoolean("version") || commandLineConfig.getBoolean("verbose")) {
-			System.out.println("INI version " + VERSION);
-		}
+		LOGGER.info("INI version " + VERSION);
 		if (commandLineConfig.getBoolean("version")) {
 			System.exit(0);
 		}
@@ -152,12 +146,7 @@ public class Main {
 			return;
 		}
 
-		try {
-			configuration = new Gson().fromJson(FileUtils.readFileToString(new File("ini_config.json"), "UTF8"),
-					Configuration.class);
-		} catch (Exception e) {
-			throw new RuntimeException("cannot read configuration", e);
-		}
+		parseConfiguration();
 
 		String systemEnv = System.getenv("INI_ENV");
 		if (systemEnv != null) {
@@ -187,16 +176,18 @@ public class Main {
 
 	}
 
-	public static void evalMainFunction(IniParser parser, JSAPResult commandLineConfig) {
-
+	public static void parseConfiguration() {
 		try {
 			configuration = new Gson().fromJson(FileUtils.readFileToString(new File("ini_config.json"), "UTF8"),
 					Configuration.class);
-
-			// System.err.println("=====> " + new Gson().toJson(configuration));
 		} catch (Exception e) {
 			throw new RuntimeException("cannot read configuration", e);
 		}
+	}
+
+	public static void evalMainFunction(IniParser parser, JSAPResult commandLineConfig) {
+
+		parseConfiguration();
 
 		Context context = null;
 		Function main = parser.parsedFunctionMap.get("main");
@@ -232,28 +223,39 @@ public class Main {
 
 			if (commandLineConfig != null
 					&& (commandLineConfig.getBoolean("deamon") || commandLineConfig.contains("node"))) {
-				if (commandLineConfig != null && commandLineConfig.getBoolean("verbose")) {
-					System.out.println("Starting INI deamon...");
-				}
+				LOGGER.info("Starting INI deamon...");
 				CoreBrokerClient.startSpawnRequestConsumer(request -> {
+					LOGGER.info("processing " + request);
 					Invocation invocation = new Invocation(parser, null, request.spawnedProcessName, request.parameters
 							.stream().map(data -> RawData.dataToExpression(parser, data)).collect(Collectors.toList()));
 					invocation.owner = request.sourceNode;
-					eval.eval(invocation);
+					new Thread() {
+						public void run() {
+							eval.eval(invocation);
+						}
+					}.start();
 				});
 
 				CoreBrokerClient.startFetchRequestConsumer(request -> {
-					if (parser.parsedFunctionMap.containsKey(request.fetchedName)) {
-						CoreBrokerClient.sendDeployRequest(request.sourceNode,
-								new DeployRequest(parser.parsedFunctionMap.get(request.fetchedName)));
+					LOGGER.info("processing " + request);
+					CoreBrokerClient.sendDeployRequest(request.sourceNode,
+							new DeployRequest(parser.parsedFunctionMap.get(request.fetchedName)));
+				});
+
+				CoreBrokerClient.startDeployRequestConsumer(request -> {
+					if (parser.parsedFunctionMap.containsKey(request.function.name)) {
+						Function oldf = parser.parsedFunctionMap.get(request.function.name);
+						parser.parsedFunctionMap.remove(request.function.name);
+						parser.parsedFunctionList.remove(oldf);
 					}
+					parser.parsedFunctionMap.put(request.function.name, request.function);
+					parser.parsedFunctionList.add(request.function);
+					Main.LOGGER.info("deployed function " + request.function.name);
 				});
 			}
 
-			if (commandLineConfig != null && commandLineConfig.getBoolean("verbose")) {
-				System.out.println("Environment: " + environment);
-				System.out.println("INI started - node " + node);
-			}
+			LOGGER.info("Environment: " + environment);
+			LOGGER.info("INI started - node " + node);
 
 			eval.eval(main);
 		} catch (Exception e) {

@@ -5,13 +5,15 @@ import java.util.Map;
 
 import org.apache.kafka.common.errors.InterruptException;
 
-import ini.broker.DefaultBrokerClient;
+import ini.broker.BrokerClient;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 
 public class AtConsume extends At {
 	
 	Thread mainThread;
+	String channel;
+	BrokerClient<Data> brokerClient;
 
 	@Override
 	public void eval(final IniEval eval) {
@@ -21,26 +23,14 @@ public class AtConsume extends At {
 			public void run() {
 				do {
 					try {
-						Data d = getInContext().get("channel");
-						
-						//System.out.println("CCCC: "+d.getValue());
-						
-						DefaultBrokerClient.getInstance().consume(d.getValue(), value -> {
+						brokerClient = BrokerClient.createDefaultInstance();
+						channel = getInContext().get("channel").getValue();
+						brokerClient.consume(channel, value -> {
 							Map<String, Data> variables = new HashMap<String, Data>();
 							variables.put(getAtPredicate().outParameters.get(0).toString(),
 									value);
 							execute(eval, variables);
 						});
-						
-						/*List<Data> values = KafkaClient.runConsumer(d.getValue());
-						for(Data value : values) {
-							Map<String, Data> variables = new HashMap<String, Data>();
-							variables.put(getAtPredicate().outParameters.get(0).toString(),
-									value);
-							execute(eval, variables);
-						}*/
-					} catch (InterruptedException e) {
-						break;
 					} catch (InterruptException e) {
 						break;
 					}
@@ -53,9 +43,10 @@ public class AtConsume extends At {
 
 	@Override
 	public void terminate() {
+		super.terminate();
+		brokerClient.stopConsumer(channel);
 		// TODO: interrupt properly 
 		mainThread.interrupt();
-		super.terminate();
 	}
 
 }

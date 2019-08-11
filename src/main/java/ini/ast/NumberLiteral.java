@@ -1,16 +1,19 @@
 package ini.ast;
 
-import ini.parser.IniParser;
-
 import java.io.PrintStream;
+
+import ini.broker.TypeInfo;
+import ini.parser.IniParser;
 
 public class NumberLiteral extends AstElement implements Expression {
 
 	public Number value;
+	public int typeInfo;
 	
 	public NumberLiteral(IniParser parser, Token token, Number value) {
 		super(parser, token);
 		this.value=value;
+		this.typeInfo = TypeInfo.getTypeInfoForInstance(value);
 		if(value instanceof Byte) {
 			this.type = parser.ast.BYTE;
 		} if(value instanceof Integer) {
@@ -26,6 +29,33 @@ public class NumberLiteral extends AstElement implements Expression {
 	@Override
 	public void prettyPrint(PrintStream out) {
 		out.print(value);
+	}
+	
+	public NumberLiteral applyTypeInfo() {
+		if (value == null || typeInfo == 0) {
+			return this;
+		}
+		switch (typeInfo) {
+		case TypeInfo.INTEGER:
+			value = ((Number) value).intValue();
+			break;
+		case TypeInfo.LONG:
+			value = ((Number) value).longValue();
+			break;
+		case TypeInfo.DOUBLE:
+			value = ((Number) value).doubleValue();
+			break;
+		case TypeInfo.FLOAT:
+			value = ((Number) value).floatValue();
+			break;
+		case TypeInfo.STRING:
+			break;
+		case TypeInfo.BOOLEAN:
+			break;
+		default:
+			System.out.println("NO CONVERSION: " + typeInfo + " / " + value + " / " + value.getClass());
+		}
+		return this;
 	}
 	
 }

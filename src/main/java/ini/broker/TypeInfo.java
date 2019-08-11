@@ -1,0 +1,41 @@
+package ini.broker;
+
+public class TypeInfo {
+
+	public static final int NULL = 0;
+	public static final int INTEGER = 1;
+	public static final int LONG = 2;
+	public static final int DOUBLE = 3;
+	public static final int FLOAT = 4;
+	public static final int STRING = 5;
+	public static final int BOOLEAN = 6;
+	
+	public static int getTypeInfoForInstance(Object object) {
+		if(object == null) {
+			return NULL;
+		} else {
+			return getTypeInfo(object.getClass());
+		}
+	}
+
+	public static int getTypeInfo(Class<?> clazz) {
+		switch (clazz.getName()) {
+		case "java.lang.Integer":
+			return INTEGER;
+		case "java.lang.Long":
+			return LONG;
+		case "java.lang.Double":
+			return DOUBLE;
+		case "java.lang.Float":
+			return FLOAT;
+		case "java.lang.String":
+			return STRING;
+		case "java.lang.Boolean":
+			return BOOLEAN;
+		default:
+			return NULL;
+			//throw new RuntimeException("unknown type "+clazz);
+		}
+	}
+	
+}

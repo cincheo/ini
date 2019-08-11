@@ -1,6 +1,7 @@
 package ini.eval.data;
 
 import ini.ast.Constructor;
+import ini.broker.TypeInfo;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -324,9 +325,9 @@ public class DataReference implements Data {
 	}
 
 	@Override
-	public String getTypeInfo() {
+	public int getTypeInfo() {
 		if (isPending()) {
-			return null;
+			return TypeInfo.NULL;
 		}
 		return referencedData.getTypeInfo();
 	}

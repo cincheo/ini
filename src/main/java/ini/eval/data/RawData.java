@@ -21,13 +21,14 @@ import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
 import ini.ast.StringLiteral;
 import ini.ast.Variable;
+import ini.broker.TypeInfo;
 import ini.parser.IniParser;
 import ini.type.Type;
 
 public class RawData implements Data {
 
 	// for serialization / deserialization
-	private String typeInfo;
+	private int typeInfo = 0;
 
 	private Object value;
 
@@ -324,22 +325,28 @@ public class RawData implements Data {
 	}
 
 	public RawData applyTypeInfo() {
-		if (value == null || typeInfo == null) {
+		if (value == null || typeInfo == 0) {
 			return this;
 		}
 		switch (typeInfo) {
-		case "java.lang.Integer":
+		case TypeInfo.INTEGER:
 			value = ((Number) value).intValue();
 			break;
-		case "java.lang.Long":
+		case TypeInfo.LONG:
 			value = ((Number) value).longValue();
 			break;
-		case "java.lang.Double":
+		case TypeInfo.DOUBLE:
 			value = ((Number) value).doubleValue();
 			break;
-		case "java.lang.Float":
+		case TypeInfo.FLOAT:
 			value = ((Number) value).floatValue();
 			break;
+		case TypeInfo.STRING:
+			break;
+		case TypeInfo.BOOLEAN:
+			break;
+		default:
+			System.out.println("NO CONVERSION: " + typeInfo + " / " + value + " / " + value.getClass());
 		}
 		return this;
 	}
@@ -383,11 +390,7 @@ public class RawData implements Data {
 		}
 		Object oldValue = this.value;
 		this.value = value;
-		if (value != null) {
-			this.typeInfo = value.getClass().getName();
-		} else {
-			this.typeInfo = null;
-		}
+		this.typeInfo = TypeInfo.getTypeInfoForInstance(value);
 		notifyDataObservers(oldValue);
 	}
 
@@ -730,7 +733,7 @@ public class RawData implements Data {
 		return subArray(1, getSize() - 1);
 	}
 
-	public String getTypeInfo() {
+	public int getTypeInfo() {
 		return typeInfo;
 	}
 

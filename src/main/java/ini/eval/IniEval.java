@@ -314,7 +314,8 @@ public class IniEval {
 										arguments.add(eval(argument));
 									}
 									// TODO: parse-time
-									throw new RuntimeException("cannot spawn a function... please only spawn processes");
+									throw new RuntimeException(
+											"cannot spawn a function... please only spawn processes");
 								} else {
 									Data argument = null;
 									f = parser.parsedFunctionMap.get(invocation.name);
@@ -333,11 +334,13 @@ public class IniEval {
 										arguments.add(argument);
 									}
 									// TODO: parse-time
-									if(!f.isProcess()) {
-										throw new RuntimeException("cannot spawn a function... please only spawn processes");
+									if (!f.isProcess()) {
+										throw new RuntimeException(
+												"cannot spawn a function... please only spawn processes");
 									}
 								}
-								Main.log("spawn request to " + targetNode + " / " + invocation.name + " - " + arguments);
+								Main.LOGGER.info(
+										"spawn request to " + targetNode + " / " + invocation.name + " - " + arguments);
 								CoreBrokerClient.sendSpawnRequest(targetNode,
 										new SpawnRequest(invocation.name, arguments));
 								spawned = true;
@@ -353,26 +356,17 @@ public class IniEval {
 						f = parser.parsedFunctionMap.get(invocation.name);
 						if (f == null) {
 							if (!Main.node.equals(invocation.owner)) {
-								CoreBrokerClient.sendFetchRequest(invocation.owner, new FetchRequest(invocation.name),
-										request -> {
-											if (parser.parsedFunctionMap.containsKey(request.function.name)) {
-												Function oldf = parser.parsedFunctionMap.get(request.function.name);
-												parser.parsedFunctionMap.remove(request.function.name);
-												parser.parsedFunctionList.remove(oldf);
-											}
-											parser.parsedFunctionMap.put(request.function.name, request.function);
-											parser.parsedFunctionList.add(request.function);
-											Main.log("deployed function:");
-											if(Main.verbose) {
-												request.function.prettyPrint(System.out);
-											}
-										});
+								CoreBrokerClient.sendFetchRequest(invocation.owner, new FetchRequest(invocation.name));
 							}
-							f = parser.parsedFunctionMap.get(invocation.name);
-							Main.log("f after fetch: " + f + " - " + invocation.arguments);
-							if (f == null) {
-								throw new RuntimeException("undefined function at " + node);
-							}
+							do {
+								Main.LOGGER.debug("waiting for function to be deployed");
+								try {
+									Thread.sleep(20);
+								} catch (Exception e) {
+								}
+								f = parser.parsedFunctionMap.get(invocation.name);
+							} while (f == null);
+							Main.LOGGER.info("f after fetch: " + f + " - " + invocation.arguments);
 						}
 						if (f.parameters.size() < invocation.arguments.size()) {
 							throw new RuntimeException("wrong number of parameters at " + node);

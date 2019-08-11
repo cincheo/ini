@@ -1,9 +1,11 @@
 package ini.broker;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -14,98 +16,181 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import ini.Main;
 
 public class KafkaBrokerClient<T> implements BrokerClient<T> {
 
-	Producer<Long, String> producer;
-	ConsumerConfiguration<T> consumerConfiguration;
+	public static void main(String[] args) {
+		clearCoreChannels();
+	}
+
+	public static void clearCoreChannels() {
+		Main.parseConfiguration();
+		Main.LOGGER.info("clearing core channels: " + Main.getEnvironmentConfiguration().coreConsumerGroupId);
+		KafkaBrokerClient<Object> client = new KafkaBrokerClient<Object>(true, new ConsumerConfiguration<Object>(
+				Main.getEnvironmentConfiguration().coreConsumerGroupId, new GsonBuilder(), Object.class));
+		Consumer<Long, String> c = client.createConsumer(null);
+		System.out.println(c.listTopics());
+
+		for (String topic : c.listTopics().keySet()) {
+			if (topic.endsWith(CoreBrokerClient.DEPLOY_REQUEST_SUFFIX)
+					|| topic.endsWith(CoreBrokerClient.FETCH_REQUEST_SUFFIX)
+					|| topic.endsWith(CoreBrokerClient.SPAWN_REQUEST_SUFFIX)) {
+				Main.LOGGER.info("clearing core channel: " + topic);
+				new Thread() {
+					public void run() {
+						client.consume(topic, null);
+					}
+				}.start();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				client.stopConsumer(topic);
+			}
+		}
+	}
+
+	public void clearChannels(Predicate<String> channelSelector) {
+
+	}
+
+	private static Producer<Long, String> producer;
+	private ConsumerConfiguration<T> consumerConfiguration;
+	private Map<String, Consumer<Long, String>> consumers = new HashMap<>();
+	private Map<String, AtomicBoolean> consumerCloseStates = new HashMap<>();
 	boolean verbose = false;
+
+	private static synchronized Producer<Long, String> getProducerInstance() {
+		if (producer == null) {
+			Properties props = new Properties();
+			props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+					Main.configuration.environments.get(Main.environment).bootstrapBrokerServers);
+			props.put(ProducerConfig.CLIENT_ID_CONFIG, "IniProducer");
+			props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
+			props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+			producer = new KafkaProducer<>(props);
+		}
+		return producer;
+	}
 
 	public KafkaBrokerClient(boolean verbose, ConsumerConfiguration<T> consumerConfiguration) {
 		this.verbose = verbose;
-		Properties props = new Properties();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-				Main.configuration.environments.get(Main.environment).bootstrapBrokerServers);
-		props.put(ProducerConfig.CLIENT_ID_CONFIG, "IniProducer");
-		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
-		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-		this.producer = new KafkaProducer<>(props);
 		this.consumerConfiguration = consumerConfiguration;
 	}
 
 	private Consumer<Long, String> createConsumer(String channel) {
+		Main.LOGGER.debug("creating '" + consumerConfiguration.getConsumerId() + "' consumer for channel " + channel);
+		if (consumers.containsKey(channel)) {
+			stopConsumer(channel);
+		}
 		Consumer<Long, String> consumer = null;
 		final Properties props = new Properties();
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
 				Main.configuration.environments.get(Main.environment).bootstrapBrokerServers);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, "IniConsumer");
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerConfiguration.getConsumerId());
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		if (consumerConfiguration.getConsumeStrategy() == ConsumerConfiguration.ConsumeStrategy.EARLIEST) {
+			Main.LOGGER.debug("consume strategy is 'earliest'");
 			props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 		}
 
+		Main.LOGGER.debug("creating consumer");
 		// Create the consumer using props.
 		consumer = new KafkaConsumer<>(props);
+		Main.LOGGER.debug("done creating consumer");
 
-		// Subscribe to the topic.
-		consumer.subscribe(Collections.singletonList(channel));
+		if (channel != null) {
+			consumers.put(channel, consumer);
+			consumerCloseStates.put(channel, new AtomicBoolean(false));
+			// Subscribe to the topic.
+			consumer.subscribe(Collections.singletonList(channel));
+			Main.LOGGER.debug("subscribed consumer to " + channel);
+		}
 		return consumer;
 	}
-	
+
 	@Override
-	public void consume(String channel, java.util.function.Consumer<T> consumeHandler) throws InterruptedException {
-		Consumer<Long, String> consumer = createConsumer(channel);
-
-		List<T> results = new ArrayList<>();
-
-		if (verbose) {
-			System.out.println("[KAFKA] Consumer polling from topic " + channel);
-		}
-		while (true) {
-			
-			final ConsumerRecords<Long, String> consumerRecords = consumer.poll(java.time.Duration.ofMillis(1000));
-
-			if (consumerRecords.count() == 0) {
-				continue;
-			} else {
-				consumerRecords.forEach(record -> {
-					if (verbose) {
-						System.out.printf("[KAFKA] Consuming: (topic=%s, %d, %s, %d, %d)\n", channel, record.key(),
-								record.value(), record.partition(), record.offset());
-					}
-					try {
-						results.add(consumerConfiguration.getGsonBuilder().create().fromJson(record.value(),
-								consumerConfiguration.getDataType()));
-					} catch (Exception e) {
-						System.err.println("[KAFKA] Error deserializing: " + record.value() + " - ignoring");
-						e.printStackTrace();
-					}
-				});
-				if (verbose) {
-					System.out.println("[KAFKA] Commit consume from '" + channel + "'");
+	public void stopConsumer(String channel) {
+		if (consumers.containsKey(channel)) {
+			Main.LOGGER.debug("stopping consumer for channel " + channel);
+			consumerCloseStates.get(channel).set(true);
+			try {
+				Thread.sleep(2000);
+				if (isConsumerRunning(channel)) {
+					Main.LOGGER.debug("wakeup");
+					consumers.get(channel).wakeup();
 				}
-				consumer.commitAsync();
-				break;
+			} catch (Exception e) {
 			}
 		}
-		if (verbose) {
-			System.out.println("[KAFKA] Consumer '" + channel + "' closed");
+	}
+
+	@Override
+	public boolean isConsumerRunning(String channel) {
+		return consumers.containsKey(channel);
+	}
+
+	@Override
+	public void consume(String channel, java.util.function.Consumer<T> consumeHandler) {
+		if (channel == null) {
+			throw new RuntimeException("Cannot create consumer for null channel");
 		}
-		if (consumer != null) {
+		Consumer<Long, String> consumer = createConsumer(channel);
+
+		Main.LOGGER.debug("consumer polling from topic '" + channel + "'...");
+
+		while (!consumerCloseStates.get(channel).get()) {
+			try {
+				final ConsumerRecords<Long, String> consumerRecords = consumer.poll(java.time.Duration.ofMillis(1000));
+
+				if (consumerRecords.count() == 0) {
+					//Main.LOGGER.debug("consumer timeout: "+channel);
+					continue;
+				} else {
+					Main.LOGGER.debug(
+							"consumer polled " + consumerRecords.count() + " records from topic '" + channel + "'");
+					consumerRecords.forEach(record -> {
+						Main.LOGGER.debug(String.format("accept: (topic=%s, %d, %s, %d, %d)", channel, record.key(),
+								record.value(), record.partition(), record.offset()));
+						try {
+							if (consumeHandler != null) {
+								consumeHandler.accept(consumerConfiguration.getGsonBuilder().create()
+										.fromJson(record.value(), consumerConfiguration.getDataType()));
+							}
+						} catch (Exception e) {
+							Main.LOGGER.error("error deserializing: " + record.value() + " - ignoring", e);
+						}
+					});
+					Main.LOGGER.debug("commiting consume from '" + channel + "'");
+					consumer.commitSync();
+				}
+			} catch (WakeupException wakeupException) {
+				Main.LOGGER.debug("woke up consumer for " + channel);
+			} finally {
+			}
+		}
+		Main.LOGGER.debug("consumer '" + channel + "' out of consume loop");
+		consumers.remove(channel);
+		consumerCloseStates.remove(channel);
+		try {
 			consumer.close();
+		} catch (Exception e) {
+			Main.LOGGER.error("consumer raised an exception while closing");
 		}
-		for(T data : results) {
-			consumeHandler.accept(data);
-		}
+		Main.LOGGER.debug("consumer '" + channel + "' closed");
+
 	}
 
 	@Override
@@ -115,25 +200,19 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 		try {
 			final ProducerRecord<Long, String> record = new ProducerRecord<>(channel, new Gson().toJson(data));
 
-			RecordMetadata metadata = producer.send(record).get();
+			Main.LOGGER.debug("producing on channel " + channel);
+			RecordMetadata metadata = getProducerInstance().send(record).get();
 
 			long elapsedTime = System.currentTimeMillis() - time;
-			if (verbose) {
-				System.out.printf(
-						"[KAFKA] Produced: (topic=%s, key=%s, value=%s) " + "meta(partition=%d, offset=%d) time=%d\n",
-						channel, record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
-			}
+			Main.LOGGER.debug(String.format(
+					"produced: (topic=%s, key=%s, value=%s) " + "meta(partition=%d, offset=%d) time=%d", channel,
+					record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime));
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} finally {
 			producer.flush();
 		}
-	}
-
-	@Override
-	public void close() {
-		producer.close();
 	}
 
 }

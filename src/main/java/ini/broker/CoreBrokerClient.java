@@ -3,6 +3,7 @@ package ini.broker;
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -14,15 +15,19 @@ import com.google.gson.JsonPrimitive;
 import ini.Main;
 import ini.ast.AstNode;
 import ini.ast.Expression;
+import ini.ast.NumberLiteral;
 import ini.ast.Statement;
 import ini.ast.VariableAccess;
-import ini.broker.ConsumerConfiguration.ConsumeStrategy;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
 
 public class CoreBrokerClient {
 
 	private static final boolean VERBOSE = false;
+
+	public static final String SPAWN_REQUEST_SUFFIX = "_spawn_request";
+	public static final String FETCH_REQUEST_SUFFIX = "_fetch_request";
+	public static final String DEPLOY_REQUEST_SUFFIX = "_deploy_request";
 
 	private static BrokerClient<SpawnRequest> spawnRequestBrokerClient;
 	private static BrokerClient<FetchRequest> fetchRequestBrokerClient;
@@ -45,7 +50,9 @@ public class CoreBrokerClient {
 				}
 			});
 			spawnRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE,
-					new ConsumerConfiguration<>(ConsumeStrategy.LATEST, 1000, gsonBuilder, SpawnRequest.class));
+					new ConsumerConfiguration<>(
+							Main.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
+							SpawnRequest.class));
 		}
 		return spawnRequestBrokerClient;
 	}
@@ -62,18 +69,22 @@ public class CoreBrokerClient {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys();
-					if (data.isNumber()) {
-						if (!json.getAsJsonObject().get("value").toString().contains(".")) {
-							data.setValue(json.getAsJsonObject().get("value").getAsLong());
-						}
-					}
-					return data;
+					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo();
 				}
 			});
 
-			deployRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE,
-					new ConsumerConfiguration<>(ConsumeStrategy.LATEST, 1000, gsonBuilder, DeployRequest.class));
+			gsonBuilder.registerTypeAdapter(NumberLiteral.class, new JsonDeserializer<NumberLiteral>() {
+
+				@Override
+				public NumberLiteral deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+						throws JsonParseException {
+					// context.deserialize(json, type);
+					return new Gson().fromJson(json, NumberLiteral.class).applyTypeInfo();
+				}
+			});
+
+			deployRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, new ConsumerConfiguration<>(
+					Main.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder, DeployRequest.class));
 		}
 		return deployRequestBrokerClient;
 	}
@@ -81,8 +92,8 @@ public class CoreBrokerClient {
 	private static synchronized BrokerClient<FetchRequest> getFetchRequestBrokerClient() {
 		if (fetchRequestBrokerClient == null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
-			fetchRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE,
-					new ConsumerConfiguration<>(ConsumeStrategy.LATEST, 1000, gsonBuilder, FetchRequest.class));
+			fetchRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, new ConsumerConfiguration<>(
+					Main.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder, FetchRequest.class));
 		}
 		return fetchRequestBrokerClient;
 	}
@@ -90,53 +101,32 @@ public class CoreBrokerClient {
 	public static void startSpawnRequestConsumer(Consumer<SpawnRequest> handler) {
 		new Thread() {
 			public void run() {
-				while (true) {
-					try {
-						getSpawnRequestBrokerClient().consume(Main.node + "_spawn_request", request -> {
-							Main.log("" + request);
-							handler.accept(request);
-						});
-					} catch (InterruptedException e) {
-					}
-				}
+				getSpawnRequestBrokerClient().consume(Main.node + SPAWN_REQUEST_SUFFIX, request -> {
+					Main.LOGGER.info("" + request);
+					handler.accept(request);
+				});
 			}
 		}.start();
 	}
 
 	public static void sendSpawnRequest(String targetNode, SpawnRequest request) {
-		getSpawnRequestBrokerClient().produce(targetNode + "_spawn_request", request);
+		getSpawnRequestBrokerClient().produce(targetNode + SPAWN_REQUEST_SUFFIX, request);
 	}
 
 	public static void startFetchRequestConsumer(Consumer<FetchRequest> handler) {
 		new Thread() {
 			public void run() {
-				while (true) {
-					try {
-						getFetchRequestBrokerClient().consume(Main.node + "_fetch_request", request -> {
-							Main.log("" + request);
-							handler.accept(request);
-						});
-					} catch (InterruptedException e) {
-					}
-				}
+				getFetchRequestBrokerClient().consume(Main.node + FETCH_REQUEST_SUFFIX, request -> {
+					Main.LOGGER.info("" + request);
+					handler.accept(request);
+				});
 			}
 		}.start();
 	}
 
-	public static void sendFetchRequest(String targetNode, FetchRequest request, Consumer<DeployRequest> handler) {
-		Main.log("send " + request + " to " + targetNode);
-		getFetchRequestBrokerClient().produce(targetNode + "_fetch_request", request);
-		boolean[] handled = { false };
-		while (!handled[0]) {
-			try {
-				getDeployRequestBrokerClient().consume(Main.node + "_deploy_request", deployRequest -> {
-					Main.log("" + deployRequest);
-					handled[0] = true;
-					handler.accept(deployRequest);
-				});
-			} catch (InterruptedException e) {
-			}
-		}
+	public static void sendFetchRequest(String targetNode, FetchRequest request) {
+		Main.LOGGER.info("send " + request + " to " + targetNode);
+		getFetchRequestBrokerClient().produce(targetNode + FETCH_REQUEST_SUFFIX, request);
 	}
 
 	private static class AstNodeDeserializer implements JsonDeserializer<AstNode> {
@@ -157,7 +147,18 @@ public class CoreBrokerClient {
 	}
 
 	public static void sendDeployRequest(String targetNode, DeployRequest request) {
-		getDeployRequestBrokerClient().produce(targetNode + "_deploy_request", request);
+		getDeployRequestBrokerClient().produce(targetNode + DEPLOY_REQUEST_SUFFIX, request);
 	}
 
+	public static void startDeployRequestConsumer(Consumer<DeployRequest> handler) {
+		new Thread() {
+			public void run() {
+				getDeployRequestBrokerClient().consume(Main.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
+					Main.LOGGER.info("" + deployRequest);
+					handler.accept(deployRequest);
+				});
+			}
+		}.start();
+	}
+	
 }

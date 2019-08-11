@@ -4,6 +4,7 @@ import java.util.List;
 
 import ini.ast.Expression;
 import ini.ast.Invocation;
+import ini.broker.BrokerClient;
 import ini.broker.DefaultBrokerClient;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
@@ -19,7 +20,7 @@ public class ProduceFunction extends IniFunction {
 		String channel = eval.eval(params.get(0)).getValue();
 		Data data = eval.eval(params.get(1));
 		try {
-			DefaultBrokerClient.getInstance().produce(channel, RawData.rawCopy(data));
+			BrokerClient.createDefaultInstance().produce(channel, RawData.rawCopy(data));
 			//KafkaClient.runProducer(topic, RawData.rawCopy(message));
 		}
 		catch(Exception e) {

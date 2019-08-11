@@ -98,6 +98,6 @@ public interface Data {
 	
 	Data first();
 	
-	String getTypeInfo();
+	int getTypeInfo();
 	
 }
