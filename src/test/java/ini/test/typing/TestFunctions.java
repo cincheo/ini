@@ -117,7 +117,7 @@ public class TestFunctions extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"f1(Int)->Int => \"any\", \"any\""+
-					"function f2() { @init() f1(2)==1.2 {} }");
+					"function f2() { @init() && f1(2)==1.2 {} }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 2 errors: "+attrib.errors, 2, attrib.errors.size());

@@ -182,6 +182,9 @@ public abstract class At {
 	}
 
 	public void parseInParameters(final IniEval eval, List<Expression> inParameters) {
+		if (inParameters == null) {
+			return;
+		}
 		for (Expression e : inParameters) {
 			Assignment a = (Assignment) e;
 			inContext.put(((Variable) a.assignee).name, eval.eval(a.assignment));

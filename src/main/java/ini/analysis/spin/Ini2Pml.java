@@ -192,7 +192,7 @@ public class Ini2Pml {
 					break;
 				case UPDATE:
 					// Generate monitor proctype for the variable
-					String observedVariable = r.atPredicate.inParameters.get(0).toString().split("=")[1];
+					String observedVariable = r.atPredicate.annotations.get(0).toString().split("=")[1];
 					// observedVariables.add(observedVariable);
 					rendezvousChannels.add("chan_" + observedVariable);
 					String tempVariable = "temp_" + observedVariable;
@@ -416,7 +416,7 @@ public class Ini2Pml {
 			Function f = (Function) node;
 			for (Rule r : f.atRules) {
 				if (r.atPredicate.kind.equals(AtPredicate.Kind.UPDATE)) {
-					String observedVariable = r.atPredicate.inParameters.get(0).toString().split("=")[1];
+					String observedVariable = r.atPredicate.annotations.get(0).toString().split("=")[1];
 					observedVariables.add(observedVariable);
 				}
 			}

@@ -251,7 +251,7 @@ public class IniEval {
 						}
 
 						evaluationStack.push(evalRule.atPredicate);
-						evalAt.parseInParameters(this, evalRule.atPredicate.inParameters);
+						evalAt.parseInParameters(this, evalRule.atPredicate.annotations);
 						evalAt.eval(this);
 						evaluationStack.pop();
 					}
@@ -274,7 +274,7 @@ public class IniEval {
 					boolean caught = false;
 					for (Rule rule : f.errorRules) {
 						if (rule.guard == null || eval(rule.guard).isTrueOrDefined()) {
-							invocationStack.peek().bind(((Variable) rule.atPredicate.inParameters.get(0)).name,
+							invocationStack.peek().bind(((Variable) rule.atPredicate.annotations.get(0)).name,
 									new RawData(e));
 							Sequence<Statement> s = rule.statements;
 							while (s != null) {

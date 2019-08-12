@@ -8,7 +8,7 @@ public class AtCron extends At {
 
 	@Override
 	public void eval(IniEval eval) {
-		if (getAtPredicate().inParameters.size() != 1) {
+		if (getAtPredicate().annotations!=null && getAtPredicate().annotations.size() != 1) {
 			throw new RuntimeException(
 					"wrong number of arguments in @cron (expecting one cron expression as a string)");
 		}

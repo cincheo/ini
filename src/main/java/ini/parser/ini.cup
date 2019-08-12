@@ -138,7 +138,7 @@ non terminal invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
 non terminal rule_list_opt, rule_list, rule, rule_body, guard;
 non terminal logical_expr_opt, logical_expr, algebraic_expr, set_logical_expr, boolean_literal;
 non terminal set_decl, constructor_expr, assignment_list;
-non terminal at_expr, at_binding, at_params_conf_opt;
+non terminal at_expr, at_binding, annotations_opt;
 non terminal usertype, constructor_list, constructor, list_constructor, constructor_or_type;
 non terminal field_list_opt, field_list, field;
 non terminal constructor_match_expr;
@@ -519,23 +519,23 @@ field_match_expr_list ::= field_match_expr_list:l COMMA logical_expr:f
 	:}
 ;
 
-at_params_conf_opt ::= LSPAREN arg_list_opt:l RSPAREN
+annotations_opt ::= LSPAREN arg_list:l RSPAREN
 {:
 	RESULT = (List)l;
 :}
 |
 {:
-	RESULT = new ArrayList();
+	RESULT = (List)null;
 :}
 ;
 
-at_expr ::= IDENTIFIER:id COL AT:at IDENTIFIER:name at_params_conf_opt:cp LPAREN arg_list_opt:rp RPAREN
+at_expr ::= IDENTIFIER:id COL AT:at IDENTIFIER:name LPAREN arg_list_opt:rp RPAREN annotations_opt:a
 {: 
-	RESULT = new AtPredicate(parser,(Token)at,name.toString(),(List)cp,(List)rp, id.toString());
+	RESULT = new AtPredicate(parser,(Token)at,name.toString(),(List)a,(List)rp, id.toString());
 :}
-| AT:at IDENTIFIER:name at_params_conf_opt:cp LPAREN arg_list_opt:rp RPAREN
+| AT:at IDENTIFIER:name LPAREN arg_list_opt:rp RPAREN annotations_opt:a
 {: 
-	RESULT = new AtPredicate(parser,(Token)at,name.toString(),(List)cp,(List)rp, null);
+	RESULT = new AtPredicate(parser,(Token)at,name.toString(),(List)a,(List)rp, null);
 :}
 ;
 
@@ -543,10 +543,10 @@ pre_post_op ::= var_access:e PLUSPLUS:op {: RESULT=new UnaryOperator(parser,(Tok
 	| var_access:e MINUSMINUS:op {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.POST_DEC,(Expression)e); :}
 ;
 
-invocation ::= IDENTIFIER:i LPAREN arg_list_opt:l RPAREN at_params_conf_opt:cp
+invocation ::= IDENTIFIER:i LPAREN arg_list_opt:l RPAREN annotations_opt:a
 	{:
 		Invocation inv = new Invocation(parser,(Token)i,i.toString(),(List)l);
-		inv.annotations = (List)cp;
+		inv.annotations = (List)a;
 		RESULT = inv;
 	:}
 ;
@@ -595,7 +595,7 @@ rule_body ::= statement_list_opt:l ret_expr_opt:ret
 	:}
 ;		
 
-logical_expr_opt ::= logical_expr:e {: RESULT = e; :} | ;
+logical_expr_opt ::= ANDAND logical_expr:e {: RESULT = e; :} | ;
 
 ret_expr_opt ::= RETURN:r expr:e {: RESULT = new ReturnStatement(parser,(Token)r,(Expression)e); :}
 	| RETURN:r boolean_literal:e {: RESULT = new ReturnStatement(parser,(Token)r,(Expression)e); :}

@@ -11,7 +11,6 @@ public class AtPredicate extends NamedElement {
 		UPDATE, EVERY, CRON, INIT, END, ERROR, UPDATE_SYNC, USER_DEFINED
 	}
 	
-	public List<Expression> inParameters;
 	public List<Expression> outParameters;
 	public Kind kind=null;
 	public String identifier;
@@ -19,7 +18,7 @@ public class AtPredicate extends NamedElement {
 	public AtPredicate(IniParser parser, Token token, String name, List<Expression> configurationArguments, List<Expression> runtimeArguments, String identifier) {
 		super(parser, token, name);
 		this.identifier = identifier;
-		this.inParameters = configurationArguments;
+		this.annotations = configurationArguments;
 		this.outParameters = runtimeArguments;
 		if(name.equals("init")) {
 			kind=Kind.INIT;
@@ -52,7 +51,7 @@ public class AtPredicate extends NamedElement {
 	public void prettyPrint(PrintStream out) {
 		out.print("@"+name);
 		out.print("[");
-		prettyPrintList(out, inParameters, ",");
+		prettyPrintList(out, annotations, ",");
 		out.print("]");
 		out.print("(");
 		prettyPrintList(out, outParameters, ",");
