@@ -7,6 +7,7 @@
 
 import java.util.*;
 import java.io.*;
+import ini.*;
 import ini.ast.*;
 import ini.eval.function.*;
 import ini.eval.at.*;
@@ -23,6 +24,20 @@ parser code {:
 	public List<Binding> parsedBindingList=new ArrayList<Binding>();
 	public List<AtBinding> parsedAtBindingList=new ArrayList<AtBinding>();
 	public List<Import> parsedImportList=new ArrayList<Import>();
+
+	public boolean deamon = false;
+
+	public ini.broker.CoreBrokerClient coreBrokerClient;
+
+	public Configuration configuration;
+
+	public String environment = "development";
+
+	public String node = "main";
+	
+	public EnvironmentConfiguration getEnvironmentConfiguration() {
+		return configuration.environments.get(environment);
+	}
 
 	protected static IniParser createParser(String fileName) throws java.io.FileNotFoundException {
       IniScanner scanner= new IniScanner(new java.io.FileReader(fileName));
@@ -222,6 +237,12 @@ binding_list ::= binding_list binding:b
 binding ::= IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN ARROW_RIGHT type:rtype IMPLIES STRING:className COMMA STRING:methodName
 	{:
 		RESULT = new Binding(parser, (Token)name, name.toString(), (List)types, (TypeVariable)rtype, className.toString(), methodName.toString());
+	:}
+| IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN ARROW_RIGHT type:rtype annotations_opt:a
+	{:
+		Binding binding = new Binding(parser, (Token)name, name.toString(), (List)types, (TypeVariable)rtype, null, null);
+		binding.annotations = (List)a;
+		RESULT = binding;
 	:}
 ;
 
@@ -499,6 +520,10 @@ case_expr ::= CASE:c LCPAREN rule_list_opt:l DEFAULT LCPAREN statement_list_opt:
 	| CASE:c LCPAREN rule_list_opt:l RCPAREN 
 	{:
 		RESULT = new CaseStatement(parser,(Token)c, (List)l,null); 
+	:}
+	| CASE:c rule:r 
+	{:
+		RESULT = new CaseStatement(parser,(Token)c,(List<Rule>)(List)Arrays.asList(r),null); 
 	:}
 ;
 

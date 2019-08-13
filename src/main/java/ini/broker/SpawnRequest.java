@@ -9,7 +9,8 @@ public class SpawnRequest extends Request {
 	public String spawnedProcessName;
 	public List<Data> parameters;
 
-	public SpawnRequest(String spawnedProcessName, List<Data> parameters) {
+	public SpawnRequest(String sourceNode, String spawnedProcessName, List<Data> parameters) {
+		super(sourceNode);
 		this.spawnedProcessName = spawnedProcessName;
 		this.parameters = parameters;
 	}

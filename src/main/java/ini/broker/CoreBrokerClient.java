@@ -20,8 +20,15 @@ import ini.ast.Statement;
 import ini.ast.VariableAccess;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
+import ini.parser.IniParser;
 
 public class CoreBrokerClient {
+
+	private IniParser parser;
+
+	public CoreBrokerClient(IniParser parser) {
+		this.parser = parser;
+	}
 
 	private static final boolean VERBOSE = false;
 
@@ -29,11 +36,31 @@ public class CoreBrokerClient {
 	public static final String FETCH_REQUEST_SUFFIX = "_fetch_request";
 	public static final String DEPLOY_REQUEST_SUFFIX = "_deploy_request";
 
-	private static BrokerClient<SpawnRequest> spawnRequestBrokerClient;
-	private static BrokerClient<FetchRequest> fetchRequestBrokerClient;
-	private static BrokerClient<DeployRequest> deployRequestBrokerClient;
+	private BrokerClient<SpawnRequest> spawnRequestBrokerClient;
+	private BrokerClient<FetchRequest> fetchRequestBrokerClient;
+	private BrokerClient<DeployRequest> deployRequestBrokerClient;
 
-	private static synchronized BrokerClient<SpawnRequest> getSpawnRequestBrokerClient() {
+	/*
+	 * public static void clearCoreChannels() { Main.parseConfiguration();
+	 * Main.LOGGER.info("clearing core channels: " +
+	 * Main.getEnvironmentConfiguration().coreConsumerGroupId);
+	 * KafkaBrokerClient<Object> client = new KafkaBrokerClient<Object>(true,
+	 * new ConsumerConfiguration<Object>(
+	 * Main.getEnvironmentConfiguration().coreConsumerGroupId, new
+	 * GsonBuilder(), Object.class)); Consumer<Long, String> c =
+	 * client.createConsumer(null); System.out.println(c.listTopics());
+	 * 
+	 * for (String topic : c.listTopics().keySet()) { if
+	 * (topic.endsWith(CoreBrokerClient.DEPLOY_REQUEST_SUFFIX) ||
+	 * topic.endsWith(CoreBrokerClient.FETCH_REQUEST_SUFFIX) ||
+	 * topic.endsWith(CoreBrokerClient.SPAWN_REQUEST_SUFFIX)) {
+	 * Main.LOGGER.info("clearing core channel: " + topic); new Thread() {
+	 * public void run() { client.consume(topic, null); } }.start(); try {
+	 * Thread.sleep(100); } catch (InterruptedException e) {
+	 * e.printStackTrace(); } client.stopConsumer(topic); } } }
+	 */
+
+	private synchronized BrokerClient<SpawnRequest> getSpawnRequestBrokerClient() {
 		if (spawnRequestBrokerClient == null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
 			gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
@@ -43,15 +70,14 @@ public class CoreBrokerClient {
 					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo();
 				}
 			});
-			spawnRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE,
-					new ConsumerConfiguration<>(
-							Main.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
+			spawnRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, parser.getEnvironmentConfiguration(),
+					new ConsumerConfiguration<>(parser.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
 							SpawnRequest.class));
 		}
 		return spawnRequestBrokerClient;
 	}
 
-	private static synchronized BrokerClient<DeployRequest> getDeployRequestBrokerClient() {
+	private synchronized BrokerClient<DeployRequest> getDeployRequestBrokerClient() {
 		if (deployRequestBrokerClient == null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
 			gsonBuilder.registerTypeAdapter(AstNode.class, new AstNodeDeserializer())
@@ -77,25 +103,27 @@ public class CoreBrokerClient {
 				}
 			});
 
-			deployRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, new ConsumerConfiguration<>(
-					Main.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder, DeployRequest.class));
+			deployRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, parser.getEnvironmentConfiguration(),
+					new ConsumerConfiguration<>(parser.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
+							DeployRequest.class));
 		}
 		return deployRequestBrokerClient;
 	}
 
-	private static synchronized BrokerClient<FetchRequest> getFetchRequestBrokerClient() {
+	private synchronized BrokerClient<FetchRequest> getFetchRequestBrokerClient() {
 		if (fetchRequestBrokerClient == null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
-			fetchRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, new ConsumerConfiguration<>(
-					Main.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder, FetchRequest.class));
+			fetchRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, parser.getEnvironmentConfiguration(),
+					new ConsumerConfiguration<>(parser.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
+							FetchRequest.class));
 		}
 		return fetchRequestBrokerClient;
 	}
 
-	public static void startSpawnRequestConsumer(Consumer<SpawnRequest> handler) {
+	public void startSpawnRequestConsumer(Consumer<SpawnRequest> handler) {
 		new Thread() {
 			public void run() {
-				getSpawnRequestBrokerClient().consume(Main.node + SPAWN_REQUEST_SUFFIX, request -> {
+				getSpawnRequestBrokerClient().consume(parser.node + SPAWN_REQUEST_SUFFIX, request -> {
 					Main.LOGGER.info("" + request);
 					handler.accept(request);
 				});
@@ -103,14 +131,14 @@ public class CoreBrokerClient {
 		}.start();
 	}
 
-	public static void sendSpawnRequest(String targetNode, SpawnRequest request) {
+	public void sendSpawnRequest(String targetNode, SpawnRequest request) {
 		getSpawnRequestBrokerClient().produce(targetNode + SPAWN_REQUEST_SUFFIX, request);
 	}
 
-	public static void startFetchRequestConsumer(Consumer<FetchRequest> handler) {
+	public void startFetchRequestConsumer(Consumer<FetchRequest> handler) {
 		new Thread() {
 			public void run() {
-				getFetchRequestBrokerClient().consume(Main.node + FETCH_REQUEST_SUFFIX, request -> {
+				getFetchRequestBrokerClient().consume(parser.node + FETCH_REQUEST_SUFFIX, request -> {
 					Main.LOGGER.info("" + request);
 					handler.accept(request);
 				});
@@ -118,7 +146,7 @@ public class CoreBrokerClient {
 		}.start();
 	}
 
-	public static void sendFetchRequest(String targetNode, FetchRequest request) {
+	public void sendFetchRequest(String targetNode, FetchRequest request) {
 		Main.LOGGER.info("send " + request + " to " + targetNode);
 		getFetchRequestBrokerClient().produce(targetNode + FETCH_REQUEST_SUFFIX, request);
 	}
@@ -140,19 +168,19 @@ public class CoreBrokerClient {
 
 	}
 
-	public static void sendDeployRequest(String targetNode, DeployRequest request) {
+	public void sendDeployRequest(String targetNode, DeployRequest request) {
 		getDeployRequestBrokerClient().produce(targetNode + DEPLOY_REQUEST_SUFFIX, request);
 	}
 
-	public static void startDeployRequestConsumer(Consumer<DeployRequest> handler) {
+	public void startDeployRequestConsumer(Consumer<DeployRequest> handler) {
 		new Thread() {
 			public void run() {
-				getDeployRequestBrokerClient().consume(Main.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
+				getDeployRequestBrokerClient().consume(parser.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
 					Main.LOGGER.info("" + deployRequest);
 					handler.accept(deployRequest);
 				});
 			}
 		}.start();
 	}
-	
+
 }

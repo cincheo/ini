@@ -2,9 +2,12 @@ package ini;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,17 +34,7 @@ public class Main {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("ini");
 
-	public static Configuration configuration;
-
-	public static String environment = "development";
-
-	public static String node = "main";
-
 	public static final String VERSION = "pre-alpha 2";
-
-	public static EnvironmentConfiguration getEnvironmentConfiguration() {
-		return configuration.environments.get(environment);
-	}
 
 	public static void main(String[] args) throws Exception {
 
@@ -61,8 +54,8 @@ public class Main {
 		jsap.registerParameter(
 				new Switch("help").setShortFlag('h').setLongFlag("help").setHelp("Print this usage message."));
 
-		jsap.registerParameter(new FlaggedOption("breakpoint").setList(true).setListSeparator(',').setShortFlag('b')
-				.setLongFlag("breakpoint").setHelp(
+		jsap.registerParameter(new FlaggedOption("breakpoints").setList(true).setListSeparator(',').setShortFlag('b')
+				.setLongFlag("breakpoints").setHelp(
 						"Install breakpoints on the program when run in debug mode (ignored when not in debug mode)."));
 
 		jsap.registerParameter(
@@ -116,6 +109,11 @@ public class Main {
 			return;
 		}
 
+		if (commandLineConfig.userSpecified("node") || commandLineConfig.userSpecified("deamon")) {
+			System.out.println("coucou");
+			parser.deamon = true;
+		}
+
 		if (commandLineConfig.getBoolean("pretty-print-ast")) {
 			for (UserType t : parser.parsedTypes) {
 				t.prettyPrint(System.out);
@@ -146,48 +144,56 @@ public class Main {
 			return;
 		}
 
-		parseConfiguration();
+		parseConfiguration(parser);
 
 		String systemEnv = System.getenv("INI_ENV");
 		if (systemEnv != null) {
-			environment = systemEnv;
+			parser.environment = systemEnv;
 		}
 
 		String commandLineEnv = commandLineConfig.getString("env");
 		if (commandLineEnv != null) {
-			environment = commandLineEnv;
+			parser.environment = commandLineEnv;
 		}
 
 		String systemNode = System.getenv("INI_NODE");
 		if (systemNode != null) {
-			node = systemNode;
+			parser.node = systemNode;
 		}
 
-		if (configuration.node != null) {
-			node = configuration.node;
+		if (parser.configuration.node != null) {
+			parser.node = parser.configuration.node;
 		}
 
 		String commandLineNode = commandLineConfig.getString("node");
 		if (commandLineNode != null) {
-			node = commandLineNode;
+			parser.node = commandLineNode;
 		}
 
-		evalMainFunction(parser, commandLineConfig);
+		evalMainFunction(parser, commandLineConfig.getBoolean("debug"),
+				Arrays.asList(ArrayUtils.toStringArray(commandLineConfig.getObjectArray("breakpoints"))),
+				Arrays.asList(ArrayUtils.toStringArray(commandLineConfig.getObjectArray("watch"))),
+				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("parameters")));
 
 	}
 
-	public static void parseConfiguration() {
+	public static void parseConfiguration(IniParser parser) {
 		try {
-			configuration = new Gson().fromJson(FileUtils.readFileToString(new File("ini_config.json"), "UTF8"),
+			parser.configuration = new Gson().fromJson(FileUtils.readFileToString(new File("ini_config.json"), "UTF8"),
 					Configuration.class);
 		} catch (Exception e) {
 			throw new RuntimeException("cannot read configuration", e);
 		}
 	}
 
-	public static void evalMainFunction(IniParser parser, JSAPResult commandLineConfig) {
+	public static void evalMainFunction(IniParser parser, String[] args) {
+		evalMainFunction(parser, false, null, null, args);
+	}
 
-		parseConfiguration();
+	public static void evalMainFunction(IniParser parser, boolean debug, List<String> breakpoints,
+			List<String> watchedVariables, String[] args) {
+
+		parseConfiguration(parser);
 
 		Context context = null;
 		Function main = parser.parsedFunctionMap.get("main");
@@ -209,22 +215,20 @@ public class Main {
 			// System.out.println("=====>
 			// "+Arrays.asList(config.getObjectArray("parameters")));
 			if (main.parameters != null && main.parameters.size() == 1) {
-				context.bind(main.parameters.get(0).name,
-						RawData.objectToData(commandLineConfig.getObjectArray("parameters")));
+				context.bind(main.parameters.get(0).name, RawData.objectToData(args));
 			}
 		}
 		IniEval eval;
-		if (commandLineConfig != null && commandLineConfig.getBoolean("debug")) {
-			eval = new IniDebug(parser, context, commandLineConfig);
+		if (debug) {
+			eval = new IniDebug(parser, context, breakpoints, watchedVariables);
 		} else {
-			eval = new IniEval(parser, context, commandLineConfig);
+			eval = new IniEval(parser, context);
 		}
 		try {
-
-			if (commandLineConfig != null
-					&& (commandLineConfig.getBoolean("deamon") || commandLineConfig.contains("node"))) {
+			if (parser.deamon) {
 				LOGGER.info("Starting INI deamon...");
-				CoreBrokerClient.startSpawnRequestConsumer(request -> {
+				parser.coreBrokerClient = new CoreBrokerClient(parser);
+				parser.coreBrokerClient.startSpawnRequestConsumer(request -> {
 					LOGGER.info("processing " + request);
 					Invocation invocation = new Invocation(parser, null, request.spawnedProcessName, request.parameters
 							.stream().map(data -> RawData.dataToExpression(parser, data)).collect(Collectors.toList()));
@@ -236,13 +240,13 @@ public class Main {
 					}.start();
 				});
 
-				CoreBrokerClient.startFetchRequestConsumer(request -> {
+				parser.coreBrokerClient.startFetchRequestConsumer(request -> {
 					LOGGER.info("processing " + request);
-					CoreBrokerClient.sendDeployRequest(request.sourceNode,
-							new DeployRequest(parser.parsedFunctionMap.get(request.fetchedName)));
+					parser.coreBrokerClient.sendDeployRequest(request.sourceNode,
+							new DeployRequest(parser.node, parser.parsedFunctionMap.get(request.fetchedName)));
 				});
 
-				CoreBrokerClient.startDeployRequestConsumer(request -> {
+				parser.coreBrokerClient.startDeployRequestConsumer(request -> {
 					if (parser.parsedFunctionMap.containsKey(request.function.name)) {
 						Function oldf = parser.parsedFunctionMap.get(request.function.name);
 						parser.parsedFunctionMap.remove(request.function.name);
@@ -254,8 +258,8 @@ public class Main {
 				});
 			}
 
-			LOGGER.info("Environment: " + environment);
-			LOGGER.info("INI started - node " + node);
+			LOGGER.info("Environment: " + parser.environment);
+			LOGGER.info("INI started - node " + parser.node);
 
 			eval.eval(main);
 		} catch (Exception e) {

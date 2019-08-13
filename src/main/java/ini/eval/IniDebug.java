@@ -1,5 +1,11 @@
 package ini.eval;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import ini.ast.AstNode;
 import ini.ast.AtPredicate;
 import ini.ast.Function;
@@ -7,35 +13,26 @@ import ini.ast.Rule;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import com.martiansoftware.jsap.JSAPResult;
-
 public class IniDebug extends IniEval {
 
 	boolean step = false;
 	List<String> breakpoints;
 	List<String> watchedVariables;
 
-	public IniDebug(IniParser parser, Context context, JSAPResult config) {
-		super(parser, context, config);
+	public IniDebug(IniParser parser, Context context, List<String> breakpoints, List<String> watchedVariables) {
+		super(parser, context);
 		System.out.println("[INI] Entering debug mode...");
 		step = true;
-		breakpoints = new ArrayList<String>();
-		watchedVariables = new ArrayList<String>();
-		List<String> l = Arrays.asList(config.getStringArray("breakpoint"));
+		this.breakpoints = new ArrayList<>();
+		this.watchedVariables = new ArrayList<>();
+		List<String> l = breakpoints;
 		if (l != null) {
 			breakpoints.addAll(l);
 			System.out.println("[INI] Breakpoints: "
 					+ (breakpoints.isEmpty() ? "no breakpoints defined"
 							: breakpoints));
 		}
-		l = Arrays.asList(config.getStringArray("watch"));
+		l = watchedVariables;
 		if (l != null) {
 			watchedVariables.addAll(l);
 			System.out.println("[INI] Watched variables: "

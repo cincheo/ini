@@ -23,7 +23,7 @@ public class AtConsume extends At {
 			public void run() {
 				do {
 					try {
-						brokerClient = BrokerClient.createDefaultInstance();
+						brokerClient = BrokerClient.createDefaultInstance(eval.parser);
 						channel = getInContext().get("channel").getValue();
 						brokerClient.consume(channel, value -> {
 							Map<String, Data> variables = new HashMap<String, Data>();

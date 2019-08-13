@@ -10,8 +10,6 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.martiansoftware.jsap.JSAPResult;
-
 import ini.Main;
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
@@ -42,7 +40,6 @@ import ini.ast.SubArrayAccess;
 import ini.ast.UnaryOperator;
 import ini.ast.Variable;
 import ini.ast.VariableAccess;
-import ini.broker.CoreBrokerClient;
 import ini.broker.FetchRequest;
 import ini.broker.SpawnRequest;
 import ini.eval.at.At;
@@ -59,15 +56,13 @@ public class IniEval {
 	public Stack<AstNode> evaluationStack = new Stack<AstNode>();
 	public Data result;
 	public boolean error = false;
-	JSAPResult config;
 	public List<IniEval> forkedEvals = new ArrayList<IniEval>();
 	boolean rulePassed = false;
 	public boolean kill = false;
 
-	public IniEval(IniParser parser, Context context, JSAPResult config) {
+	public IniEval(IniParser parser, Context context) {
 		this.parser = parser;
 		this.invocationStack.push(context);
-		this.config = config;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -341,8 +336,8 @@ public class IniEval {
 								}
 								Main.LOGGER.info(
 										"spawn request to " + targetNode + " / " + invocation.name + " - " + arguments);
-								CoreBrokerClient.sendSpawnRequest(targetNode,
-										new SpawnRequest(invocation.name, arguments));
+								parser.coreBrokerClient.sendSpawnRequest(targetNode,
+										new SpawnRequest(parser.node, invocation.name, arguments));
 								spawned = true;
 							}
 						}
@@ -355,8 +350,9 @@ public class IniEval {
 					} else {
 						f = parser.parsedFunctionMap.get(invocation.name);
 						if (f == null) {
-							if (!Main.node.equals(invocation.owner)) {
-								CoreBrokerClient.sendFetchRequest(invocation.owner, new FetchRequest(invocation.name));
+							if (!parser.node.equals(invocation.owner)) {
+								parser.coreBrokerClient.sendFetchRequest(invocation.owner,
+										new FetchRequest(parser.node, invocation.name));
 							}
 							do {
 								Main.LOGGER.debug("waiting for function to be deployed");
@@ -643,7 +639,7 @@ public class IniEval {
 	}
 
 	public IniEval fork() {
-		IniEval forkedEval = new IniEval(this.parser, new Context(invocationStack.peek()), this.config);
+		IniEval forkedEval = new IniEval(this.parser, new Context(invocationStack.peek()));
 		forkedEvals.add(forkedEval);
 		return forkedEval;
 	}

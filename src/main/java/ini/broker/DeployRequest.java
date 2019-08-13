@@ -4,7 +4,8 @@ import ini.ast.Function;
 
 public class DeployRequest extends Request {
 
-	public DeployRequest(Function function) {
+	public DeployRequest(String sourceNode, Function function) {
+		super(sourceNode);
 		this.function = function;
 	}
 

@@ -1,9 +1,11 @@
 package ini.broker;
 
-import ini.Main;
-
 public class Request {
 
-	public String sourceNode = Main.node;
+	public Request(String sourceNode) {
+		this.sourceNode = sourceNode;
+	}
+	
+	public String sourceNode;
 		
 }

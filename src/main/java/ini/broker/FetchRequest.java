@@ -4,7 +4,8 @@ public class FetchRequest extends Request {
 
 	public String fetchedName;
 
-	public FetchRequest(String fetchedName) {
+	public FetchRequest(String sourceNode, String fetchedName) {
+		super(sourceNode);
 		this.fetchedName = fetchedName;
 	}
 

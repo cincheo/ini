@@ -1,13 +1,12 @@
 package ini.ast;
 
-import ini.Main;
-import ini.parser.IniParser;
-import ini.type.Type;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
+
+import ini.parser.IniParser;
+import ini.type.Type;
 
 public abstract class AstElement implements AstNode {
 
@@ -15,35 +14,38 @@ public abstract class AstElement implements AstNode {
 	transient public Token token;
 	public int nodeTypeId = -1;
 	transient public Type type;
-	public String owner = Main.node;
+	public String owner;
 	public List<Expression> annotations;
-	
+
 	@Override
 	public int nodeTypeId() {
 		return nodeTypeId;
 	}
-	
+
 	public AstElement(IniParser parser, Token token) {
 		super();
-		//if(token==null) {
-		//	throw new RuntimeException("token cannot be null");
-		//}
+		// if(token==null) {
+		// throw new RuntimeException("token cannot be null");
+		// }
 		this.parser = parser;
 		this.token = token;
+		if (parser != null) {
+			this.owner = parser.node;
+		}
 	}
 
 	static public void prettyPrintList(PrintStream out, List<? extends AstNode> nodes, String separator) {
-		if(nodes==null) {
+		if (nodes == null) {
 			return;
 		}
-		for(int i=0;i<nodes.size();i++) {
+		for (int i = 0; i < nodes.size(); i++) {
 			nodes.get(i).prettyPrint(out);
-			if(i<nodes.size()-1) {
+			if (i < nodes.size() - 1) {
 				out.print(separator);
 			}
 		}
 	}
-	
+
 	@Override
 	public Token token() {
 		return token;
@@ -61,7 +63,7 @@ public abstract class AstElement implements AstNode {
 		}
 		return s;
 	}
-	
+
 	@Override
 	public Type getType() {
 		return type;
@@ -71,6 +73,5 @@ public abstract class AstElement implements AstNode {
 	public void setType(Type type) {
 		this.type = type;
 	}
-	
-}
 
+}
