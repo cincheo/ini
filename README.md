@@ -113,17 +113,15 @@ process main() {
     println("processes started")
     produce("c1", 1)
   }
-  c:@consume(v) [channel="c"] {
+  @consume(v) [channel="c"] {
     println("end of pipeline: "+v)
-    stop(c)
   }
 }
 
 process p(in, out) {
-  c:@consume(v) [channel=in] {
+  @consume(v) [channel=in] {
     println(in+": "+v)
     produce(out, v+1)
-    stop(c)
   }
 }
 ```
@@ -136,14 +134,14 @@ The above program behaves as depicted here:
 - ``2`` is consumed from ``"c2"`` by ``p("c2", "c")``, and ``3`` is produced to ``"c"``,
 - finally, ``3`` is consumed from ``"c"`` by ``main``, and the pipeline stops there.
 
-Note the use of the ``stop`` function in the ``@consume`` event rules. This is not mandatory but if you don't stop the consumer, the process will never end. Here, we want the processes to terminate once they have handled the data.
-
 ## INI nodes and auto-deployment
 
 By default spawned processes are deployed on the current node (called ``main`` if unspecified). However, by simply using annotations, the programmer can decide on which (remote) INI node the process shall be spawned. There are two ways to deploy processes or functions:
 
 - Push the process/function on a remote node.
 - Pull the process/function from a remote node.
+
+### Push/spawn a process on a target node
 
 Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the following annotations:
 
@@ -158,7 +156,26 @@ Given the pipeline example explained above, to push/spawn the ``p`` processes to
 [...]
 ``` 
 
+In that case, the program of the ``main`` node acts like a coordinator for all the other processes in the distributed program.
+
 A key point to remember is that when a process is spawned to a remote node, the required code (processes and functions) will be automatically fetched from the spawning node. So there is no need for the programmer to pre-deploy manually any piece of program on the INI nodes. INI will take care of all this transparently.
+
+### Pull from a server node
+
+In other cases, a given node may want to evaluate a function or a process that has been defined in another node. In that case, the target node may pull a function or a process from a remote server (any INI node). To do so, the target node needs to declare a function/process binding annotated with the right server node. For instance, the following program runs the ``hello(string)`` function, which has been defined on a node called ``server``.
+
+```javascript
+// this is a binding to a function declared on a remote server
+hello(String) -> String [node="server"]
+
+process main() {
+  @init() {
+    println(hello("Renaud"))
+  }
+}
+``` 
+
+Note that the binding of ``hello``, also defines the functional type ``(String) -> String``, since INI cannot infer it from the function implementation.
 
 ## Getting started
 
