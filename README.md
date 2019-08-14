@@ -9,19 +9,22 @@ By default, INI uses Kafka as a broker.
 
 ### Language Design Philosophy
 
-INI has been built around a simple syntactic construct called a *rule*, which follows the syntax below:
+INI has been built around a simple construct called a *rule*, which follows the syntax below:
 
 ```javascript
 rule := guard '{' statements '}'
 ```
 
-Rules are the heart of the language and since there are no other control flow structure (besides the ``case`` construct), this choice forces the programmers to write well-structured and readable code. To some programmers, this constraint will feel uncomfortable. However, the benefit of this approach, besides code clarity, is also that it can be formally verified and validated with Model Checking, as shown in Truong Giang Le's PhD thesis: https://tel.archives-ouvertes.fr/tel-00953368/document.  
+Rules are the heart of the language and since there are no other control flow structure (besides the ``case`` construct), this choice forces the programmers to write well-structured and readable code. To some programmers, this constraint will feel uncomfortable. However, the benefit of this approach, besides code clarity, is also that it is well-suited to be formally verified and validated with Model Checking, as shown in Truong Giang Le's PhD thesis: https://tel.archives-ouvertes.fr/tel-00953368/document. 
+
+One of INI's main design drive is that it is able to generate Promela code that can be formally verified with the Spin model checker (feature still under development). 
 
 ### Typical Uses/Applications
 
 - IoT/Robotics
 - Distributed Computing
 - Multi-Agent Systems
+- Critical Systems
 
 ### INI Main Features
 
@@ -30,7 +33,7 @@ Rules are the heart of the language and since there are no other control flow st
 - Rule-based: processes and functions rely on rules for readability purpose.
 - Functional style: programmers familiar with functional programming can use functions and recursion.
 - Auto-deployment: processes and functions are automatically deployed with annotations, either in push or in pull mode.
-- Type inference and user types: programmers can define complex structured types and the type checker will enforce the correct usage of the structure
+- Type inference: programs are strongly typed-checked with type inference (still under development).
 
 ## Examples
 
@@ -42,12 +45,12 @@ For pure local calculations, INI programmers can define functions. Here is a typ
 
 ```javascript
 function fac(n) {
-	n == 1 {
-		return 1
-	}
-	n > 1 {
-		return n * fac2(n-1)
-	}
+  n == 1 {
+    return 1
+  }
+  n > 1 {
+    return n * fac2(n-1)
+  }
 }
 ```
 
@@ -59,70 +62,69 @@ In INI, all the rules continue to be executed until none is applicable anymore o
 
 ```javascript
 function fac(n) {
-	@init() {
-		f=1
-		i=2
-	}
-	// this rule will loop until i > n
-	i <= n {
-		f=f*i++
-	}
-	@end() {
-		return f
-	}
+  @init() {
+    f=1
+    i=2
+  }
+  // this rule will loop until i > n
+  i <= n {
+    f=f*i++
+  }
+  @end() {
+    return f
+  }
 }
 ```
 
-The second rule guarded by ``i <= n`` continues to be executed until the ``i`` variable value become greater than ``n``. In INI, looping can be implemented this way, which means that there is no need of having loops as control flow constructs in the language. This design choice keeps the language small and simple, thus making INI programs usually easy to read and maintain.
+The second rule, guarded by ``i <= n``, continues to be executed until the ``i`` variable value become greater than ``n``. In INI, looping can be implemented this way, which means that there is no need for having loops as control flow constructs in the language. This design choice keeps the language small and simple, thus making INI programs usually easy to read and maintain.
 
 Finally, note the ``@init`` and ``@end`` rules, which are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. 
 
 ### A process awaking every second
 
-In INI, processes look pretty similar to functions but actually implement a quite different execution semantics. On contrary to a function, a process always runs asynchronously and reacts to its environment through events. A process definition can only contain rules and event rules, i.e. actions that are triggered when a condition is fulfilled, or when an event is fired. By default, a process will never end, unless none of the rules can apply anymore and all the events are terminated (or are one-shot events). 
+In INI, processes look pretty similar to functions but actually implement a quite different execution semantics. On contrary to a function, a process always runs asynchronously and reacts to its environment through events. A process definition can only contain rules and event rules, i.e. actions that are triggered when a condition is fulfilled, or when an event is fired. By default, a process will never end, unless none of the rules can apply anymore and all the events are terminated. 
 
 The following INI program creates a process that will be notified every second (1000ms) by the ``@every`` event. It then evaluate the rule's action to print a tick and increments the tick count hold by the ``i`` variable.
 
 ```javascript
 process main() {
-	@init() {
-		i = 1
-	}
-	@every() [time=1000] {
-		println("tick "+(i++))
-	}
+  @init() {
+    i = 1
+  }
+  @every() [time=1000] {
+    println("tick "+(i++))
+  }
 }
 ```
 
-Note the ``[time=1000]`` construct, which configures the ``@every`` event rule to be fired every second. This construct will be commonly used in INI programs and is called an annotation.
+Note the ``[time=1000]`` construct, which configures the ``@every`` event rule to be fired every second. This construct will be commonly used in INI programs and is called an *annotation*.
 
 ### A simple 3-process data pipeline
 
 Since processes are asynchronous, they cannot return values like functions do. So, process communicate through channels (similarly to Pi calculus and most agent-based systems). Processes can produce data in channels using the ``produce`` function, and consume data from channel using the ``@consume`` event.
 
-In the following program, the ``main`` process creates two sub-processes by calling ``p``. Each sub-process consumes a data from an ``in`` channel and produces the incremented result to an ``out`` channel.
-Thus, it creates a pipeline that ultimately sends back the data incremented twice to the main process, as explained below.
+In the following program, the ``main`` process creates two sub-processes by calling ``p``. Each sub-process consumes a data from an ``in`` channel and produces the incremented result to an ``out`` channel. Thus, it creates a pipeline that ultimately sends back the data incremented twice to the main process.
 
 ```javascript
 process main() {
-	@init() {
-		p("c1", "c2")
-		p("c2", "c")
-		println("processes started")
-		produce("c1", 1)
-	}
-	c:@consume(v) [channel="c"] {
-		println("end of pipeline: "+v)
-		stop(c)
-	}
+  @init() {
+    p("c1", "c2")
+    p("c2", "c")
+    println("processes started")
+    produce("c1", 1)
+  }
+  c:@consume(v) [channel="c"] {
+    println("end of pipeline: "+v)
+    stop(c)
+  }
 }
 
 process p(in, out) {
-	c:@consume(v) [channel=in] {
-		println(in+": "+v)
-		produce(out, v+1)
-		stop(c)
-	}
+  c:@consume(v) [channel=in] {
+    println(in+": "+v)
+    produce(out, v+1)
+    stop(c)
+  }
 }
 ```
 
@@ -136,29 +138,31 @@ The above program behaves as depicted here:
 
 Note the use of the ``stop`` function in the ``@consume`` event rules. This is not mandatory but if you don't stop the consumer, the process will never end. Here, we want the processes to terminate once they have handled the data.
 
-### INI nodes and auto-deployment
+## INI nodes and auto-deployment
 
-By default spawned processes are deployed on the current node. However, by simply using annotations, the programmer can decide on which (remote) INI node the process shall be deployed. There are two ways to deploy processes or functions:
+By default spawned processes are deployed on the current node (called ``main`` if unspecified). However, by simply using annotations, the programmer can decide on which (remote) INI node the process shall be spawned. There are two ways to deploy processes or functions:
 
 - Push the process/function on a remote node.
 - Pull the process/function from a remote node.
 
-Give the previous pipeline example, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have be properly launched), just add the following annotations:
+Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the following annotations:
 
 ```javascript
 [...]
-	@init() {
-		p("c1", "c2") [node="n1"]
-		p("c2", "c")  [node="n2"]
-		println("processes started")
-		produce("c1", 1)
-	}
+  @init() {
+    p("c1", "c2") [node="n1"]
+    p("c2", "c")  [node="n2"]
+    println("processes started")
+    produce("c1", 1)
+  }
 [...]
 ``` 
 
-An important point to remember is that when a process is spawned to a remote node, the required code (processes and functions) will be automatically fetched from the spawning node. So there is no need for the programmer to pre-deploy manually any piece of program on the INI node. INI will take care of all this transparently.
+A key point to remember is that when a process is spawned to a remote node, the required code (processes and functions) will be automatically fetched from the spawning node. So there is no need for the programmer to pre-deploy manually any piece of program on the INI nodes. INI will take care of all this transparently.
 
 ## Getting started
+
+### Build and run
 
 Install and start Apache Kafka:
 
@@ -172,24 +176,20 @@ Build with:
 
 ```console
 $ cd {ini_root_dir}
-$ maven install
+$ maven package
 ```
 
-Lauch INI program (UNIX-based):
+Lauch INI program (UNIX-based OS):
 
 ```console
 $ cd {ini_root_dir}
 $ bin/ini {ini_file}
 ```
 
-## Using with Kafka
+### Configuration
 
-For development (JUnit tests), INI uses the "development" environment, which uses a locally installed Kafka broker. 
-In order to use another Kafka instance, modify the "ini_config.json" configuration file to set the right connection parameters. Typically once moving an INI program to production, you should modify the "production" environment to connect to the production Kafka instance. Then you should ask INI to use the production environment by setting the "INI_ENV" system environment variable to "production", or by using the "--env" option when running INI.
+For development (JUnit tests), INI uses the ``development`` environment, which defaults to a locally-installed Kafka broker. In order to use another Kafka instance, modify the ``ini_config.json`` configuration file to set the right connection parameters.
 
-## Origins of INI
+Ultimately, once moving an INI program to production, you should modify the ``production`` environment to connect to the production Kafka broker. Then, select the ``production`` environment by setting the ``INI_ENV`` system environment variable to ``production``, or by using the ``--env`` option when running INI.
 
-INI was first created and design by Renaud Pawlak as a side research project.
-
-It was extended by Truang Giang Lee during his PhD to introduce better control and synchronization on events, as well as formal verification of INI programs using model checking. His PhD was co-supervised by Renaud Rioboo (research director), Renaud Pawlak, Mathieu Manceny, and Olivier Hermant.
 
