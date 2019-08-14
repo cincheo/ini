@@ -196,11 +196,18 @@ $ cd {ini_root_dir}
 $ maven package
 ```
 
-Lauch INI program (UNIX-based OS):
+Launch INI program (UNIX-based OS):
 
 ```console
 $ cd {ini_root_dir}
 $ bin/ini {ini_file}
+```
+
+Launch an INI node:
+
+```console
+$ cd {ini_root_dir}
+$ bin/ini -n {node_name} {ini_file} # alternatively set the INI_NODE environment variable
 ```
 
 ### Configuration
