@@ -1,13 +1,21 @@
 
 ## About INI
 
+INI has been designed to keep distributed computing as simple as it can be. It natively handles processes, deployment, communication and synchronization.
+
+INI is not meant to be a general-purpose language. It will not address all programming issues programmers can face. On the other hand, it will help programmers to efficiently build and deploy distributed data pipelines or calculations.
+
+By default, INI uses Kafka as a broker.
+
 ### Language Design Philosophy
 
-INI has been designed to keep distributed computing as simple as it can be. It natively handles processes, deployment, communication and synchronization, so that the programmers do not have to care about these issues by writing complex code.
+INI has been built around a simple syntactic construct called a *rule*, which follows the syntax below:
 
-INI is not meant to be a general-purpose language. It will not address all programming issues programmers can face. On the other hand, it will help programmers to efficiently build data pipelines or calculations that require multiple distributed processes to collaborate around a broker.
+```javascript
+rule := guard '{' statements '}'
+```
 
-By default, INI uses Kafka as a distributed broker for inter-process communication.
+Rules are the heart of the language and since there are no other control flow structure (besides the ``case`` construct), this choice forces the programmers to write well-structured and readable code. To some programmers, this constraint will feel uncomfortable. However, the benefit of this approach, besides code clarity, is also that it can be formally verified and validated with Model Checking, as shown in Truong Giang Le's PhD thesis: https://tel.archives-ouvertes.fr/tel-00953368/document.  
 
 ### Typical Uses/Applications
 
@@ -17,19 +25,20 @@ By default, INI uses Kafka as a distributed broker for inter-process communicati
 
 ### INI Main Features
 
-- Process oriented: programmers can easily define processes that will run on INI nodes and react to events
-- Reactive and event-driven: programmers can easily declare events to which processes will react
+- Process oriented: programmers can define processes that will run on INI nodes.
+- Reactive and event-driven: processes react to events, including consume events that allow for inter-process communication.
+- Rule-based: processes and functions rely on rules for readability purpose.
+- Functional style: programmers familiar with functional programming can use functions and recursion.
+- Auto-deployment: processes and functions are automatically deployed with annotations, either in push or in pull mode.
 - Type inference and user types: programmers can define complex structured types and the type checker will enforce the correct usage of the structure
-- Rule-based: processes and programs rely on rules for readability purpose
-- Functional style: programmers familiar with functional programming can use functions and recursion
 
 ## Examples
 
-### Functions
+The goal of these examples is to give a first overview of the INI syntax and semantics.
 
-For pure local calculations, INI programmers can define functions. These are meant to be extremely simple, because for heavy and distributed computations, programmers shall use processes, that we will show in the next section.
+### Functional-style factorial function
 
-Here is a typical factorial calculation with INI. Note the absence of a switch in the body of the function. 
+For pure local calculations, INI programmers can define functions. Here is a typical factorial calculation with INI. 
 
 ```javascript
 function fac(n) {
@@ -42,8 +51,11 @@ function fac(n) {
 }
 ```
 
-In INI, only rules (``rule := condition|event { action }``) are allowed within a function. All the rules continue to be executed until none is applicable anymore or if the function has returned (using an explicit ``return`` statement).
-In practice, it means that one can use a rule-based flavor to program a function. For instance, here is the factorial implementation with a rule-based style.
+Note the absence of a switch in the body of the function. That is because, in INI, only rules (``rule := guard '{' statements '}'``) are allowed as first-level statements. 
+
+### Rule-based-style factorial function
+
+In INI, all the rules continue to be executed until none is applicable anymore or if the function has returned (using an explicit ``return`` statement). In practice, it means that one can use a rule-based flavor to program a function. For instance, here is the factorial implementation with a rule-based style.
 
 ```javascript
 function fac(n) {
@@ -51,6 +63,7 @@ function fac(n) {
 		f=1
 		i=2
 	}
+	// this rule will loop until i > n
 	i <= n {
 		f=f*i++
 	}
@@ -60,24 +73,30 @@ function fac(n) {
 }
 ```
 
-Note the ``@init`` and ``@end`` rules, which are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. Note that this programming style is not purely functional and is not encouraged. However, it can be quite convenient in various cases, especially to implement looping in a simple way.
+The second rule guarded by ``i <= n`` continues to be executed until the ``i`` variable value become greater than ``n``. In INI, looping can be implemented this way, which means that there is no need of having loops as control flow constructs in the language. This design choice keeps the language small and simple, thus making INI programs usually easy to read and maintain.
 
-### Processes
+Finally, note the ``@init`` and ``@end`` rules, which are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. 
+
+### A process awaking every second
 
 In INI, processes look pretty similar to functions but actually implement a quite different execution semantics. On contrary to a function, a process always runs asynchronously and reacts to its environment through events. A process definition can only contain rules and event rules, i.e. actions that are triggered when a condition is fulfilled, or when an event is fired. By default, a process will never end, unless none of the rules can apply anymore and all the events are terminated (or are one-shot events). 
 
-The following INI program creates a process that will be notified every 1000ms by the ``@every`` event. It then evaluate the rule's action to print a tick and increments the tick count hold by the ``i`` variable.
+The following INI program creates a process that will be notified every second (1000ms) by the ``@every`` event. It then evaluate the rule's action to print a tick and increments the tick count hold by the ``i`` variable.
 
 ```javascript
 process main() {
 	@init() {
 		i = 1
 	}
-	@every[time=1000]() {
+	@every() [time=1000] {
 		println("tick "+(i++))
 	}
 }
 ```
+
+Note the ``[time=1000]`` construct, which configures the ``@every`` event rule to be fired every second. This construct will be commonly used in INI programs and is called an annotation.
+
+### A simple 3-process data pipeline
 
 Since processes are asynchronous, they cannot return values like functions do. So, process communicate through channels (similarly to Pi calculus and most agent-based systems). Processes can produce data in channels using the ``produce`` function, and consume data from channel using the ``@consume`` event.
 
@@ -110,12 +129,34 @@ process p(in, out) {
 The above program behaves as depicted here:
 
 - ``main`` creates two sub-processes ``p("c1", "c2")`` and ``p("c2", "c")``,
-- ``main`` sends the data 1 to the ``"c1"`` channel (``produce("c1", 1)``),
+- ``main`` sends the data ``1`` to the ``"c1"`` channel (``produce("c1", 1)``),
 - ``1`` is consumed from ``"c1"`` by ``p("c1", "c2")``, and ``2`` is produced to ``"c2"``,
 - ``2`` is consumed from ``"c2"`` by ``p("c2", "c")``, and ``3`` is produced to ``"c"``,
 - finally, ``3`` is consumed from ``"c"`` by ``main``, and the pipeline stops there.
 
 Note the use of the ``stop`` function in the ``@consume`` event rules. This is not mandatory but if you don't stop the consumer, the process will never end. Here, we want the processes to terminate once they have handled the data.
+
+### INI nodes and auto-deployment
+
+By default spawned processes are deployed on the current node. However, by simply using annotations, the programmer can decide on which (remote) INI node the process shall be deployed. There are two ways to deploy processes or functions:
+
+- Push the process/function on a remote node.
+- Pull the process/function from a remote node.
+
+Give the previous pipeline example, to push the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have be properly launched), just add the following annotations:
+
+```javascript
+[...]
+	@init() {
+		p("c1", "c2") [node="n1"]
+		p("c2", "c")  [node="n2"]
+		println("processes started")
+		produce("c1", 1)
+	}
+[...]
+``` 
+
+An important point to remember is that when a process is spawned to a remote node, the required code (processes and functions) will be automatically fetched from the spawning node. So there is no need for the programmer to pre-deploy manually any piece of program on the INI node. INI will take care of all this transparently.
 
 ## Getting started
 
