@@ -162,7 +162,7 @@ A key point to remember is that when a process is spawned to a remote node, the 
 
 ### Pull from a server node
 
-In other cases, a given node may want to evaluate a function or a process that has been defined in another node. In that case, the target node may pull a function or a process from a remote server (any INI node). To do so, the target node needs to declare a function/process binding annotated with the right server node. For instance, the following program runs the ``hello(string)`` function, which has been defined on a node called ``server``.
+In other cases, a given node may want to evaluate a function or a process that has been defined in another node. In that case, the target node may pull a function or a process from a remote server (any INI node). To do so, the target node needs to declare a function/process binding annotated with the right server node. For instance, the following program runs the ``hello(string)`` function, which has been defined on a node called ``server``. In that case, the ``hello`` method implementation is fetched from the server node and evaluated locally on the requesting node. 
 
 ```javascript
 // this is a binding to a function declared on a remote server
