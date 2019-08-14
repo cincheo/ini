@@ -111,14 +111,14 @@ process main() {
 		println("processes started")
 		produce("c1", 1)
 	}
-	c:@consume[channel="c"](v) {
+	c:@consume(v) [channel="c"] {
 		println("end of pipeline: "+v)
 		stop(c)
 	}
 }
 
 process p(in, out) {
-	c:@consume[channel=in](v) {
+	c:@consume(v) [channel=in] {
 		println(in+": "+v)
 		produce(out, v+1)
 		stop(c)
@@ -143,7 +143,7 @@ By default spawned processes are deployed on the current node. However, by simpl
 - Push the process/function on a remote node.
 - Pull the process/function from a remote node.
 
-Give the previous pipeline example, to push the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have be properly launched), just add the following annotations:
+Give the previous pipeline example, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have be properly launched), just add the following annotations:
 
 ```javascript
 [...]
