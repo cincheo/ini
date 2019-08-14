@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import ini.Main;
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
+import ini.ast.AstElement;
 import ini.ast.AstNode;
 import ini.ast.BinaryOperator;
 import ini.ast.BooleanLiteral;
@@ -46,6 +47,7 @@ import ini.eval.at.At;
 import ini.eval.data.Data;
 import ini.eval.data.DataReference;
 import ini.eval.data.RawData;
+import ini.eval.function.BoundJavaFunction;
 import ini.eval.function.IniFunction;
 import ini.parser.IniParser;
 
@@ -63,6 +65,22 @@ public class IniEval {
 	public IniEval(IniParser parser, Context context) {
 		this.parser = parser;
 		this.invocationStack.push(context);
+	}
+
+	private String getTargetNode(AstElement element) {
+		String targetNode = null;
+		if (element.annotations != null && !element.annotations.isEmpty()) {
+			for (Expression e : element.annotations) {
+				if (e instanceof Assignment) {
+					Assignment a = (Assignment) e;
+					String name = a.assignee.toString();
+					if ("node".equals(name)) {
+						targetNode = eval(a.assignment).getValue();
+					}
+				}
+			}
+		}
+		return targetNode;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -296,61 +314,60 @@ public class IniEval {
 				Invocation invocation = (Invocation) node;
 				boolean spawned = false;
 				// first check if function/process needs to be spawned
-				if (invocation.annotations != null && !invocation.annotations.isEmpty()) {
-					for (Expression e : invocation.annotations) {
-						if (e instanceof Assignment) {
-							Assignment a = (Assignment) e;
-							String name = a.assignee.toString();
-							if ("node".equals(name)) {
-								String targetNode = eval(a.assignment).getValue();
-								List<Data> arguments = new ArrayList<>();
-								if (IniFunction.functions.containsKey(invocation.name)) {
-									for (Expression argument : invocation.arguments) {
-										arguments.add(eval(argument));
-									}
-									// TODO: parse-time
-									throw new RuntimeException(
-											"cannot spawn a function... please only spawn processes");
+				String targetNode = null;
+				targetNode = getTargetNode(invocation);
+				if (targetNode != null) {
+					List<Data> arguments = new ArrayList<>();
+					if (IniFunction.functions.containsKey(invocation.name)) {
+						for (Expression argument : invocation.arguments) {
+							arguments.add(eval(argument));
+						}
+						// TODO: parse-time
+						throw new RuntimeException("cannot spawn a function... please only spawn processes");
+					} else {
+						Data argument = null;
+						f = parser.parsedFunctionMap.get(invocation.name);
+						for (int i = 0; i < f.parameters.size(); i++) {
+							if (i > invocation.arguments.size() - 1) {
+								if (f.parameters.get(i).defaultValue == null) {
+									throw new RuntimeException("no value or default value given for parameter '"
+											+ f.parameters.get(i).name + "' at " + node);
 								} else {
-									Data argument = null;
-									f = parser.parsedFunctionMap.get(invocation.name);
-									for (int i = 0; i < f.parameters.size(); i++) {
-										if (i > invocation.arguments.size() - 1) {
-											if (f.parameters.get(i).defaultValue == null) {
-												throw new RuntimeException(
-														"no value or default value given for parameter '"
-																+ f.parameters.get(i).name + "' at " + node);
-											} else {
-												argument = eval(f.parameters.get(i).defaultValue);
-											}
-										} else {
-											argument = eval(invocation.arguments.get(i));
-										}
-										arguments.add(argument);
-									}
-									// TODO: parse-time
-									if (!f.isProcess()) {
-										throw new RuntimeException(
-												"cannot spawn a function... please only spawn processes");
-									}
+									argument = eval(f.parameters.get(i).defaultValue);
 								}
-								Main.LOGGER.info(
-										"spawn request to " + targetNode + " / " + invocation.name + " - " + arguments);
-								parser.coreBrokerClient.sendSpawnRequest(targetNode,
-										new SpawnRequest(parser.node, invocation.name, arguments));
-								spawned = true;
+							} else {
+								argument = eval(invocation.arguments.get(i));
 							}
+							arguments.add(argument);
+						}
+						// TODO: parse-time
+						if (!f.isProcess()) {
+							throw new RuntimeException("cannot spawn a function... please only spawn processes");
 						}
 					}
+					Main.LOGGER.info("spawn request to " + targetNode + " / " + invocation.name + " - " + arguments);
+					parser.coreBrokerClient.sendSpawnRequest(targetNode,
+							new SpawnRequest(parser.node, invocation.name, arguments));
+					spawned = true;
 				}
 				if (!spawned) {
 					// try built-in INI functions first
+					targetNode = null;
 					if (IniFunction.functions.containsKey(invocation.name)) {
+						IniFunction iniFunction = IniFunction.functions.get(invocation.name);
+						if (iniFunction instanceof BoundJavaFunction) {
+							targetNode = getTargetNode(((BoundJavaFunction) iniFunction).binding);
+						}
+					}
+					if (targetNode == null && IniFunction.functions.containsKey(invocation.name)) {
 						result = IniFunction.functions.get(invocation.name).eval(this, invocation.arguments);
 					} else {
 						f = parser.parsedFunctionMap.get(invocation.name);
 						if (f == null) {
-							if (!parser.node.equals(invocation.owner)) {
+							if (targetNode != null) {
+								parser.coreBrokerClient.sendFetchRequest(targetNode,
+										new FetchRequest(parser.node, invocation.name));
+							} else if (!parser.node.equals(invocation.owner)) {
 								parser.coreBrokerClient.sendFetchRequest(invocation.owner,
 										new FetchRequest(parser.node, invocation.name));
 							}
@@ -562,7 +579,9 @@ public class IniEval {
 
 			evaluationStack.pop();
 
-		} catch (ReturnException e) {
+		} catch (
+
+		ReturnException e) {
 			evaluationStack.pop();
 			throw e;
 		} catch (Exception e) {

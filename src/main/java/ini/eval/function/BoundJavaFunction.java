@@ -20,7 +20,7 @@ import java.util.List;
 
 public class BoundJavaFunction extends IniFunction {
 
-	Binding binding;
+	public Binding binding;
 
 	public BoundJavaFunction(Binding binding) {
 		this.binding = binding;

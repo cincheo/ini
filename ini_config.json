@@ -3,17 +3,17 @@
 		development: {
 			consumerGroupId: "IniConsumer2",
 			coreConsumerGroupId: "CoreIniConsumer2",
-			bootstrapBrokerServers: "localhost:9092,localhost:9093,localhost:9094"
+			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
 		},
 		test: {
 			consumerGroupId: "IniConsumer2",
 			coreConsumerGroupId: "CoreIniConsumer2",
-			bootstrapBrokerServers: "localhost:9092,localhost:9093,localhost:9094"
+			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
 		},
 		production: {
 			consumerGroupId: "IniConsumer2",
 			coreConsumerGroupId: "CoreIniConsumer2",
-			bootstrapBrokerServers: "localhost:9092,localhost:9093,localhost:9094"
+			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
 		}
 	}
 }

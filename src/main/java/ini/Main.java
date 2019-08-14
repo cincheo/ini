@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.google.gson.Gson;
 import com.martiansoftware.jsap.FlaggedOption;
@@ -37,7 +38,9 @@ public class Main {
 	public static final String VERSION = "pre-alpha 2";
 
 	public static void main(String[] args) throws Exception {
-
+		
+		MDC.put("node", ".");
+		
 		JSAP jsap = new JSAP();
 
 		jsap.registerParameter(new Switch("version").setLongFlag("version").setHelp("Print the INI version and exit."));
@@ -193,6 +196,8 @@ public class Main {
 	public static void evalMainFunction(IniParser parser, boolean debug, List<String> breakpoints,
 			List<String> watchedVariables, String[] args) {
 
+		MDC.put("node", parser.node);
+		
 		parseConfiguration(parser);
 
 		Context context = null;

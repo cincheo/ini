@@ -4,6 +4,7 @@ public class TestBroker extends IniTestCase {
 
 	public TestBroker(String name) {
 		super(name);
+		System.err.println("WARINING: this test case will take a while");
 	}
 
 	public void testCoordinator() {
@@ -18,4 +19,16 @@ public class TestBroker extends IniTestCase {
 		});
 	}
 
+	public void testDeploymentClient() {
+		new Thread() {
+			@Override
+			public void run() {
+				testFile("ini/test/broker/broker_server.ini", 10000, "main", null);
+			}
+		}.start();
+		testFile("ini/test/broker/broker_client.ini", 10000, "client", (p, out) -> {
+			assertEquals("%test%\n%test2%\n%test3%\n", out);
+		});
+	}
+	
 }

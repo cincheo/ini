@@ -32,6 +32,9 @@ public class Binding extends NamedElement {
 	public void prettyPrint(PrintStream out) {
 		out.print(name + " => " + "\"" + className + "\"" + "," + "\"" + member
 				+ "\"");
+		if(annotations != null) {
+			out.print(" "+annotations);
+		}
 	}
 
 	public Kind getKind() {

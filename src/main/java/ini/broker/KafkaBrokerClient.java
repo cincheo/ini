@@ -47,7 +47,8 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 		return producer;
 	}
 
-	public KafkaBrokerClient(boolean verbose, EnvironmentConfiguration configuration, ConsumerConfiguration<T> consumerConfiguration) {
+	public KafkaBrokerClient(boolean verbose, EnvironmentConfiguration configuration,
+			ConsumerConfiguration<T> consumerConfiguration) {
 		this.verbose = verbose;
 		this.configuration = configuration;
 		this.consumerConfiguration = consumerConfiguration;
@@ -60,8 +61,7 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 		}
 		Consumer<Long, String> consumer = null;
 		final Properties props = new Properties();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-				configuration.bootstrapBrokerServers);
+		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, configuration.bootstrapBrokerServers);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerConfiguration.getConsumerId());
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -91,7 +91,7 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 			Main.LOGGER.debug("stopping consumer for channel " + channel);
 			consumerCloseStates.get(channel).set(true);
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(consumerConfiguration.getMaxPollTime() * 2);
 				if (isConsumerRunning(channel)) {
 					Main.LOGGER.debug("wakeup");
 					consumers.get(channel).wakeup();
@@ -117,7 +117,8 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 
 		while (!consumerCloseStates.get(channel).get()) {
 			try {
-				final ConsumerRecords<Long, String> consumerRecords = consumer.poll(java.time.Duration.ofMillis(1000));
+				final ConsumerRecords<Long, String> consumerRecords = consumer
+						.poll(java.time.Duration.ofMillis(consumerConfiguration.getMaxPollTime()));
 
 				if (consumerRecords.count() == 0) {
 					// Main.LOGGER.debug("consumer timeout: "+channel);
