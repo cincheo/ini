@@ -75,3 +75,4 @@
 \contentsline {subsection}{\numberline {6.2}Interceptors}{50}
 \contentsline {subsection}{\numberline {6.3}\texttt {@file} event}{51}
 \contentsline {subsection}{\numberline {6.4}Date and Duration type}{51}
+\contentsline {subsection}{\numberline {6.5}Synchronous invocation of processes}{51}

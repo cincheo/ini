@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  15 AUG 2019 10:08
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  15 AUG 2019 10:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**ini_manual.tex
-(./ini_manual.tex
+**ini_language_specs.tex
+(./ini_language_specs.tex
 LaTeX2e <2015/01/01>
 Babel <3.9l> and hyphenation patterns for 79 languages loaded.
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/article.cls
@@ -112,8 +112,8 @@ File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
 Package color Info: Driver file: pdftex.def on input line 142.
 )
-(./ini_manual.aux)
-\openout1 = `ini_manual.aux'.
+(./ini_language_specs.aux)
+\openout1 = `ini_language_specs.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
 LaTeX Font Info:    ... okay on input line 19.
@@ -197,14 +197,14 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 26.
 
-(./ini_manual.toc
+(./ini_language_specs.toc
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <10.95> on input line 3.
  [1
 
 {/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2])
 \tf@toc=\write3
-\openout3 = `ini_manual.toc'.
+\openout3 = `ini_language_specs.toc'.
 
 
 Overfull \hbox (5.4131pt too wide) in paragraph at lines 35--36
@@ -346,25 +346,22 @@ LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
 (Font)              for symbol `textbraceleft' on input line 1655.
 
-[50] (./ini_manual.bbl) [51] (./ini_manual.aux)
+[50] (./ini_language_specs.bbl) [51] (./ini_language_specs.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
  ) 
 Here is how much of TeX's memory you used:
  2957 strings out of 493089
- 42815 string characters out of 6134842
+ 42919 string characters out of 6134842
  129972 words of memory out of 5000000
  6414 multiletter control sequences out of 15000+600000
  10574 words of font info for 38 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 38i,6n,32p,1417b,1443s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 38i,6n,32p,1425b,1443s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -381,7 +378,7 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive
 015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/20
 15/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/201
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on ini_manual.pdf (51 pages, 323485 bytes).
+Output written on ini_language_specs.pdf (51 pages, 323618 bytes).
 PDF statistics:
  234 PDF objects out of 1000 (max. 8388607)
  163 compressed objects within 2 object streams

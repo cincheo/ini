@@ -1,10 +1,11 @@
-This is BibTeX, Version 0.99c (TeX Live 2009)
-The top-level auxiliary file: ini_manual.aux
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: ini_language_specs.aux
 The style file: plain.bst
-Database file #1: ini_manual.bib
+Database file #1: ini_language_specs.bib
 You've used 3 entries,
             2118 wiz_defined-function locations,
-            518 strings with 4314 characters,
+            518 strings with 4330 characters,
 and the built_in function-call counts, 851 in all, are:
 = -- 84
 > -- 27
