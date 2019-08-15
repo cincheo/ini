@@ -19,6 +19,8 @@ Rules are the heart of the language and since there are no other control flow st
 
 One of INI's main design drive is that it is able to generate Promela code that can be formally verified with the Spin model checker (feature still under development). 
 
+For more details, download the [INI language specifications](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
+
 ### Typical Uses/Applications
 
 - IoT/Robotics
@@ -37,7 +39,7 @@ One of INI's main design drive is that it is able to generate Promela code that 
 
 ## Examples
 
-The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specification [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
+The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specifications [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
 
 ### Functional-style factorial function
 
