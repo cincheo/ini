@@ -37,7 +37,7 @@ One of INI's main design drive is that it is able to generate Promela code that 
 
 ## Examples
 
-The goal of these examples is to give a first overview of the INI syntax and semantics.
+The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specification [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
 
 ### Functional-style factorial function
 
