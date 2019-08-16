@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  16 AUG 2019 09:50
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  16 AUG 2019 13:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -6,22 +6,27 @@ entering extended mode
 (./ini_language_specs.tex
 LaTeX2e <2015/01/01>
 Babel <3.9l> and hyphenation patterns for 79 languages loaded.
-(/usr/local/texlive/2015/texmf-dist/tex/latex/base/article.cls
-Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/local/texlive/2015/texmf-dist/tex/latex/base/report.cls
+Document Class: report 2014/09/29 v1.4h Standard LaTeX document class
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/size11.clo
 File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
-\c@section=\count80
-\c@subsection=\count81
-\c@subsubsection=\count82
-\c@paragraph=\count83
-\c@subparagraph=\count84
-\c@figure=\count85
-\c@table=\count86
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
 \abovecaptionskip=\skip41
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
+)
+(/usr/local/texlive/2015/texmf-dist/tex/latex/preprint/fullpage.sty
+Package: fullpage 1999/02/23 1.1 (PWD)
+\FP@margin=\skip43
 )
 (/usr/local/texlive/2015/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
@@ -50,15 +55,15 @@ Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
 (/usr/local/texlive/2015/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
 Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 )
-\Gread@gobject=\count87
+\Gread@gobject=\count88
 ))
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
 (./bussproofs.sty
 Proof Tree (bussproofs) style macros. Version 1.0.
-\theLevel=\count88
-\myMaxLevel=\count89
+\theLevel=\count89
+\myMaxLevel=\count90
 \myBoxA=\box26
 \myBoxB=\box27
 \myBoxC=\box28
@@ -80,23 +85,23 @@ Proof Tree (bussproofs) style macros. Version 1.0.
 \htAbox=\dimen117
 \htCbox=\dimen118
 ) (/usr/local/texlive/2015/texmf-dist/tex/latex/listings/listings.sty
-\lst@mode=\count90
+\lst@mode=\count91
 \lst@gtempboxa=\box32
 \lst@token=\toks15
-\lst@length=\count91
+\lst@length=\count92
 \lst@currlwidth=\dimen119
-\lst@column=\count92
-\lst@pos=\count93
+\lst@column=\count93
+\lst@pos=\count94
 \lst@lostspace=\dimen120
 \lst@width=\dimen121
-\lst@newlines=\count94
-\lst@lineno=\count95
+\lst@newlines=\count95
+\lst@lineno=\count96
 \lst@maxwidth=\dimen122
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2014/09/06 1.5e (Carsten Heinz)
-\c@lstnumber=\count96
-\lst@skipnumbers=\count97
+\c@lstnumber=\count97
+\lst@skipnumbers=\count98
 \lst@framebox=\box33
 )
 (/usr/local/texlive/2015/texmf-dist/tex/latex/listings/listings.cfg
@@ -115,31 +120,31 @@ Package color Info: Driver file: pdftex.def on input line 142.
 (./ini_language_specs.aux)
 \openout1 = `ini_language_specs.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 19.
-LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
 
 (/usr/local/texlive/2015/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count98
+\scratchcounter=\count99
 \scratchdimen=\dimen123
 \scratchbox=\box34
-\nofMPsegments=\count99
-\nofMParguments=\count100
+\nofMPsegments=\count100
+\nofMParguments=\count101
 \everyMPshowfont=\toks16
-\MPscratchCnt=\count101
+\MPscratchCnt=\count102
 \MPscratchDim=\dimen124
-\MPnumerator=\count102
-\makeMPintoPDFobject=\count103
+\MPnumerator=\count103
+\makeMPintoPDFobject=\count104
 \everyMPtoPDFconversion=\toks17
 ) (/usr/local/texlive/2015/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
@@ -189,144 +194,98 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-\c@lstlisting=\count104
+\c@lstlisting=\count105
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 26.
+(Font)              <12> on input line 27.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 26.
+(Font)              <8> on input line 27.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 26.
+(Font)              <6> on input line 27.
 
-(./ini_language_specs.toc
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 3.
- [1
+[1
 
-{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2])
+{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+[1] (./ini_language_specs.toc
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.95> on input line 2.
+ [2
+
+] [3])
 \tf@toc=\write3
 \openout3 = `ini_language_specs.toc'.
 
- [3]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 50.
+ [4]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 51.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 50.
-LaTeX Font Info:    Try loading font information for OML+cmr on input line 55.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 51.
+ [5
+
+]
+LaTeX Font Info:    Try loading font information for OML+cmr on input line 56.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 55.
- [4]
-Overfull \hbox (17.42862pt too wide) in paragraph at lines 70--71
-\OT1/cmr/m/n/10.95 the lat-est Java ver-sion. To in-stall INI, go to \OT1/cmtt/
-m/n/10.95 https://github.com/cincheo/ini
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 56.
+ [6]
+Chapter 1.
+[7
+
+] [8]
+Chapter 2.
+[9
+
+] [10] [11]
+Overfull \hbox (45.83401pt too wide) in paragraph at lines 238--239
+[]\OT1/cmr/m/n/10.95 For in-stance, the fol-low-ing code de-fines two bound fun
+c-tions to call the clas-si-cal \OT1/cmtt/m/n/10.95 System.out.println(..)
  []
 
-[5] [6] [7] [8]
-Overfull \hbox (9.98611pt too wide) in paragraph at lines 204--205
-[]\OT1/cmtt/m/n/10.95 produce(channel:String, data:Any)->Void\OT1/cmr/m/n/10.95
- : pro-duces the given data
- []
-
-[9]
-Overfull \hbox (3.53749pt too wide) in paragraph at lines 245--246
-[]\OT1/cmr/m/n/10.95 Programmers can then in-voke both func-tions, which are we
-ll-typed thanks
- []
-
-[10] [11] [12] [13]
-LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 355.
- [14]
-Overfull \hbox (7.16122pt too wide) in paragraph at lines 399--400
-\OT1/cmr/m/n/10.95 The \OT1/cmtt/m/n/10.95 @update(old[]value, new[]value) [var
-iable = <variable>] \OT1/cmr/m/n/10.95 event oc-
- []
-
-[15] [16] [17] [18]
-Overfull \hbox (1.47108pt too wide) in paragraph at lines 516--517
-[]\OT1/cmtt/m/n/10.95 "* 12 16 * Mon"\OT1/cmr/m/n/10.95 : This pat-tern causes 
-the event to oc-cur ev-ery minute
- []
-
-
-Overfull \hbox (7.16122pt too wide) in paragraph at lines 527--528
-\OT1/cmr/m/n/10.95 The \OT1/cmtt/m/n/10.95 @update(old[]value, new[]value) [var
-iable = <variable>] \OT1/cmr/m/n/10.95 event oc-
- []
-
-[19]
-LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 533
+[12] [13] [14]
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 356.
+ [15] [16] [17] [18] [19]
+LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 534
 .
-LaTeX Font Info:    No file OMScmtt.fd. on input line 533.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 534.
 
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 533.
+(Font)              for symbol `textbraceleft' on input line 534.
 
-[20] [21] [22] [23]
+[20] [21] [22]
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 703.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 704.
+ [23]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9> on input line 732.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 732.
  [24]
-Overfull \hbox (0.75119pt too wide) in paragraph at lines 716--717
-[][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 731.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 731.
-[25]
-LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 763.
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 764.
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 771.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 772.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 780.
+(Font)              <7> on input line 781.
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 780.
- [26]
-
-LaTeX Warning: Reference `subsubsec:bindings' on page 27 undefined on input lin
-e 802.
-
-[27]
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 833--834
-[][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 781.
 
 
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 838--839
-[][][][][][][][][][][][][][][][][][] 
- []
+LaTeX Warning: Reference `subsubsec:bindings' on page 25 undefined on input lin
+e 803.
 
+[25] [26] [27] [28]
+Chapter 3.
+[29
 
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 850--851
-[][][][][][][][][][] 
- []
-
-
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 861--862
-[][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 864--865
-[][][][][][][][][][][][] 
- []
-
-[28]
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 881--882
-[][][][][][][][][][][][][] 
- []
-
-[29] [30]
+]
 \myBox1=\box35
 \myScoreStart1=\dimen125
 \myCenter1=\dimen126
@@ -335,25 +294,36 @@ Overfull \hbox (1.35376pt too wide) in paragraph at lines 881--882
 \myScoreStart2=\dimen128
 \myCenter2=\dimen129
 \myScoreEnd2=\dimen130
- [31] [32]
+ [30] [31]
 \myBox3=\box37
 \myScoreStart3=\dimen131
 \myCenter3=\dimen132
 \myScoreEnd3=\dimen133
- [33] [34] [35] [36] [37] [38]
-Overfull \hbox (18.15633pt too wide) in paragraph at lines 1294--1295
+ [32]
+Overfull \hbox (10.85796pt too wide) in paragraph at lines 1128--1129
+\OT1/cmr/m/n/10.95 must be of the same type \OT1/cmtt/m/n/10.95 T\OT1/cmr/m/n/1
+0.95 . Then the type of the re-sult-ing list is \OT1/cmtt/m/n/10.95 T* \OT1/cmr
+/m/n/10.95 (equiv-a-lent to \OT1/cmtt/m/n/10.95 Dictionary(Int,T)\OT1/cmr/m/n/1
+0.95 ) 
+ []
+
+[33] [34]
+Chapter 4.
+[35
+
+] [36]
+Overfull \hbox (17.35269pt too wide) in paragraph at lines 1295--1296
 []\OT1/cmr/m/n/10.95 Note that this func-tion is poly-mor-phic. Its type is \OT
-1/cmtt/m/n/10.95 (Dictionary(Int,'T))->
+1/cmtt/m/n/10.95 (Dictionary(Int,'T))-> Dictionary(Int,'T)\OT1/cmr/m/n/10.95 ,
  []
 
-[39] [40] [41] [42] [43] [44] [45] [46]
-Overfull \hbox (11.38655pt too wide) in paragraph at lines 1552--1553
-[]\OT1/cmr/m/n/10.95 It would be pos-si-ble to deal with client con-nec-tions a
-f-ter the \OT1/cmtt/m/n/10.95 socket[]accept
- []
+[37] [38] [39] [40] [41] [42] [43] [44] [45] [46] [47]
+Chapter 5.
+[48
 
-[47] [48] [49] [50] [51] [52] (./ini_language_specs.bbl [53]) [54]
-(./ini_language_specs.aux)
+] (./ini_language_specs.bbl [49]) [50
+
+] (./ini_language_specs.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
@@ -362,11 +332,11 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 2957 strings out of 493089
- 42919 string characters out of 6134842
- 129973 words of memory out of 5000000
- 6414 multiletter control sequences out of 15000+600000
- 10574 words of font info for 38 fonts, out of 8000000 for 9000
+ 3000 strings out of 493089
+ 43559 string characters out of 6134842
+ 133378 words of memory out of 5000000
+ 6453 multiletter control sequences out of 15000+600000
+ 11955 words of font info for 43 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,6n,32p,1425b,1443s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
@@ -385,10 +355,10 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive
 015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/20
 15/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/201
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on ini_language_specs.pdf (54 pages, 329572 bytes).
+Output written on ini_language_specs.pdf (51 pages, 322538 bytes).
 PDF statistics:
- 243 PDF objects out of 1000 (max. 8388607)
- 169 compressed objects within 2 object streams
+ 234 PDF objects out of 1000 (max. 8388607)
+ 163 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

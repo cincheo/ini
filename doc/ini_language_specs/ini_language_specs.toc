@@ -1,83 +1,82 @@
-\contentsline {section}{\numberline {1}Introduction}{3}
-\contentsline {section}{\numberline {2}Getting started with INI}{5}
-\contentsline {subsection}{\numberline {2.1}Installing INI}{5}
-\contentsline {subsection}{\numberline {2.2}Write and run your first INI program}{5}
-\contentsline {section}{\numberline {3}Language features}{6}
-\contentsline {subsection}{\numberline {3.1}Built-in types}{6}
-\contentsline {subsection}{\numberline {3.2}Functions}{6}
-\contentsline {subsubsection}{\numberline {3.2.1}Syntax}{6}
-\contentsline {subsubsection}{\numberline {3.2.2}Parameters}{7}
-\contentsline {subsubsection}{\numberline {3.2.3}Returned values}{7}
-\contentsline {subsubsection}{\numberline {3.2.4}Function types}{8}
-\contentsline {subsubsection}{\numberline {3.2.5}Built-in Functions }{8}
-\contentsline {subsubsection}{\numberline {3.2.6}Bindings to Java objects}{10}
-\contentsline {subsection}{\numberline {3.3}Rules}{11}
-\contentsline {subsubsection}{\numberline {3.3.1}Syntax}{11}
-\contentsline {subsubsection}{\numberline {3.3.2}Logical operators}{11}
-\contentsline {subsubsection}{\numberline {3.3.3}Comparison operators}{13}
-\contentsline {subsubsection}{\numberline {3.3.4}Regular expression match operator}{13}
-\contentsline {subsubsection}{\numberline {3.3.5}Event-triggered rules}{14}
-\contentsline {subsection}{\numberline {3.4}Synchronous events}{14}
-\contentsline {subsubsection}{\numberline {3.4.1}\texttt {@init} event}{14}
-\contentsline {subsubsection}{\numberline {3.4.2}\texttt {@end} event}{15}
-\contentsline {subsubsection}{\numberline {3.4.3}\texttt {@update} event}{15}
-\contentsline {subsubsection}{\numberline {3.4.4}\texttt {@error} event}{16}
-\contentsline {subsection}{\numberline {3.5}Processes}{16}
-\contentsline {subsubsection}{\numberline {3.5.1}Getting started with processes}{16}
-\contentsline {subsubsection}{\numberline {3.5.2}Inter-process communication}{17}
-\contentsline {subsubsection}{\numberline {3.5.3}Stopping processes}{17}
-\contentsline {subsection}{\numberline {3.6}Asynchronous events}{18}
-\contentsline {subsubsection}{\numberline {3.6.1}\texttt {@every} event}{18}
-\contentsline {subsubsection}{\numberline {3.6.2}\texttt {@cron} event}{18}
-\contentsline {subsubsection}{\numberline {3.6.3}\texttt {@consume} event}{19}
-\contentsline {subsubsection}{\numberline {3.6.4}\texttt {@update} event (asynchronous mode)}{20}
-\contentsline {subsection}{\numberline {3.7}Synchronization of events}{20}
-\contentsline {subsection}{\numberline {3.8}Dictionaries, lists, and sets}{21}
-\contentsline {subsubsection}{\numberline {3.8.1}Dictionary definition and access}{21}
-\contentsline {subsubsection}{\numberline {3.8.2}List definition and access}{21}
-\contentsline {subsubsection}{\numberline {3.8.3}Integer sets}{21}
-\contentsline {subsubsection}{\numberline {3.8.4}Set selection expressions}{22}
-\contentsline {subsection}{\numberline {3.9}User-defined types}{22}
-\contentsline {subsubsection}{\numberline {3.9.1}Simple structured types}{22}
-\contentsline {subsubsection}{\numberline {3.9.2}Algebraic types}{23}
-\contentsline {subsubsection}{\numberline {3.9.3}Type set selection expressions}{24}
-\contentsline {subsubsection}{\numberline {3.9.4}Type set match expressions}{24}
-\contentsline {subsection}{\numberline {3.10}Function references and \texttt {eval}}{26}
-\contentsline {subsection}{\numberline {3.11}Imports}{27}
-\contentsline {subsection}{\numberline {3.12}User-defined events}{27}
-\contentsline {section}{\numberline {4}The INI type system}{29}
-\contentsline {subsection}{\numberline {4.1}Definitions}{29}
-\contentsline {subsection}{\numberline {4.2}Type Inference}{30}
-\contentsline {subsection}{\numberline {4.3}Type Inference rules}{31}
-\contentsline {subsubsection}{\numberline {4.3.1}Initiation rules}{31}
-\contentsline {subsubsection}{\numberline {4.3.2}Assignments}{31}
-\contentsline {subsubsection}{\numberline {4.3.3}Logical operators}{31}
-\contentsline {subsubsection}{\numberline {4.3.4}Comparison operators}{32}
-\contentsline {subsubsection}{\numberline {4.3.5}Division}{32}
-\contentsline {subsubsection}{\numberline {4.3.6}Multiplication and minus}{32}
-\contentsline {subsubsection}{\numberline {4.3.7}The plus operator}{32}
-\contentsline {subsubsection}{\numberline {4.3.8}Unary minus (sign inversion)}{33}
-\contentsline {subsubsection}{\numberline {4.3.9}Post operators}{33}
-\contentsline {subsubsection}{\numberline {4.3.10}The not operator}{33}
-\contentsline {subsubsection}{\numberline {4.3.11}The match operator}{33}
-\contentsline {subsubsection}{\numberline {4.3.12}Dictionary access}{34}
-\contentsline {subsubsection}{\numberline {4.3.13}Field access}{34}
-\contentsline {subsubsection}{\numberline {4.3.14}Function invocation}{34}
-\contentsline {subsubsection}{\numberline {4.3.15}List definition}{34}
-\contentsline {subsubsection}{\numberline {4.3.16}Return statement}{35}
-\contentsline {subsubsection}{\numberline {4.3.17}Type instantiation}{35}
-\contentsline {subsubsection}{\numberline {4.3.18}Integer set declaration}{35}
-\contentsline {subsubsection}{\numberline {4.3.19}Set selection}{36}
-\contentsline {section}{\numberline {5}Some INI examples}{36}
-\contentsline {subsection}{\numberline {5.1}Counting occurences in a list}{36}
-\contentsline {subsection}{\numberline {5.2}Implementing a sort function}{38}
-\contentsline {subsection}{\numberline {5.3}Constructing a Fibonacci tree}{41}
-\contentsline {subsection}{\numberline {5.4}Programming a simple HTTP server}{44}
-\contentsline {section}{\numberline {6}Candidate features}{51}
-\contentsline {subsection}{\numberline {6.1}Validations and Model Checking}{52}
-\contentsline {subsection}{\numberline {6.2}Interceptors}{52}
-\contentsline {subsection}{\numberline {6.3}\texttt {@file} event}{53}
-\contentsline {subsection}{\numberline {6.4}Date and Duration type}{53}
-\contentsline {subsection}{\numberline {6.5}Synchronous invocation of processes}{53}
-\contentsline {subsection}{\numberline {6.6}Add packages / namespaces}{53}
-\contentsline {subsection}{\numberline {6.7}Add placeholders for string substitution}{53}
+\contentsline {chapter}{\numberline {1}Getting started with INI}{7}
+\contentsline {section}{\numberline {1.1}Installing INI}{7}
+\contentsline {section}{\numberline {1.2}Write and run your first INI program}{7}
+\contentsline {chapter}{\numberline {2}Language features}{9}
+\contentsline {section}{\numberline {2.1}Built-in types}{9}
+\contentsline {section}{\numberline {2.2}Functions}{9}
+\contentsline {subsection}{\numberline {2.2.1}Syntax}{9}
+\contentsline {subsection}{\numberline {2.2.2}Parameters}{10}
+\contentsline {subsection}{\numberline {2.2.3}Returned values}{10}
+\contentsline {subsection}{\numberline {2.2.4}Function types}{10}
+\contentsline {subsection}{\numberline {2.2.5}Built-in Functions }{11}
+\contentsline {subsection}{\numberline {2.2.6}Bindings to Java objects}{12}
+\contentsline {section}{\numberline {2.3}Rules}{13}
+\contentsline {subsection}{\numberline {2.3.1}Syntax}{13}
+\contentsline {subsection}{\numberline {2.3.2}Logical operators}{13}
+\contentsline {subsection}{\numberline {2.3.3}Comparison operators}{14}
+\contentsline {subsection}{\numberline {2.3.4}Regular expression match operator}{14}
+\contentsline {subsection}{\numberline {2.3.5}Event-triggered rules}{15}
+\contentsline {section}{\numberline {2.4}Synchronous events}{15}
+\contentsline {subsection}{\numberline {2.4.1}\texttt {@init} event}{15}
+\contentsline {subsection}{\numberline {2.4.2}\texttt {@end} event}{16}
+\contentsline {subsection}{\numberline {2.4.3}\texttt {@update} event}{16}
+\contentsline {subsection}{\numberline {2.4.4}\texttt {@error} event}{16}
+\contentsline {section}{\numberline {2.5}Processes}{17}
+\contentsline {subsection}{\numberline {2.5.1}Getting started with processes}{17}
+\contentsline {subsection}{\numberline {2.5.2}Inter-process communication}{17}
+\contentsline {subsection}{\numberline {2.5.3}Stopping processes}{18}
+\contentsline {section}{\numberline {2.6}Asynchronous events}{18}
+\contentsline {subsection}{\numberline {2.6.1}\texttt {@every} event}{19}
+\contentsline {subsection}{\numberline {2.6.2}\texttt {@cron} event}{19}
+\contentsline {subsection}{\numberline {2.6.3}\texttt {@consume} event}{19}
+\contentsline {subsection}{\numberline {2.6.4}\texttt {@update} event (asynchronous mode)}{20}
+\contentsline {section}{\numberline {2.7}Synchronization of events}{20}
+\contentsline {section}{\numberline {2.8}Dictionaries, lists, and sets}{20}
+\contentsline {subsection}{\numberline {2.8.1}Dictionary definition and access}{20}
+\contentsline {subsection}{\numberline {2.8.2}List definition and access}{21}
+\contentsline {subsection}{\numberline {2.8.3}Integer sets}{21}
+\contentsline {subsection}{\numberline {2.8.4}Set selection expressions}{21}
+\contentsline {section}{\numberline {2.9}User-defined types}{22}
+\contentsline {subsection}{\numberline {2.9.1}Simple structured types}{22}
+\contentsline {subsection}{\numberline {2.9.2}Algebraic types}{23}
+\contentsline {subsection}{\numberline {2.9.3}Type set selection expressions}{23}
+\contentsline {subsection}{\numberline {2.9.4}Type set match expressions}{23}
+\contentsline {section}{\numberline {2.10}Function references and \texttt {eval}}{25}
+\contentsline {section}{\numberline {2.11}Imports}{25}
+\contentsline {section}{\numberline {2.12}User-defined events}{26}
+\contentsline {chapter}{\numberline {3}The INI type system}{29}
+\contentsline {section}{\numberline {3.1}Definitions}{29}
+\contentsline {section}{\numberline {3.2}Type Inference}{29}
+\contentsline {section}{\numberline {3.3}Type Inference rules}{30}
+\contentsline {subsection}{\numberline {3.3.1}Initiation rules}{30}
+\contentsline {subsection}{\numberline {3.3.2}Assignments}{30}
+\contentsline {subsection}{\numberline {3.3.3}Logical operators}{31}
+\contentsline {subsection}{\numberline {3.3.4}Comparison operators}{31}
+\contentsline {subsection}{\numberline {3.3.5}Division}{31}
+\contentsline {subsection}{\numberline {3.3.6}Multiplication and minus}{31}
+\contentsline {subsection}{\numberline {3.3.7}The plus operator}{31}
+\contentsline {subsection}{\numberline {3.3.8}Unary minus (sign inversion)}{32}
+\contentsline {subsection}{\numberline {3.3.9}Post operators}{32}
+\contentsline {subsection}{\numberline {3.3.10}The not operator}{32}
+\contentsline {subsection}{\numberline {3.3.11}The match operator}{32}
+\contentsline {subsection}{\numberline {3.3.12}Dictionary access}{33}
+\contentsline {subsection}{\numberline {3.3.13}Field access}{33}
+\contentsline {subsection}{\numberline {3.3.14}Function invocation}{33}
+\contentsline {subsection}{\numberline {3.3.15}List definition}{33}
+\contentsline {subsection}{\numberline {3.3.16}Return statement}{33}
+\contentsline {subsection}{\numberline {3.3.17}Type instantiation}{34}
+\contentsline {subsection}{\numberline {3.3.18}Integer set declaration}{34}
+\contentsline {subsection}{\numberline {3.3.19}Set selection}{34}
+\contentsline {chapter}{\numberline {4}Some INI examples}{35}
+\contentsline {section}{\numberline {4.1}Counting occurences in a list}{35}
+\contentsline {section}{\numberline {4.2}Implementing a sort function}{37}
+\contentsline {section}{\numberline {4.3}Constructing a Fibonacci tree}{39}
+\contentsline {section}{\numberline {4.4}Programming a simple HTTP server}{42}
+\contentsline {chapter}{\numberline {5}Candidate features}{48}
+\contentsline {section}{\numberline {5.1}Validations and Model Checking}{48}
+\contentsline {section}{\numberline {5.2}Interceptors}{48}
+\contentsline {section}{\numberline {5.3}\texttt {@file} event}{49}
+\contentsline {section}{\numberline {5.4}Date and Duration type}{49}
+\contentsline {section}{\numberline {5.5}Synchronous invocation of processes}{49}
+\contentsline {section}{\numberline {5.6}Add packages / namespaces}{49}
+\contentsline {section}{\numberline {5.7}Add placeholders for string substitution}{49}

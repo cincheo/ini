@@ -1,5 +1,6 @@
 
-\documentclass[11pt]{article}
+\documentclass[11pt]{report}
+\usepackage{fullpage}
 \usepackage{graphicx}
 \usepackage{bussproofs}
 \usepackage{listings}
@@ -19,7 +20,7 @@
 \begin{document}
 \thispagestyle{empty}
 
-\title{INI Language Reference Documentation / User Manual}
+\title{INI Language Specifications}
 \author{Renaud Pawlak, CINCHEO}
 
 \date{Version pre-alpha 2}
@@ -28,7 +29,7 @@
 
 \tableofcontents
 
-\section{Introduction}
+\chapter*{Introduction}
 
 INI is a programming language dedicated to distributed computing. It natively handle processes, communication, deployment and synchronization. There are two kinds of first-class entities with INI: functions and processes. Functions are evaluated synchronously while processes are evaluated asynchronously and react to their environment through events. Functions return values. Processes communicate with each others through channels (like in $\pi$-calculus [...] or in most multi-agent systems [...]).
 
@@ -63,13 +64,13 @@ function fac(n) {
 
 One can find the initialization and termination rules at lines 2 and 9. At line 6, the only non-event-triggered rule actually calculates the factorial result. It is important to understand that due to the INI execution semantics, the applicable rules will continue to apply until their guards evaluate to false. Here, \texttt{i<=n} eventually becomes false since \texttt{i++} increments \texttt{i} at each rule execution. Once \texttt{i} equals to \texttt{n}, there are no rules to be executed anymore in the function, and the \texttt{@end} event is triggered, thus making the function return the value stored in \texttt{f}.
 
-\section{Getting started with INI}
+\chapter{Getting started with INI}
 
-\subsection{Installing INI}
+\section{Installing INI}
 
 The current implementation of INI is an interpreter written in pure Java, which means that INI is easy to install and run on any platform that supports the latest Java version. To install INI, go to \texttt{https://github.com/cincheo/ini} and follow the indications of the getting started section.
 
-\subsection{Write and run your first INI program}
+\section{Write and run your first INI program}
 
 To write your first INI program, you can use your favorite editor. The convention is to name the source code files such as: \texttt{my\_path/my\_program.ini}, however, INI will not prevent the programmers to use their own file naming conventions at their own risks. Let us now write a simple "hello world" program. We just need a main process that prints out the text on the initialization event. Create a \texttt{hello\_world.ini} file with the following content:
 
@@ -99,9 +100,9 @@ process main() {
 
 Note that \texttt{println} is part of INI's built-in functions. For a list of these functions, see \ref{sec:built_in_functions}. Besides using built-in functions, it is possible to use Java objects from INI, as explained in \ref{sec:bindings}.
 
-\section{Language features}
+\chapter{Language features}
 
-\subsection{Built-in types}
+\section{Built-in types}
 
 INI comes with 5 built-in types for numbers: \texttt{Double}, \texttt{Float}, \texttt{Long}, \texttt{Int}, and \texttt{Byte}. They differ on the number of bytes used to encode them (same as Java encoding). INI allows the use of \texttt{Int} and \texttt{Float} literals: e.g.:
 
@@ -119,9 +120,9 @@ INI comes also with a \texttt{Char} type for single characters (letters and othe
 \item \texttt{s = "hello"}
 \end{itemize}
 
-\subsection{Functions}
+\section{Functions}
 
-\subsubsection{Syntax}
+\subsection{Syntax}
 
 Functions are defined with the \texttt{function} keyword. Functions have a name that must be unique. The syntax is the following:
 
@@ -146,7 +147,7 @@ function <name>(<parameters>) {
 }
 \end{verbatim}
 
-\subsubsection{Parameters}
+\subsection{Parameters}
 
 Functions takes parameters which have a unique name within the function scope. Parameters are passed by reference and not by value. If the programmer wants to pass by value, it can be done using the \texttt{copy} built-in function. For instance, the function:
 
@@ -162,7 +163,7 @@ function f(a,b=0,c="") { ... }
 
 In that case, some parameter values are optional when invoked. For instance, \texttt{f(2,1)} invokes \texttt{f} with an empty string for \texttt{c}.
 
-\subsubsection{Returned values}
+\subsection{Returned values}
 
 A function can return a value by using a \texttt{return [<expr>]} statement within a rule body. If \texttt{<expr>} is not defined or if no return statements appear in the function, then the function returns a \texttt{Void} value. For instance:
 
@@ -179,11 +180,11 @@ function f(a,b=0,c="") {
 
 The return statement at line 5 indicates that the function returns a value of type \texttt{Int} (since \texttt{b} is an integer, as seen in the parameter's default value at line 1). Note that return statements are optional when the function returns no values, but must always be the last statement of a rule.
 
-\subsubsection{Function types}
+\subsection{Function types}
 
 A function type is noted as \texttt{(T1,T2,...TN)->T}, where \texttt{Ti} is the expected type of the ith parameter, and \texttt{T} is the function's return type.
 
-\subsubsection{Built-in Functions\label{sec:built_in_functions} }
+\subsection{Built-in Functions\label{sec:built_in_functions} }
 
 Here is the list of built-in functions provided by INI. Built-in function have predefined function types, which are given here.
 
@@ -216,7 +217,7 @@ Here is the list of built-in functions provided by INI. Built-in function have p
 \item \texttt{to\_string(v:T)->String}: converts the given variable to a string value.
 \end{itemize}
 
-\subsubsection{Bindings to Java objects\label{sec:bindings}}
+\subsection{Bindings to Java objects\label{sec:bindings}}
 
 INI only provides a minimal set of built-in functions. For all other functions, one can bind new functions to Java APIs. Thus, to use Java objects from INI the programmers just need to define bindings from INI functions to Java constructors, methods or fields. The binding syntax is the following:
 
@@ -248,9 +249,9 @@ Programmers can then invoke both functions, which are well-typed thanks to the b
 java_println(out(),"hello Java")
 \end{verbatim}
 
-\subsection{Rules}
+\section{Rules}
 
-\subsubsection{Syntax}
+\subsection{Syntax}
 
 Each rule has the following syntax:
 
@@ -266,7 +267,7 @@ The guard is either a event matcher (for event-triggered rules) or a logical exp
 
 A logical expression within a guard is formed of variable accesses, function invocations, and literals, composed together with logical operators and/or comparison operators.
 
-\subsubsection{Logical operators}
+\subsection{Logical operators}
 
 Allowed logical operators within a guard are:
 
@@ -306,7 +307,7 @@ function ping_pong() {
 }
 \end{lstlisting}
 
-\subsubsection{Comparison operators}
+\subsection{Comparison operators}
 
 Comparison operators are binary operators that apply to objects. In INI, using a comparison operator between two object implies that they are of the same type. If not, a typing error will occur.
 
@@ -319,7 +320,7 @@ Comparison operators are binary operators that apply to objects. In INI, using a
 \item \texttt{<expr> <= <expr>}: used mainly to compare two numbers, but can actual apply to any comparable objets.
 \end{itemize}
 
-\subsubsection{Regular expression match operator\label{subsubsec:regexp}}
+\subsection{Regular expression match operator\label{subsubsec:regexp}}
 
 In order to match strings in a concise way, INI provides a match operator $\sim$, with can match a string against a regular expression \cite{friedl2006} and bind matching groups (if any) to INI variables. For example:
 
@@ -344,15 +345,15 @@ function greetings(sentence) {
 
 This function matches the given sentence to determine who it is said hello or bye to. Typically, the invocation \texttt{greetings("See you Renaud")} will print out \texttt{"Bye to Renaud"}. Note the use of the return statement at lines 5 and 10 to ensure that rules are applied once at best.
 
-\subsubsection{Event-triggered rules}
+\subsection{Event-triggered rules}
 
 Besides rules that are applied because the logical expression of the guard evaluates to true, some rules can also be event-triggered. An event rules takes configuration parameters as an annotation, and will provide input arguments when fired. Thus, an event-rule guard starts with one event expression, of the form \texttt{@<event>(<input arguments>) [<configuration parameters>]}. Configuration parameters may be optional depending on the event. Some events are evaluated synchronously (in the function/process thread), but some event are fired asynchronously and concurrently (multi-threaded evaluation).
 
-\subsection{Synchronous events}
+\section{Synchronous events}
 
 Synchronous events are evaluated within the function evaluation thread. When a synchronous event evaluates, no other rule or event can be evaluated concurrently. In functions, only synchronous events are allowed. To use asynchronous events, the programmers must define a process, as explained in section [...].
 
-\subsubsection{\texttt{@init} event}
+\subsection{\texttt{@init} event}
 
 As the name says, \texttt{@init}-trigger rules are invoked when the function starts evaluating. It is the right place to initialize the variables that may need to be used within the other rules. This event takes no parameters.
 
@@ -390,25 +391,25 @@ function f(n) {
 }
 \end{lstlisting}
 
-\subsubsection{\texttt{@end} event}
+\subsection{\texttt{@end} event}
 
 On the contrary to the \texttt{@init} event, \texttt{@end} is triggered when no more rule apply, and when the function is about to return (not including explicit return statements, which do no trigger the \texttt{@end} event). Note that any state change in an \texttt{@end}-triggered rule body will never lead to any other rule re-evaluation, even if the state change makes an existing rule applicable again.
 
-\subsubsection{\texttt{@update} event}
+\subsection{\texttt{@update} event}
 
 The \texttt{@update(old\_value, new\_value) [variable = <variable>]} event occurs when the given variable is modified by the program (i.e. by one of the evaluated rules). For instance, \texttt{@update(b,c) [variable = a]} is triggered if the value of \texttt{a} is modified. The old value of \texttt{a} will be kept in the variable \texttt{b} and the new value of \texttt{a} will be kept in the variable \texttt{c}.
 
 The \texttt{@update} event is particular because it is evaluated synchronously by default, but it can be set to be asynchronous, as explained later.
 
-\subsubsection{\texttt{@error} event}
+\subsection{\texttt{@error} event}
 
 The \texttt{@error[message:String]()} event occurs when an error is thrown during the function's evaluation.
 
-\subsection{Processes\label{sec:processes}}
+\section{Processes\label{sec:processes}}
 
 Processes are very similar to functions, except that they run asynchronously and concurrently. 
 
-\subsubsection{Getting started with processes}
+\subsection{Getting started with processes}
 
 Within a process, it is allowed to to use asynchronous events, which are also run concurrently to other events within the process. An example of an asynchronous event is the \texttt{@every} event, which is triggered at regular intervals defined by the \texttt{time} annotation parameter. For example, to define a process that says \texttt{"hello"} every second:
 
@@ -445,7 +446,7 @@ process p(msg) {
 }
 \end{lstlisting}
 
-\subsubsection{Inter-process communication\label{sec:communication}}
+\subsection{Inter-process communication\label{sec:communication}}
 
 Process communicate with each other through channels. A channel has a unique name and can be used to produce and consume data. To produce data in a channel, a function or a process must invoke the \texttt{produce} built-in function. This is a non-blocking call. On the other end of the channel, a process must consume the data using the  \texttt{@consume} event. Since it is an asynchronous event, only processes can use the  \texttt{@consume} event. For instance, the following program starts a process \texttt{p} and send a \texttt{"hello"} message through a channel \texttt{c}. Note that the  \texttt{p} process never terminates and will wait on subsequent data on the channel \texttt{c} to be produced.
 
@@ -463,7 +464,7 @@ process p() {
 }
 \end{lstlisting}
 
-\subsubsection{Stopping processes}
+\subsection{Stopping processes}
 
 Since processes usually never end, it may be useful to force them to terminate. This can be achieved by terminating all the events in the process, which can be done with the \texttt{stop} built-in function. This function will take a parameter, which is an event rule referred to thanks to the name of the rule. For instance, to name a \texttt{@consume} event rule \texttt{c}, just write: \texttt{c: @consume(...)}. 
 
@@ -487,15 +488,15 @@ process p() {
 }
 \end{lstlisting}
 
-\subsection{Asynchronous events\label{sec:asynchronous_events}}
+\section{Asynchronous events\label{sec:asynchronous_events}}
 
 Asynchronous events can only be used in process definitions, and are evaluated concurrently with other rules or events in the process. 
 
-\subsubsection{\texttt{@every} event}
+\subsection{\texttt{@every} event}
 
 The \texttt{@every() [time = interval:Int]} event occurs every \texttt{interval} milliseconds.
 
-\subsubsection{\texttt{@cron} event}
+\subsection{\texttt{@cron} event}
 
 The \texttt{@cron() [pattern:String]} event occurs on times indicated by the \texttt{pattern} UNIX CRON pattern expression. CRON is a task scheduler that allows the concise definition of repetitive task within a single (and simple) CRON pattern \cite{franta1977}. A UNIX crontab-like pattern is a string split in five space separated parts. Each part is intended as:
 
@@ -518,17 +519,17 @@ Some examples:
 \item \texttt{"59 11 * * 1-5"}: This pattern is equivalent to the previous one.
 \end{itemize}
 
-\subsubsection{\texttt{@consume} event}
+\subsection{\texttt{@consume} event}
 
 The \texttt{@consume(value:Any) [channel = name:String]} event occurs when a data is consumed from the channel \texttt{name}. The consumed data is then passed in the \texttt{value} variable.
 
-\subsubsection{\texttt{@update} event (asynchronous mode)}
+\subsection{\texttt{@update} event (asynchronous mode)}
 
 The \texttt{@update(old\_value, new\_value) [variable = <variable>]} event occurs when the given variable is modified by the program (i.e. by one of the evaluated rules). For instance, \texttt{@update(b,c) [variable = a]} is triggered if the value of \texttt{a} is modified. The old value of \texttt{a} will be kept in the variable \texttt{b} and the new value of \texttt{a} will be kept in the variable \texttt{c}.
 
 The \texttt{@update} event is particular because it is evaluated synchronously by default, but it can be set to be asynchronous, by setting the optional \texttt{mode} annotation parameter to \texttt{"async"}. For instance: \texttt{@update(b,c) [variable = a, mode = "async"]}.
 
-\subsection{Synchronization of events}
+\section{Synchronization of events}
 
 Since asynchronous events can run concurrently, it is sometimes necessary to use synchronization to avoid undesirable side effects. INI provides a simple synchronization construct with the following syntax, which just complements the declaration of a rule: \texttt{\$(r1, r2, ... rn) <guard> \{ <statements> \}}. It means that the declared rule cannot run if one of the \texttt{r1, r2, ... rn} rule is executed.
 
@@ -551,9 +552,9 @@ process main() {
 }
 \end{lstlisting}
 
-\subsection{Dictionaries, lists, and sets}
+\section{Dictionaries, lists, and sets}
 
-\subsubsection{Dictionary definition and access}
+\subsection{Dictionary definition and access}
 
 Dictionaries are natively supported by INI. A dictionary is automatically defined when accessed through the dictionary access expression that uses square brackets: \texttt{dict[key]}. Keys and values within dictionaries are of any type, but shall all be of the same type for a given dictionary. For instance the following statement list is valid:
 
@@ -580,15 +581,15 @@ println(dict["key2"])
 
 Note that the size of a dictionary (i.e. the number of elements in it) can be retrieved with the \texttt{size} built-in function (see Section \ref{sec:built_in_functions}).  Emptying a dictionary or removing an entry is done with the \texttt{clear} function.
 
-\subsubsection{List definition and access}
+\subsection{List definition and access}
 
 In INI, a list is simply a dictionary where keys are integers.
 
-\subsubsection{Integer sets}
+\subsection{Integer sets}
 
 To allow easy iteration on lists, INI provides a constructor for set of integers. A set of integers is defined with two bounds: \texttt{[min..max]}. For instance, the set that contains all the integers between \texttt{0} and \texttt{10} (bounds included) is written \texttt{[0..10]}.
 
-\subsubsection{Set selection expressions\label{subsubsec:setselectionexpressions}}
+\subsection{Set selection expressions\label{subsubsec:setselectionexpressions}}
 
 Set can be used in set selection expressions that allows the programmer to randomly select elements in a set and bind their values to local variables. A selection condition must be used to select the elements upon a given criteria. For instance, to select two integers \texttt{i} and \texttt{j} that are contained within 0 and 10, so that \texttt{i} < \texttt{j}, one can write the following set selection expression:
 
@@ -613,11 +614,11 @@ function sort1(s) {
 
 As we will see in the next section, set selection expressions can be used to select instances of types that have been constructed by the program. This feature requires the use of user-defined types.
 
-\subsection{User-defined types}
+\section{User-defined types}
 
 A user-defined type is a way for the programmer to define complex structures. Structures contains values stored in named fields, which need to be explicitly typed when defined by the programmer. Section [...] gives an example that uses types.
 
-\subsubsection{Simple structured types}
+\subsection{Simple structured types}
 
 To define a new type, the programmer uses the \texttt{type} keyword and sets a name that must be unique, and a set of typed field. Note that in INI, type name must start with an uppercased letter. For example, to define a \texttt{Person} type that has a name and an age, one may want to write:
 
@@ -656,7 +657,7 @@ type Person = [name:String, age:Int,
 
 Note that when using such types, INI checks that the used objects work on the right fields with the correct types.
 
-\subsubsection{Algebraic types}
+\subsection{Algebraic types}
 
 Algebraic types are an extension of simple structured type that allow the definition of types that have different constructors. Algebraic types in INI are not actual pure algebraic types since they contain named fields that do not need to be initialized. However, they are defined and used in a very similar way, as shown in the Fibonacci example of Section [...]. Algebraic types can be related to AST (Abstract Syntax Trees) in the sense that they allow the definition of typed trees structures.
 
@@ -681,7 +682,7 @@ expr = UMinus[operand=Plus[
   right=Number[value=1.0]]]
 \end{lstlisting}
 
-\subsubsection{Type set selection expressions}
+\subsection{Type set selection expressions}
 
 In Section \ref{subsubsec:setselectionexpressions}, we have seen the set selection expression that allows to select values within a set. Each object constructed with a user type constructor is automatically part of an instance set, which is named after the constructor name. Thus, it is possible to select instances using the set selection construct. For example, the following rule raises an error if a number has a undefined value:
 
@@ -693,7 +694,7 @@ n of Number | !n.value {
 
 Note that sets are local to the functions that construct the instances.
 
-\subsubsection{Type set match expressions}
+\subsection{Type set match expressions}
 
 In Section \ref{subsubsec:regexp}, we have seen the match operator ($\sim$) for string, which is based on regular expressions. The match operator can also be used to match type instances. It an be used similarly to the match construction in the CAML language. For example, we can use the match operator to implement a basic expression printer (see function \texttt{expr\_str} at line 19) and evaluator (function \texttt{expr\_val} at line 40).
 
@@ -760,7 +761,7 @@ function expr_val(expr) {
 }
 \end{lstlisting} }
 
-\subsection{Function references and \texttt{eval}}
+\section{Function references and \texttt{eval}}
 
 Functions can be referenced and passed as parameters to other functions. A function reference expression is defined with the function keyword. For instance: \texttt{f = function(my\_function)} creates a reference to \texttt{my\_function} and store it in the \texttt{f} variable. Then the referenced function can be evaluated using the built-in function \texttt{eval}, that takes  a reference to the function to be evaluated followed by the parameters to be passed to the evaluated function.
 
@@ -791,7 +792,7 @@ function compare(e1,e2) {
 
 As one can see at line 10, that we invoke the \texttt{eval} function to call the function referenced in \texttt{comparator}. This function takes two elements (here \texttt{l[i]} and \texttt{l[i+1]} are passed) and returns an integer (since the result of \texttt{eval} is compared with 0). At line 4, we can see that the passed comparison function is the \texttt{compare} function defined at line 15, however, any comparison function that takes to elements to compare and returns an integer may be used as a comparator.
 
-\subsection{Imports\label{sec:imports}}
+\section{Imports\label{sec:imports}}
 
 Since all the functions should not be defined within a single file, INI programs can start with a list of import clauses. For example:
 
@@ -801,7 +802,7 @@ import "ini/examples/lib_io.ini"
 
 Imports allow the definition and use of function libraries. In particular, it is recommended to define bindings (see Section \ref{subsubsec:bindings}) within external files and to import them when required.
 
-\subsection{User-defined events}
+\section{User-defined events}
 
 Besides the built-in events, INI allows developers to create their own events. For example, we will try to create a simple custom event. This event will copy one file to another file. We need two in parameters: one for source file name and another for destination file name. Besides, we will store the time needed for copy process in the variable \texttt{v} and the result of this process (whether successful or not) in the variable \texttt{s}. In INI, \texttt{t} and \texttt{s} are examples of out parameters.
 \begin{lstlisting}
@@ -888,9 +889,9 @@ function main() {
 \end{lstlisting}
 Before using the event, we need to declare it as you see in the first line of our program. The types of configuration and out parameters should be declared. In our example, we have two in parameters with type \texttt{String}. Besides, we have two out parameters, one with type \texttt{Long} and another with type \texttt{Boolean}. Moreover, a source code associated with the event also must be declared. When we run this program, it will copy a file \texttt{file.exe} to a file \texttt{fileCopy.exe}. The time needed for this process (in milliseconds) also will be displayed.
 
-\section{The INI type system}
+\chapter{The INI type system}
 
-\subsection{Definitions}
+\section{Definitions}
 
 INI comes with 5 built-in types for numbers: $Double$, $Float$, $Long$, $Int$, and $Byte$. They differ on the number of bytes used to encode them (same as Java encoding). INI comes also with a $Char$ type for single characters (letters and other ASCII characters) and a $Boolean$ type that takes only $true$ and $false$ values.
 Finally, INI provides built-in dictionary types: $Dictionary(K,V)$. Dictionary types are dependent types with a key type $K$ and a value type $V$. When $K=Int$, it means that the type is a list in the INI definition (in reality, it is more of an indexed set). Syntactically, lists can be noted with the * notation:
@@ -911,7 +912,7 @@ INI types can be ordered with a type relation $\succ$. $A \succ B$ means that $A
 $Double \succ Float \succ Long \succ Int \succ Byte$
 \end{center}
 
-\subsection{Type Inference}
+\section{Type Inference}
 
 As said in Section \ref{sec:counting_occurences_in_a_list}, most types in INI are calculated with the type inference engine, which allows the programmers to say very few about the typing. The kernel of this type inference is based on a Herbrand unification algorithm, as depicted by Robinson in \cite{robinson1965}. The typing algorithm is enhanced with polymorphic function support, abstract data types (or algebraic types) support, and with internal sub-typing for number types.
 
@@ -924,9 +925,9 @@ Thus, INI works with the following steps:
 \item if errors are found, they are reported to the user and INI does not proceed to the execution phase.
 \end{enumerate}
 
-\subsection{Type Inference rules}
+\section{Type Inference rules}
 
-\subsubsection{Initiation rules}
+\subsection{Initiation rules}
 
 In order to infer types for the program, we first need some initiation rules. Here is a rule that states that undefined values have any type, i.e. their type is an unconstrained type variable.
 
@@ -947,7 +948,7 @@ Note that INI also has an internal \texttt{Void} type for functions returning no
 \item \texttt{true} and \texttt{false} literals will be typed as \texttt{Boolean},
 \end{itemize}
 
-\subsubsection{Assignments}
+\subsection{Assignments}
 
 When an assignment is made from a resolved type (for instance from a literal, such as \texttt{x=2.0}), then the type of the assignee equals to the type of the assignment (for instance \texttt{x:Float}).
 
@@ -967,7 +968,7 @@ When the assignment is made from an unresolved type (e.g. \texttt{x=y}), then th
 \DP
 \end{center}
 
-\subsubsection{Logical operators}
+\subsection{Logical operators}
 
 Logical operators are easy to deal with since the result must be of the \texttt{Boolean} type. There are no constraints on the operands since undefined values mean \texttt{false} and defined ones mean \texttt{true} from a boolean perspective.
 
@@ -979,7 +980,7 @@ Logical operators are easy to deal with since the result must be of the \texttt{
 \end{center}
 \begin{center}with  \texttt{op} $\in \{$\texttt{\&\&, ||}$\}$\end{center}
 
-\subsubsection{Comparison operators}
+\subsection{Comparison operators}
 
 Comparators imply that the result must be \texttt{Boolean}. Operands must be comparable, which is the case for all objects in INI. Moreover, we enforce that the compared object must be of the same type.
 
@@ -991,7 +992,7 @@ Comparators imply that the result must be \texttt{Boolean}. Operands must be com
 \end{center}
 \begin{center}with  \texttt{op} $\in \{$\texttt{==, !=, <, <=, >, >=}$\}$\end{center}
 
-\subsubsection{Division}
+\subsection{Division}
 
 Division must occur between two expressions of the same type, which both must be subtypes of \texttt{Double} (e.g. \texttt{Float} or \texttt{Int}). Division returns a \texttt{Float} whatever the operands' type is, thus avoiding loss of precision for integers.
 
@@ -1002,7 +1003,7 @@ Division must occur between two expressions of the same type, which both must be
 \DP
 \end{center}
 
-\subsubsection{Multiplication and minus}
+\subsection{Multiplication and minus}
 
 Multiplication and minus operations must occur between two expressions of the same type, which both must be subtypes of \texttt{Double} (e.g. \texttt{Float} or \texttt{Int}). They will return the same type as the operands' type.
 
@@ -1015,7 +1016,7 @@ Multiplication and minus operations must occur between two expressions of the sa
 \begin{center}with  \texttt{op} $\in \{$\texttt{-, *}$\}$\end{center}
 
 
-\subsubsection{The plus operator}
+\subsection{The plus operator}
 
 There are two case for the plus operator. In the first case, it is uses as a string concatenation operator. For that, like in Java, the first operand must be of a resolved \texttt{String} type. If it is the case, the type of the second operand does not matter and the overall expression will be typed as a \texttt{String} and the \texttt{String} type will propagate. Typically, the \texttt{"a"+b} expression is a string concatenation case.
 
@@ -1035,7 +1036,7 @@ The second case occurs when the type of the first operand's type is undetermined
 \DP
 \end{center}
 
-\subsubsection{Unary minus (sign inversion)}
+\subsection{Unary minus (sign inversion)}
 
 The unary minus operator expects an operand which is a number and will return a result of the same type.
 
@@ -1046,7 +1047,7 @@ The unary minus operator expects an operand which is a number and will return a 
 \DP
 \end{center}
 
-\subsubsection{Post operators}
+\subsection{Post operators}
 
 The post increment/decrement operators both expect an operand which is a number and will return a result of the same type.
 
@@ -1058,7 +1059,7 @@ The post increment/decrement operators both expect an operand which is a number 
 \end{center}
 \begin{center}with  \texttt{postop} $\in \{$\texttt{++, --}$\}$\end{center}
 
-\subsubsection{The not operator}
+\subsection{The not operator}
 
 The logical negation operator returns a boolean, but does not force any constraint on the operand (undefined means \texttt{false} and defined means \texttt{true} for non-boolean objects).
 
@@ -1069,7 +1070,7 @@ The logical negation operator returns a boolean, but does not force any constrai
 \DP
 \end{center}
 
-\subsubsection{The match operator}
+\subsection{The match operator}
 
 Within a guard a match operator can be used to match strings with regular expressions and bind the results to some variables. For instance \texttt{"a b c"} $\sim$ \texttt{regexp("(.) (b) (.)",v1,v2,v3)} will match and be evaluated to \texttt{true}. Since there are three groups (between parenthesis), the three match sub-results will be bound to the given variables. Thus, once the match is done, we will have \texttt{v1="a"}, \texttt{v2="b"}, and \texttt{v3="c"}. With regard to typing, all the bound variables are strings.
 
@@ -1089,7 +1090,7 @@ A match operator can also be used to match a constructor's instance with some co
 \DP
 \end{center}
 
-\subsubsection{Dictionary access}
+\subsection{Dictionary access}
 
 A dictionary access node such as \texttt{x[y]} allows to say that the resulting type of the expression is \texttt{V}, if \texttt{x} is of type \texttt{Dictionary(K,V)}.
 
@@ -1100,7 +1101,7 @@ A dictionary access node such as \texttt{x[y]} allows to say that the resulting 
 \DP
 \end{center}
 
-\subsubsection{Field access}
+\subsection{Field access}
 
 For a field access such as \texttt{x.f}, the type of the accessed expression \texttt{x} must have a field of the right name and type. Note that, when using match expressions, by construction, it is often the case that the type of the accessed expression is already resolved.
 
@@ -1111,7 +1112,7 @@ For a field access such as \texttt{x.f}, the type of the accessed expression \te
 \DP
 \end{center}
 
-\subsubsection{Function invocation}
+\subsection{Function invocation}
 
 For an invocation, the rule implies some constraints between the function type and the types of the result and of the parameter expressions. To support polymorphism, the function body is evaluated within its own environment, so that each invocation has its own set of constraints.
 
@@ -1122,7 +1123,7 @@ For an invocation, the rule implies some constraints between the function type a
 \DP
 \end{center}
 
-\subsubsection{List definition}
+\subsection{List definition}
 
 Lists definitions are done with the following syntax: \texttt{[e1, e2, ... en]}, where all the expressions must be of the same type \texttt{T}. Then the type of the resulting list is \texttt{T*} (equivalent to \texttt{Dictionary(Int,T)})
 
@@ -1133,7 +1134,7 @@ Lists definitions are done with the following syntax: \texttt{[e1, e2, ... en]},
 \DP
 \end{center}
 
-\subsubsection{Return statement}
+\subsection{Return statement}
 
 A return statement implies that the enclosing function's return type is \texttt{Void}. Note that, in addition, the function's return type is \texttt{Void} if no return statements appear in the function body.
 
@@ -1153,7 +1154,7 @@ A return statement with an expression implies that the enclosing function's retu
 \DP
 \end{center}
 
-\subsubsection{Type instantiation}
+\subsection{Type instantiation}
 
 One can construct an instance of an algebraic type using one of its constructor. For instance, a algebraic type defined as: type \texttt{A = C[f1:T1, f2:T2, ... fn,Tn]} has one constructor \texttt{C} with n typed fields. A constructor \texttt{C} of an algebraic type \texttt{A} is typed with a type of the same name (\texttt{C}), with $C \preceq A$. When an instance of \texttt{A} is constructed using \texttt{C} through the expression \texttt{C[f1=e1,f2=e2, ... fn=en]}, then the type of each expression \texttt{ei} must be of the type of the field \texttt{fi}, as declared in the algebraic type definition (i.e. \texttt{Ti}).
 
@@ -1165,7 +1166,7 @@ One can construct an instance of an algebraic type using one of its constructor.
 \end{center}
 \begin{center}with  $T$, the type that corresponds to the $C$ constructor, which is part of an algebraic type\end{center}
 
-\subsubsection{Integer set declaration}
+\subsection{Integer set declaration}
 
 An integer set declaration allows the programmer to declare a integer domain with min and max bounds. The syntax is \texttt{[e1..e2]} where \texttt{e1} is the min bound and \texttt{e2} is the max one. Both min and max bound expressions must be of type \texttt{Int}, and the resulting type is an \texttt{Set(Int)}.
 
@@ -1176,7 +1177,7 @@ An integer set declaration allows the programmer to declare a integer domain wit
 \DP
 \end{center}
 
-\subsubsection{Set selection}
+\subsection{Set selection}
 
 Within a set expression, one can select elements in a set, and bind them to variables. In that construct, each variable is of the type of the set elements.
 
@@ -1196,9 +1197,9 @@ A selection operation can also be done within a constructor type \texttt{C}, i.e
 \DP
 \end{center}
 
-\section{Some INI examples}
+\chapter{Some INI examples}
 
-\subsection{Counting occurences in a list\label{sec:counting_occurences_in_a_list}}
+\section{Counting occurences in a list\label{sec:counting_occurences_in_a_list}}
 
 In order to illustrate the use of dictionaries and lists with INI, we now show how to implement a simple function that counts the occurences of the elements within a given list. In order to access the counted results for each element, we store them in a dictionary, where each entry's key is the counted element, and the entry's value is the calculated number of occurences of the element.
 
@@ -1276,7 +1277,7 @@ Number of spaces: 6
 
 In terms of typing, it means that the \texttt{countOccurencesAndStoreToDict} function is \emph{polymorphic}. A polymorphic function is more generic since it can be applied to several types. More precisely, in our case, the inferred functional type is \texttt{(Dictionary('E,Int))->Void}, where \texttt{'E} is a type parameter. Actually, the INI type inference algorithm finds the most general type so that functions are only typed with the least possible constraints and remain polymorphic when possible. For more details, see [...].
 
-\subsection{Implementing a sort function\label{sec:implementing_a_sort_function}}
+\section{Implementing a sort function\label{sec:implementing_a_sort_function}}
 
 With INI, there is a very straightforward way to implement a sort function, which consists of taking advantage of \emph{set expressions}. A set expression allows to select arbitrary objects within a set. These selected objects may follow some criteria given in the second part of the expression. Set expressions are used in guard so that the guard is evaluated to true only if an object that matches the given criteria can be found in the set. Here, to implement the \texttt{sort1} function, we simply select all the indexes \texttt{i} in the \texttt{s} list so that \texttt{s[i]} is greater than \texttt{s[i+1]} (line 2). When this rule matches it simply swaps \texttt{s[i]} and \texttt{s[i+1]}, so that the list will eventually be sorted when the rule cannot apply anymore. In that case, the \texttt{@end} event is triggered and the function returns the sorted list.
 
@@ -1360,7 +1361,7 @@ function partition(s,lo,hi,pivotIndex){
 
 This algorithm is more complex to understand but it performs very well for middle-sized lists. The interesting characteristic to point out here is that the quicksort function is recursive. Hence, INI allows both rule-based programming style and functional programming style. Programmers may use one or the other depending on the type of problem they need to solve.
 
-\subsection{Constructing a Fibonacci tree}
+\section{Constructing a Fibonacci tree}
 
 A Fibonacci tree is a binary tree defined as follows:
 
@@ -1470,7 +1471,7 @@ function fibtree4(n) {
 }
 \end{lstlisting}
 
-\subsection{Programming a simple HTTP server}
+\section{Programming a simple HTTP server}
 
 In order to illustrate the use of Java objets and the use of asynchronous event-based rules, we will now study a slightly more complex example. The goal of this example is to program a very simple HTTP server, which is not meant to be complete, but to explain basic programming principles in INI. For this example, we will use the \texttt{java.net} API for sockets, and some of the \texttt{java.io} classes. To use Java objects from INI the programmer just need to define bindings from INI functions to Java constructors, methods or fields. For instance, to bind an \texttt{out()} function to the \texttt{System.out} Java writer, you need to define the following binding:
 
@@ -1688,11 +1689,11 @@ function main() {
 }
 \end{lstlisting}
 
-\section{Candidate features}
+\chapter{Candidate features}
 
 Following features are not yet implemented but could be in future releases, especially if people up-vote them on github...
 
-\subsection{Validations and Model Checking}
+\section{Validations and Model Checking}
 
 In the close future, we want to add to INI some validations to avoid programming mistakes (besides those already detected by the type inference algorithm). Validations will be performed with a model-checking engine called Spin. The idea is to provide default validations such as:
 
@@ -1704,7 +1705,7 @@ In the close future, we want to add to INI some validations to avoid programming
 
 Besides default validations, programmers will be able to define their own using Temporal Logic formulas.
 
-\subsection{Interceptors}
+\section{Interceptors}
 
 Interceptors would allow to react upon some specific function invocation or process spawning. For example:
 
@@ -1722,21 +1723,21 @@ Interceptors would allow to react upon some specific function invocation or proc
 }
 \end{lstlisting}
 
-\subsection{\texttt{@file} event}
+\section{\texttt{@file} event}
 
 Observing file system modifications can be useful in many use cases.
 
 The \texttt{@file(f1:String, f2: String, ... fn:String)} event occurs when one of the given file \texttt{fi} is modified on the file system. If the file does not exist initially, the event occurs when the file is created. If the file initially exists, the event occurs when it is modified or deleted. If the given file is a directory, the event happens when the content of the directory is modified (i.e. a file within this directory is modified, created, or deleted).
 
-\subsection{Date and Duration type}
+\section{Date and Duration type}
 
 Add a built-in Date type with + and - operators. Date literals will need to be specified, as well as date formatting. For type consistency, dates may be seen as durations from the initial date.
 
-\subsection{Synchronous invocation of processes}
+\section{Synchronous invocation of processes}
 
 Add support to invoke processes in a synchronous way.
 
-\subsection{Add packages / namespaces}
+\section{Add packages / namespaces}
 
 Names should be qualified to avoid clashes in the long run.
 
@@ -1748,7 +1749,7 @@ Names should be qualified to avoid clashes in the long run.
 
 Question: do we also deal with private/public visibility?
 
-\subsection{Add placeholders for string substitution}
+\section{Add placeholders for string substitution}
 
 \texttt{"value of i: \{i\}"} shall be substituted with "value of i: 1" if \texttt{i} holds the value \texttt{1}.
 
