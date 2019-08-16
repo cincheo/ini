@@ -30,9 +30,9 @@
 
 \section{Introduction}
 
-INI is a programming language dedicated to distributed computing. It natively handle processes, communication, deployment and synchronization. There are two kinds of first-class entities with INI: functions and processes. Functions are evaluated synchronously while processes are evaluated asynchronously and react to their environment through events. Functions return values. Processes communicate with each others through channels (like in $\pi$-calculus or in most multi-agent systems).
+INI is a programming language dedicated to distributed computing. It natively handle processes, communication, deployment and synchronization. There are two kinds of first-class entities with INI: functions and processes. Functions are evaluated synchronously while processes are evaluated asynchronously and react to their environment through events. Functions return values. Processes communicate with each others through channels (like in $\pi$-calculus [...] or in most multi-agent systems [...]).
 
-INI has been designed to remain as simple as possible for readability and maintainability, but also to ensure that it is easy to validate using formal methods such as Model Checking. Thus, a strong design choice is to allow only rules within the the definitions of functions and processes. A rule is a pair of (guard, action). The action is executed only if the guard is evaluated to true in the context of the function/process. Guards are formed of an optional event part (e.g. \texttt{@event(arguments) [configuration parameters]}), and of an optional condition part, which includes first-order logic expressions. At least one event part or a condition (possibly both) must be defined. When the guard is passed, it triggers the evaluation of the action. The action is a list of sequential statements including variable assignments, function invocations, and return statements. Besides, INI allows a \texttt{case} statement, which is also a list of rules.
+INI has been designed to remain as simple as possible for readability and maintainability, but also to ensure that it is easy to validate using formal methods such as Model Checking. Thus, a strong design choice is to allow only rules within the the definitions of functions and processes. A rule is a pair of (guard, action). The action is executed only if the guard is true in the context of the function/process. Guards can contain an event predicate (which is true when the event has been fired) and a logic predicate. The action is a list of sequential statements including variable assignments, function invocations, and return statements. Besides, INI allows a \texttt{case} statement, which is also a list of rules.
 
 Within a function or a process body, rules are executed until no rules are left to be executed. If one rule remain to be executed, the function or process does not terminate. On contrary to regular imperative languages, INI does not include any control structures such as \emph{ifs} or \emph{loops}. All the control is made through rules (i.e. guards and actions evaluation) and case statements (which are also rules).
 
@@ -190,17 +190,28 @@ Here is the list of built-in functions provided by INI. Built-in function have p
 \begin{itemize}
 \item \texttt{clear(v:T)->Void}: initializes or re-initializes a \texttt{v} variable, passed as a parameter.
 \item \texttt{copy(v:T)->T}: copies the content of a \texttt{v} variable, passed as a parameter.
-\item \texttt{eval(f:F,p1:T1,p:T2,...pN:TN)->T}: evaluates a function of type \texttt{F} passed as a reference, passing the parameters \texttt{pi} and returns the value returned by the evaluated function.
 \item \texttt{error(message:String)->Void}: throws an error with the given message. Throwing an error will stop the evaluation, unless it is caught by an error-event-triggered rule.
+\item \texttt{eval(f:F,p1:T1,p:T2,...pN:TN)->T}: evaluates a function of type \texttt{F} passed as a reference, passing the parameters \texttt{pi} and returns the value returned by the evaluated function.
+\item \texttt{print(v:T)->Void}: writes the textual representation of the passed data on the standard output stream.
+\item \texttt{first(list:T*)->T}: returns the first element in the given list.
+\item \texttt{key(dict:Dictionary(K,V), element:V)->K}: returns the key that corresponds to the given element in the given dictionary.
+\item \texttt{max(n1:Number, n2:Number)->Number}: returns the highest number between \texttt{n1} and \texttt{n2}.
+\item \texttt{min(n1:Number, n2:Number)->Number}: returns the lowest number between \texttt{n1} and \texttt{n2}.
+\item \texttt{parse\_number(n:String)->Number}: parses the given string and returns it as a number.
+\item \texttt{pow(n1:Number, n2:Number)->Number}: returns \texttt{n1} to the power of \texttt{n2}.
 \item \texttt{print(v:T)->Void}: writes the textual representation of the passed data on the standard output stream.
 \item \texttt{println(v:T)->Void}: writes the textual representation of the passed data on the standard output stream, and adds a carriage return at the end of the line.
+\item \texttt{produce(channel:String, data:Any)->Void}: produces the given data on the given channel (non-blocking call).
 \item \texttt{read\_keyboard()->String}: reads a line typed in by the user on the standard input stream and returns it.
-\item \texttt{size(Map(K,V))->Int}: returns the size of a map, i.e. the number of elements in it.
+\item \texttt{size(Dictionary(K,V))->Int}: returns the size of a dictionary, i.e. the number of elements in it.
+\item \texttt{sleep(time:Long)->Void}: stops the current thread during \texttt{time} milliseconds.
+\item \texttt{stop(rule:Any)->Void}: stops the given rule, so that it will kill the current thread and terminate the rule (an event rule will not be triggered anymore once stopped).
 \item \texttt{time()->Long}: returns the current system clock time as a \texttt{Long}.
 \item \texttt{to\_byte(v:T)->Byte}: converts the given variable to a byte value.
 \item \texttt{to\_double(v:T)->Double}: converts the given variable to a double value.
 \item \texttt{to\_float(v:T)->Float}: converts the given variable to a float value.
 \item \texttt{to\_int(v:T)->Int}: converts the given variable to a integer value.
+\item \texttt{to\_json(v:T)->String}: converts the given variable to a String value holding the JSON representation of the data (serialization).
 \item \texttt{to\_long(v:T)->Long}: converts the given variable to a long value.
 \item \texttt{to\_string(v:T)->String}: converts the given variable to a string value.
 \end{itemize}
@@ -248,7 +259,7 @@ Each rule has the following syntax:
 <body> := <statements> <return_statement_opt>
 <guard> := <event_matcher>
          | <logical_expr>
-         | <event_matcher> <logical_expr>
+         | <event_matcher> && <logical_expr>
 \end{verbatim}
 
 The guard is either a event matcher (for event-triggered rules) or a logical expression, or both. Events will be depicted in the next section, and we will now focus on the logical expression part of the rule.
@@ -387,6 +398,8 @@ On the contrary to the \texttt{@init} event, \texttt{@end} is triggered when no 
 
 The \texttt{@update(old\_value, new\_value) [variable = <variable>]} event occurs when the given variable is modified by the program (i.e. by one of the evaluated rules). For instance, \texttt{@update(b,c) [variable = a]} is triggered if the value of \texttt{a} is modified. The old value of \texttt{a} will be kept in the variable \texttt{b} and the new value of \texttt{a} will be kept in the variable \texttt{c}.
 
+The \texttt{@update} event is particular because it is evaluated synchronously by default, but it can be set to be asynchronous, as explained later.
+
 \subsubsection{\texttt{@error} event}
 
 The \texttt{@error[message:String]()} event occurs when an error is thrown during the function's evaluation.
@@ -396,7 +409,6 @@ The \texttt{@error[message:String]()} event occurs when an error is thrown durin
 Processes are very similar to functions, except that they run asynchronously and concurrently. 
 
 \subsubsection{Getting started with processes}
-
 
 Within a process, it is allowed to to use asynchronous events, which are also run concurrently to other events within the process. An example of an asynchronous event is the \texttt{@every} event, which is triggered at regular intervals defined by the \texttt{time} annotation parameter. For example, to define a process that says \texttt{"hello"} every second:
 
@@ -506,11 +518,44 @@ Some examples:
 \item \texttt{"59 11 * * 1-5"}: This pattern is equivalent to the previous one.
 \end{itemize}
 
-\subsection{Maps, lists, and sets}
+\subsubsection{\texttt{@consume} event}
 
-\subsubsection{Map definition and access}
+The \texttt{@consume(value:Any) [channel = name:String]} event occurs when a data is consumed from the channel \texttt{name}. The consumed data is then passed in the \texttt{value} variable.
 
-Maps are natively supported by INI. A map is automatically defined when accessed through the map access expression that uses square brackets: \texttt{map[key]}. Keys and values within maps are of any type, but shall all be of the same type for a given map. For instance the following statement list is valid:
+\subsubsection{\texttt{@update} event (asynchronous mode)}
+
+The \texttt{@update(old\_value, new\_value) [variable = <variable>]} event occurs when the given variable is modified by the program (i.e. by one of the evaluated rules). For instance, \texttt{@update(b,c) [variable = a]} is triggered if the value of \texttt{a} is modified. The old value of \texttt{a} will be kept in the variable \texttt{b} and the new value of \texttt{a} will be kept in the variable \texttt{c}.
+
+The \texttt{@update} event is particular because it is evaluated synchronously by default, but it can be set to be asynchronous, by setting the optional \texttt{mode} annotation parameter to \texttt{"async"}. For instance: \texttt{@update(b,c) [variable = a, mode = "async"]}.
+
+\subsection{Synchronization of events}
+
+Since asynchronous events can run concurrently, it is sometimes necessary to use synchronization to avoid undesirable side effects. INI provides a simple synchronization construct with the following syntax, which just complements the declaration of a rule: \texttt{\$(r1, r2, ... rn) <guard> \{ <statements> \}}. It means that the declared rule cannot run if one of the \texttt{r1, r2, ... rn} rule is executed.
+
+Rule names are defined trough labels, for example, to name a rule \texttt{r}, just add the label in front of the rule as: \texttt{r:<guard> \{ <statements> \}}. For example, if we have a \texttt{@consume} event rule that we want to be executed only once at a time, then we can just write  \texttt{\$(c) c:@consume(v) \{ <statements> \}}, so that the event rule \texttt{c} synchronizes on itself.
+
+In the following example, the two rules here are made to be mutually exclusive so that the value of the \texttt{tick} variable cannot be modified concurrently and remains consistent within the every and consume events.
+
+\begin{lstlisting}[numbers=none]
+process main() {
+	@init() {
+		tick = 0
+	}
+	$(c) e:@every() [time=1000] {
+		tick++
+	}
+	$(e) c:@consume(v) [channel="c"] {
+		println("new event at tick = "+tick)
+		tick=0
+	}
+}
+\end{lstlisting}
+
+\subsection{Dictionaries, lists, and sets}
+
+\subsubsection{Dictionary definition and access}
+
+Dictionaries are natively supported by INI. A dictionary is automatically defined when accessed through the dictionary access expression that uses square brackets: \texttt{dict[key]}. Keys and values within dictionaries are of any type, but shall all be of the same type for a given dictionary. For instance the following statement list is valid:
 
 \begin{lstlisting}[numbers=none]
 m["key1"] = 1
@@ -518,7 +563,7 @@ m["key2"] = 2
 println(m["key2"])
 \end{lstlisting}
 
-On the other hand, the following statement list is not valid because the first line initializes \texttt{m} to be a map of integer values accessed through string keys and:
+On the other hand, the following statement list is not valid because the first line initializes \texttt{m} to be a dictionary of integer values accessed through string keys and:
 
 \begin{itemize}
 \item the key is an integer at line 2,
@@ -527,17 +572,17 @@ On the other hand, the following statement list is not valid because the first l
 \end{itemize}
 
 \begin{lstlisting}
-m["key1"] = 1
-m[1] = 2
-m["key2"] = "test"
-println(m["key2"])
+dict["key1"] = 1
+dict[1] = 2
+dict["key2"] = "test"
+println(dict["key2"])
 \end{lstlisting}
 
-Note that the size of a map (i.e. the number of elements in it) can be retrieved with the \texttt{size} built-in function (see Section [...]).  Emptying a map or removing an entry is done with the \texttt{clear} function (not implemented yet).
+Note that the size of a dictionary (i.e. the number of elements in it) can be retrieved with the \texttt{size} built-in function (see Section \ref{sec:built_in_functions}).  Emptying a dictionary or removing an entry is done with the \texttt{clear} function.
 
 \subsubsection{List definition and access}
 
-In INI, a list is simply a map where keys are integers.
+In INI, a list is simply a dictionary where keys are integers.
 
 \subsubsection{Integer sets}
 
@@ -848,16 +893,16 @@ Before using the event, we need to declare it as you see in the first line of ou
 \subsection{Definitions}
 
 INI comes with 5 built-in types for numbers: $Double$, $Float$, $Long$, $Int$, and $Byte$. They differ on the number of bytes used to encode them (same as Java encoding). INI comes also with a $Char$ type for single characters (letters and other ASCII characters) and a $Boolean$ type that takes only $true$ and $false$ values.
-Finally, INI provides built-in map types: $Map(K,V)$. Map types are dependent types with a key type $K$ and a value type $V$. When $K=Int$, it means that the type is a list in the INI definition (in reality, it is more of an indexed set). Syntactically, lists can be noted with the * notation:
+Finally, INI provides built-in dictionary types: $Dictionary(K,V)$. Dictionary types are dependent types with a key type $K$ and a value type $V$. When $K=Int$, it means that the type is a list in the INI definition (in reality, it is more of an indexed set). Syntactically, lists can be noted with the * notation:
 
 \begin{center}
-$T* \widehat= Map(Int,T)$
+$T* \widehat= Dictionary(Int,T)$
 \end{center}
 
 A list of $Char$ (i.e. a $Char*$) is a $String$ type (note that $String$ and $T*$ types are actually aliases and do not exist as real types in the INI internal type representation).
 
 \begin{center}
-$String \widehat= Char* \widehat= Map(Int,Char)$
+$String \widehat= Char* \widehat= Dictionary(Int,Char)$
 \end{center}
 
 INI types can be ordered with a type relation $\succ$. $A \succ B$ means that $A$ is a super-type of $B$, i.e. $A$ is assignable from $B$, whereas the contrary is not true. By default, number types in INI are ordered so that it is not possible to assign more generic numbers to less generic numbers.
@@ -1044,13 +1089,13 @@ A match operator can also be used to match a constructor's instance with some co
 \DP
 \end{center}
 
-\subsubsection{Map access}
+\subsubsection{Dictionary access}
 
-A map access node such as \texttt{x[y]} allows to say that the resulting type of the expression is \texttt{V}, if \texttt{x} is of type \texttt{Map(K,V)}.
+A dictionary access node such as \texttt{x[y]} allows to say that the resulting type of the expression is \texttt{V}, if \texttt{x} is of type \texttt{Dictionary(K,V)}.
 
 \begin{center}
-\AxiomC{$\vdash x:Map(K,V)$} \AxiomC{$\vdash y:K$}
-\LeftLabel{(MAPACCESS)}
+\AxiomC{$\vdash x:Dictionary(K,V)$} \AxiomC{$\vdash y:K$}
+\LeftLabel{(DICTACCESS)}
 \BIC{$\vdash x[y]: V $}
 \DP
 \end{center}
@@ -1079,7 +1124,7 @@ For an invocation, the rule implies some constraints between the function type a
 
 \subsubsection{List definition}
 
-Lists definitions are done with the following syntax: \texttt{[e1, e2, ... en]}, where all the expressions must be of the same type \texttt{T}. Then the type of the resulting list is \texttt{T*} (equivalent to \texttt{Map(Int,T)})
+Lists definitions are done with the following syntax: \texttt{[e1, e2, ... en]}, where all the expressions must be of the same type \texttt{T}. Then the type of the resulting list is \texttt{T*} (equivalent to \texttt{Dictionary(Int,T)})
 
 \begin{center}
 \AxiomC{$\{\vdash e_i:T\}_{i \in [1..n]}$}
@@ -1155,14 +1200,14 @@ A selection operation can also be done within a constructor type \texttt{C}, i.e
 
 \subsection{Counting occurences in a list\label{sec:counting_occurences_in_a_list}}
 
-In order to illustrate the use of maps and lists with INI, we now show how to implement a simple function that counts the occurences of the elements within a given list. In order to access the counted results for each element, we store them in a map, where each entry's key is the counted element, and the entry's value is the calculated number of occurences of the element.
+In order to illustrate the use of dictionaries and lists with INI, we now show how to implement a simple function that counts the occurences of the elements within a given list. In order to access the counted results for each element, we store them in a dictionary, where each entry's key is the counted element, and the entry's value is the calculated number of occurences of the element.
 
-For implementing this function, we will use INI built-in map types, which allow the programmer to associate keys with values by using a square bracket based syntax (like arrays in most languages). Within an INI map, all the keys and values must be of the same type in order to avoid typing errors. In INI, a list is a \texttt{Map(Int,T)}, which can also be said as \texttt{T*} (list of \texttt{T}). A type alias is defined for strings, which are lists of characters: \texttt{String} $\widehat=$ \texttt{Map(Int,Char)}.
+For implementing this function, we will use INI built-in dictionary types, which allow the programmer to associate keys with values by using a square bracket based syntax (like arrays in most languages). Within an INI dictionary, all the keys and values must be of the same type in order to avoid typing errors. In INI, a list is a \texttt{Dictionary(Int,T)}, which can also be said as \texttt{T*} (list of \texttt{T}). A type alias is defined for strings, which are lists of characters: \texttt{String} $\widehat=$ \texttt{Dictionary(Int,Char)}.
 
-INI provides \emph{type inference} [...], so that the programmer does not need to declare any type (except in some cases as we will see later). For instance, the \texttt{i=0} statement will define the \texttt{i} variable with an \texttt{Int} type. If the programmer tries to set the type of \texttt{i} to any other type within the \texttt{i} definition scope, (for instance with the \texttt{i=0.0} statement that assigns i with a \texttt{Float} type) the INI type checker will raise a type mismatch error. Following the same type inference principles, accessing a variable with the square brackets map access construct will automatically define the type of the variable to be a map. For instance, the \texttt{l[i]} expression tells INI that \texttt{l} is of type \texttt{Map(Int,T)} (i.e. a list of \texttt{T}), where \texttt{T} can be any type.
+INI provides \emph{type inference} [...], so that the programmer does not need to declare any type (except in some cases as we will see later). For instance, the \texttt{i=0} statement will define the \texttt{i} variable with an \texttt{Int} type. If the programmer tries to set the type of \texttt{i} to any other type within the \texttt{i} definition scope, (for instance with the \texttt{i=0.0} statement that assigns i with a \texttt{Float} type) the INI type checker will raise a type mismatch error. Following the same type inference principles, accessing a variable with the square brackets dictionary access construct will automatically define the type of the variable to be a dictionary. For instance, the \texttt{l[i]} expression tells INI that \texttt{l} is of type \texttt{Dictionary(Int,T)} (i.e. a list of \texttt{T}), where \texttt{T} can be any type.
 
 \begin{lstlisting}
-function countOccurencesAndStoreToMap(l) {
+function countOccurencesAndStoreToDict(l) {
 	@init() {
 		i=0
 	}
@@ -1175,7 +1220,7 @@ function countOccurencesAndStoreToMap(l) {
 }
 \end{lstlisting}
 
-The \texttt{countOccurencesAndStoreToMap} function shown here simply iterates through the given \texttt{l} variable. As expected, this variable is inferred by INI to be a list, since it is used as such in the expressions \texttt{l[i++]} (line 6) and \texttt{size(l)} (line 5). So, for each element in \texttt{l}, the function accesses the corresponding entry in a \texttt{c} map: c[l[i]] and increments the value of this entry with the \texttt{++} operator (\texttt{c[l[i]]++}). Then, the program goes to the next element of the list with the \texttt{++} operator on \texttt{i} (hence the weird yet concise statement \texttt{c[l[i++]]++} of line 6). The \texttt{++} operator is a typical post increment operator as it is found in C or Java languages.
+The \texttt{countOccurencesAndStoreToDict} function shown here simply iterates through the given \texttt{l} variable. As expected, this variable is inferred by INI to be a list, since it is used as such in the expressions \texttt{l[i++]} (line 6) and \texttt{size(l)} (line 5). So, for each element in \texttt{l}, the function accesses the corresponding entry in a \texttt{c} dictionary: c[l[i]] and increments the value of this entry with the \texttt{++} operator (\texttt{c[l[i]]++}). Then, the program goes to the next element of the list with the \texttt{++} operator on \texttt{i} (hence the weird yet concise statement \texttt{c[l[i++]]++} of line 6). The \texttt{++} operator is a typical post increment operator as it is found in C or Java languages.
 
 As shown in the following program, we can now use this function to count the occurences within a list of integers. Note that a program shall define a main function that is run by the INI interpreter.
 
@@ -1184,7 +1229,7 @@ function main() {
 	@init() {
 		l = [1, 2, 1, 7]
 		println("Counting '"+l+"'")
-		c = countOccurencesAndStoreToMap(l)
+		c = countOccurencesAndStoreToDict(l)
 		println("Number of 1: "+c[1])
 		println("Number of 7: "+c[7])
 		println("Number of 3: "+c[3])
@@ -1201,14 +1246,14 @@ Number of 7: 1
 Number of 3: null
 \end{lstlisting}
 
-When executing the main function, the \texttt{c} variable is filled with the count of each element in the list \texttt{l}. Note that in that case, the type of \texttt{c} is \texttt{Map(Int,Int)}, because \texttt{l} is of type \texttt{Int*}. However, we can note that nothing prevents the program to count other types of elements. For instance, we can count a list of strings: \texttt{l = ["a","ab","abc","ab","a"]}. In that case, the type of \texttt{c} would be \texttt{Map(String,Int)}. Finally, since strings are defined as lists of characters in INI, we can also count letter occurences in a string, as showed below.
+When executing the main function, the \texttt{c} variable is filled with the count of each element in the list \texttt{l}. Note that in that case, the type of \texttt{c} is \texttt{Dictionary(Int,Int)}, because \texttt{l} is of type \texttt{Int*}. However, we can note that nothing prevents the program to count other types of elements. For instance, we can count a list of strings: \texttt{l = ["a","ab","abc","ab","a"]}. In that case, the type of \texttt{c} would be \texttt{Dictionary(String,Int)}. Finally, since strings are defined as lists of characters in INI, we can also count letter occurences in a string, as showed below.
 
 \begin{lstlisting}
 function main() {
 	@init() {
 		s = "This is the string we will count"
 		println("Counting '"+s+"'")
-		c = countOccurencesAndStoreToMap(s)
+		c = countOccurencesAndStoreToDict(s)
 		println("Number of e(s): "+c['e'])
 		println("Number of a(s): "+c['a'])
 		println("Number of s(s): "+c['s'])
@@ -1229,7 +1274,7 @@ Number of i(s): 4
 Number of spaces: 6
 \end{lstlisting}
 
-In terms of typing, it means that the \texttt{countOccurencesAndStoreToMap} function is \emph{polymorphic}. A polymorphic function is more generic since it can be applied to several types. More precisely, in our case, the inferred functional type is \texttt{(Map('E,Int))->Void}, where \texttt{'E} is a type parameter. Actually, the INI type inference algorithm finds the most general type so that functions are only typed with the least possible constraints and remain polymorphic when possible. For more details, see [...].
+In terms of typing, it means that the \texttt{countOccurencesAndStoreToDict} function is \emph{polymorphic}. A polymorphic function is more generic since it can be applied to several types. More precisely, in our case, the inferred functional type is \texttt{(Dictionary('E,Int))->Void}, where \texttt{'E} is a type parameter. Actually, the INI type inference algorithm finds the most general type so that functions are only typed with the least possible constraints and remain polymorphic when possible. For more details, see [...].
 
 \subsection{Implementing a sort function\label{sec:implementing_a_sort_function}}
 
@@ -1246,7 +1291,7 @@ function sort1(s) {
 }
 \end{lstlisting}
 
-Note that this function is polymorphic. Its type is \texttt{(Map(Int,'T))->} \texttt{Map(Int,'T)}, or simpler written \texttt{('T*)->'T*}.
+Note that this function is polymorphic. Its type is \texttt{(Dictionary(Int,'T))->} \texttt{Dictionary(Int,'T)}, or simpler written \texttt{('T*)->'T*}.
 
 Of course, programmers can also use explicit indexes to iterate on the list to be sorted, leading to more classical code. The following function implements a basic bubble sort with INI. The iteration is done with two rules: one which swaps the current elements (line 7), and one which does not (line 12). A \texttt{swap} boolean flag is used to know if there was a swap during the iteration. If \texttt{swap} is true once the end of the list is reach, we set back the index \texttt{i} to \texttt{0} so that the iteration rules apply all over again (line 15).
 
@@ -1690,6 +1735,22 @@ Add a built-in Date type with + and - operators. Date literals will need to be s
 \subsection{Synchronous invocation of processes}
 
 Add support to invoke processes in a synchronous way.
+
+\subsection{Add packages / namespaces}
+
+Names should be qualified to avoid clashes in the long run.
+
+\begin{itemize}
+\item \texttt{import x.y.z as z}: imports the namespace, so that all functions in the namespace are accessible through \texttt{z.f(...)}.
+\item \texttt{import x.y.z.f as f2}: imports the function \texttt{f} in the \texttt{x.y.z} namespace, so that it become accessible directly as f2.
+\item \texttt{import x.y.z}: imports all the functions declared in the \texttt{x.y.z} namespace, so that they all become accessible directly.
+\end{itemize}
+
+Question: do we also deal with private/public visibility?
+
+\subsection{Add placeholders for string substitution}
+
+\texttt{"value of i: \{i\}"} shall be substituted with "value of i: 1" if \texttt{i} holds the value \texttt{1}.
 
 \bibliographystyle{plain}	% (uses file "plain.bst")
 \bibliography{ini_language_specs}		% expects file "ini_manual.bib"

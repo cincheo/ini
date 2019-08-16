@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  15 AUG 2019 10:54
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  16 AUG 2019 09:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -206,15 +206,10 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \tf@toc=\write3
 \openout3 = `ini_language_specs.toc'.
 
-
-Overfull \hbox (5.4131pt too wide) in paragraph at lines 35--36
-\OT1/cmr/m/n/10.95 tional event part (e.g. \OT1/cmtt/m/n/10.95 @event(arguments
-) [configuration parameters]\OT1/cmr/m/n/10.95 ),
- []
-
-[3]
+ [3]
 LaTeX Font Info:    Try loading font information for OMS+cmr on input line 50.
- (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
+
+(/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
@@ -232,90 +227,106 @@ Overfull \hbox (17.42862pt too wide) in paragraph at lines 70--71
 m/n/10.95 https://github.com/cincheo/ini
  []
 
-[5] [6] [7] [8] [9]
-Overfull \hbox (3.53749pt too wide) in paragraph at lines 234--235
+[5] [6] [7] [8]
+Overfull \hbox (9.98611pt too wide) in paragraph at lines 204--205
+[]\OT1/cmtt/m/n/10.95 produce(channel:String, data:Any)->Void\OT1/cmr/m/n/10.95
+ : pro-duces the given data
+ []
+
+[9]
+Overfull \hbox (3.53749pt too wide) in paragraph at lines 245--246
 []\OT1/cmr/m/n/10.95 Programmers can then in-voke both func-tions, which are we
 ll-typed thanks
  []
 
-[10] [11] [12]
+[10] [11] [12] [13]
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 344.
- [13] [14]
-Overfull \hbox (7.16122pt too wide) in paragraph at lines 388--389
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 355.
+ [14]
+Overfull \hbox (7.16122pt too wide) in paragraph at lines 399--400
 \OT1/cmr/m/n/10.95 The \OT1/cmtt/m/n/10.95 @update(old[]value, new[]value) [var
 iable = <variable>] \OT1/cmr/m/n/10.95 event oc-
  []
 
-[15] [16] [17]
-Overfull \hbox (1.47108pt too wide) in paragraph at lines 504--505
+[15] [16] [17] [18]
+Overfull \hbox (1.47108pt too wide) in paragraph at lines 516--517
 []\OT1/cmtt/m/n/10.95 "* 12 16 * Mon"\OT1/cmr/m/n/10.95 : This pat-tern causes 
 the event to oc-cur ev-ery minute
  []
 
 
-Overfull \hbox (19.17403pt too wide) in paragraph at lines 513--514
-\OT1/cmr/m/n/10.95 ac-cessed through the map ac-cess ex-pres-sion that uses squ
-are brack-ets: \OT1/cmtt/m/n/10.95 map[key]\OT1/cmr/m/n/10.95 .
+Overfull \hbox (7.16122pt too wide) in paragraph at lines 527--528
+\OT1/cmr/m/n/10.95 The \OT1/cmtt/m/n/10.95 @update(old[]value, new[]value) [var
+iable = <variable>] \OT1/cmr/m/n/10.95 event oc-
  []
 
-[18] [19] [20] [21]
+[19]
+LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 533
+.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 533.
+
+
+LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
+(Font)              using `OMS/cmsy/m/n' instead
+(Font)              for symbol `textbraceleft' on input line 533.
+
+[20] [21] [22] [23]
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 658.
- [22]
-Overfull \hbox (0.75119pt too wide) in paragraph at lines 671--672
-[][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 686.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 686.
-[23]
-LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 718.
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 726.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 735.
-LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 735.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 703.
  [24]
+Overfull \hbox (0.75119pt too wide) in paragraph at lines 716--717
+[][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
 
-LaTeX Warning: Reference `subsubsec:bindings' on page 25 undefined on input lin
-e 757.
-
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9> on input line 731.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 731.
 [25]
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 788--789
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 763.
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 771.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 780.
+LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10> not available
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 780.
+ [26]
+
+LaTeX Warning: Reference `subsubsec:bindings' on page 27 undefined on input lin
+e 802.
+
+[27]
+Overfull \hbox (1.35376pt too wide) in paragraph at lines 833--834
 [][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 793--794
+Overfull \hbox (1.35376pt too wide) in paragraph at lines 838--839
 [][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 805--806
+Overfull \hbox (1.35376pt too wide) in paragraph at lines 850--851
 [][][][][][][][][][] 
  []
 
 
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 816--817
+Overfull \hbox (1.35376pt too wide) in paragraph at lines 861--862
 [][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 819--820
+Overfull \hbox (1.35376pt too wide) in paragraph at lines 864--865
 [][][][][][][][][][][][] 
  []
 
-[26]
-Overfull \hbox (1.35376pt too wide) in paragraph at lines 836--837
+[28]
+Overfull \hbox (1.35376pt too wide) in paragraph at lines 881--882
 [][][][][][][][][][][][][] 
  []
 
-[27] [28]
+[29] [30]
 \myBox1=\box35
 \myScoreStart1=\dimen125
 \myCenter1=\dimen126
@@ -324,29 +335,25 @@ Overfull \hbox (1.35376pt too wide) in paragraph at lines 836--837
 \myScoreStart2=\dimen128
 \myCenter2=\dimen129
 \myScoreEnd2=\dimen130
- [29] [30]
+ [31] [32]
 \myBox3=\box37
 \myScoreStart3=\dimen131
 \myCenter3=\dimen132
 \myScoreEnd3=\dimen133
- [31] [32] [33] [34] [35] [36] [37] [38] [39] [40] [41]
-[42] [43] [44]
-Overfull \hbox (11.38655pt too wide) in paragraph at lines 1507--1508
+ [33] [34] [35] [36] [37] [38]
+Overfull \hbox (18.15633pt too wide) in paragraph at lines 1294--1295
+[]\OT1/cmr/m/n/10.95 Note that this func-tion is poly-mor-phic. Its type is \OT
+1/cmtt/m/n/10.95 (Dictionary(Int,'T))->
+ []
+
+[39] [40] [41] [42] [43] [44] [45] [46]
+Overfull \hbox (11.38655pt too wide) in paragraph at lines 1552--1553
 []\OT1/cmr/m/n/10.95 It would be pos-si-ble to deal with client con-nec-tions a
 f-ter the \OT1/cmtt/m/n/10.95 socket[]accept
  []
 
-[45] [46] [47] [48] [49]
-LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 165
-5.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 1655.
-
-
-LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
-(Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 1655.
-
-[50] (./ini_language_specs.bbl) [51] (./ini_language_specs.aux)
+[47] [48] [49] [50] [51] [52] (./ini_language_specs.bbl [53]) [54]
+(./ini_language_specs.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
@@ -357,7 +364,7 @@ LaTeX Warning: There were undefined references.
 Here is how much of TeX's memory you used:
  2957 strings out of 493089
  42919 string characters out of 6134842
- 129972 words of memory out of 5000000
+ 129973 words of memory out of 5000000
  6414 multiletter control sequences out of 15000+600000
  10574 words of font info for 38 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -378,10 +385,10 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive
 015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/20
 15/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/201
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on ini_language_specs.pdf (51 pages, 323618 bytes).
+Output written on ini_language_specs.pdf (54 pages, 329572 bytes).
 PDF statistics:
- 234 PDF objects out of 1000 (max. 8388607)
- 163 compressed objects within 2 object streams
+ 243 PDF objects out of 1000 (max. 8388607)
+ 169 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
