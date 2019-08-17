@@ -29,8 +29,7 @@ public interface AstNode {
 	int CONSTRUCTOR_MATCH_EXPRESSION = CONSTRUCTOR + 1;
 	int FIELD_ACCESS = CONSTRUCTOR_MATCH_EXPRESSION + 1;
 	int FUNCTION = FIELD_ACCESS + 1;
-	int FUNCTION_LITERAL = FUNCTION + 1;
-	int IMPORT = FUNCTION_LITERAL + 1;
+	int IMPORT = FUNCTION + 1;
 	int INVOCATION = IMPORT + 1;
 	int LIST_EXPRESSION = INVOCATION + 1;
 	int NUMBER_LITERAL = LIST_EXPRESSION + 1;
@@ -85,8 +84,6 @@ public interface AstNode {
 			return FieldAccess.class;
 		case AstNode.FUNCTION:
 			return Function.class;
-		case AstNode.FUNCTION_LITERAL:
-			return FunctionLiteral.class;
 		case AstNode.IMPORT:
 			return Import.class;
 		case AstNode.INVOCATION:

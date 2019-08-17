@@ -266,10 +266,6 @@ public class Ini2Pml {
 			generateRendezvousChannels();
 			break;
 
-		case AstNode.FUNCTION_LITERAL:
-
-			break;
-
 		case AstNode.INVOCATION:
 
 			break;

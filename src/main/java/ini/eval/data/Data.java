@@ -9,7 +9,7 @@ import java.util.Map;
 public interface Data {
 
 	public enum Kind {
-		REGULAR, INT_SET
+		REGULAR, INT_SET, FUNCTIONAL
 	}
 
 	static final String UPPER_BOUND_KEY = "upperBound";

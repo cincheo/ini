@@ -1,5 +1,11 @@
 package ini.type;
 
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Stack;
+
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
 import ini.ast.AstNode;
@@ -11,7 +17,6 @@ import ini.ast.Expression;
 import ini.ast.Field;
 import ini.ast.FieldAccess;
 import ini.ast.Function;
-import ini.ast.FunctionLiteral;
 import ini.ast.Invocation;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
@@ -28,12 +33,6 @@ import ini.ast.UserType;
 import ini.ast.Variable;
 import ini.eval.function.IniFunction;
 import ini.parser.IniParser;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-import java.util.Map.Entry;
 
 public class AstAttrib {
 
@@ -62,7 +61,7 @@ public class AstAttrib {
 		invocationStack.pop();
 	}
 
-	//@SuppressWarnings("unchecked")
+	// @SuppressWarnings("unchecked")
 	public Type eval(AstNode node) {
 		Function f;
 		result = null;
@@ -84,8 +83,7 @@ public class AstAttrib {
 			}
 			if (!t1.isVariable() && !t2.isVariable()) {
 				if (t1.getTypeParameters().get(0) != t2) {
-					addError(new TypingError(node,
-							"incompatible type for map access"));
+					addError(new TypingError(node, "incompatible type for map access"));
 				}
 				result = t1.getTypeParameters().get(1);
 				break;
@@ -95,8 +93,8 @@ public class AstAttrib {
 				map.addTypeParameter(t2);
 				Type val = new Type(parser);
 				map.addTypeParameter(val);
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						t1, map, ((ArrayAccess) node).variableAccess, node));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, map,
+						((ArrayAccess) node).variableAccess, node));
 				result = val;
 				break;
 			}
@@ -110,18 +108,16 @@ public class AstAttrib {
 			// if (t2 == parser.ast.VOID) { addError(new TypingError(node,
 			// "cannot
 			// assign void")); }
-			//			 
+			//
 			// if (t1.isVariable() || t2.isVariable()) { constraints.add(new
 			// TypingConstraint(TypingConstraint.Kind.EQ, t1, t2, ((Assignment)
 			// node).assignee, ((Assignment) node).assignment)); }
 
 			if (t2 != null && !t2.isVariable() && !t2.hasFields()) {
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						t1, t2, ((Assignment) node).assignee,
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, t2, ((Assignment) node).assignee,
 						((Assignment) node).assignment));
 			} else {
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE,
-						t2, t1, ((Assignment) node).assignee,
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE, t2, t1, ((Assignment) node).assignee,
 						((Assignment) node).assignment));
 			}
 
@@ -142,21 +138,16 @@ public class AstAttrib {
 				result = parser.ast.BOOLEAN;
 				break;
 			case DIV:
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE,
-						t1, parser.ast.DOUBLE, b, b));
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						t1, t2, b.left, b.right));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE, t1, parser.ast.DOUBLE, b, b));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, t2, b.left, b.right));
 				result = parser.ast.FLOAT;
 				break;
 			case MULT:
 			case MINUS:
 				result = new Type(parser);
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						t1, t2, b.left, b.right));
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE,
-						t1, parser.ast.DOUBLE, b, b));
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						result, t1, b, b));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, t2, b.left, b.right));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE, t1, parser.ast.DOUBLE, b, b));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, result, t1, b, b));
 				break;
 			case EQUALS:
 			case NOTEQUALS:
@@ -164,8 +155,7 @@ public class AstAttrib {
 			case GTE:
 			case LT:
 			case LTE:
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						t1, t2, b.left, b.right));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, t2, b.left, b.right));
 				result = parser.ast.BOOLEAN;
 				break;
 			case PLUS:
@@ -173,13 +163,9 @@ public class AstAttrib {
 					result = parser.ast.STRING;
 				} else {
 					result = new Type(parser);
-					constraints.add(new TypingConstraint(
-							TypingConstraint.Kind.EQ, t1, t2, b.left, b.right));
-					constraints.add(new TypingConstraint(
-							TypingConstraint.Kind.LTE, t1, parser.ast.DOUBLE,
-							b, b));
-					constraints.add(new TypingConstraint(
-							TypingConstraint.Kind.EQ, result, t1, b, b));
+					constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, t2, b.left, b.right));
+					constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE, t1, parser.ast.DOUBLE, b, b));
+					constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, result, t1, b, b));
 				}
 				break;
 			case MATCHES:
@@ -198,10 +184,8 @@ public class AstAttrib {
 				break;
 			case CONCAT:
 				result = new Type(parser);
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						t1, t2, b.left, b.right));
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						result, t1, b, b));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, t2, b.left, b.right));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, result, t1, b, b));
 				break;
 			default:
 				throw new RuntimeException("unsuported operator: " + b);
@@ -217,11 +201,10 @@ public class AstAttrib {
 			break;
 
 		case AstNode.CONSTRUCTOR_MATCH_EXPRESSION:
-			Constructor constr = parser.ast
-					.getConstructor(((ConstructorMatchExpression) node).name);
+			Constructor constr = parser.ast.getConstructor(((ConstructorMatchExpression) node).name);
 			if (constr == null) {
-				addError(new TypingError(node, "undeclared constructor '"
-						+ ((ConstructorMatchExpression) node).name + "'"));
+				addError(new TypingError(node,
+						"undeclared constructor '" + ((ConstructorMatchExpression) node).name + "'"));
 				result = new Type(parser);
 				break;
 			}
@@ -255,8 +238,7 @@ public class AstAttrib {
 				if (t1.isVariable()) {
 					t1.addField(((FieldAccess) node).fieldName, t2);
 				} else {
-					addError(new TypingError(node, "undeclared field '"
-							+ ((FieldAccess) node).fieldName + "'"));
+					addError(new TypingError(node, "undeclared field '" + ((FieldAccess) node).fieldName + "'"));
 				}
 			}
 			result = t2;
@@ -264,7 +246,7 @@ public class AstAttrib {
 			// typeVar = new Type();
 			// typeVar.addField(((FieldAccess) node).fieldName, result);
 			//
-			//			
+			//
 			// constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
 			// t1, typeVar, ((FieldAccess) node).variableAccess, node));
 
@@ -278,8 +260,7 @@ public class AstAttrib {
 
 			for (int i = 0; i < f.parameters.size(); i++) {
 				// handle default values?
-				invocationStack.peek().bind(f.parameters.get(i).name,
-						typeVar.getTypeParameters().get(i));
+				invocationStack.peek().bind(f.parameters.get(i).name, typeVar.getTypeParameters().get(i));
 			}
 
 			for (Rule rule : f.initRules) {
@@ -299,20 +280,11 @@ public class AstAttrib {
 			}
 
 			if (!hadReturnStatement) {
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						typeVar.getReturnType(), parser.ast.VOID, f, f));
+				constraints.add(
+						new TypingConstraint(TypingConstraint.Kind.EQ, typeVar.getReturnType(), parser.ast.VOID, f, f));
 			}
 
 			result = typeVar;
-			break;
-
-		case AstNode.FUNCTION_LITERAL:
-			f = parser.parsedFunctionMap.get(((FunctionLiteral) node).name);
-			if (f == null) {
-				throw new RuntimeException("'" + ((FunctionLiteral) node).name
-						+ "' is not a declared function");
-			}
-			result = f.getFunctionType();
 			break;
 
 		case AstNode.INVOCATION:
@@ -320,18 +292,21 @@ public class AstAttrib {
 			if (invocation.name.equals("regexp")) {
 				for (Expression e : invocation.arguments) {
 					result = eval(e);
-					constraints.add(new TypingConstraint(
-							TypingConstraint.Kind.EQ, result,
-							parser.ast.STRING, e, e));
+					constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, result, parser.ast.STRING, e, e));
 				}
 				result = null;
 				break;
 			}
-			Type ft = null;
+			Type ft = invocationStack.peek().get(invocation.name);
+			if (ft != null) {
+				// functional variable case
+				// ignore type checking for now
+				// TODO
+				break;
+			}
 			// try built-in INI functions first
 			if (IniFunction.functions.containsKey(invocation.name)) {
-				ft = IniFunction.functions.get(invocation.name).getType(parser,
-						constraints, invocation);
+				ft = IniFunction.functions.get(invocation.name).getType(parser, constraints, invocation);
 
 				if (ft == parser.ast.ANY) {
 					for (int i = 0; i < invocation.arguments.size(); i++) {
@@ -340,20 +315,16 @@ public class AstAttrib {
 					result = new Type(parser);
 				} else {
 					if (ft.getTypeParameters() != null) {
-						if (ft.getTypeParameters().size() != invocation.arguments
-								.size()) {
-							System.out.println("Function " + ft + ft.getTypeParameters().size() + ":" + invocation.arguments.size());
-							addError(new TypingError(node,
-									"wrong number of parameters for '"
-											+ invocation.name + "'"));
+						if (ft.getTypeParameters().size() != invocation.arguments.size()) {
+							System.out.println("Function " + ft + ft.getTypeParameters().size() + ":"
+									+ invocation.arguments.size());
+							addError(new TypingError(node, "wrong number of parameters for '" + invocation.name + "'"));
 						} else {
 							for (int i = 0; i < ft.getTypeParameters().size(); i++) {
 								t2 = eval(invocation.arguments.get(i));
 								if (ft.getTypeParameters().get(i) != parser.ast.ANY) {
-									constraints.add(new TypingConstraint(
-											TypingConstraint.Kind.EQ, t2,
-											ft.getTypeParameters().get(i),
-											invocation.arguments.get(i),
+									constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t2,
+											ft.getTypeParameters().get(i), invocation.arguments.get(i),
 											invocation.arguments.get(i)));
 								}
 							}
@@ -379,45 +350,34 @@ public class AstAttrib {
 					break;
 				}
 				if (f == null) {
-					addError(new TypingError(node, "undefined function '"
-							+ invocation.name + "'"));
+					addError(new TypingError(node, "undefined function '" + invocation.name + "'"));
 					break;
 				}
 
 				if (f.parameters.size() < invocation.arguments.size()) {
-					addError(new TypingError(node,
-							"wrong number of parameters for '"
-									+ invocation.name + "'"));
+					addError(new TypingError(node, "wrong number of parameters for '" + invocation.name + "'"));
 				}
 
 				/*
-				 * if (f.getType() != null) { System.err.println("FOUND " + f + "
-				 * FUNCTION TYPE: " + f.getType()); }
+				 * if (f.getType() != null) { System.err.println("FOUND " + f +
+				 * " FUNCTION TYPE: " + f.getType()); }
 				 */
 				typeVar = f.getFunctionType();
 
 				for (int i = 0; i < f.parameters.size(); i++) {
 					if (i > invocation.arguments.size() - 1) {
 						if (f.parameters.get(i).defaultValue == null) {
-							addError(new TypingError(TypingError.Level.ERROR,
-									node,
-									"no value or default value given for parameter '"
-											+ f.parameters.get(i).name));
+							addError(new TypingError(TypingError.Level.ERROR, node,
+									"no value or default value given for parameter '" + f.parameters.get(i).name));
 						} else {
-							constraints.add(new TypingConstraint(
-									TypingConstraint.Kind.EQ, eval(f.parameters
-											.get(i).defaultValue), typeVar
-											.getTypeParameters().get(i),
-									f.parameters.get(i).defaultValue,
-									f.parameters.get(i)));
+							constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
+									eval(f.parameters.get(i).defaultValue), typeVar.getTypeParameters().get(i),
+									f.parameters.get(i).defaultValue, f.parameters.get(i)));
 						}
 					} else {
-						constraints.add(new TypingConstraint(
-								TypingConstraint.Kind.EQ,
-								eval(invocation.arguments.get(i)), typeVar
-										.getTypeParameters().get(i),
-								invocation.arguments.get(i), f.parameters
-										.get(i)));
+						constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
+								eval(invocation.arguments.get(i)), typeVar.getTypeParameters().get(i),
+								invocation.arguments.get(i), f.parameters.get(i)));
 					}
 				}
 
@@ -441,8 +401,7 @@ public class AstAttrib {
 						t1 = t2;
 					} else {
 						if (t1 != t2) {
-							addError(new TypingError(node, "type mismatch '"
-									+ e + "'"));
+							addError(new TypingError(node, "type mismatch '" + e + "'"));
 						}
 					}
 				}
@@ -453,8 +412,7 @@ public class AstAttrib {
 			} else {
 				for (Type t : types) {
 					if (t.isVariable()) {
-						constraints.add(new TypingConstraint(
-								TypingConstraint.Kind.EQ, t1, t, node, node));
+						constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, t, node, node));
 					}
 				}
 				result = parser.ast.getDependentType("Map", parser.ast.INT, t1);
@@ -478,8 +436,7 @@ public class AstAttrib {
 
 			typeVar = f.functionType;
 
-			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-					result, typeVar.getReturnType(), node, f));
+			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, result, typeVar.getReturnType(), node, f));
 
 			break;
 
@@ -503,9 +460,9 @@ public class AstAttrib {
 			// invocationStack.pop();
 
 			break;
-		
+
 		case AstNode.CASE_STATEMENT:
-			for(Rule rl: ((CaseStatement)node).cases) {
+			for (Rule rl : ((CaseStatement) node).cases) {
 				if (rl.guard != null) {
 					eval(rl.guard);
 				}
@@ -515,7 +472,7 @@ public class AstAttrib {
 					sq = sq.next();
 				}
 			}
-			Sequence<Statement> ds = ((CaseStatement)node).defaultStatements;
+			Sequence<Statement> ds = ((CaseStatement) node).defaultStatements;
 			while (ds != null) {
 				eval(ds.get());
 				ds = ds.next();
@@ -524,28 +481,23 @@ public class AstAttrib {
 
 		case AstNode.SET_CONSTRUCTOR:
 			if (((SetConstructor) node).name != null) {
-				Constructor c = parser.ast.constructors
-						.get(((SetConstructor) node).name);
+				Constructor c = parser.ast.constructors.get(((SetConstructor) node).name);
 				// System.out.println("CONSTRUCTORS2="+parser.ast.constructors);
 				// System.out.println("TYPE2="+parser.ast.types);
 				// System.out.println("======>"+c);
 				// System.out.println("======>"+c.type);
 				if (c == null) {
-					addError(new TypingError(node, "undeclared constructor '"
-							+ ((SetConstructor) node).name + "'"));
+					addError(new TypingError(node, "undeclared constructor '" + ((SetConstructor) node).name + "'"));
 					break;
 				}
 				for (Assignment a : ((SetConstructor) node).fieldAssignments) {
 					Variable fieldVariable = ((Variable) a.assignee);
 					if (!c.type.getFields().containsKey(fieldVariable.name)) {
-						addError(new TypingError(a, "undeclared field '"
-								+ fieldVariable.name + "'"));
+						addError(new TypingError(a, "undeclared field '" + fieldVariable.name + "'"));
 					} else {
 						t2 = eval(a.assignment);
-						constraints.add(new TypingConstraint(
-								TypingConstraint.Kind.EQ, t2, c.type
-										.getFields().get(fieldVariable.name),
-								a.assignment, fieldVariable));
+						constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t2,
+								c.type.getFields().get(fieldVariable.name), a.assignment, fieldVariable));
 					}
 				}
 				result = c.type;
@@ -561,13 +513,11 @@ public class AstAttrib {
 
 		case AstNode.SET_DECLARATION:
 			t1 = eval(((SetDeclaration) node).lowerBound);
-			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1,
-					parser.ast.INT, ((SetDeclaration) node).lowerBound,
-					((SetDeclaration) node).lowerBound));
+			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, parser.ast.INT,
+					((SetDeclaration) node).lowerBound, ((SetDeclaration) node).lowerBound));
 			t2 = eval(((SetDeclaration) node).upperBound);
-			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t2,
-					parser.ast.INT, ((SetDeclaration) node).upperBound,
-					((SetDeclaration) node).upperBound));
+			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t2, parser.ast.INT,
+					((SetDeclaration) node).upperBound, ((SetDeclaration) node).upperBound));
 			result = parser.ast.getDependentType("Set", parser.ast.INT);
 			break;
 
@@ -575,13 +525,11 @@ public class AstAttrib {
 			Expression set = ((SetExpression) node).set;
 
 			Type t = new Type(parser, "Set");
-			if (set instanceof Variable
-					&& invocationStack.peek().get(((Variable) set).name) == null) {
+			if (set instanceof Variable && invocationStack.peek().get(((Variable) set).name) == null) {
 				if ((typeVar = parser.ast.types.get(((Variable) set).name)) != null) {
 					t.addTypeParameter(typeVar);
 				} else {
-					addError(new TypingError(set,
-							"undefined set variable or type"));
+					addError(new TypingError(set, "undefined set variable or type"));
 					break;
 				}
 			} else {
@@ -589,12 +537,11 @@ public class AstAttrib {
 			}
 			t1 = eval(set);
 
-			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1,
-					t, ((SetExpression) node).set, ((SetExpression) node).set));
+			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, t, ((SetExpression) node).set,
+					((SetExpression) node).set));
 			for (Variable v : ((SetExpression) node).variables) {
 				t2 = eval(v);
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						t2, t.getTypeParameters().get(0), v, v));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t2, t.getTypeParameters().get(0), v, v));
 			}
 			eval(((SetExpression) node).expression);
 			result = parser.ast.BOOLEAN;
@@ -606,19 +553,16 @@ public class AstAttrib {
 
 		case AstNode.SUB_ARRAY_ACCESS:
 			t1 = eval(((SubArrayAccess) node).minExpression);
-			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1,
-					parser.ast.INT, ((SubArrayAccess) node).minExpression,
-					((SubArrayAccess) node).minExpression));
+			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, parser.ast.INT,
+					((SubArrayAccess) node).minExpression, ((SubArrayAccess) node).minExpression));
 			t2 = eval(((SubArrayAccess) node).maxExpression);
-			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t2,
-					parser.ast.INT, ((SubArrayAccess) node).maxExpression,
-					((SubArrayAccess) node).maxExpression));
+			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t2, parser.ast.INT,
+					((SubArrayAccess) node).maxExpression, ((SubArrayAccess) node).maxExpression));
 			t = eval(((SubArrayAccess) node).variableAccess);
 			result = new Type(parser, "Map");
 			result.addTypeParameter(parser.ast.INT);
 			result.addTypeParameter(new Type(parser));
-			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t,
-					result, node, node));
+			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t, result, node, node));
 			break;
 
 		case AstNode.THIS_LITERAL:
@@ -633,10 +577,8 @@ public class AstAttrib {
 			case POST_DEC:
 			case POST_INC:
 				result = new Type(parser);
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE,
-						t1, parser.ast.DOUBLE, u, u));
-				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-						t1, result, u.operand, node));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE, t1, parser.ast.DOUBLE, u, u));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, t1, result, u.operand, node));
 				break;
 			case NOT:
 				result = parser.ast.BOOLEAN;
@@ -651,8 +593,7 @@ public class AstAttrib {
 			if (forceVariableDeclaration) {
 				result = invocationStack.peek().get(((Variable) node).name);
 				if (result == null) {
-					addError(new TypingError(node,
-							"undeclared field or variable"));
+					addError(new TypingError(node, "undeclared field or variable"));
 				}
 			} else {
 				result = invocationStack.peek().getOrCreate((Variable) node);
@@ -660,8 +601,7 @@ public class AstAttrib {
 			break;
 
 		default:
-			throw new RuntimeException("unsuported syntax node: " + node + " ("
-					+ node.getClass() + ")");
+			throw new RuntimeException("unsuported syntax node: " + node + " (" + node.getClass() + ")");
 
 		}
 
@@ -680,9 +620,8 @@ public class AstAttrib {
 	}
 
 	boolean isNumber(Type type) {
-		return type == parser.ast.BYTE || type == parser.ast.FLOAT
-				|| type == parser.ast.INT || type == parser.ast.DOUBLE
-				|| type == parser.ast.LONG;
+		return type == parser.ast.BYTE || type == parser.ast.FLOAT || type == parser.ast.INT
+				|| type == parser.ast.DOUBLE || type == parser.ast.LONG;
 	}
 
 	public void printErrors(PrintStream out) {
@@ -722,11 +661,7 @@ public class AstAttrib {
 	}
 
 	public void printNode(PrintStream out, AstNode node) {
-		out.print("'"
-				+ node
-				+ "'"
-				+ (node != null && node.token() != null ? " at "
-						+ node.token().getLocation() : ""));
+		out.print("'" + node + "'" + (node != null && node.token() != null ? " at " + node.token().getLocation() : ""));
 	}
 
 	public void unify() {
@@ -746,9 +681,7 @@ public class AstAttrib {
 				if (substitution.kind != TypingConstraint.Kind.EQ) {
 					continue;
 				}
-				if ((!substitution.left.isVariable() && !substitution.right
-						.isVariable())
-						|| substitution.used) {
+				if ((!substitution.left.isVariable() && !substitution.right.isVariable()) || substitution.used) {
 					continue;
 				}
 				for (TypingConstraint current : constraints) {
@@ -757,21 +690,19 @@ public class AstAttrib {
 				allUsed = false;
 				substitution.used = true;
 			}
-			//System.out.println("===> after substitution");
-			//printConstraints(System.out);
+			// System.out.println("===> after substitution");
+			// printConstraints(System.out);
 			simplify();
-			//System.out.println("===> after simplification");
-			//printConstraints(System.out);
+			// System.out.println("===> after simplification");
+			// printConstraints(System.out);
 		}
 		for (TypingConstraint c : constraints) {
-			if (!c.left.isVariable() && !c.right.isVariable()
-					&& c.left != c.right) {
-				addError(new TypingError(c.leftOrigin, "type mismatch: '"
-						+ c.left + "' is not compatible with '" + c.right + "'"));
+			if (!c.left.isVariable() && !c.right.isVariable() && c.left != c.right) {
+				addError(new TypingError(c.leftOrigin,
+						"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
 				if (c.leftOrigin != c.rightOrigin) {
-					addError(new TypingError(c.rightOrigin, "type mismatch: '"
-							+ c.left + "' is not compatible with '" + c.right
-							+ "'"));
+					addError(new TypingError(c.rightOrigin,
+							"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
 				}
 			}
 		}
@@ -782,8 +713,7 @@ public class AstAttrib {
 		boolean simplified = true;
 		while (simplified) {
 			simplified = false;
-			for (TypingConstraint c : new ArrayList<TypingConstraint>(
-					constraints)) {
+			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
 				// remove tautologies
 				if (c.left == c.right) {
 					constraints.remove(c);
@@ -796,29 +726,24 @@ public class AstAttrib {
 						// + c.left.isLTE(c.right) + "===> "
 						// + c.left.isGTE(c.right));
 						// System.out.println("===> " + c.left.superType);
-						if (c.kind == TypingConstraint.Kind.LTE
-								&& c.left.isLTE(c.right)) {
+						if (c.kind == TypingConstraint.Kind.LTE && c.left.isLTE(c.right)) {
 							constraints.remove(c);
 						}
-						if (c.kind == TypingConstraint.Kind.GTE
-								&& c.left.isGTE(c.right)) {
+						if (c.kind == TypingConstraint.Kind.GTE && c.left.isGTE(c.right)) {
 							constraints.remove(c);
 						}
 					}
-					if(c.left.hasFields() || c.right.hasFields()) {
-						c.kind=TypingConstraint.Kind.EQ;
+					if (c.left.hasFields() || c.right.hasFields()) {
+						c.kind = TypingConstraint.Kind.EQ;
 					}
 					continue;
 				}
 
 				// skip
-				if (((c.left.getFields() == null || c.left.getFields()
-						.isEmpty()) && (c.right.getFields() == null || c.right
-						.getFields().isEmpty()))
-						&& (c.left.isVariable()
-								&& c.left.getName().startsWith("_") || c.left
-								.isVariable()
-								&& c.left.getName().startsWith("_"))) {
+				if (((c.left.getFields() == null || c.left.getFields().isEmpty())
+						&& (c.right.getFields() == null || c.right.getFields().isEmpty()))
+						&& (c.left.isVariable() && c.left.getName().startsWith("_")
+								|| c.left.isVariable() && c.left.getName().startsWith("_"))) {
 					continue;
 				}
 				List<TypingError> errors = new ArrayList<TypingError>();
@@ -847,11 +772,10 @@ public class AstAttrib {
 	}
 
 	private void addError(TypingError error) {
-		//System.err.println(error);
-		//new Exception().printStackTrace();
+		// System.err.println(error);
+		// new Exception().printStackTrace();
 		for (TypingError e : errors) {
-			if (e.level == error.level && e.message.equals(error.message)
-					&& e.origin == error.origin) {
+			if (e.level == error.level && e.message.equals(error.message) && e.origin == error.origin) {
 				return;
 			}
 		}
@@ -883,8 +807,7 @@ public class AstAttrib {
 		for (UserType t : parser.ast.userTypes) {
 			type = new Type(t);
 			if (parser.ast.types.containsKey(t.name)) {
-				addError(new TypingError(t, "duplicate type name '" + t.name
-						+ "'"));
+				addError(new TypingError(t, "duplicate type name '" + t.name + "'"));
 			} else {
 				parser.ast.register(t.name, type);
 			}
@@ -910,12 +833,10 @@ public class AstAttrib {
 						} else {
 							// constructor cannot be named after the type name
 							// or anonymous when it is not the sole constructor
-							addError(new TypingError(c, "illegal constructor '"
-									+ c.name + "'"));
+							addError(new TypingError(c, "illegal constructor '" + c.name + "'"));
 						}
 					} else {
-						addError(new TypingError(c, "duplicate type name '"
-								+ c.name + "'"));
+						addError(new TypingError(c, "duplicate type name '" + c.name + "'"));
 					}
 				} else {
 					parser.ast.register(c.name, type);
@@ -930,8 +851,7 @@ public class AstAttrib {
 					for (Field f : c.fields) {
 						type = getFieldType(f.constructor);
 						if (type == null || type.constructorType) {
-							addError(new TypingError(f.constructor,
-									"illegal type reference"));
+							addError(new TypingError(f.constructor, "illegal type reference"));
 						}
 						c.type.addField(f.name, type);
 					}
@@ -956,8 +876,7 @@ public class AstAttrib {
 				if (!type.hasFields()) {
 					t.type.fields.clear();
 				} else {
-					for (Entry<String, Type> field : type.getFields()
-							.entrySet()) {
+					for (Entry<String, Type> field : type.getFields().entrySet()) {
 						Type fieldType = t.type.fields.get(field.getKey());
 						if (fieldType != null && fieldType != field.getValue()) {
 							t.type.fields.remove(field.getKey());
@@ -982,14 +901,12 @@ public class AstAttrib {
 				if (type == null) {
 					type = parser.ast.types.get(c.name);
 				}
-				if (type != null && type.superType != null
-						&& type.name.startsWith("_C")) {
+				if (type != null && type.superType != null && type.name.startsWith("_C")) {
 					type = type.superType;
 					throw new RuntimeException("????");
 				}
 			} else {
-				type = parser.ast.getDependentType("Map", parser.ast.INT,
-						getFieldType(c.element));
+				type = parser.ast.getDependentType("Map", parser.ast.INT, getFieldType(c.element));
 			}
 			if (type == null) {
 				addError(new TypingError(c, "undeclared type"));

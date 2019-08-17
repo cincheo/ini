@@ -25,7 +25,6 @@ import ini.ast.Expression;
 import ini.ast.Field;
 import ini.ast.FieldAccess;
 import ini.ast.Function;
-import ini.ast.FunctionLiteral;
 import ini.ast.Invocation;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
@@ -45,6 +44,7 @@ import ini.broker.FetchRequest;
 import ini.broker.SpawnRequest;
 import ini.eval.at.At;
 import ini.eval.data.Data;
+import ini.eval.data.Data.Kind;
 import ini.eval.data.DataReference;
 import ini.eval.data.RawData;
 import ini.eval.function.BoundJavaFunction;
@@ -303,22 +303,21 @@ public class IniEval {
 				}
 				break;
 
-			case AstNode.FUNCTION_LITERAL:
-				if (!parser.parsedFunctionMap.containsKey(((FunctionLiteral) node).name)) {
-					throw new RuntimeException("'" + ((FunctionLiteral) node).name + "' is not a declared function");
-				}
-				result = new RawData(((FunctionLiteral) node).name);
-				break;
-
 			case AstNode.INVOCATION:
 				Invocation invocation = (Invocation) node;
 				boolean spawned = false;
 				// first check if function/process needs to be spawned
 				String targetNode = null;
 				targetNode = getTargetNode(invocation);
+				String targetName = invocation.name;
+				Data data = invocationStack.peek().get(targetName);
+				if (data != null && data.getKind() == Kind.FUNCTIONAL) {
+					// functional variable case
+					targetName = data.getValue();
+				}
 				if (targetNode != null) {
 					List<Data> arguments = new ArrayList<>();
-					if (IniFunction.functions.containsKey(invocation.name)) {
+					if (IniFunction.functions.containsKey(targetName)) {
 						for (Expression argument : invocation.arguments) {
 							arguments.add(eval(argument));
 						}
@@ -326,7 +325,7 @@ public class IniEval {
 						throw new RuntimeException("cannot spawn a function... please only spawn processes");
 					} else {
 						Data argument = null;
-						f = parser.parsedFunctionMap.get(invocation.name);
+						f = parser.parsedFunctionMap.get(targetName);
 						for (int i = 0; i < f.parameters.size(); i++) {
 							if (i > invocation.arguments.size() - 1) {
 								if (f.parameters.get(i).defaultValue == null) {
@@ -345,31 +344,31 @@ public class IniEval {
 							throw new RuntimeException("cannot spawn a function... please only spawn processes");
 						}
 					}
-					Main.LOGGER.info("spawn request to " + targetNode + " / " + invocation.name + " - " + arguments);
+					Main.LOGGER.info("spawn request to " + targetNode + " / " + targetName + " - " + arguments);
 					parser.coreBrokerClient.sendSpawnRequest(targetNode,
-							new SpawnRequest(parser.node, invocation.name, arguments));
+							new SpawnRequest(parser.node, targetName, arguments));
 					spawned = true;
 				}
 				if (!spawned) {
 					// try built-in INI functions first
 					targetNode = null;
-					if (IniFunction.functions.containsKey(invocation.name)) {
-						IniFunction iniFunction = IniFunction.functions.get(invocation.name);
+					if (IniFunction.functions.containsKey(targetName)) {
+						IniFunction iniFunction = IniFunction.functions.get(targetName);
 						if (iniFunction instanceof BoundJavaFunction) {
 							targetNode = getTargetNode(((BoundJavaFunction) iniFunction).binding);
 						}
 					}
-					if (targetNode == null && IniFunction.functions.containsKey(invocation.name)) {
-						result = IniFunction.functions.get(invocation.name).eval(this, invocation.arguments);
+					if (targetNode == null && IniFunction.functions.containsKey(targetName)) {
+						result = IniFunction.functions.get(targetName).eval(this, invocation.arguments);
 					} else {
-						f = parser.parsedFunctionMap.get(invocation.name);
+						f = parser.parsedFunctionMap.get(targetName);
 						if (f == null) {
 							if (targetNode != null) {
 								parser.coreBrokerClient.sendFetchRequest(targetNode,
-										new FetchRequest(parser.node, invocation.name));
+										new FetchRequest(parser.node, targetName));
 							} else if (!parser.node.equals(invocation.owner)) {
 								parser.coreBrokerClient.sendFetchRequest(invocation.owner,
-										new FetchRequest(parser.node, invocation.name));
+										new FetchRequest(parser.node, targetName));
 							}
 							do {
 								Main.LOGGER.debug("waiting for function to be deployed");
@@ -377,7 +376,7 @@ public class IniEval {
 									Thread.sleep(20);
 								} catch (Exception e) {
 								}
-								f = parser.parsedFunctionMap.get(invocation.name);
+								f = parser.parsedFunctionMap.get(targetName);
 							} while (f == null);
 							Main.LOGGER.info("f after fetch: " + f + " - " + invocation.arguments);
 						}

@@ -6,7 +6,9 @@ import java.util.Map;
 
 import ini.ast.Function;
 import ini.eval.data.Data;
+import ini.eval.data.Data.Kind;
 import ini.eval.data.DataReference;
+import ini.eval.data.RawData;
 
 public class Context {
 
@@ -46,7 +48,13 @@ public class Context {
 
 	public Data getOrCreate(String name) {
 		if (!variables.containsKey(name)) {
-			bind(name, new DataReference(null));
+			if(function.parser.parsedFunctionMap.containsKey(name)) {
+				RawData data = new RawData(name);
+				data.setKind(Kind.FUNCTIONAL);
+				bind(name, data);
+			} else {
+				bind(name, new DataReference(null));
+			}
 		}
 		return variables.get(name);
 	}

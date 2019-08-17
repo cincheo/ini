@@ -57,7 +57,7 @@ Comment = {TraditionalComment} | {EndOfLineComment} | {DocumentationComment}
 StringText=(\\\"|[^\n\"]|\\{WhiteSpaceChar}*\\)*
 
 TraditionalComment = "/*" [^*] ~"*/"
-EndOfLineComment = "//" {InputCharacter}* {LineTerminator}
+EndOfLineComment = "//" {InputCharacter}* {LineTerminator} | "#" {InputCharacter}* {LineTerminator}
 DocumentationComment = "/**" {CommentContent} "*/"
 CommentContent = ( [^*] | \*+ [^/*] )*
 
@@ -83,6 +83,10 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
   "this"		        { return symbol(sym.THIS); }
   "case"		        { return symbol(sym.CASE); }
   "default"		        { return symbol(sym.DEFAULT); }
+
+  {WhiteSpace}* / "function"  { return symbol(sym.END); }
+  {WhiteSpace}* / "process"   { return symbol(sym.END); }
+  {WhiteSpace}* / "type"      { return symbol(sym.END); }
 
   {DecIntegerLiteral}   { return symbol(sym.INT); }
   {DecFloatLiteral}		{ return symbol(sym.NUM); }
@@ -123,10 +127,11 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
   ".."                  { return symbol(sym.DOTDOT); }
   \"\"                  { return emptyString(); }
   "@"		        	{ return symbol(sym.AT); }
+  {LineTerminator}      { return symbol(sym.LF); }
   "'"					{ yybegin(CHAR); }
   \"                    { yybegin(STRING); }
   {Comment}             { /* ignore */ }
-  {WhiteSpace}          { /* ignore */ }
+  {WhiteSpaceChar}      { /* ignore */ }
 }
 
 /*<BBLOCK> {
