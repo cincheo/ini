@@ -159,11 +159,11 @@ public class TestTypeDeclarations extends TestCase {
 	public void testUseUndeclaredConstructorInConstructor() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function f() {" +
-					"  @init() {" +
-					"    c = C[value=2]" +
-					"    println(c)" +
-					"  }"+
+					"function f() {\n" +
+					"  @init() {\n" +
+					"    c = C[value=2]\n" +
+					"    println(c)\n" +
+					"  }\n"+
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();

@@ -195,7 +195,7 @@ program_elt_list ::= program_elt_list lf_opt END program_elt | program_elt ;
 
 program_elt ::= function | usertype ;
 
-import_list_opt ::= import_list lf |;
+import_list_opt ::= import_list |;
 
 import_list ::= import_list lf import_decl:i
 	{:
@@ -225,7 +225,7 @@ import_decl ::= IMPORT:itoken STRING:filePath
 ;
 
 
-binding_list_opt ::= binding_list lf |;
+binding_list_opt ::= binding_list lf_opt |;
 
 binding_list ::= binding_list lf binding:b
 	{:
