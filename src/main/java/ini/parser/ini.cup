@@ -245,13 +245,13 @@ binding_list ::= binding_list lf binding:b
 	:}
 ;
 
-binding ::= IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN ARROW_RIGHT type:rtype IMPLIES STRING:className COMMA STRING:methodName
+binding ::= /*IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN ARROW_RIGHT type:rtype IMPLIES STRING:className COMMA STRING:methodName
 	{:
 		RESULT = new Binding(parser, (Token)name, name.toString(), (List)types, (TypeVariable)rtype, className.toString(), methodName.toString());
 	:}
-| IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN ARROW_RIGHT type:rtype annotations_opt:a
+|*/ IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN ARROW_RIGHT type:rtype annotations_opt:a
 	{:
-		Binding binding = new Binding(parser, (Token)name, name.toString(), (List)types, (TypeVariable)rtype, null, null);
+		Binding binding = new Binding(parser, (Token)name, name.toString(), (List)types, (TypeVariable)rtype, (List)a);
 		binding.annotations = (List)a;
 		RESULT = binding;
 	:}

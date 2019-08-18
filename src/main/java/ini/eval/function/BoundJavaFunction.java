@@ -1,5 +1,6 @@
 package ini.eval.function;
 
+import ini.Main;
 import ini.ast.Binding;
 import ini.ast.Expression;
 import ini.ast.Invocation;
@@ -33,25 +34,25 @@ public class BoundJavaFunction extends IniFunction {
 			Object[] args = new Object[params.size()];
 			int i = 0;
 			for (Expression e : params) {
-				//System.out.println("-- constructing param "+e+" - "+binding.getFunctionalType());
+				// System.out.println("-- constructing param "+e+" -
+				// "+binding.getFunctionalType());
 				Data d = eval.eval(e);
-				Object o=null;
+				Object o = null;
 				List<Type> ts = binding.getFunctionalType().getTypeParameters();
-				if(ts==null) {
+				if (ts == null) {
 					o = RawData.dataToObject(null, d);
 				} else {
-					o = RawData.dataToObject(ts.get(i) , d);
+					o = RawData.dataToObject(ts.get(i), d);
 				}
-				//System.out.println("-- "+o);
+				// System.out.println("-- "+o);
 				// TODO: handle data structure (at least collections)
 				args[i] = o;
 				i++;
 			}
 			Class<?> c = Class.forName(binding.className);
 			boolean invoked = false;
-			
-			
-			switch(binding.getKind()) {
+
+			switch (binding.getKind()) {
 			case CONSTRUCTOR:
 				for (Constructor<?> constr : c.getConstructors()) {
 					try {
@@ -59,15 +60,15 @@ public class BoundJavaFunction extends IniFunction {
 						invoked = true;
 						break;
 					} catch (Exception e) {
-						if(e instanceof InvocationTargetException) {
-							throw ((InvocationTargetException)e).getTargetException();
+						if (e instanceof InvocationTargetException) {
+							throw ((InvocationTargetException) e).getTargetException();
 						}
 						// swallow
 					}
 				}
 				if (!invoked) {
-					throw new RuntimeException("Cannot instantiate object (" + binding
-							+ ") with " + getArgsString(args));
+					throw new RuntimeException(
+							"Cannot instantiate object (" + binding + ") with " + getArgsString(args));
 				}
 				break;
 			case METHOD:
@@ -79,22 +80,22 @@ public class BoundJavaFunction extends IniFunction {
 								invoked = true;
 								break;
 							} else {
-								result = m.invoke(args[0], Arrays.copyOfRange(
-										args, 1, args.length));
+								Main.LOGGER.debug("invoking " + binding.getMemberName() + " on " + args[0]
+										+ " from thread " + Thread.currentThread().getName());
+								result = m.invoke(args[0], Arrays.copyOfRange(args, 1, args.length));
 								invoked = true;
 								break;
 							}
 						} catch (Exception e) {
-							if(e instanceof InvocationTargetException) {
-								throw ((InvocationTargetException)e).getTargetException();
+							if (e instanceof InvocationTargetException) {
+								throw ((InvocationTargetException) e).getTargetException();
 							}
 							// swallow
 						}
 					}
 				}
 				if (!invoked) {
-					throw new RuntimeException("Cannot invoke method (" + binding
-							+ ") with " + getArgsString(args));
+					throw new RuntimeException("Cannot invoke method (" + binding + ") with " + getArgsString(args));
 				}
 				break;
 			case FIELD:
@@ -116,8 +117,7 @@ public class BoundJavaFunction extends IniFunction {
 					}
 				}
 				if (!invoked) {
-					throw new RuntimeException("Cannot access field (" + binding
-							+ ") with " + getArgsString(args));
+					throw new RuntimeException("Cannot access field (" + binding + ") with " + getArgsString(args));
 				}
 				break;
 			}
@@ -128,14 +128,14 @@ public class BoundJavaFunction extends IniFunction {
 	}
 
 	private String getArgsString(Object[] args) {
-		String s="";
-		for(int i=0;i<args.length;i++) {
-			s+=args[i];
-			if(args[i]!=null) {
-				s+=" ("+args[i].getClass()+")";
+		String s = "";
+		for (int i = 0; i < args.length; i++) {
+			s += args[i];
+			if (args[i] != null) {
+				s += " (" + args[i].getClass() + ")";
 			}
-			if(i<args.length-1) {
-				s+=", ";
+			if (i < args.length - 1) {
+				s += ", ";
 			}
 		}
 		return s;
@@ -145,5 +145,5 @@ public class BoundJavaFunction extends IniFunction {
 	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
 		return binding.getFunctionalType();
 	}
-	
+
 }

@@ -223,11 +223,11 @@ public class IniEval {
 
 			case AstNode.FUNCTION:
 				f = (Function) node;
+				List<At> ats = null;
 				try {
 					for (Rule rule : f.initRules) {
 						eval(rule);
 					}
-					List<At> ats = null;
 					if (!f.atRules.isEmpty()) {
 						ats = new ArrayList<At>();
 					}
@@ -287,7 +287,7 @@ public class IniEval {
 					boolean caught = false;
 					for (Rule rule : f.errorRules) {
 						if (rule.guard == null || eval(rule.guard).isTrueOrDefined()) {
-							invocationStack.peek().bind(((Variable) rule.atPredicate.annotations.get(0)).name,
+							invocationStack.peek().bind(((Variable) rule.atPredicate.outParameters.get(0)).name,
 									new RawData(e));
 							Sequence<Statement> s = rule.statements;
 							while (s != null) {
@@ -300,6 +300,8 @@ public class IniEval {
 					if (!caught) {
 						throw e;
 					}
+				} finally {
+					At.destroyAll(ats);
 				}
 				break;
 
@@ -578,9 +580,7 @@ public class IniEval {
 
 			evaluationStack.pop();
 
-		} catch (
-
-		ReturnException e) {
+		} catch (ReturnException e) {
 			evaluationStack.pop();
 			throw e;
 		} catch (Exception e) {

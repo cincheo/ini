@@ -18,13 +18,13 @@ public class Binding extends NamedElement {
 	}
 
 	public Binding(IniParser parser, Token token, String name,
-			List<TypeVariable> parameterTypes, TypeVariable returnType, String className,
-			String member) {
+			List<TypeVariable> parameterTypes, TypeVariable returnType, List<Expression> annotations) {
 		super(parser, token, name);
+		this.annotations = annotations;
 		this.parameterTypes = parameterTypes;
 		this.returnType = returnType;
-		this.className = className;
-		this.member = member;
+		this.className = ((StringLiteral)getAnnotationValue("class")).value;
+		this.member = ((StringLiteral)getAnnotationValue("member")).value;
 		this.nodeTypeId = AstNode.BINDING;
 	}
 

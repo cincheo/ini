@@ -61,4 +61,8 @@ public abstract class IniTestCase extends TestCase {
 		}
 	}
 
+	protected String getOut() {
+		return outputStream.toString();
+	}
+	
 }

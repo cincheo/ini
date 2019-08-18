@@ -81,6 +81,7 @@ public class AtUpdate extends At {
 	public boolean checkTerminated() {
 		// getThreadExecutor().shutdownNow();
 		// return getThreadExecutor().getTaskCount() == 0;
+		System.out.println("update :" + (getThreadExecutor().getActiveCount() == 0));
 		return getThreadExecutor().getActiveCount() == 0;
 	}
 
