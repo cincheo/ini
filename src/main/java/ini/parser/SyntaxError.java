@@ -15,11 +15,9 @@ public class SyntaxError {
 
 	@Override
 	public String toString() {
-		return "SYNTAX ERROR"
-				+ ": "
-				+ message
-				+ (origin != null ? " at '" + origin.toString() + "'" + " "
-						+ origin.getLocation() : "");
+		return "SYNTAX ERROR" + ": " + message + (origin != null
+				? " at '" + origin.toString() + "'" + " " + origin.getLocation() + " (token code=" + origin.getType() + ")"
+				: "");
 	}
 
 }

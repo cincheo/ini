@@ -19,7 +19,7 @@ public class TestTypeDeclarations extends TestCase {
 	public void testRightTypeDeclaration() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]");
+					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n\n");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 0 errors: "+attrib.errors, 0, attrib.errors.size());
@@ -33,7 +33,7 @@ public class TestTypeDeclarations extends TestCase {
 	public void _testUnallowedEmptyConstructorDeclaration() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree = Leaf | Node[value:Int,left:Tree,right:Tree]");
+					"type Tree = Leaf | Node[value:Int,left:Tree,right:Tree]\n");
 			assertEquals("expected 1 errors: "+parser.errors, 1, parser.errors.size());
 			assertEquals("wrong type of error: "+parser.errors, "'|' is not expected", parser.errors.get(0).message);
 		} catch (Exception e) {
@@ -44,7 +44,7 @@ public class TestTypeDeclarations extends TestCase {
 	public void testUnallowedConstructorReference() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree = Leaf[value:Int] | Node[value:Int,left:Node,right:Tree]");
+					"type Tree = Leaf[value:Int] | Node[value:Int,left:Node,right:Tree]\n");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 1 error: "+attrib.errors, 1, attrib.errors.size());
@@ -56,8 +56,8 @@ public class TestTypeDeclarations extends TestCase {
 
 	public void testUndeclaredTypeReference() {
 		try {
-			IniParser parser = IniParser.parseCode(
-					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree2,right:Tree]");
+			IniParser parser = IniParser.parseFile(
+					"ini/test/typing/type_declaration/undeclared_type_reference.ini");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 2 error: "+attrib.errors, 2, attrib.errors.size());
@@ -71,8 +71,8 @@ public class TestTypeDeclarations extends TestCase {
 	public void testIllegalDuplicateTypeDeclaration() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]"+
-					"type Tree = Text[value:Int]");
+					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n"+
+					"type Tree = Text[value:Int]\n");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 1 error: "+attrib.errors, 1, attrib.errors.size());
@@ -85,8 +85,8 @@ public class TestTypeDeclarations extends TestCase {
 	public void testIllegalSameNameForTypeAndExternalConstructor() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree1 = Leaf[value:Int] | Node[value:Int,left:Tree1,right:Tree1]"+
-					"type Tree2 = Tree1[value:Int]");
+					"type Tree1 = Leaf[value:Int] | Node[value:Int,left:Tree1,right:Tree1]\n"+
+					"type Tree2 = Tree1[value:Int]\n");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 1 error: "+attrib.errors, 1, attrib.errors.size());
@@ -112,7 +112,7 @@ public class TestTypeDeclarations extends TestCase {
 	public void testUseOfAnonymousConstructor1() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree = [value:Int,left:Tree,right:Tree]" +
+					"type Tree = [value:Int,left:Tree,right:Tree]\n" +
 					"function main() {" +
 					"  @init() { t = Tree[value = 1] }" +
 					"}");
@@ -127,7 +127,7 @@ public class TestTypeDeclarations extends TestCase {
 	public void testUseOfAnonymousConstructor2() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Point = [x:Int,y:Int]" +
+					"type Point = [x:Int,y:Int]\n" +
 					"function main() {" +
 					"  @init() { p = Point[x = 1, y = 1] }" +
 					"}");

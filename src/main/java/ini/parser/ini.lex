@@ -21,6 +21,7 @@ import ini.ast.Token;
 %state BLOCK
 %state STRING
 %state CHAR
+%state USERTYPE
 
 %{
 	//StringBuffer string=new StringBuffer();
@@ -54,6 +55,8 @@ WhiteSpace = {LineTerminator} | [ \t\f]
 WhiteSpaceChar = [ \t\f]
 Comment = {TraditionalComment} | {EndOfLineComment} | {DocumentationComment}
 
+WhiteSpaceOrComment = ({WhiteSpace} | {TraditionalComment})+
+
 StringText=(\\\"|[^\n\"]|\\{WhiteSpaceChar}*\\)*
 
 TraditionalComment = "/*" [^*] ~"*/"
@@ -79,14 +82,10 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
   "return"		        { return symbol(sym.RETURN); }
   "true"		        { return symbol(sym.TRUE); }
   "false"		        { return symbol(sym.FALSE); }
-  "type"		        { return symbol(sym.TYPE); }
+  "type"		        { yybegin(USERTYPE); return symbol(sym.TYPE); }
   "this"		        { return symbol(sym.THIS); }
   "case"		        { return symbol(sym.CASE); }
   "default"		        { return symbol(sym.DEFAULT); }
-
-  {WhiteSpace}* / "function"  { return symbol(sym.END); }
-  {WhiteSpace}* / "process"   { return symbol(sym.END); }
-  {WhiteSpace}* / "type"      { return symbol(sym.END); }
 
   {DecIntegerLiteral}   { return symbol(sym.INT); }
   {DecFloatLiteral}		{ return symbol(sym.NUM); }
@@ -156,6 +155,28 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
   (\\\'|[^\'\n])	  { return symbol(sym.CHAR); }
   "'"                 { yybegin(YYINITIAL); }
   "\n"                { yybegin(YYINITIAL); }
+}
+
+<USERTYPE> {
+  "["                   { return symbol(sym.LSPAREN); }
+  "]"                   { return symbol(sym.RSPAREN); }
+  "="                   { return symbol(sym.ASSIGN); }
+  ","                   { return symbol(sym.COMMA); }
+  "*"                   { return symbol(sym.MULT); }
+  "|"                   { return symbol(sym.TUBE); }
+  ":"                   { return symbol(sym.COL); }
+  {Identifier}          { return symbol(sym.IDENTIFIER); }
+  {TypeIdentifier}      { return symbol(sym.TIDENTIFIER); }
+  {Comment}             { /* ignore */ }
+  {WhiteSpaceChar}      { /* ignore */ }
+  // POTENTIAL PB UNDER WINDOWS?
+  "\n" / "\n"           { yybegin(YYINITIAL); return symbol(sym.END); }
+  "\n" / "type"         { yybegin(YYINITIAL); return symbol(sym.END); }
+  "\n" / "function"     { yybegin(YYINITIAL); return symbol(sym.END); }
+  "\n" / "process"      { yybegin(YYINITIAL); return symbol(sym.END); }
+  //"\n" / <<EOF>>               { yybegin(YYINITIAL); return symbol(sym.END); }
+  <<EOF>>               { yybegin(YYINITIAL); return symbol(sym.END); }
+  "\n"                  { return symbol(sym.LF); }
 }
 
 

@@ -18,8 +18,8 @@ public class TestArrays extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"function main() { @init() {"+
-					"	a[\"a\"] = 1"+
-					"	a[\"b\"] = 1.2"+ 
+					"	a[\"a\"] = 1\n"+
+					"	a[\"b\"] = 1.2\n"+ 
 					"} }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
@@ -49,8 +49,8 @@ public class TestArrays extends TestCase {
 	public void testPolymorphicFunction() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function main() { @init() { println(f([1,3])) println(f(\"13\")) } }"+
-					"function f(l) { @end() { swap(l[0],l[1]) return l } }");
+					"function main() { @init() { println(f([1,3]))\n println(f(\"13\")) } }\n"+
+					"function f(l) { @end() { swap(l[0],l[1])\n return l } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
@@ -62,8 +62,8 @@ public class TestArrays extends TestCase {
 	public void testWrongPolymorphicFunctionInvocation() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function main() { @init() { println(f([1,3])) println(f(\"13\")) println(f(1.2)) } }"+
-					"function f(l) { @end() { swap(l[0],l[1]) return l } }");
+					"function main() { @init() {\n println(f([1,3]))\n println(f(\"13\"))\n println(f(1.2))\n } }"+
+					"function f(l) { @end() {\n swap(l[0],l[1])\n return l\n } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 3 error: "+attrib.errors, 3, attrib.errors.size());

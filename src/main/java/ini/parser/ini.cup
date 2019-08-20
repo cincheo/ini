@@ -143,14 +143,14 @@ terminal LF, END;
 // keywords
 terminal IMPORT, FUNCTION, PROCESS, OF, RETURN, TYPE, THIS, CASE, DEFAULT;
 
-non terminal lf, lf_opt, end_or_lf, end_opt;
+non terminal lf, lf_opt, end_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
 non terminal function, param_list_opt, param_list, param;
 non terminal import_list_opt, import_list, import_decl;
 non terminal binding_list_opt, binding_list, binding, type_list_opt, type_list, type, at_binding_conf_type;
 non terminal var_list;
 non terminal statement_list_opt, statement_list, statement, expr/*, ret_expr_opt*/;
-non terminal assignment_expr, var_access, sync_var_access, set_var_access, single_string, string_expr, case_expr;
+non terminal assignment_expr, var_access, sync_var_access, set_var_access, single_string, string_expr, case_expr, lambda_expr;
 non terminal ret_statement;
 non terminal invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
 non terminal rule_list_opt, rule_list, rule/*, rule_body*/, guard;
@@ -164,6 +164,7 @@ non terminal field_match_expr_list_opt, field_match_expr_list;
 non terminal list_concat_expr;
 
 precedence left DOLLAR;
+precedence left ASSIGN;
 precedence left OROR;
 precedence left ANDAND;
 precedence left MATCHES;
@@ -172,8 +173,10 @@ precedence left PLUS, MINUS;
 precedence left MULT, DIV;
 precedence left PLUSPLUS, MINUSMINUS;
 precedence left EQUALS, GT, GTE, LT, LTE, NOTEQUALS;
+precedence left TUBE;
 precedence left LF;
 precedence left END;
+precedence left IMPLIES;
 
 start with ini_program;
 
@@ -189,13 +192,13 @@ end_opt ::= END |;
 
 ini_program ::= lf_opt import_list_opt binding_list_opt program_elt_list_opt;
 
-program_elt_list_opt ::= end_opt program_elt_list lf_opt |;
+program_elt_list_opt ::= program_elt_list lf_opt |;
 
-program_elt_list ::= program_elt_list lf_opt END program_elt | program_elt ;
+program_elt_list ::= program_elt_list lf_opt program_elt | program_elt ;
 
 program_elt ::= function | usertype ;
 
-import_list_opt ::= import_list |;
+import_list_opt ::= import_list lf_opt |;
 
 import_list ::= import_list lf import_decl:i
 	{:
@@ -252,7 +255,7 @@ binding ::= IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rt
 ;
 
 at_binding_conf_type ::=
-|LSPAREN type_list_opt:ct RSPAREN
+| LSPAREN type_list_opt:ct RSPAREN
 {:
 	RESULT = ct;
 :}
@@ -264,19 +267,21 @@ at_binding ::= AT IDENTIFIER:name at_binding_conf_type:ct LPAREN:ft type_list_op
 	:}
 ;
 
-function ::= end_opt FUNCTION:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
+function ::= FUNCTION:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
 	{:
 		//System.out.println("created function "+name);
 		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (List)rules);
 		parser.parsedFunctionMap.put(f.name,f);
 		parser.parsedFunctionList.add(f);
+		//System.out.println(">>>>>> "+f);
 	:} 
-	| end_opt PROCESS:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
+	| PROCESS:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
 	{:
 		//System.out.println("created function "+name);
 		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (List)rules);
 		parser.parsedFunctionMap.put(f.name,f);
 		parser.parsedFunctionList.add(f);
+		//System.out.println(">>>>>> "+f);
 	:} 
 ;
 
@@ -473,6 +478,12 @@ expr ::= var_access:e {: RESULT=e; :}
 	| set_var_access:e {: RESULT = e; :}
 //	| FUNCTION:f LPAREN IDENTIFIER:i RPAREN {: RESULT = new FunctionLiteral(parser,(Token)f,i.toString()); :}
 	| list_concat_expr:e {: RESULT = e; :}
+//	| lambda_expr: e {: RESULT = e; :} %prec IMPLIES
+;
+
+lambda_expr ::=  LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN rule_list_opt:rules RCPAREN {:
+	RESULT = new Function(parser, (Token)def, null, (List)vars, (List)rules);	
+:}
 ;
 
 /*list_concat_expr ::= list_concat_expr:e1 AND:op var_access:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
@@ -652,11 +663,10 @@ set_decl ::= LSPAREN:l expr:lb DOTDOT expr:ub RSPAREN:r {:
 :}
 ;
 
-end_or_lf ::= END | lf;
-
-usertype ::= TYPE:t TIDENTIFIER:i ASSIGN constructor_list:l
+usertype ::= TYPE:t TIDENTIFIER:i ASSIGN constructor_list:l lf_opt END
 	{:
 		UserType type = new UserType(parser,(Token)t,i.toString(),(List)l);
+		// System.out.println(">>>>>>> usertype: "+type);
 		parser.parsedTypes.add(type);
 	:}
 ;
@@ -675,7 +685,7 @@ constructor_list ::= constructor_list:l lf_opt TUBE constructor:c
 	:}
 ;
 
-constructor ::= TIDENTIFIER:i LSPAREN field_list_opt: l RSPAREN 
+constructor ::= TIDENTIFIER:i LSPAREN field_list_opt:l RSPAREN 
 	{:
 		RESULT = new Constructor(parser,(Token)i,i.toString(),(List)l);
 	:}

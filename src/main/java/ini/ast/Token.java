@@ -23,15 +23,15 @@ public class Token {
 	 * @param charEnd
 	 *            the character where it ends in the file
 	 */
-	public Token(int type, String fileName, String text, int line,
-			int charBegin, int charEnd) {
-
+	public Token(int type, String fileName, String text, int line, int charBegin, int charEnd) {
 		this.type = type;
 		this.fileName = fileName;
 		this.text = text;
 		this.line = line;
 		this.charBegin = charBegin;
 		this.charEnd = charEnd;
+		// uncomment to debug the lexer - do not use logger because performance critical
+		// System.out.println("TOKEN: " + type + " - " + text);
 	}
 
 	public String getLocation() {

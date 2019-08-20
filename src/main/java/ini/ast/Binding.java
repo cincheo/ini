@@ -23,8 +23,8 @@ public class Binding extends NamedElement {
 		this.annotations = annotations;
 		this.parameterTypes = parameterTypes;
 		this.returnType = returnType;
-		this.className = ((StringLiteral)getAnnotationValue("class")).value;
-		this.member = ((StringLiteral)getAnnotationValue("member")).value;
+		this.className = getAnnotationValue("class");
+		this.member = getAnnotationValue("member");
 		this.nodeTypeId = AstNode.BINDING;
 	}
 

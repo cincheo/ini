@@ -17,11 +17,11 @@ public class TestFields extends TestCase {
 	public void testWrongFieldAccessInMatchRule() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]"+
+					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n"+
 					"function f() {" +
 					"  n ~ Node[value==2,!left,!right] {" +
-					"    n.let = Leaf[value=1]" +
-					"    n.right = Leaf[value=1]" +
+					"    n.let = Leaf[value=1]\n" +
+					"    n.right = Leaf[value=1]\n" +
 					"  }"+
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
@@ -36,11 +36,11 @@ public class TestFields extends TestCase {
 	public void testWrongFieldAccessInMatchExpression() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]"+
+					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n"+
 					"function f() {" +
-					"  n ~ Node[value==2,!let,!right] {" +
-					"    n.left = Leaf[value=1]" +
-					"    n.right = Leaf[value=1]" +
+					"  n ~ Node[value==2,!let,!right] {\n" +
+					"    n.left = Leaf[value=1]\n" +
+					"    n.right = Leaf[value=1]\n" +
 					"  }"+
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
@@ -55,11 +55,11 @@ public class TestFields extends TestCase {
 	public void testWrongFieldAccessTypeInMatchExpression() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]"+
+					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n"+
 					"function f() {" +
 					"  n ~ Node[value==2.0,!left,!right] {" +
-					"    n.left = Leaf[value=1]" +
-					"    n.right = Leaf[value=1]" +
+					"    n.left = Leaf[value=1]\n" +
+					"    n.right = Leaf[value=1]\n" +
 					"  }"+
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
@@ -75,11 +75,11 @@ public class TestFields extends TestCase {
 	public void testFieldAccessAfterAssignment() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Point = [x:Int,y:Int]"+
+					"type Point = [x:Int,y:Int]\n"+
 					"function f() {" +
 					"  @init() {" +
-					"    p = Point[x=0,y=0]" +
-					"    x = p.z" +
+					"    p = Point[x=0,y=0]\n" +
+					"    x = p.z\n" +
 					"  }"+
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
@@ -94,11 +94,11 @@ public class TestFields extends TestCase {
 	public void testFieldAccessAfterAssignmentAndOp() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"type Point = [x:Int,y:Int]"+
+					"type Point = [x:Int,y:Int]\n"+
 					"function f() {" +
 					"  @init() {" +
-					"    p = Point[x=0,y=0]" +
-					"    x = p.x - p.z" +
+					"    p = Point[x=0,y=0]\n" +
+					"    x = p.x - p.z\n" +
 					"  }"+
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());

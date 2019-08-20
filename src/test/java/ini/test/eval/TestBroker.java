@@ -15,7 +15,10 @@ public class TestBroker extends IniTestCase {
 			}
 		}.start();
 		testFile("ini/test/broker/coordinator.ini", 10000, "main", (p, out) -> {
-			assertEquals("yeah\n%yeah%%yeah%\n1\nprocesses started\n", out);
+			assertTrue(out, "yeah\n%yeah%%yeah%\n1\nprocesses started\n".equals(out) ||
+					"1\nyeah\n%yeah%%yeah%\nprocesses started\n".equals(out) ||
+					"%yeah%%yeah%\nyeah\n1\nprocesses started\n".equals(out) ||
+					"%yeah%%yeah%\n1\nyeah\nprocesses started\n".equals(out));
 		});
 	}
 
@@ -23,10 +26,10 @@ public class TestBroker extends IniTestCase {
 		new Thread() {
 			@Override
 			public void run() {
-				testFile("ini/test/broker/broker_server.ini", 10000, "main", null);
+				testFile("ini/test/broker/broker_server.ini", 4000, "main", null);
 			}
 		}.start();
-		testFile("ini/test/broker/broker_client.ini", 10000, "client", (p, out) -> {
+		testFile("ini/test/broker/broker_client.ini", 4000, "client", (p, out) -> {
 			assertEquals("%test%\n%test2%\n%test3%\n", out);
 		});
 	}

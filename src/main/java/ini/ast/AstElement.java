@@ -17,14 +17,16 @@ public abstract class AstElement implements AstNode {
 	public String owner;
 	public List<Expression> annotations;
 
-	public Expression getAnnotationValue(String key) {
+	public String getAnnotationValue(String key) {
 		if (annotations != null && !annotations.isEmpty()) {
 			for (Expression e : annotations) {
 				if (e instanceof Assignment) {
 					Assignment a = (Assignment) e;
 					String name = a.assignee.toString();
 					if (key.equals(name)) {
-						return a.assignment;
+						if (a.assignment instanceof StringLiteral) {
+							return ((StringLiteral) a.assignment).value;
+						}
 					}
 				}
 			}

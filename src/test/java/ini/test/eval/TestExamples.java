@@ -76,4 +76,26 @@ public class TestExamples extends IniTestCase {
 		}
 	}
 
+	public void testFibonacci() {
+		testFile("ini/examples/fibonacci.ini",
+				(p, out) -> assertEquals(
+						"Fib(8)=34\n" + "Here is a flat Fibonacci tree for 5:\n"
+								+ "[5,4,3,3,2,2,1,2,1,1,1,1,1,null,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null](1..32)\n"
+								+ "Here is a non-flat Fibonacci tree for 5:\n"
+								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({value=Data(1)}),value=Data(3)}),value=Data(5)})\n"
+								+ "Fibtree(5).left.value = 4\n" + "Fibtree(5).right.value = 3\n"
+								+ "Fibtree(5).left.left.value = 3\n" + "Fibtree(5).left.right.value = 2\n"
+								+ "Fibtree(5).right.left.value = 2\n" + "Fibtree(5).right.right.value = 1\n"
+								+ "{left:{left:{left:{left:{value:1},right:{value:1},value:2},right:{value:1},value:3},right:{left:{value:1},right:{value:1},value:2},value:4},right:{left:{left:{value:1},right:{value:1},value:2},right:{value:1},value:3},value:5}\n"
+								+ "Here is a non-flat Fibonacci tree for 5:\n"
+								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=null,right=null,value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=null,right=null,value=Data(1)}),value=Data(3)}),value=Data(5)})\n"
+								+ "Here is a non-flat Fibonacci tree for 5:\n"
+								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=null,right=null,value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=null,right=null,value=Data(1)}),value=Data(3)}),value=Data(5)})\n"
+								+ "Here is a non-flat Fibonacci tree for 5:\n"
+								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=Data(),right=Data(),value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=Data(),right=Data(),value=Data(1)}),value=Data(3)}),value=Data(5)})\n"
+								+ "Here is a non-flat Fibonacci tree for 5:\n"
+								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({value=Data(1)}),value=Data(3)}),value=Data(5)})\n",
+						out));
+	}
+
 }

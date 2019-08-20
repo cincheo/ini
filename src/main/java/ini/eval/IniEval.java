@@ -10,6 +10,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ini.Main;
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
@@ -300,9 +302,9 @@ public class IniEval {
 					if (!caught) {
 						throw e;
 					}
-				} finally {
+				} /*finally {
 					At.destroyAll(ats);
-				}
+				}*/
 				break;
 
 			case AstNode.INVOCATION:
@@ -587,7 +589,12 @@ public class IniEval {
 			// printNode(System.err, evaluationStack.peek());
 			// System.err.println();
 			// printInvocationStackTrace(System.err);
-			throw new RuntimeException(evaluationStack.peek().toString(), e);
+			if (e instanceof RuntimeException
+					&& StringUtils.equals(evaluationStack.peek().toString(), e.getMessage())) {
+				throw e;
+			} else {
+				throw new RuntimeException(evaluationStack.peek().toString(), e);
+			}
 		}
 		return result;
 	}
