@@ -255,6 +255,10 @@ public class AstAttrib {
 		case AstNode.FUNCTION:
 			f = (Function) node;
 
+			if (f.functionType == null) {
+				invoke(f);
+			}
+
 			hadReturnStatement = false;
 			typeVar = f.functionType;
 

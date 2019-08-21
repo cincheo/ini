@@ -19,7 +19,8 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testComparator() {
-		testFile("ini/examples/comparator.ini", (p, out) -> assertEquals("result:    aginoorrssttt\n", out));
+		testFile("ini/examples/comparator.ini",
+				(p, out) -> assertEquals("result:    aginoorrssttt\nresult:    aginoorrssttt\n", out));
 	}
 
 	public void testCountOccurences() {
@@ -76,6 +77,25 @@ public class TestExamples extends IniTestCase {
 		}
 	}
 
+	public void testWebService() {
+		new Thread() {
+			@Override
+			public void run() {
+				testFile("ini/examples/unpublished/web_service.ini", null);
+			}
+		}.start();
+		try {
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			Thread.sleep(50);
+			HttpGet request = new HttpGet("http://localhost:8080/test");
+			HttpResponse response = httpclient.execute(request);
+			assertEquals("hello world wide web!\n<p>bye!\n", IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testFibonacci() {
 		testFile("ini/examples/fibonacci.ini",
 				(p, out) -> assertEquals(

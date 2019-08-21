@@ -8,6 +8,10 @@ public class ConsumerConfiguration<T> {
 		LATEST, EARLIEST
 	}
 
+	public ConsumerConfiguration() {
+		super();
+	}
+	
 	public ConsumerConfiguration(String consumerId, GsonBuilder gsonBuilder, Class<T> dataType) {
 		super();
 		this.consumerId = consumerId;

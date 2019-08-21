@@ -93,7 +93,7 @@ public class Function extends NamedElement {
 	
 	public Type getFunctionType() {
 		functionType = new Type(parser,"function");
-		if (name.equals("main")) {
+		if (name != null && name.equals("main")) {
 			if(parameters!=null && parameters.size()==1) {
 				functionType.addTypeParameter(parser.ast.getDependentType("Map", parser.ast.INT, parser.ast.STRING));
 			}

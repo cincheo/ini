@@ -9,6 +9,7 @@ public class TypeInfo {
 	public static final int FLOAT = 4;
 	public static final int STRING = 5;
 	public static final int BOOLEAN = 6;
+	public static final int FUNCTION = 7;
 	
 	public static int getTypeInfoForInstance(Object object) {
 		if(object == null) {
@@ -32,6 +33,8 @@ public class TypeInfo {
 			return STRING;
 		case "java.lang.Boolean":
 			return BOOLEAN;
+		case "ini.ast.Function":
+			return FUNCTION;
 		default:
 			return NULL;
 			//throw new RuntimeException("unknown type "+clazz);

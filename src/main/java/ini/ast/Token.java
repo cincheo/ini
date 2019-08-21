@@ -31,7 +31,7 @@ public class Token {
 		this.charBegin = charBegin;
 		this.charEnd = charEnd;
 		// uncomment to debug the lexer - do not use logger because performance critical
-		// System.out.println("TOKEN: " + type + " - " + text);
+		//System.out.println("TOKEN: " + type + " - " + text);
 	}
 
 	public String getLocation() {

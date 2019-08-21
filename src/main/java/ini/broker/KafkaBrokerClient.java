@@ -143,6 +143,7 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 				}
 			} catch (WakeupException wakeupException) {
 				Main.LOGGER.debug("woke up consumer for " + channel);
+				consumerCloseStates.get(channel).set(true);
 			} finally {
 			}
 		}

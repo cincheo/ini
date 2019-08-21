@@ -141,7 +141,7 @@ terminal IDENTIFIER, TIDENTIFIER;
 terminal QUESTION, DOLLAR;
 terminal LF, END;
 // keywords
-terminal IMPORT, FUNCTION, PROCESS, OF, RETURN, TYPE, THIS, CASE, DEFAULT;
+terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT;
 
 non terminal lf, lf_opt, end_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
@@ -478,10 +478,13 @@ expr ::= var_access:e {: RESULT=e; :}
 	| set_var_access:e {: RESULT = e; :}
 //	| FUNCTION:f LPAREN IDENTIFIER:i RPAREN {: RESULT = new FunctionLiteral(parser,(Token)f,i.toString()); :}
 	| list_concat_expr:e {: RESULT = e; :}
-//	| lambda_expr: e {: RESULT = e; :} %prec IMPLIES
+	| lambda_expr: e {: RESULT = e; :}
 ;
 
-lambda_expr ::=  LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN rule_list_opt:rules RCPAREN {:
+// TODO: the LAMBDA symbol is produced by the lexer with a look-ahead. The parser should disambiguate itself for better perfs.
+lambda_expr ::= LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN rule_list_opt:rules RCPAREN {:
+	RESULT = new Function(parser, (Token)def, null, (List)vars, (List)rules);	
+:} | LAMBDA param_list_opt:vars IMPLIES:def LCPAREN rule_list_opt:rules RCPAREN {:
 	RESULT = new Function(parser, (Token)def, null, (List)vars, (List)rules);	
 :}
 ;

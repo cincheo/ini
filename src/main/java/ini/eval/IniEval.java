@@ -225,86 +225,7 @@ public class IniEval {
 
 			case AstNode.FUNCTION:
 				f = (Function) node;
-				List<At> ats = null;
-				try {
-					for (Rule rule : f.initRules) {
-						eval(rule);
-					}
-					if (!f.atRules.isEmpty()) {
-						ats = new ArrayList<At>();
-					}
-					Map<Rule, At> atMap = new HashMap<Rule, At>();
-					for (Rule rule : f.atRules) {
-						// At at = At.atPredicates.get(rule.atPredicate.name);
-						Class<? extends At> c = At.atPredicates.get(rule.atPredicate.name);
-						At at = null;
-						try {
-							at = c.newInstance();
-							at.setRule(rule);
-							at.setAtPredicate(rule.atPredicate);
-							ats.add(at);
-							if (rule.atPredicate.identifier != null) {
-								invocationStack.peek().bind(rule.atPredicate.identifier, new RawData(at));
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						if (at == null) {
-							throw new RuntimeException("unknown @ predicate '" + rule.atPredicate.name + "'");
-						}
-						atMap.put(rule, at);
-					}
-					Iterator<Rule> itr = atMap.keySet().iterator();
-					while (itr.hasNext()) {
-						Rule evalRule = itr.next();
-						At evalAt = atMap.get(evalRule);
-						List<Expression> synchronizedAtsNames = evalRule.synchronizedAtsNames;
-						if (synchronizedAtsNames != null) {
-							for (Expression e : synchronizedAtsNames) {
-								evalAt.synchronizedAts.add((At) this.eval(e).getValue());
-							}
-						}
-
-						evaluationStack.push(evalRule.atPredicate);
-						evalAt.parseInParameters(this, evalRule.atPredicate.annotations);
-						evalAt.eval(this);
-						evaluationStack.pop();
-					}
-					do {
-						invocationStack.peek().noRulesApplied = false;
-						while (!invocationStack.peek().noRulesApplied) {
-							invocationStack.peek().noRulesApplied = true;
-							for (Rule rule : f.rules) {
-								eval(rule);
-							}
-						}
-					} while (!At.checkAllTerminated(ats));
-					At.destroyAll(ats);
-					for (Rule rule : f.endRules) {
-						eval(rule);
-					}
-				} catch (ReturnException e) {
-					// swallow
-				} catch (RuntimeException e) {
-					boolean caught = false;
-					for (Rule rule : f.errorRules) {
-						if (rule.guard == null || eval(rule.guard).isTrueOrDefined()) {
-							invocationStack.peek().bind(((Variable) rule.atPredicate.outParameters.get(0)).name,
-									new RawData(e));
-							Sequence<Statement> s = rule.statements;
-							while (s != null) {
-								eval(s.get());
-								s = s.next();
-							}
-							caught = true;
-						}
-					}
-					if (!caught) {
-						throw e;
-					}
-				} /*finally {
-					At.destroyAll(ats);
-				}*/
+				result = new RawData(f);
 				break;
 
 			case AstNode.INVOCATION:
@@ -315,9 +236,16 @@ public class IniEval {
 				targetNode = getTargetNode(invocation);
 				String targetName = invocation.name;
 				Data data = invocationStack.peek().get(targetName);
+				f = null;
 				if (data != null && data.getKind() == Kind.FUNCTIONAL) {
-					// functional variable case
-					targetName = data.getValue();
+					if (data.getValue() instanceof Function) {
+						// lambda case
+						f = (Function) data.getValue();
+						targetName = null;
+					} else {
+						// functional variable case
+						targetName = data.getValue();
+					}
 				}
 				if (targetNode != null) {
 					List<Data> arguments = new ArrayList<>();
@@ -365,7 +293,7 @@ public class IniEval {
 					if (targetNode == null && IniFunction.functions.containsKey(targetName)) {
 						result = IniFunction.functions.get(targetName).eval(this, invocation.arguments);
 					} else {
-						f = parser.parsedFunctionMap.get(targetName);
+						f = targetName != null ? parser.parsedFunctionMap.get(targetName) : f;
 						if (f == null) {
 							if (targetNode != null) {
 								parser.coreBrokerClient.sendFetchRequest(targetNode,
@@ -375,7 +303,7 @@ public class IniEval {
 										new FetchRequest(parser.node, targetName));
 							}
 							do {
-								Main.LOGGER.debug("waiting for function to be deployed");
+								Main.LOGGER.debug("waiting for function '" + targetName + "' to be deployed");
 								try {
 									Thread.sleep(20);
 								} catch (Exception e) {
@@ -410,11 +338,13 @@ public class IniEval {
 							new Thread(new Runnable() {
 								@Override
 								public void run() {
-									child.eval(function);
+									// child.eval(function);
+									child.execute(function);
 								}
 							}).start();
 						} else {
-							result = eval(f);
+							// result = eval(f);
+							execute(f);
 						}
 						invocationStack.pop();
 					}
@@ -766,10 +696,93 @@ public class IniEval {
 			}
 		}
 		invocationStack.push(ctx);
-		eval(f);
+		execute(f);
 		invocationStack.pop();
 		// TODO: handle collections
 		return result == null ? null : result.getValue();
+	}
+
+	public void execute(Function f) {
+		List<At> ats = null;
+		try {
+			for (Rule rule : f.initRules) {
+				eval(rule);
+			}
+			if (!f.atRules.isEmpty()) {
+				ats = new ArrayList<At>();
+			}
+			Map<Rule, At> atMap = new HashMap<Rule, At>();
+			for (Rule rule : f.atRules) {
+				// At at = At.atPredicates.get(rule.atPredicate.name);
+				Class<? extends At> c = At.atPredicates.get(rule.atPredicate.name);
+				At at = null;
+				try {
+					at = c.newInstance();
+					at.setRule(rule);
+					at.setAtPredicate(rule.atPredicate);
+					ats.add(at);
+					if (rule.atPredicate.identifier != null) {
+						invocationStack.peek().bind(rule.atPredicate.identifier, new RawData(at));
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (at == null) {
+					throw new RuntimeException("unknown @ predicate '" + rule.atPredicate.name + "'");
+				}
+				atMap.put(rule, at);
+			}
+			Iterator<Rule> itr = atMap.keySet().iterator();
+			while (itr.hasNext()) {
+				Rule evalRule = itr.next();
+				At evalAt = atMap.get(evalRule);
+				List<Expression> synchronizedAtsNames = evalRule.synchronizedAtsNames;
+				if (synchronizedAtsNames != null) {
+					for (Expression e : synchronizedAtsNames) {
+						evalAt.synchronizedAts.add((At) this.eval(e).getValue());
+					}
+				}
+
+				evaluationStack.push(evalRule.atPredicate);
+				evalAt.parseInParameters(this, evalRule.atPredicate.annotations);
+				evalAt.eval(this);
+				evaluationStack.pop();
+			}
+			do {
+				invocationStack.peek().noRulesApplied = false;
+				while (!invocationStack.peek().noRulesApplied) {
+					invocationStack.peek().noRulesApplied = true;
+					for (Rule rule : f.rules) {
+						eval(rule);
+					}
+				}
+			} while (!At.checkAllTerminated(ats));
+			At.destroyAll(ats);
+			for (Rule rule : f.endRules) {
+				eval(rule);
+			}
+		} catch (ReturnException e) {
+			// swallow
+		} catch (RuntimeException e) {
+			boolean caught = false;
+			for (Rule rule : f.errorRules) {
+				if (rule.guard == null || eval(rule.guard).isTrueOrDefined()) {
+					invocationStack.peek().bind(((Variable) rule.atPredicate.outParameters.get(0)).name,
+							new RawData(e));
+					Sequence<Statement> s = rule.statements;
+					while (s != null) {
+						eval(s.get());
+						s = s.next();
+					}
+					caught = true;
+				}
+			}
+			if (!caught) {
+				throw e;
+			}
+		} /*
+			 * finally { At.destroyAll(ats); }
+			 */
 	}
 
 	public void printError(PrintStream out, Exception e) {

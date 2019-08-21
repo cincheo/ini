@@ -17,11 +17,12 @@ import ini.ast.Token;
 %cup
 %line
 %column
-%state BBLOCK
-%state BLOCK
+//%state BBLOCK
+//%state BLOCK
 %state STRING
 %state CHAR
 %state USERTYPE
+%state LAMBDA
 
 %{
 	//StringBuffer string=new StringBuffer();
@@ -71,6 +72,10 @@ TypeIdentifier = [A-Z][A-Za-z0-9_]*
 DecIntegerLiteral = [0-9] | [1-9][0-9]*
 DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
 
+O = [^()]*
+//FunctionalTypeEnding = {O} ({O} "(" {O} ({O} "(" {O} ({O} "(" {O} ")" {O})* {O} ")" {O})* {O} ")" {O})* {O} ")" {WhiteSpaceChar}* "=>"
+ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* ("," {WhiteSpace}* {Identifier} {WhiteSpace}*)* ")"
+
 %% 
 
 <YYINITIAL> {
@@ -89,12 +94,8 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
 
   {DecIntegerLiteral}   { return symbol(sym.INT); }
   {DecFloatLiteral}		{ return symbol(sym.NUM); }
-  {Identifier}          { return symbol(sym.IDENTIFIER); }
-  {TypeIdentifier}      { return symbol(sym.TIDENTIFIER); }
   "->"                  { return symbol(sym.ARROW_RIGHT); }
   ":"                   { return symbol(sym.COL); }
-  "("                   { return symbol(sym.LPAREN); }
-  ")"                   { return symbol(sym.RPAREN); }
   "{"                   { return symbol(sym.LCPAREN); }
   "}"                   { return symbol(sym.RCPAREN); }
   "["                   { return symbol(sym.LSPAREN); }
@@ -131,6 +132,16 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
   \"                    { yybegin(STRING); }
   {Comment}             { /* ignore */ }
   {WhiteSpaceChar}      { /* ignore */ }
+
+  // THIS LOOK-AHEAD SHOULD BE SOLVED IN THE PARSER FOR BETTER PERFS
+  {ParameterList} / {WhiteSpace}* "=>"  { yypushback(yylength()); yybegin(LAMBDA); return symbol(sym.LAMBDA); }
+
+  {Identifier}          { return symbol(sym.IDENTIFIER); }
+  {TypeIdentifier}      { return symbol(sym.TIDENTIFIER); }
+  
+  "("                   { return symbol(sym.LPAREN); }
+  ")"                   { return symbol(sym.RPAREN); }
+  
 }
 
 /*<BBLOCK> {
@@ -179,5 +190,15 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
   "\n"                  { return symbol(sym.LF); }
 }
 
+<LAMBDA> {
+  {Identifier}          { return symbol(sym.IDENTIFIER); }
+  "("                   { return symbol(sym.LPAREN); }
+  ")"                   { return symbol(sym.RPAREN); }
+  ","                   { return symbol(sym.COMMA); }
+  {Comment}             { /* ignore */ }
+  {WhiteSpaceChar}      { /* ignore */ }
+  "=>"                  { yybegin(YYINITIAL); return symbol(sym.IMPLIES); }
+  "\n"                  { return symbol(sym.LF); }
+}
 
 .|\n { System.out.println("unmatched:"+yytext()); }

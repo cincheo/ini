@@ -5,6 +5,7 @@ import java.util.List;
 import ini.ast.Expression;
 import ini.ast.Invocation;
 import ini.broker.BrokerClient;
+import ini.broker.Channel;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
@@ -16,21 +17,20 @@ public class ProduceFunction extends IniFunction {
 
 	@Override
 	public Data eval(IniEval eval, List<Expression> params) {
-		String channel = eval.eval(params.get(0)).getValue();
+		Channel channel = new Channel(eval.eval(params.get(0)).getValue());
 		Data data = eval.eval(params.get(1));
 		try {
-			BrokerClient.createDefaultInstance(eval.parser).produce(channel, RawData.rawCopy(data));
-			//KafkaClient.runProducer(topic, RawData.rawCopy(message));
-		}
-		catch(Exception e) {
+			BrokerClient.createDefaultInstance(eval.parser, channel.isGlobal()).produce(channel.getName(),
+					RawData.rawCopy(data));
+			// KafkaClient.runProducer(topic, RawData.rawCopy(message));
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		return null;
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints,
-			Invocation invocation) {
+	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
 		return parser.ast.getFunctionalType(parser.ast.VOID, parser.ast.STRING, parser.ast.ANY);
 	}
 

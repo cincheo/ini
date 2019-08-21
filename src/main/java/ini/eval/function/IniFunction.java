@@ -38,6 +38,7 @@ public abstract class IniFunction {
 		functions.put("parse_number", new ParseNumberFunction());
 		functions.put("to_long", new ToLongFunction());
 		functions.put("start_web_service", new StartWebServiceFunction());
+		functions.put("stop_web_service", new StopWebServiceFunction());
 		functions.put("clear", new ClearFunction());
 		functions.put("swap", new SwapFunction());
 		functions.put("copy", new CopyFunction());

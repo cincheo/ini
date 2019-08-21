@@ -266,7 +266,9 @@ public class Main {
 			LOGGER.info("Environment: " + parser.environment);
 			LOGGER.info("INI started - node " + parser.node);
 
-			eval.eval(main);
+			//eval.invoke(function, params)
+			//eval.eval(main);
+			eval.execute(main);
 		} catch (Exception e) {
 			eval.printError(parser.err, e);
 			parser.err.println("Java stack:");
