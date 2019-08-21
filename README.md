@@ -145,18 +145,23 @@ By default spawned processes are deployed on the current node (called ``main`` i
 
 ### Push/spawn a process on a target node
 
-Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the following annotations:
+Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the ``node`` annotation when starting the processes. Additionally, we also need to prefix the names of the channels with ``global:``. By default, channels remain local to the current process and this prefix is required so that the channels become visible by all nodes (through the Kafka broker).
 
 ```javascript
-[...]
+process main() {
   @init() {
-    p("c1", "c2") [node="n1"]
-    p("c2", "c")  [node="n2"]
+    p("global:c1", "global:c2") [node="n1"]
+    p("global:c2", "global:c")  [node="n1"]
     println("processes started")
-    produce("c1", 1)
+    produce("global:c1", 1)
   }
-[...]
-``` 
+  @consume(v) [channel="global:c"] {
+    println("end of pipeline: "+v)
+  }
+}
+
+process p(in, out) ... // unchanged
+```
 
 In that case, the program of the ``main`` node acts like a coordinator for all the other processes in the distributed program.
 
@@ -168,7 +173,7 @@ In other cases, a given node may want to evaluate a function or a process that h
 
 ```javascript
 // this is a binding to a function declared on a remote server
-hello(String) -> String [node="server"]
+hello(String)=>String [node="server"]
 
 process main() {
   @init() {
