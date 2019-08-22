@@ -131,7 +131,7 @@ parser code {:
   
 :};
 
-terminal COL, COMMA, DOT, DOTDOT;
+terminal COL, COMMA, DOT, INVDOT, DOTDOT;
 terminal LPAREN, RPAREN, LCPAREN, RCPAREN, LSPAREN, RSPAREN;
 terminal LT, LTE, GTE, GT, ASSIGN, EQUALS, NOTEQUALS, MULT, DIV, MINUS, MINUSMINUS, PLUS, PLUSPLUS;
 terminal OROR, ANDAND, AND, NOT, TUBE, IMPLIES, MATCHES;
@@ -149,10 +149,10 @@ non terminal function, param_list_opt, param_list, param;
 non terminal import_list_opt, import_list, import_decl;
 non terminal binding_list_opt, binding_list, binding, type_list_opt, type_list, type, at_binding_conf_type;
 non terminal var_list;
-non terminal statement_list_opt, statement_list, statement, expr/*, ret_expr_opt*/;
+non terminal statement_list_opt, statement_list, statement, expr, no_paren_expr;
 non terminal assignment_expr, var_access, sync_var_access, set_var_access, single_string, string_expr, case_expr, lambda_expr;
 non terminal ret_statement;
-non terminal invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
+non terminal invocation, dot_invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
 non terminal rule_list_opt, rule_list, rule/*, rule_body*/, guard;
 non terminal logical_expr_opt, logical_expr, algebraic_expr, set_logical_expr, boolean_literal;
 non terminal set_decl, constructor_expr, assignment_list;
@@ -177,6 +177,7 @@ precedence left TUBE;
 precedence left LF;
 precedence left END;
 precedence left IMPLIES;
+precedence left DOT, INVDOT;
 
 start with ini_program;
 
@@ -457,8 +458,17 @@ assignment_list ::= assignment_list:l COMMA lf_opt IDENTIFIER:f ASSIGN:a expr:e
 statement ::= pre_post_op:e {: RESULT = e; :}
 	| assignment_expr:e {: RESULT = e; :} 
 	| invocation:e {: RESULT = e; :}
+	| dot_invocation:e {: RESULT = e; :}
 	| case_expr:e {: RESULT = e; :}
 	| ret_statement:e {: RESULT = e; :}
+;
+
+no_paren_expr ::= var_access:e {: RESULT=e; :}
+    | THIS:t {: RESULT = new ThisLiteral(parser,(Token)t); :}
+	| invocation:e {: RESULT=e; :}
+	| dot_invocation:e {: RESULT=e; :}
+	| CHAR:c {: RESULT = new CharLiteral(parser,(Token)c,c.toString().charAt(0)); :}
+	| list_expr:l {: RESULT=l; :}
 ;
 
 expr ::= var_access:e {: RESULT=e; :}
@@ -469,6 +479,7 @@ expr ::= var_access:e {: RESULT=e; :}
 	| sync_var_access:e {: RESULT=e; :} 
     | THIS:t {: RESULT = new ThisLiteral(parser,(Token)t); :}
 	| invocation:e {: RESULT=e; :}
+	| dot_invocation:e {: RESULT=e; :}
 	| CHAR:c {: RESULT = new CharLiteral(parser,(Token)c,c.toString().charAt(0)); :}
 	| algebraic_expr:e {: RESULT=e; :}
 	| string_expr:e {: RESULT=e; :}
@@ -486,6 +497,18 @@ lambda_expr ::= LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN rul
 	RESULT = new Function(parser, (Token)def, null, (List)vars, (List)rules);	
 :} | LAMBDA param_list_opt:vars IMPLIES:def LCPAREN rule_list_opt:rules RCPAREN {:
 	RESULT = new Function(parser, (Token)def, null, (List)vars, (List)rules);	
+:} | LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def statement:s {:
+	AtPredicate at = new AtPredicate(parser,(Token)def,"init",(List)null,new ArrayList(), null);
+	Rule rule = new Rule(parser,((AstNode)at).token(),(AtPredicate)at,(Expression)null,new Sequence(s), null);	
+	List rules = new ArrayList();
+	rules.add(rule);
+	RESULT = new Function(parser, (Token)def, null, (List)vars, rules);
+:} | LAMBDA param_list_opt:vars IMPLIES:def statement:s {:
+	AtPredicate at = new AtPredicate(parser,(Token)def,"init",(List)null,new ArrayList(), null);
+	Rule rule = new Rule(parser,((AstNode)at).token(),(AtPredicate)at,(Expression)null,new Sequence(s), null);	
+	List rules = new ArrayList();
+	rules.add(rule);
+	RESULT = new Function(parser, (Token)def, null, (List)vars, rules);	
 :}
 ;
 
@@ -495,8 +518,8 @@ lambda_expr ::= LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN rul
 ;*/	
 
 
-list_concat_expr ::= list_expr:e1 AND:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
-	| var_access:e1 AND:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
+list_concat_expr ::= no_paren_expr:e1 AND:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
+//	| var_access:e1 AND:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}
 ;
 
 algebraic_expr ::= NUM:e {: RESULT=new NumberLiteral(parser,(Token)e,Double.parseDouble(e.toString())); :}
@@ -591,6 +614,16 @@ pre_post_op ::= var_access:e PLUSPLUS:op {: RESULT=new UnaryOperator(parser,(Tok
 invocation ::= IDENTIFIER:i LPAREN arg_list_opt:l RPAREN annotations_opt:a
 	{:
 		Invocation inv = new Invocation(parser,(Token)i,i.toString(),(List)l);
+		inv.annotations = (List)a;
+		RESULT = inv;
+	:}
+;
+
+dot_invocation ::= no_paren_expr:target INVDOT IDENTIFIER:i LPAREN arg_list_opt:l RPAREN annotations_opt:a
+	{:
+		List args = (List)l;
+		args.add(0, target);
+		Invocation inv = new Invocation(parser,(Token)i,i.toString(),args);
 		inv.annotations = (List)a;
 		RESULT = inv;
 	:}

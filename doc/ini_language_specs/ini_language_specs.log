@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  16 AUG 2019 13:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  22 AUG 2019 07:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -300,7 +300,7 @@ Chapter 3.
 \myCenter3=\dimen132
 \myScoreEnd3=\dimen133
  [32]
-Overfull \hbox (10.85796pt too wide) in paragraph at lines 1128--1129
+Overfull \hbox (10.85796pt too wide) in paragraph at lines 1139--1140
 \OT1/cmr/m/n/10.95 must be of the same type \OT1/cmtt/m/n/10.95 T\OT1/cmr/m/n/1
 0.95 . Then the type of the re-sult-ing list is \OT1/cmtt/m/n/10.95 T* \OT1/cmr
 /m/n/10.95 (equiv-a-lent to \OT1/cmtt/m/n/10.95 Dictionary(Int,T)\OT1/cmr/m/n/1
@@ -312,7 +312,7 @@ Chapter 4.
 [35
 
 ] [36]
-Overfull \hbox (17.35269pt too wide) in paragraph at lines 1295--1296
+Overfull \hbox (17.35269pt too wide) in paragraph at lines 1306--1307
 []\OT1/cmr/m/n/10.95 Note that this func-tion is poly-mor-phic. Its type is \OT
 1/cmtt/m/n/10.95 (Dictionary(Int,'T))-> Dictionary(Int,'T)\OT1/cmr/m/n/10.95 ,
  []
@@ -355,7 +355,7 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive
 015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/20
 15/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/201
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on ini_language_specs.pdf (51 pages, 322538 bytes).
+Output written on ini_language_specs.pdf (51 pages, 322736 bytes).
 PDF statistics:
  234 PDF objects out of 1000 (max. 8388607)
  163 compressed objects within 2 object streams

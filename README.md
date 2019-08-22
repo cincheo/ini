@@ -182,7 +182,7 @@ process main() {
 }
 ``` 
 
-Note that the binding of ``hello``, also defines the functional type ``(String) -> String``, since INI cannot infer it from the function implementation.
+Note that the binding of ``hello``, also defines the functional type ``(String) => String``, since INI cannot infer it from the function implementation.
 
 ## Getting started
 

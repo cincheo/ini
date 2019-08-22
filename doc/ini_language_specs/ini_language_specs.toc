@@ -55,18 +55,19 @@
 \contentsline {subsection}{\numberline {3.3.5}Division}{31}
 \contentsline {subsection}{\numberline {3.3.6}Multiplication and minus}{31}
 \contentsline {subsection}{\numberline {3.3.7}The plus operator}{31}
-\contentsline {subsection}{\numberline {3.3.8}Unary minus (sign inversion)}{32}
-\contentsline {subsection}{\numberline {3.3.9}Post operators}{32}
-\contentsline {subsection}{\numberline {3.3.10}The not operator}{32}
-\contentsline {subsection}{\numberline {3.3.11}The match operator}{32}
-\contentsline {subsection}{\numberline {3.3.12}Dictionary access}{33}
-\contentsline {subsection}{\numberline {3.3.13}Field access}{33}
-\contentsline {subsection}{\numberline {3.3.14}Function invocation}{33}
-\contentsline {subsection}{\numberline {3.3.15}List definition}{33}
-\contentsline {subsection}{\numberline {3.3.16}Return statement}{33}
-\contentsline {subsection}{\numberline {3.3.17}Type instantiation}{34}
-\contentsline {subsection}{\numberline {3.3.18}Integer set declaration}{34}
-\contentsline {subsection}{\numberline {3.3.19}Set selection}{34}
+\contentsline {subsection}{\numberline {3.3.8}The list concatenation operator (TBD)}{32}
+\contentsline {subsection}{\numberline {3.3.9}Unary minus (sign inversion)}{32}
+\contentsline {subsection}{\numberline {3.3.10}Post operators}{32}
+\contentsline {subsection}{\numberline {3.3.11}The not operator}{32}
+\contentsline {subsection}{\numberline {3.3.12}The match operator}{32}
+\contentsline {subsection}{\numberline {3.3.13}Dictionary access}{33}
+\contentsline {subsection}{\numberline {3.3.14}Field access}{33}
+\contentsline {subsection}{\numberline {3.3.15}Function invocation}{33}
+\contentsline {subsection}{\numberline {3.3.16}List definition}{33}
+\contentsline {subsection}{\numberline {3.3.17}Return statement}{33}
+\contentsline {subsection}{\numberline {3.3.18}Type instantiation}{34}
+\contentsline {subsection}{\numberline {3.3.19}Integer set declaration}{34}
+\contentsline {subsection}{\numberline {3.3.20}Set selection}{34}
 \contentsline {chapter}{\numberline {4}Some INI examples}{35}
 \contentsline {section}{\numberline {4.1}Counting occurences in a list}{35}
 \contentsline {section}{\numberline {4.2}Implementing a sort function}{37}

@@ -1,5 +1,9 @@
 package ini.eval.function;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import ini.ast.Expression;
 import ini.ast.Invocation;
 import ini.eval.IniEval;
@@ -7,10 +11,6 @@ import ini.eval.data.Data;
 import ini.parser.IniParser;
 import ini.type.Type;
 import ini.type.TypingConstraint;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public abstract class IniFunction {
 
@@ -43,6 +43,7 @@ public abstract class IniFunction {
 		functions.put("swap", new SwapFunction());
 		functions.put("copy", new CopyFunction());
 		functions.put("time", new TimeFunction());
+		functions.put("mod", new ModFunction());
 		functions.put("pow", new PowFunction());
 		functions.put("print", new PrintFunction());
 		functions.put("println", new PrintlnFunction());

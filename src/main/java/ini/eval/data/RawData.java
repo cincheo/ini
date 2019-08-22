@@ -392,7 +392,7 @@ public class RawData implements Data {
 		Object oldValue = this.value;
 		this.value = value;
 		this.typeInfo = TypeInfo.getTypeInfoForInstance(value);
-		if(value instanceof Function) {
+		if (value instanceof Function) {
 			this.kind = Kind.FUNCTIONAL;
 		}
 		notifyDataObservers(oldValue);
@@ -720,8 +720,10 @@ public class RawData implements Data {
 				res.set(i1++, data.get(i2));
 			}
 		} else {
-			for (Entry<Object, Data> e : data.getReferences().entrySet()) {
-				res.set(e.getKey(), e.getValue());
+			if (data.getReferences() != null) {
+				for (Entry<Object, Data> e : data.getReferences().entrySet()) {
+					res.set(e.getKey(), e.getValue());
+				}
 			}
 		}
 		return res;

@@ -1036,6 +1036,17 @@ The second case occurs when the type of the first operand's type is undetermined
 \DP
 \end{center}
 
+\subsection{The list concatenation operator (TBD)} 
+
+The list concatenation operator is \texttt{\&}.
+
+\begin{center}
+\AxiomC{$\vdash x:T*$} \AxiomC{$\vdash y:T*$}
+\LeftLabel{(CONCAT)}
+\BIC{$\vdash (x \texttt{ \& } y):T*$}
+\DP
+\end{center}
+
 \subsection{Unary minus (sign inversion)}
 
 The unary minus operator expects an operand which is a number and will return a result of the same type.

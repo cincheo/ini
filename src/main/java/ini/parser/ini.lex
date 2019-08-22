@@ -105,6 +105,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "<="                  { return symbol(sym.LTE); }
   ">="                  { return symbol(sym.GTE); }
   ","                   { return symbol(sym.COMMA); }
+  "." / {Identifier} "(" { return symbol(sym.INVDOT); }
   "."                   { return symbol(sym.DOT); }
   "="                   { return symbol(sym.ASSIGN); }
   "=="                  { return symbol(sym.EQUALS); }

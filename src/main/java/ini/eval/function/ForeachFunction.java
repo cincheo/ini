@@ -11,28 +11,20 @@ import ini.type.TypingConstraint;
 
 import java.util.List;
 
-public class FirstFunction extends IniFunction {
+public class ForeachFunction extends IniFunction {
 
 	@Override
 	public Data eval(IniEval eval, List<Expression> params) {
-		Data d = eval.eval(params.get(0));
-		if(d.getSize()<1) {
-			return new RawData(null);
-		} else {
-			return d.first();
-		}
+		
+		return new RawData(eval.eval(params.get(0)).getSize());
 	}
 
 	@Override
 	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		Type l = new Type(parser,"Map");
 		Type t = new Type(parser);
-		l.addTypeParameter(parser.ast.INT);
-		l.addTypeParameter(t);
-		Type functionType = new Type(parser,"function");
-		functionType.setReturnType(t);
-		functionType.addTypeParameter(l);
-		return functionType;
+		Type l = parser.ast.getDependentType("Map", parser.ast.INT, t);
+		return parser.ast.getFunctionalType(l, l, parser.ast.getFunctionalType(parser.ast.VOID, t, parser.ast.ANY));
+
 	}
-	
+
 }

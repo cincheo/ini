@@ -23,6 +23,11 @@ public class TestExamples extends IniTestCase {
 				(p, out) -> assertEquals("result:    aginoorrssttt\nresult:    aginoorrssttt\n", out));
 	}
 
+	public void testLambdas() {
+		testFile("ini/examples/lambdas.ini",
+				(p, out) -> assertEquals("234567246", out));
+	}
+	
 	public void testCountOccurences() {
 		testFile("ini/examples/count_occurences.ini",
 				(p, out) -> assertEquals(
