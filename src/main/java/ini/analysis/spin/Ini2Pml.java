@@ -8,6 +8,7 @@ import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
 import ini.ast.CharLiteral;
 import ini.ast.Function;
+import ini.ast.Process;
 import ini.ast.Rule;
 import ini.ast.Sequence;
 import ini.ast.Statement;
@@ -152,27 +153,30 @@ public class Ini2Pml {
 			break;
 
 		case AstNode.FUNCTION:
-			Function f = (Function) node;
-			if (f.rules.size() > 0) {
-				if (f.name.equals("main")) {
+			break;
+
+		case AstNode.PROCESS:
+			Process process = (Process) node;
+			if (process.rules.size() > 0) {
+				if (process.name.equals("main")) {
 					activeProctypes.add("main");
 				}
 				out.append("proctype ");
-				out.append(f.name);
+				out.append(process.name);
 				out.append("(");
 				// TODO Add parameters
 				out.append(")");
 				out.append("{\n");
 				// out.append("endM:\n");
 				out.append("do\n");
-				for (Rule r : f.rules) {
+				for (Rule r : process.rules) {
 					generate(r, out);
 				}
 				out.append("od;\n");
 				out.append("}\n");
 			}
 
-			for (Rule r : f.atRules) {
+			for (Rule r : process.atRules) {
 				switch (r.atPredicate.kind) {
 				case EVERY:
 					out.append("proctype ");
@@ -220,9 +224,9 @@ public class Ini2Pml {
 
 			initPromelaCode.append("init ");
 			initPromelaCode.append("{\n");
-			if (!f.initRules.isEmpty()) {
+			if (!process.initRules.isEmpty()) {
 				// initPromelaCode.append("atomic {\n");
-				for (Rule initRule : f.initRules) {
+				for (Rule initRule : process.initRules) {
 					Sequence<Statement> exclusiveStatements = initRule.statements;
 					while (exclusiveStatements != null) {
 						exclusiveNodes.add((AstNode) exclusiveStatements.get());
@@ -243,9 +247,9 @@ public class Ini2Pml {
 					initPromelaCode.append("}\n");
 				}
 			}
-			if (!f.endRules.isEmpty()) {
+			if (!process.endRules.isEmpty()) {
 				// initPromelaCode.append("atomic {\n");
-				for (Rule endRule : f.endRules) {
+				for (Rule endRule : process.endRules) {
 					Sequence<Statement> exclusiveStatements = endRule.statements;
 					while (exclusiveStatements != null) {
 						exclusiveNodes.add((AstNode) exclusiveStatements.get());
@@ -408,9 +412,9 @@ public class Ini2Pml {
 
 	public void generateObserverdVariabsles(AstNode node) {
 		switch (node.nodeTypeId()) {
-		case AstNode.FUNCTION:
-			Function f = (Function) node;
-			for (Rule r : f.atRules) {
+		case AstNode.PROCESS:
+			Process p = (Process) node;
+			for (Rule r : p.atRules) {
 				if (r.atPredicate.kind.equals(AtPredicate.Kind.UPDATE)) {
 					String observedVariable = r.atPredicate.annotations.get(0).toString().split("=")[1];
 					observedVariables.add(observedVariable);

@@ -77,6 +77,8 @@ public interface Data {
 	
 	List<DataObserver> getDataObservers();
 
+	Data getIfAvailable();
+	
 	/**
 	 * Equals by value (including maps).
 	 */

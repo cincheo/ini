@@ -20,6 +20,7 @@ import ini.ast.Function;
 import ini.ast.Invocation;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
+import ini.ast.Process;
 import ini.ast.ReturnStatement;
 import ini.ast.Rule;
 import ini.ast.Sequence;
@@ -267,11 +268,38 @@ public class AstAttrib {
 				invocationStack.peek().bind(f.parameters.get(i).name, typeVar.getTypeParameters().get(i));
 			}
 
-			for (Rule rule : f.initRules) {
+			for (Rule rule : f.rules) {
 				eval(rule);
 			}
 
-			for (Rule rule : f.atRules) {
+			if (!hadReturnStatement) {
+				constraints.add(
+						new TypingConstraint(TypingConstraint.Kind.EQ, typeVar.getReturnType(), parser.ast.VOID, f, f));
+			}
+
+			result = typeVar;
+			break;
+			
+		case AstNode.PROCESS:
+			f = (Function) node;
+
+			if (f.functionType == null) {
+				invoke(f);
+			}
+
+			hadReturnStatement = false;
+			typeVar = f.functionType;
+
+			for (int i = 0; i < f.parameters.size(); i++) {
+				// handle default values?
+				invocationStack.peek().bind(f.parameters.get(i).name, typeVar.getTypeParameters().get(i));
+			}
+
+			for (Rule rule : ((Process)f).initRules) {
+				eval(rule);
+			}
+
+			for (Rule rule : ((Process)f).atRules) {
 				eval(rule);
 			}
 
@@ -279,7 +307,7 @@ public class AstAttrib {
 				eval(rule);
 			}
 
-			for (Rule rule : f.endRules) {
+			for (Rule rule : ((Process)f).endRules) {
 				eval(rule);
 			}
 

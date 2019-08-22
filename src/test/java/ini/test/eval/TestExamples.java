@@ -18,6 +18,11 @@ public class TestExamples extends IniTestCase {
 				(p, out) -> assertEquals("The value of -(((3.0*2.0)+1.0)) is -7.0\n", out));
 	}
 
+	public void testLCSS() {
+		testFile("ini/examples/lcss.ini",
+				(p, out) -> assertEquals("2.0\n", out));
+	}
+	
 	public void testComparator() {
 		testFile("ini/examples/comparator.ini",
 				(p, out) -> assertEquals("result:    aginoorrssttt\nresult:    aginoorrssttt\n", out));

@@ -268,7 +268,7 @@ public class Main {
 
 			//eval.invoke(function, params)
 			//eval.eval(main);
-			eval.execute(main);
+			eval.executeProcessOrFunction(main);
 		} catch (Exception e) {
 			eval.printError(parser.err, e);
 			parser.err.println("Java stack:");

@@ -9,6 +9,7 @@ import java.util.*;
 import java.io.*;
 import ini.*;
 import ini.ast.*;
+import ini.ast.Process;
 import ini.eval.function.*;
 import ini.eval.at.*;
 
@@ -153,7 +154,8 @@ non terminal statement_list_opt, statement_list, statement, expr, no_paren_expr;
 non terminal assignment_expr, var_access, sync_var_access, set_var_access, single_string, string_expr, case_expr, lambda_expr;
 non terminal ret_statement;
 non terminal invocation, dot_invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
-non terminal rule_list_opt, rule_list, rule/*, rule_body*/, guard;
+non terminal rule_list_opt, rule_list, rule, guard;
+non terminal frule_list_opt, frule_list, frule;
 non terminal logical_expr_opt, logical_expr, algebraic_expr, set_logical_expr, boolean_literal;
 non terminal set_decl, constructor_expr, assignment_list;
 non terminal at_expr, at_binding, annotations_opt;
@@ -268,21 +270,21 @@ at_binding ::= AT IDENTIFIER:name at_binding_conf_type:ct LPAREN:ft type_list_op
 	:}
 ;
 
-function ::= FUNCTION:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
+function ::= FUNCTION:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN frule_list_opt:rules RCPAREN
 	{:
 		//System.out.println("created function "+name);
 		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (List)rules);
 		parser.parsedFunctionMap.put(f.name,f);
 		parser.parsedFunctionList.add(f);
-		//System.out.println(">>>>>> "+f);
+		//f.prettyPrint(System.out);
 	:} 
 	| PROCESS:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
 	{:
-		//System.out.println("created function "+name);
-		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (List)rules);
-		parser.parsedFunctionMap.put(f.name,f);
-		parser.parsedFunctionList.add(f);
-		//System.out.println(">>>>>> "+f);
+		//System.out.println("created process "+name);
+		Process p = new Process(parser, (Token)def, name.toString(), (List)vars, (List)rules);
+		parser.parsedFunctionMap.put(p.name,p);
+		parser.parsedFunctionList.add(p);
+		//p.prettyPrint(System.out);
 	:} 
 ;
 
@@ -342,6 +344,24 @@ rule_list ::= rule_list:l lf rule:r
 		RESULT = list;
 	:}
 	| rule:r
+	{:
+		List l=new ArrayList();
+		l.add(r);
+		RESULT=l;
+	:}
+;
+
+frule_list_opt ::= lf_opt frule_list:rl lf_opt {: RESULT=rl; :}
+	| lf_opt {: RESULT=new ArrayList(); :} 
+;
+
+frule_list ::= frule_list:l lf frule:r
+	{:
+		List list=(List)l;
+		list.add(r);
+		RESULT = list;
+	:}
+	| frule:r
 	{:
 		List l=new ArrayList();
 		l.add(r);
@@ -655,6 +675,12 @@ rule ::= at_expr:at logical_expr_opt:g LCPAREN statement_list_opt:l RCPAREN
 		RESULT = new Rule(parser,((AstNode)at).token(),(AtPredicate)at,(Expression)g,(Sequence)l, (List)el);
 	:}
 	| guard:g LCPAREN statement_list_opt:l RCPAREN
+	{:
+		RESULT = new Rule(parser,((AstNode)g).token(),null,(Expression)g,(Sequence)l, null);
+	:}
+;
+
+frule ::= guard:g LCPAREN statement_list_opt:l RCPAREN
 	{:
 		RESULT = new Rule(parser,((AstNode)g).token(),null,(Expression)g,(Sequence)l, null);
 	:}

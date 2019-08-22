@@ -176,7 +176,14 @@ public class DataReference implements Data {
 		}
 		return referencedData.toJson();
 	}
-	
+
+	@Override
+	public Data getIfAvailable() {
+		if (isPending())
+			return null;
+		return referencedData.getIfAvailable();
+	}
+
 	public boolean isPending() {
 		return this.referencedData == null;
 	}
@@ -214,11 +221,9 @@ public class DataReference implements Data {
 		// data
 		if (!isPending()) {
 			if (this.referencedData.getDataObservers() != null) {
-				for (DataObserver observer : this.referencedData
-						.getDataObservers()) {
-					if (referencedData.getDataObservers() == null
-							|| (referencedData.getDataObservers() != null && !referencedData
-									.getDataObservers().contains(observer))) {
+				for (DataObserver observer : this.referencedData.getDataObservers()) {
+					if (referencedData.getDataObservers() == null || (referencedData.getDataObservers() != null
+							&& !referencedData.getDataObservers().contains(observer))) {
 						referencedData.addDataObserver(observer);
 					}
 				}
@@ -315,7 +320,7 @@ public class DataReference implements Data {
 		}
 		return referencedData.first();
 	}
-	
+
 	@Override
 	public Data concat(Data data) {
 		if (isPending()) {
@@ -331,5 +336,5 @@ public class DataReference implements Data {
 		}
 		return referencedData.getTypeInfo();
 	}
-	
+
 }

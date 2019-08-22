@@ -30,6 +30,7 @@ import ini.ast.Function;
 import ini.ast.Invocation;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
+import ini.ast.Process;
 import ini.ast.ReturnStatement;
 import ini.ast.Rule;
 import ini.ast.Sequence;
@@ -48,6 +49,7 @@ import ini.eval.at.At;
 import ini.eval.data.Data;
 import ini.eval.data.Data.Kind;
 import ini.eval.data.DataReference;
+import ini.eval.data.FutureData;
 import ini.eval.data.RawData;
 import ini.eval.function.BoundJavaFunction;
 import ini.eval.function.IniFunction;
@@ -63,6 +65,7 @@ public class IniEval {
 	public List<IniEval> forkedEvals = new ArrayList<IniEval>();
 	boolean rulePassed = false;
 	public boolean kill = false;
+	public static final String PROCESS_RESULT = "__process_result";
 
 	public IniEval(IniParser parser, Context context) {
 		this.parser = parser;
@@ -228,6 +231,11 @@ public class IniEval {
 				result = new RawData(f);
 				break;
 
+			case AstNode.PROCESS:
+				f = (Function) node;
+				result = new RawData(f);
+				break;
+
 			case AstNode.INVOCATION:
 				Invocation invocation = (Invocation) node;
 				boolean spawned = false;
@@ -334,17 +342,19 @@ public class IniEval {
 
 						if (f.isProcess()) {
 							final Function function = f;
+							result = new FutureData();
+							ctx.bind(PROCESS_RESULT, result);
 							IniEval child = fork();
 							new Thread(new Runnable() {
 								@Override
 								public void run() {
 									// child.eval(function);
-									child.execute(function);
+									child.executeProcess((Process) function);
 								}
 							}).start();
 						} else {
 							// result = eval(f);
-							execute(f);
+							executeFunction(f);
 						}
 						invocationStack.pop();
 					}
@@ -380,7 +390,12 @@ public class IniEval {
 				if (((ReturnStatement) node).expression != null) {
 					result = eval(((ReturnStatement) node).expression);
 				} else {
-					result = null;
+					result = new RawData();
+				}
+				Context ctx = invocationStack.peek();
+				Data r = ctx.get(PROCESS_RESULT);
+				if (r != null) {
+					r.copyData(result);
 				}
 				throw new ReturnException();
 
@@ -696,23 +711,47 @@ public class IniEval {
 			}
 		}
 		invocationStack.push(ctx);
-		execute(f);
+		executeFunction(f);
 		invocationStack.pop();
 		// TODO: handle collections
 		return result == null ? null : result.getValue();
 	}
 
-	public void execute(Function f) {
-		List<At> ats = null;
+	public void executeProcessOrFunction(Function f) {
+		if (f.isProcess()) {
+			executeProcess((Process) f);
+		} else {
+			executeFunction(f);
+		}
+	}
+
+	public void executeFunction(Function f) {
+		if (f.isProcess()) {
+			throw new RuntimeException("cannot execute " + f + " as a function");
+		}
 		try {
-			for (Rule rule : f.initRules) {
+			for (Rule rule : f.rules) {
 				eval(rule);
 			}
-			if (!f.atRules.isEmpty()) {
+		} catch (ReturnException e) {
+			// swallow
+		}
+	}
+
+	public void executeProcess(Process p) {
+		if (!p.isProcess()) {
+			throw new RuntimeException("cannot execute " + p + " as a process");
+		}
+		List<At> ats = null;
+		try {
+			for (Rule rule : p.initRules) {
+				eval(rule);
+			}
+			if (!p.atRules.isEmpty()) {
 				ats = new ArrayList<At>();
 			}
 			Map<Rule, At> atMap = new HashMap<Rule, At>();
-			for (Rule rule : f.atRules) {
+			for (Rule rule : p.atRules) {
 				// At at = At.atPredicates.get(rule.atPredicate.name);
 				Class<? extends At> c = At.atPredicates.get(rule.atPredicate.name);
 				At at = null;
@@ -752,20 +791,25 @@ public class IniEval {
 				invocationStack.peek().noRulesApplied = false;
 				while (!invocationStack.peek().noRulesApplied) {
 					invocationStack.peek().noRulesApplied = true;
-					for (Rule rule : f.rules) {
+					for (Rule rule : p.rules) {
 						eval(rule);
 					}
 				}
 			} while (!At.checkAllTerminated(ats));
 			At.destroyAll(ats);
-			for (Rule rule : f.endRules) {
+			for (Rule rule : p.endRules) {
 				eval(rule);
+			}
+			Context ctx = invocationStack.peek();
+			Data r = ctx.get(PROCESS_RESULT);
+			if (r != null) {
+				r.copyData(new RawData());
 			}
 		} catch (ReturnException e) {
 			// swallow
 		} catch (RuntimeException e) {
 			boolean caught = false;
-			for (Rule rule : f.errorRules) {
+			for (Rule rule : p.errorRules) {
 				if (rule.guard == null || eval(rule.guard).isTrueOrDefined()) {
 					invocationStack.peek().bind(((Variable) rule.atPredicate.outParameters.get(0)).name,
 							new RawData(e));

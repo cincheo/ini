@@ -44,6 +44,11 @@ public class RawData implements Data {
 	private transient Constructor constructor;
 
 	@Override
+	public Data getIfAvailable() {
+		return this;
+	}
+	
+	@Override
 	public Constructor getConstructor() {
 		return constructor;
 	}
@@ -260,6 +265,9 @@ public class RawData implements Data {
 	 * 
 	 * throw new RuntimeException("cannot convert data to object"); }
 	 */
+
+	public RawData() {
+	}
 
 	public RawData(Object value) {
 		setValue(value);
