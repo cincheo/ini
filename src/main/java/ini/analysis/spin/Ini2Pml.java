@@ -1,5 +1,12 @@
 package ini.analysis.spin;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+
 import ini.ast.Assignment;
 import ini.ast.AstNode;
 import ini.ast.AtPredicate;
@@ -7,7 +14,6 @@ import ini.ast.BinaryOperator;
 import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
 import ini.ast.CharLiteral;
-import ini.ast.Function;
 import ini.ast.Process;
 import ini.ast.Rule;
 import ini.ast.Sequence;
@@ -19,13 +25,6 @@ import ini.eval.data.Data;
 import ini.parser.IniParser;
 import ini.type.AttrContext;
 import ini.type.Type;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 
 public class Ini2Pml {
 

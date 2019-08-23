@@ -6,20 +6,18 @@ import java.util.List;
 
 import ini.parser.IniParser;
 
-public class Process extends Function {
+public class Process extends Executable {
 
 	public List<Rule> initRules=new ArrayList<Rule>();
 	public List<Rule> atRules=new ArrayList<Rule>();
+	public List<Rule> rules=new ArrayList<Rule>();
 	public List<Rule> endRules=new ArrayList<Rule>();
 	public List<Rule> errorRules=new ArrayList<Rule>();
 
-	public boolean isProcess() {
-		return true;
-	}
-
 	public Process(IniParser parser, Token token, String name,
 			List<Parameter> parameters, List<Rule> rules) {
-		super(parser, token, name, parameters, rules);
+		super(parser, token, name, parameters);
+		this.rules = rules;
 		for(Rule r:new ArrayList<Rule>(rules)) {
 			if(r.atPredicate!=null) {
 				switch(r.atPredicate.kind) {

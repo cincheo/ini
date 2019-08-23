@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import ini.ast.Function;
+import ini.ast.Executable;
 import ini.eval.data.Data;
 import ini.eval.data.Data.Kind;
 import ini.eval.data.DataReference;
@@ -12,16 +12,16 @@ import ini.eval.data.RawData;
 
 public class Context {
 
-	Function function;
+	Executable executable;
 
 	public boolean noRulesApplied = false;
 	
-	public Context(Function function) {
-		this.function = function;
+	public Context(Executable executable) {
+		this.executable = executable;
 	}
 
 	public Context(Context context) {
-		this.function = context.function;
+		this.executable = context.executable;
 		this.variables.putAll(context.variables);
 		//this.threadAt.putAll(context.threadAt);
 	}
@@ -48,7 +48,7 @@ public class Context {
 
 	public Data getOrCreate(String name) {
 		if (!variables.containsKey(name)) {
-			if(function.parser.parsedFunctionMap.containsKey(name)) {
+			if(executable.parser.parsedFunctionMap.containsKey(name)) {
 				RawData data = new RawData(name);
 				data.setKind(Kind.FUNCTIONAL);
 				bind(name, data);

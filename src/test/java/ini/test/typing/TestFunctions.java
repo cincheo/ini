@@ -22,7 +22,7 @@ public class TestFunctions extends TestCase {
 			IniParser parser = IniParser.parseCode(
 					"type Tree = Leaf[value:Int]"+
 					"| Node[value:Int,left:Tree,right:Tree]\n"+
-					"function fibtree3(n) {"+
+					"process fibtree3(n) {"+
 					"	n ~	Node[value>2,!left,!right] {"+
 					"		n.left = fibtree3(Node[value=n.value - 1])"+
 					"	}\n"+
@@ -58,8 +58,8 @@ public class TestFunctions extends TestCase {
 	public void testWrongParameterType() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function main() { @init() { f(1.2) } }"+
-					"function f(n) { @end() { return n+1 } }");
+					"process main() { @init() { f(1.2) } }"+
+					"process f(n) { @end() { return n+1 } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 2 error: "+attrib.errors, 2, attrib.errors.size());
@@ -73,8 +73,8 @@ public class TestFunctions extends TestCase {
 	public void testPolymorphicFunction() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function main() { @init() { println(f([1,3]))\n println(f(\"13\")) } }"+
-					"function f(l) { @end() { swap(l[0],l[1])\n return l } }");
+					"process main() { @init() { println(f([1,3]))\n println(f(\"13\")) } }"+
+					"process f(l) { @end() { swap(l[0],l[1])\n return l } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
@@ -86,8 +86,8 @@ public class TestFunctions extends TestCase {
 	public void testWrongPolymorphicFunctionInvocation() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function main() { @init() { println(f([1,3]))\n println(f(\"13\"))\n println(f(1.2))\n } }"+
-					"function f(l) { @end() { swap(l[0],l[1])\n return l } }");
+					"process main() { @init() { println(f([1,3]))\n println(f(\"13\"))\n println(f(1.2))\n } }"+
+					"process f(l) { @end() { swap(l[0],l[1])\n return l } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 3 error: "+attrib.errors, 3, attrib.errors.size());
@@ -103,7 +103,7 @@ public class TestFunctions extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"f1(Int)=>Void [class=\"any\", member=\"any\"]\n"+
-					"function f2() { @init() { f1(2.1) } }");
+					"process f2() { @init() { f1(2.1) } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 1 error: "+attrib.errors, 1, attrib.errors.size());
@@ -117,7 +117,7 @@ public class TestFunctions extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"f1(Int)=>Int [class=\"any\", method=\"any\"]\n"+
-					"function f2() { @init() && f1(2)==1.2 {} }");
+					"process f2() { @init() && f1(2)==1.2 {} }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 2 errors: "+attrib.errors, 2, attrib.errors.size());
@@ -130,13 +130,13 @@ public class TestFunctions extends TestCase {
 	
 	public void testWrongFacInvocation() {
 		try {
-			IniParser parser = IniParser.parseCode("function main() {"+
+			IniParser parser = IniParser.parseCode("process main() {"+
 					"	@init() {"+
 					"		f=10.4\n"+
 					"		fac(f)"+
 					"	}"+
 					"}"+
-					"function fac(n) {"+
+					"process fac(n) {"+
 					"	@init() {"+
 					"		f=1\n"+
 					"		i=2\n"+
@@ -161,12 +161,10 @@ public class TestFunctions extends TestCase {
 	public void testRightFacInvocation() {
 		try {
 			IniParser parser = IniParser.parseCode("function main() {"+
-					"	@init() {"+
-					"		f=10\n"+
-					"		fac(f)"+
-					"	}"+
+					"	f=10\n"+
+					"	fac(f)"+
 					"}"+
-					"function fac(n) {"+
+					"process fac(n) {"+
 					"	@init() {"+
 					"		f=1\n"+
 					"		i=2"+
@@ -190,7 +188,7 @@ public class TestFunctions extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"function nothing() {}"+
-					"function main() { @init() { i = 1\n i = nothing() } }");
+					"process main() { @init() { i = 1\n i = nothing() } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
 			assertEquals("expected 2 errors: "+attrib.errors, 2, attrib.errors.size());

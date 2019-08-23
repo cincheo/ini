@@ -1,19 +1,19 @@
 package ini.broker;
 
-import ini.ast.Function;
+import ini.ast.Executable;
 
 public class DeployRequest extends Request {
 
-	public DeployRequest(String sourceNode, Function function) {
+	public DeployRequest(String sourceNode, Executable executable) {
 		super(sourceNode);
-		this.function = function;
+		this.executable = executable;
 	}
 
-	public Function function;
+	public Executable executable;
 
 	@Override
 	public String toString() {
-		return "deploy request for function " + function.name;
+		return "deploy request for function " + executable.name;
 	}
 
 }

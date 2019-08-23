@@ -113,7 +113,7 @@ public class TestTypeDeclarations extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"type Tree = [value:Int,left:Tree,right:Tree]\n" +
-					"function main() {" +
+					"process main() {" +
 					"  @init() { t = Tree[value = 1] }" +
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
@@ -128,7 +128,7 @@ public class TestTypeDeclarations extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"type Point = [x:Int,y:Int]\n" +
-					"function main() {" +
+					"process main() {" +
 					"  @init() { p = Point[x = 1, y = 1] }" +
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
@@ -143,7 +143,7 @@ public class TestTypeDeclarations extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"function f() {" +
-					"  n ~ C[value==2] {" +
+					"  case n ~ C[value==2] {" +
 					"    println(n)" +
 					"  }"+
 					"}");
@@ -159,7 +159,7 @@ public class TestTypeDeclarations extends TestCase {
 	public void testUseUndeclaredConstructorInConstructor() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function f() {\n" +
+					"process f() {\n" +
 					"  @init() {\n" +
 					"    c = C[value=2]\n" +
 					"    println(c)\n" +

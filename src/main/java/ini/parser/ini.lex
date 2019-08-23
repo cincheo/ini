@@ -91,6 +91,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "this"		        { return symbol(sym.THIS); }
   "case"		        { return symbol(sym.CASE); }
   "default"		        { return symbol(sym.DEFAULT); }
+  "else"		        { return symbol(sym.ELSE); }
 
   {DecIntegerLiteral}   { return symbol(sym.INT); }
   {DecFloatLiteral}		{ return symbol(sym.NUM); }

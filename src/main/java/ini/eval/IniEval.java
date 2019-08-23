@@ -23,6 +23,7 @@ import ini.ast.CaseStatement;
 import ini.ast.CharLiteral;
 import ini.ast.Constructor;
 import ini.ast.ConstructorMatchExpression;
+import ini.ast.Executable;
 import ini.ast.Expression;
 import ini.ast.Field;
 import ini.ast.FieldAccess;
@@ -93,7 +94,7 @@ public class IniEval {
 		if (kill) {
 			throw new KilledException();
 		}
-		Function f;
+		Executable f;
 		Data d;
 
 		try {
@@ -280,7 +281,7 @@ public class IniEval {
 							arguments.add(argument);
 						}
 						// TODO: parse-time
-						if (!f.isProcess()) {
+						if (!(f instanceof Process)) {
 							throw new RuntimeException("cannot spawn a function... please only spawn processes");
 						}
 					}
@@ -340,8 +341,8 @@ public class IniEval {
 						}
 						invocationStack.push(ctx);
 
-						if (f.isProcess()) {
-							final Function function = f;
+						if (f instanceof Process) {
+							final Process process = (Process) f;
 							result = new FutureData();
 							ctx.bind(PROCESS_RESULT, result);
 							IniEval child = fork();
@@ -349,12 +350,12 @@ public class IniEval {
 								@Override
 								public void run() {
 									// child.eval(function);
-									child.executeProcess((Process) function);
+									child.executeProcess(process);
 								}
 							}).start();
 						} else {
 							// result = eval(f);
-							executeFunction(f);
+							executeFunction((Function) f);
 						}
 						invocationStack.pop();
 					}
@@ -687,51 +688,53 @@ public class IniEval {
 
 	}
 
-	public Object invoke(String function, Object... params) {
-		Function f = parser.parsedFunctionMap.get(function);
-		if (f == null) {
-			throw new RuntimeException("undefined function " + function);
+	public Object invoke(String executableName, Object... params) {
+		Executable executable = parser.parsedFunctionMap.get(executableName);
+		if (executable == null) {
+			throw new RuntimeException("undefined function " + executableName);
 		}
-		if (f.parameters.size() < params.length) {
-			throw new RuntimeException("wrong number of parameters for " + function);
+		if (executable instanceof Process) {
+			throw new RuntimeException("cannot invoke process " + executableName);
 		}
-		Context ctx = new Context(f);
-		for (int i = 0; i < f.parameters.size(); i++) {
+		if (executable.parameters.size() < params.length) {
+			throw new RuntimeException("wrong number of parameters for " + executableName);
+		}
+		Context ctx = new Context(executable);
+		for (int i = 0; i < executable.parameters.size(); i++) {
 			if (i > params.length - 1) {
-				if (f.parameters.get(i).defaultValue == null) {
+				if (executable.parameters.get(i).defaultValue == null) {
 					throw new RuntimeException("no value or default value given for parameter '"
-							+ f.parameters.get(i).name + "' for " + function);
+							+ executable.parameters.get(i).name + "' for " + executableName);
 				} else {
 					invocationStack.push(ctx);
-					ctx.bind(f.parameters.get(i).name, eval(f.parameters.get(i).defaultValue));
+					ctx.bind(executable.parameters.get(i).name, eval(executable.parameters.get(i).defaultValue));
 					invocationStack.pop();
 				}
 			} else {
-				ctx.bind(f.parameters.get(i).name, new RawData(params[i]));
+				ctx.bind(executable.parameters.get(i).name, new RawData(params[i]));
 			}
 		}
 		invocationStack.push(ctx);
-		executeFunction(f);
+		executeFunction((Function) executable);
 		invocationStack.pop();
 		// TODO: handle collections
 		return result == null ? null : result.getValue();
 	}
 
-	public void executeProcessOrFunction(Function f) {
-		if (f.isProcess()) {
-			executeProcess((Process) f);
+	public void executeProcessOrFunction(Executable executable) {
+		if (executable instanceof Process) {
+			executeProcess((Process) executable);
 		} else {
-			executeFunction(f);
+			executeFunction((Function) executable);
 		}
 	}
 
 	public void executeFunction(Function f) {
-		if (f.isProcess()) {
-			throw new RuntimeException("cannot execute " + f + " as a function");
-		}
 		try {
-			for (Rule rule : f.rules) {
-				eval(rule);
+			Sequence<Statement> s = f.statements;
+			while (s != null) {
+				eval(s.get());
+				s = s.next();
 			}
 		} catch (ReturnException e) {
 			// swallow
@@ -739,9 +742,6 @@ public class IniEval {
 	}
 
 	public void executeProcess(Process p) {
-		if (!p.isProcess()) {
-			throw new RuntimeException("cannot execute " + p + " as a process");
-		}
 		List<At> ats = null;
 		try {
 			for (Rule rule : p.initRules) {

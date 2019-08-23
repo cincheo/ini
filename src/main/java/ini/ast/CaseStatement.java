@@ -9,8 +9,7 @@ public class CaseStatement extends AstElement implements Statement {
 	public List<Rule> cases;
 	public Sequence<Statement> defaultStatements;
 
-	public CaseStatement(IniParser parser, Token token, List<Rule> cases,
-			Sequence<Statement> defaultStatements) {
+	public CaseStatement(IniParser parser, Token token, List<Rule> cases, Sequence<Statement> defaultStatements) {
 		super(parser, token);
 		this.cases = cases;
 		this.defaultStatements = defaultStatements;

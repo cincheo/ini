@@ -1,22 +1,22 @@
 package ini.type;
 
-import ini.ast.Function;
-import ini.ast.Variable;
-
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import ini.ast.Executable;
+import ini.ast.Variable;
+
 public class AttrContext {
 
-	Function function;
+	Executable executable;
 
-	public AttrContext(Function function) {
-		this.function = function;
+	public AttrContext(Executable executable) {
+		this.executable = executable;
 	}
 	
 	public AttrContext(AttrContext context) {
-		this.function = context.function;
+		this.executable = context.executable;
 		this.variables = new HashMap<String, Type>(context.variables);
 	}
 
@@ -32,7 +32,7 @@ public class AttrContext {
 
 	public Type getOrCreate(Variable variable) {
 		if (!variables.containsKey(variable.name)) {
-			bind(variable.name, new Type(function.parser));
+			bind(variable.name, new Type(executable.parser));
 		}
 		return variables.get(variable.name);
 	}

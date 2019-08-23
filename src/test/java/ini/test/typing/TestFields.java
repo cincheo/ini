@@ -19,7 +19,7 @@ public class TestFields extends TestCase {
 			IniParser parser = IniParser.parseCode(
 					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n"+
 					"function f() {" +
-					"  n ~ Node[value==2,!left,!right] {" +
+					"  case n ~ Node[value==2,!left,!right] {" +
 					"    n.let = Leaf[value=1]\n" +
 					"    n.right = Leaf[value=1]\n" +
 					"  }"+
@@ -38,7 +38,7 @@ public class TestFields extends TestCase {
 			IniParser parser = IniParser.parseCode(
 					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n"+
 					"function f() {" +
-					"  n ~ Node[value==2,!let,!right] {\n" +
+					"  case n ~ Node[value==2,!let,!right] {\n" +
 					"    n.left = Leaf[value=1]\n" +
 					"    n.right = Leaf[value=1]\n" +
 					"  }"+
@@ -56,7 +56,7 @@ public class TestFields extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n"+
-					"function f() {" +
+					"process f() {" +
 					"  n ~ Node[value==2.0,!left,!right] {" +
 					"    n.left = Leaf[value=1]\n" +
 					"    n.right = Leaf[value=1]\n" +
@@ -76,7 +76,7 @@ public class TestFields extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"type Point = [x:Int,y:Int]\n"+
-					"function f() {" +
+					"process f() {" +
 					"  @init() {" +
 					"    p = Point[x=0,y=0]\n" +
 					"    x = p.z\n" +
@@ -95,7 +95,7 @@ public class TestFields extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"type Point = [x:Int,y:Int]\n"+
-					"function f() {" +
+					"process f() {" +
 					"  @init() {" +
 					"    p = Point[x=0,y=0]\n" +
 					"    x = p.x - p.z\n" +

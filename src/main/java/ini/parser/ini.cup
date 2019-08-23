@@ -19,9 +19,9 @@ parser code {:
 	public PrintStream out = System.out;
 	public PrintStream err = System.err;
 
-	public Map<String,Function> parsedFunctionMap=new HashMap<String,Function>();
+	public Map<String,Executable> parsedFunctionMap=new HashMap<String,Executable>();
 	public List<UserType> parsedTypes=new ArrayList<UserType>();
-	public List<Function> parsedFunctionList=new ArrayList<Function>();
+	public List<Executable> parsedFunctionList=new ArrayList<Executable>();
 	public List<Binding> parsedBindingList=new ArrayList<Binding>();
 	public List<AtBinding> parsedAtBindingList=new ArrayList<AtBinding>();
 	public List<Import> parsedImportList=new ArrayList<Import>();
@@ -142,7 +142,7 @@ terminal IDENTIFIER, TIDENTIFIER;
 terminal QUESTION, DOLLAR;
 terminal LF, END;
 // keywords
-terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT;
+terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT, ELSE;
 
 non terminal lf, lf_opt, end_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
@@ -270,10 +270,10 @@ at_binding ::= AT IDENTIFIER:name at_binding_conf_type:ct LPAREN:ft type_list_op
 	:}
 ;
 
-function ::= FUNCTION:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN frule_list_opt:rules RCPAREN
+function ::= FUNCTION:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN statement_list_opt:statements RCPAREN
 	{:
 		//System.out.println("created function "+name);
-		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (List)rules);
+		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (Sequence)statements);
 		parser.parsedFunctionMap.put(f.name,f);
 		parser.parsedFunctionList.add(f);
 		//f.prettyPrint(System.out);
@@ -513,22 +513,14 @@ expr ::= var_access:e {: RESULT=e; :}
 ;
 
 // TODO: the LAMBDA symbol is produced by the lexer with a look-ahead. The parser should disambiguate itself for better perfs.
-lambda_expr ::= LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN rule_list_opt:rules RCPAREN {:
-	RESULT = new Function(parser, (Token)def, null, (List)vars, (List)rules);	
-:} | LAMBDA param_list_opt:vars IMPLIES:def LCPAREN rule_list_opt:rules RCPAREN {:
-	RESULT = new Function(parser, (Token)def, null, (List)vars, (List)rules);	
+lambda_expr ::= LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN statement_list_opt:statements RCPAREN {:
+	RESULT = new Function(parser, (Token)def, null, (List)vars, (Sequence)statements);	
+:} | LAMBDA param_list_opt:vars IMPLIES:def LCPAREN statement_list_opt:statements RCPAREN {:
+	RESULT = new Function(parser, (Token)def, null, (List)vars, (Sequence)statements);	
 :} | LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def statement:s {:
-	AtPredicate at = new AtPredicate(parser,(Token)def,"init",(List)null,new ArrayList(), null);
-	Rule rule = new Rule(parser,((AstNode)at).token(),(AtPredicate)at,(Expression)null,new Sequence(s), null);	
-	List rules = new ArrayList();
-	rules.add(rule);
-	RESULT = new Function(parser, (Token)def, null, (List)vars, rules);
+	RESULT = new Function(parser, (Token)def, null, (List)vars, new Sequence(s));
 :} | LAMBDA param_list_opt:vars IMPLIES:def statement:s {:
-	AtPredicate at = new AtPredicate(parser,(Token)def,"init",(List)null,new ArrayList(), null);
-	Rule rule = new Rule(parser,((AstNode)at).token(),(AtPredicate)at,(Expression)null,new Sequence(s), null);	
-	List rules = new ArrayList();
-	rules.add(rule);
-	RESULT = new Function(parser, (Token)def, null, (List)vars, rules);	
+	RESULT = new Function(parser, (Token)def, null, (List)vars, new Sequence(s));	
 :}
 ;
 
@@ -587,6 +579,10 @@ case_expr ::= CASE:c LCPAREN rule_list_opt:l DEFAULT LCPAREN statement_list_opt:
 	| CASE:c rule:r 
 	{:
 		RESULT = new CaseStatement(parser,(Token)c,(List<Rule>)(List)Arrays.asList(r),null); 
+	:}
+	| CASE:c rule:r ELSE LCPAREN statement_list_opt:s RCPAREN
+	{:
+		RESULT = new CaseStatement(parser,(Token)c,(List<Rule>)(List)Arrays.asList(r),(Sequence)s); 
 	:}
 ;
 

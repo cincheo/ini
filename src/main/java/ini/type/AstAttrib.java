@@ -13,6 +13,7 @@ import ini.ast.BinaryOperator;
 import ini.ast.CaseStatement;
 import ini.ast.Constructor;
 import ini.ast.ConstructorMatchExpression;
+import ini.ast.Executable;
 import ini.ast.Expression;
 import ini.ast.Field;
 import ini.ast.FieldAccess;
@@ -53,18 +54,19 @@ public class AstAttrib {
 		this.parser = parser;
 	}
 
-	public void invoke(Function f) {
-		invocationStack.push(new AttrContext(f));
-		f.getFunctionType();
+	public void invoke(Executable executable) {
+		invocationStack.push(new AttrContext(executable));
+		executable.getFunctionType();
 		// constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
 		// getOrCreateNodeTypeVariable(f), f.getFunctionType(), f));
-		eval(f);
+		eval(executable);
 		invocationStack.pop();
 	}
 
 	// @SuppressWarnings("unchecked")
 	public Type eval(AstNode node) {
-		Function f;
+		Executable executable;
+		Sequence<Statement> s;
 		result = null;
 		Type t1 = null;
 		Type t2 = null;
@@ -254,66 +256,68 @@ public class AstAttrib {
 			break;
 
 		case AstNode.FUNCTION:
-			f = (Function) node;
+			executable = (Executable) node;
 
-			if (f.functionType == null) {
-				invoke(f);
+			if (executable.functionType == null) {
+				invoke(executable);
 			}
 
 			hadReturnStatement = false;
-			typeVar = f.functionType;
+			typeVar = executable.functionType;
 
-			for (int i = 0; i < f.parameters.size(); i++) {
+			for (int i = 0; i < executable.parameters.size(); i++) {
 				// handle default values?
-				invocationStack.peek().bind(f.parameters.get(i).name, typeVar.getTypeParameters().get(i));
+				invocationStack.peek().bind(executable.parameters.get(i).name, typeVar.getTypeParameters().get(i));
 			}
 
-			for (Rule rule : f.rules) {
-				eval(rule);
+			s = ((Function) executable).statements;
+			while (s != null) {
+				eval(s.get());
+				s = s.next();
 			}
 
 			if (!hadReturnStatement) {
-				constraints.add(
-						new TypingConstraint(TypingConstraint.Kind.EQ, typeVar.getReturnType(), parser.ast.VOID, f, f));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, typeVar.getReturnType(), parser.ast.VOID,
+						executable, executable));
 			}
 
 			result = typeVar;
 			break;
-			
-		case AstNode.PROCESS:
-			f = (Function) node;
 
-			if (f.functionType == null) {
-				invoke(f);
+		case AstNode.PROCESS:
+			executable = (Executable) node;
+
+			if (executable.functionType == null) {
+				invoke(executable);
 			}
 
 			hadReturnStatement = false;
-			typeVar = f.functionType;
+			typeVar = executable.functionType;
 
-			for (int i = 0; i < f.parameters.size(); i++) {
+			for (int i = 0; i < executable.parameters.size(); i++) {
 				// handle default values?
-				invocationStack.peek().bind(f.parameters.get(i).name, typeVar.getTypeParameters().get(i));
+				invocationStack.peek().bind(executable.parameters.get(i).name, typeVar.getTypeParameters().get(i));
 			}
 
-			for (Rule rule : ((Process)f).initRules) {
+			for (Rule rule : ((Process) executable).initRules) {
 				eval(rule);
 			}
 
-			for (Rule rule : ((Process)f).atRules) {
+			for (Rule rule : ((Process) executable).atRules) {
 				eval(rule);
 			}
 
-			for (Rule rule : f.rules) {
+			for (Rule rule : ((Process) executable).rules) {
 				eval(rule);
 			}
 
-			for (Rule rule : ((Process)f).endRules) {
+			for (Rule rule : ((Process) executable).endRules) {
 				eval(rule);
 			}
 
 			if (!hadReturnStatement) {
-				constraints.add(
-						new TypingConstraint(TypingConstraint.Kind.EQ, typeVar.getReturnType(), parser.ast.VOID, f, f));
+				constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, typeVar.getReturnType(), parser.ast.VOID,
+						executable, executable));
 			}
 
 			result = typeVar;
@@ -375,18 +379,18 @@ public class AstAttrib {
 
 				}
 			} else {
-				f = parser.parsedFunctionMap.get(invocation.name);
-				if (evaluationStack.contains(f)) {
+				executable = parser.parsedFunctionMap.get(invocation.name);
+				if (evaluationStack.contains(executable)) {
 					// recursive function -> stop evaluation
-					result = f.getFunctionType().getReturnType();
+					result = executable.getFunctionType().getReturnType();
 					break;
 				}
-				if (f == null) {
+				if (executable == null) {
 					addError(new TypingError(node, "undefined function '" + invocation.name + "'"));
 					break;
 				}
 
-				if (f.parameters.size() < invocation.arguments.size()) {
+				if (executable.parameters.size() < invocation.arguments.size()) {
 					addError(new TypingError(node, "wrong number of parameters for '" + invocation.name + "'"));
 				}
 
@@ -394,27 +398,28 @@ public class AstAttrib {
 				 * if (f.getType() != null) { System.err.println("FOUND " + f +
 				 * " FUNCTION TYPE: " + f.getType()); }
 				 */
-				typeVar = f.getFunctionType();
+				typeVar = executable.getFunctionType();
 
-				for (int i = 0; i < f.parameters.size(); i++) {
+				for (int i = 0; i < executable.parameters.size(); i++) {
 					if (i > invocation.arguments.size() - 1) {
-						if (f.parameters.get(i).defaultValue == null) {
+						if (executable.parameters.get(i).defaultValue == null) {
 							addError(new TypingError(TypingError.Level.ERROR, node,
-									"no value or default value given for parameter '" + f.parameters.get(i).name));
+									"no value or default value given for parameter '"
+											+ executable.parameters.get(i).name));
 						} else {
 							constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
-									eval(f.parameters.get(i).defaultValue), typeVar.getTypeParameters().get(i),
-									f.parameters.get(i).defaultValue, f.parameters.get(i)));
+									eval(executable.parameters.get(i).defaultValue), typeVar.getTypeParameters().get(i),
+									executable.parameters.get(i).defaultValue, executable.parameters.get(i)));
 						}
 					} else {
 						constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,
 								eval(invocation.arguments.get(i)), typeVar.getTypeParameters().get(i),
-								invocation.arguments.get(i), f.parameters.get(i)));
+								invocation.arguments.get(i), executable.parameters.get(i)));
 					}
 				}
 
-				invocationStack.push(new AttrContext(f));
-				eval(f);
+				invocationStack.push(new AttrContext(executable));
+				eval(executable);
 				invocationStack.pop();
 
 				result = typeVar.getReturnType();
@@ -464,11 +469,12 @@ public class AstAttrib {
 				result = parser.ast.VOID;
 			}
 
-			f = getFirstEnclosingNode(Function.class);
+			executable = getFirstEnclosingNode(Executable.class);
 
-			typeVar = f.functionType;
+			typeVar = executable.functionType;
 
-			constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ, result, typeVar.getReturnType(), node, f));
+			constraints.add(
+					new TypingConstraint(TypingConstraint.Kind.EQ, result, typeVar.getReturnType(), node, executable));
 
 			break;
 
@@ -483,7 +489,7 @@ public class AstAttrib {
 			if (r.guard != null) {
 				eval(r.guard);
 			}
-			Sequence<Statement> s = r.statements;
+			s = r.statements;
 			while (s != null) {
 				eval(s.get());
 				s = s.next();

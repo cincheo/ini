@@ -19,7 +19,7 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
 
-import ini.ast.Function;
+import ini.ast.Executable;
 import ini.ast.Invocation;
 import ini.ast.UserType;
 import ini.broker.CoreBrokerClient;
@@ -121,7 +121,7 @@ public class Main {
 			for (UserType t : parser.parsedTypes) {
 				t.prettyPrint(System.out);
 			}
-			for (Function f : parser.parsedFunctionList) {
+			for (Executable f : parser.parsedFunctionList) {
 				f.prettyPrint(System.out);
 			}
 		}
@@ -201,7 +201,7 @@ public class Main {
 		parseConfiguration(parser);
 
 		Context context = null;
-		Function main = parser.parsedFunctionMap.get("main");
+		Executable main = parser.parsedFunctionMap.get("main");
 		if (main == null) {
 			parser.out.println("Error: no main function found.");
 			return;
@@ -252,14 +252,14 @@ public class Main {
 				});
 
 				parser.coreBrokerClient.startDeployRequestConsumer(request -> {
-					if (parser.parsedFunctionMap.containsKey(request.function.name)) {
-						Function oldf = parser.parsedFunctionMap.get(request.function.name);
-						parser.parsedFunctionMap.remove(request.function.name);
+					if (parser.parsedFunctionMap.containsKey(request.executable.name)) {
+						Executable oldf = parser.parsedFunctionMap.get(request.executable.name);
+						parser.parsedFunctionMap.remove(request.executable.name);
 						parser.parsedFunctionList.remove(oldf);
 					}
-					parser.parsedFunctionMap.put(request.function.name, request.function);
-					parser.parsedFunctionList.add(request.function);
-					Main.LOGGER.info("deployed function " + request.function.name);
+					parser.parsedFunctionMap.put(request.executable.name, request.executable);
+					parser.parsedFunctionList.add(request.executable);
+					Main.LOGGER.info("deployed function " + request.executable.name);
 				});
 			}
 
@@ -287,8 +287,8 @@ public class Main {
 		attrib.createTypes();
 
 		if (!attrib.hasErrors()) {
-			for (Function f : parser.parsedFunctionList) {
-				attrib.invoke(f);
+			for (Executable executable : parser.parsedFunctionList) {
+				attrib.invoke(executable);
 			}
 			// attrib.printConstraints(System.out);
 			attrib.unify();

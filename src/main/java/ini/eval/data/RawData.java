@@ -360,7 +360,7 @@ public class RawData implements Data {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Object minIndex() {
 		if (references == null) {
 			return 0;
@@ -372,7 +372,7 @@ public class RawData implements Data {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Object maxIndex() {
 		if (references == null) {
 			return -1;

@@ -17,13 +17,13 @@ public class TestTypingRules extends TestCase {
 	public void testStringByStringDivisionNotAllowed() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function main() {"+ 
+					"process main() {"+ 
 					"	@init() {"+ 
 					"		println(f(\"a\",\"b\"))"+
 					"	}"+
 					"}"+
 					"function f(i,j) {"+
-					"	0.0 == i/j {"+
+					"	case 0.0 == i/j {"+
 					"		return 0"+
 					"	}"+
 					"}");
@@ -40,7 +40,7 @@ public class TestTypingRules extends TestCase {
 	public void testStringByStringMultNotAllowed() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function main() {"+ 
+					"process main() {"+ 
 					"	@init() {"+ 
 					"		println(\"a\"*\"b\")"+
 					"	}"+
@@ -58,14 +58,10 @@ public class TestTypingRules extends TestCase {
 		try {
 			IniParser parser = IniParser.parseCode(
 					"function main() {"+ 
-					"	@init() {"+ 
-					"		println(f(\"a\"))"+
-					"	}"+
+					"	println(f(\"a\"))"+
 					"}"+
 					"function f(i) {"+
-					"	@init() {"+
-					"		return -i"+
-					"	}"+
+					"	return -i"+
 					"}");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();

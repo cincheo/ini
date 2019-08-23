@@ -9,15 +9,14 @@ By default, INI uses Kafka as a broker.
 
 ### Language Design Philosophy
 
-INI has been built around a simple construct called a *rule*, which follows the syntax below:
+INI allows to use functions and functional programming as well as process programming together in a neat and simple way.
+For the process part, INI has been built around a simple construct called a *rule*, which follows the syntax below:
 
 ```javascript
 rule := guard '{' statements '}'
 ```
 
-Rules are the heart of the language and since there are no other control flow structure (besides the ``case`` construct), this choice forces the programmers to write well-structured and readable code. To some programmers, this constraint will feel uncomfortable. However, the benefit of this approach, besides code clarity, is also that it is well-suited to be formally verified and validated with Model Checking, as shown in Truong Giang Le's PhD thesis: https://tel.archives-ouvertes.fr/tel-00953368/document. 
-
-One of INI's main design drive is that it is able to generate Promela code that can be formally verified with the Spin model checker (feature still under development). 
+The underlying idea, besides code clarity, is also that it is well-suited to be formally verified and validated with Model Checking, as shown in Truong Giang Le's PhD thesis: https://tel.archives-ouvertes.fr/tel-00953368/document. 
 
 For more details, download the [INI language specifications](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
 
@@ -47,23 +46,21 @@ For pure local calculations, INI programmers can define functions. Here is a typ
 
 ```javascript
 function fac(n) {
-  n == 1 {
+  case n == 1 {
     return 1
   }
-  n > 1 {
+  case n > 1 {
     return n * fac2(n-1)
   }
 }
 ```
 
-Note the absence of a switch in the body of the function. That is because, in INI, only rules (``rule := guard '{' statements '}'``) are allowed as first-level statements. 
+### Rule-based-style factorial function with a process
 
-### Rule-based-style factorial function
-
-In INI, all the rules continue to be executed until none is applicable anymore or if the function has returned (using an explicit ``return`` statement). In practice, it means that one can use a rule-based flavor to program a function. For instance, here is the factorial implementation with a rule-based style.
+In an INI process, all the rules continue to be executed until none is applicable anymore or if the process has returned a value (using an explicit ``return`` statement). For instance, here is the factorial implementation with a process (rule-based style).
 
 ```javascript
-function fac(n) {
+process fac(n) {
   @init() {
     f=1
     i=2
@@ -78,7 +75,7 @@ function fac(n) {
 }
 ```
 
-The second rule, guarded by ``i <= n``, continues to be executed until the ``i`` variable value become greater than ``n``. In INI, looping can be implemented this way, which means that there is no need for having loops as control flow constructs in the language. This design choice keeps the language small and simple, thus making INI programs usually easy to read and maintain.
+The second rule, guarded by ``i <= n``, continues to be executed until the ``i`` variable value become greater than ``n``. In INI, looping in processes can be implemented this way, which means that there is no need for having loops as control flow constructs in the language. This design choice keeps the language small and simple, thus making INI programs usually easy to read and maintain.
 
 Finally, note the ``@init`` and ``@end`` rules, which are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. 
 
@@ -175,10 +172,8 @@ In other cases, a given node may want to evaluate a function or a process that h
 // this is a binding to a function declared on a remote server
 hello(String)=>String [node="server"]
 
-process main() {
-  @init() {
-    println(hello("Renaud"))
-  }
+function main() {
+  println(hello("Renaud"))
 }
 ``` 
 
