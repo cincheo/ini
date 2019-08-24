@@ -40,6 +40,18 @@ For more details, download the [INI language specifications](https://github.com/
 
 The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specifications [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
 
+### Hello world
+
+INI entry point is the ``main`` function or process. To create an INI program that says ``"Hello world``:
+
+```javascript
+function main() {
+  println("Hello world")
+}
+```
+
+Then refer to the "Getting started" section to run the program.
+
 ### A factorial function
 
 For pure local calculations, INI programmers can define functions. Here is a typical factorial calculation with INI. 
@@ -55,9 +67,36 @@ function fac(n) {
 }
 ```
 
+### Lambdas
+
+INI supports lambdas (anonymous functions). It uses the typical arrow syntax (``=>``). The following example shows the use of a lambda expression to map a list ``l`` to another list where all the elements have been incremented. It uses the ``collect.ini`` lib, which provides basic functions to manipulate collections.
+
+```javascript
+import "ini/lib/collect.ini"
+
+function main() {
+  l = [1, 2, 3]
+  l = map(l, e => return e+1)  // l = [2, 3, 4]
+}
+```
+
+INI is not object oriented. However, for readability, it provides a dot-invocation syntactic sugar. In INI: ``f(a, b)`` is rigorously equivalent to ``a.f(b)``. This allows us to chain invocations in a nicer way. For instance, to map a list and print it out:  
+
+```javascript
+import "ini/lib/collect.ini"
+
+function main() {
+  l = [1, 2, 3]
+  l.map(e => return e+1).foreach(e => println(e))  // prints 2\n3\n4\n
+  // equivalent regular function invocation style (much harder to read):
+  foreach(map(l, e => return e+1), e => println(e))  // also prints 2\n3\n4\n
+  
+}
+```
+
 ### A factorial process (rule-based style)
 
-In an INI process, all the rules continue to be executed until none is applicable anymore or if the process has returned a value (using an explicit ``return`` statement). For instance, here is the factorial implementation with a process (rule-based style).
+On contrary to a function, a process runs asynchronously and can only contain rules. In an INI process, all the rules continue to be executed until none is applicable anymore or if the process has returned a value (using an explicit ``return`` statement). For instance, here is the factorial implementation with a process (rule-based style).
 
 ```javascript
 process fac(n) {
@@ -81,7 +120,7 @@ Finally, note the ``@init`` and ``@end`` rules, which are called "event rules". 
 
 ### A process awaking every second
 
-In INI, processes look pretty similar to functions but actually implement a quite different execution semantics. On contrary to a function, a process always runs asynchronously and reacts to its environment through events. A process definition can only contain rules and event rules, i.e. actions that are triggered when a condition is fulfilled, or when an event is fired. By default, a process will never end, unless none of the rules can apply anymore and all the events are terminated. 
+In INI, a process reacts to its environment through events. By default, a process will never end, unless none of the rules can apply anymore and all the events are terminated. 
 
 The following INI program creates a process that will be notified every second (1000ms) by the ``@every`` event. It then evaluate the rule's action to print a tick and increments the tick count hold by the ``i`` variable.
 
@@ -100,7 +139,7 @@ Note the ``[time=1000]`` construct, which configures the ``@every`` event rule t
 
 ### A simple 3-process data pipeline
 
-Since processes are asynchronous, they cannot return values like functions do. So, process communicate through channels (similarly to Pi calculus and most agent-based systems). Processes can produce data in channels using the ``produce`` function, and consume data from channel using the ``@consume`` event.
+The basics of process communication is provided by *channels* (similarly to Pi calculus and most agent-based systems). Processes can produce data in channels using the ``produce`` function, and consume data from channel using the ``@consume`` event.
 
 In the following program, the ``main`` process creates two sub-processes by calling ``p``. Each sub-process consumes a data from an ``in`` channel and produces the incremented result to an ``out`` channel. Thus, it creates a pipeline that ultimately sends back the data incremented twice to the main process.
 
