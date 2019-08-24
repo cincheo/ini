@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,13 +42,13 @@ public class RawData implements Data {
 
 	private transient List<DataObserver> dataObservers;
 
-	private transient Constructor constructor;
+	private Constructor constructor;
 
 	@Override
 	public Data getIfAvailable() {
 		return this;
 	}
-	
+
 	@Override
 	public Constructor getConstructor() {
 		return constructor;
@@ -360,7 +361,7 @@ public class RawData implements Data {
 		return this;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object minIndex() {
 		if (references == null) {
 			return 0;
@@ -372,7 +373,7 @@ public class RawData implements Data {
 		}
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object maxIndex() {
 		if (references == null) {
 			return -1;
@@ -460,6 +461,7 @@ public class RawData implements Data {
 		this.typeInfo = data.getTypeInfo();
 		this.explodedString = false; // because getData implodes the string
 		this.kind = data.getKind();
+		this.constructor = data.getConstructor();
 		if (data.getReferences() != null) {
 			for (Entry<Object, Data> e : data.getReferences().entrySet()) {
 				Data rd = new RawData(null);
@@ -610,7 +612,26 @@ public class RawData implements Data {
 			} else if (getReferences() == null) {
 				out.print("null");
 			} else {
-				out.print(toString());
+				if (constructor != null) {
+					out.print(constructor.name);
+				}
+				out.print("[");
+				Iterator<Entry<Object, Data>> it = references.entrySet().iterator();
+				while (it.hasNext()) {
+					Entry<Object, Data> e = it.next();
+					if (e.getKey() != null) {
+						out.print(e.getKey() + "=");
+						if (e.getValue() == null) {
+							out.print("null");
+						} else {
+							e.getValue().prettyPrint(out);
+						}
+						if (it.hasNext()) {
+							out.print(",");
+						}
+					}
+				}
+				out.print("]");
 			}
 		}
 

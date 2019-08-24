@@ -113,7 +113,6 @@ public class Main {
 		}
 
 		if (commandLineConfig.userSpecified("node") || commandLineConfig.userSpecified("deamon")) {
-			System.out.println("coucou");
 			parser.deamon = true;
 		}
 

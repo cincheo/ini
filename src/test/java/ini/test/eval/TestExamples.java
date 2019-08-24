@@ -19,20 +19,18 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testLCSS() {
-		testFile("ini/examples/lcss.ini",
-				(p, out) -> assertEquals("2.0\n", out));
+		testFile("ini/examples/lcss.ini", (p, out) -> assertEquals("2.0\n", out));
 	}
-	
+
 	public void testComparator() {
 		testFile("ini/examples/comparator.ini",
 				(p, out) -> assertEquals("result:    aginoorrssttt\nresult:    aginoorrssttt\n", out));
 	}
 
 	public void testLambdas() {
-		testFile("ini/examples/lambdas.ini",
-				(p, out) -> assertEquals("234567246", out));
+		testFile("ini/examples/lambdas.ini", (p, out) -> assertEquals("234567246", out));
 	}
-	
+
 	public void testCountOccurences() {
 		testFile("ini/examples/count_occurences.ini",
 				(p, out) -> assertEquals(
@@ -99,32 +97,32 @@ public class TestExamples extends IniTestCase {
 			Thread.sleep(50);
 			HttpGet request = new HttpGet("http://localhost:8080/test");
 			HttpResponse response = httpclient.execute(request);
-			assertEquals("hello world wide web!\n<p>bye!\n", IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
+			assertEquals("hello world wide web!\n<p>bye!\n",
+					IOUtils.toString(response.getEntity().getContent(), "UTF-8"));
 			Thread.sleep(1000);
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testFibonacci() {
 		testFile("ini/examples/fibonacci.ini",
 				(p, out) -> assertEquals(
 						"Fib(8)=34\n" + "Here is a flat Fibonacci tree for 5:\n"
 								+ "[5,4,3,3,2,2,1,2,1,1,1,1,1,null,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null](1..32)\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
-								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({value=Data(1)}),value=Data(3)}),value=Data(5)})\n"
+								+ "Tree1[left=Tree1[left=Tree1[left=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],right=Tree1[value=1],value=3],right=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],value=4],right=Tree1[left=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],right=Tree1[value=1],value=3],value=5]\n"
 								+ "Fibtree(5).left.value = 4\n" + "Fibtree(5).right.value = 3\n"
 								+ "Fibtree(5).left.left.value = 3\n" + "Fibtree(5).left.right.value = 2\n"
 								+ "Fibtree(5).right.left.value = 2\n" + "Fibtree(5).right.right.value = 1\n"
-								+ "{left:{left:{left:{left:{value:1},right:{value:1},value:2},right:{value:1},value:3},right:{left:{value:1},right:{value:1},value:2},value:4},right:{left:{left:{value:1},right:{value:1},value:2},right:{value:1},value:3},value:5}\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
-								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=null,right=null,value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=null,right=null,value=Data(1)}),value=Data(3)}),value=Data(5)})\n"
+								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[left=null,right=null,value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[left=null,right=null,value=1],value=3],value=5]\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
-								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=null,right=null,value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=null,right=null,value=Data(1)}),value=Data(3)}),value=Data(5)})\n"
+								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[left=null,right=null,value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[left=null,right=null,value=1],value=3],value=5]\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
-								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=Data(),right=Data(),value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({left=Data(),right=Data(),value=Data(1)}),value=Data(3)}),value=Data(5)})\n"
+								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1]],right=Node[left=null,right=null,value=1]],right=Node[left=Leaf[value=1],right=Leaf[value=1]]],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1]],right=Node[left=null,right=null,value=1]]]\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
-								+ "Data({left=Data({left=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({value=Data(1)}),value=Data(3)}),right=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),value=Data(4)}),right=Data({left=Data({left=Data({value=Data(1)}),right=Data({value=Data(1)}),value=Data(2)}),right=Data({value=Data(1)}),value=Data(3)}),value=Data(5)})\n",
+								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Leaf[value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Leaf[value=1],value=3],value=5]\n",
 						out));
 	}
 

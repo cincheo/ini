@@ -40,7 +40,7 @@ For more details, download the [INI language specifications](https://github.com/
 
 The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specifications [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
 
-### Functional-style factorial function
+### A factorial function
 
 For pure local calculations, INI programmers can define functions. Here is a typical factorial calculation with INI. 
 
@@ -55,7 +55,7 @@ function fac(n) {
 }
 ```
 
-### Rule-based-style factorial function with a process
+### A factorial process (rule-based style)
 
 In an INI process, all the rules continue to be executed until none is applicable anymore or if the process has returned a value (using an explicit ``return`` statement). For instance, here is the factorial implementation with a process (rule-based style).
 
@@ -181,21 +181,15 @@ Note that the binding of ``hello``, also defines the functional type ``(String) 
 
 ## Getting started
 
-### Build and run
+### Quick start
 
-Install and start Apache Kafka:
-
-```console
-$ cd kafka_{version}
-$ bin/zookeeper-server-start.sh config/zookeeper.properties
-$ bin/kafka-server-start.sh config/server.properties
-```
+Requirements: Java 1.8+, Apache Maven (in your path)
 
 Build with:
 
 ```console
 $ cd {ini_root_dir}
-$ maven package
+$ maven package -Dmaven.test.skip=true
 ```
 
 Launch INI program (UNIX-based OS):
@@ -205,14 +199,22 @@ $ cd {ini_root_dir}
 $ bin/ini {ini_file}
 ```
 
+### Distributed mode and configuration
+
+Install and start Apache Kafka:
+
+```console
+$ cd kafka_{version}
+$ bin/zookeeper-server-start.sh config/zookeeper.properties
+$ bin/kafka-server-start.sh config/server.properties
+```
+
 Launch an INI node:
 
 ```console
 $ cd {ini_root_dir}
 $ bin/ini -n {node_name} {ini_file} # alternatively set the INI_NODE environment variable
 ```
-
-### Configuration
 
 For development (JUnit tests), INI uses the ``development`` environment, which defaults to a locally-installed Kafka broker. In order to use another Kafka instance, modify the ``ini_config.json`` configuration file to set the right connection parameters.
 

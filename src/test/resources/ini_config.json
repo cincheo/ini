@@ -1,0 +1,19 @@
+{
+	environments: {
+		development: {
+			consumerGroupId: "IniConsumer2",
+			coreConsumerGroupId: "CoreIniConsumer2",
+			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
+		},
+		test: {
+			consumerGroupId: "IniConsumer2",
+			coreConsumerGroupId: "CoreIniConsumer2",
+			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
+		},
+		production: {
+			consumerGroupId: "IniConsumer2",
+			coreConsumerGroupId: "CoreIniConsumer2",
+			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
+		}
+	}
+}

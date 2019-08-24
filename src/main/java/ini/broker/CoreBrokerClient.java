@@ -14,6 +14,7 @@ import com.google.gson.JsonPrimitive;
 
 import ini.Main;
 import ini.ast.AstNode;
+import ini.ast.Executable;
 import ini.ast.Expression;
 import ini.ast.NumberLiteral;
 import ini.ast.Statement;
@@ -83,6 +84,7 @@ public class CoreBrokerClient {
 			gsonBuilder.registerTypeAdapter(AstNode.class, new AstNodeDeserializer())
 					.registerTypeAdapter(VariableAccess.class, new AstNodeDeserializer())
 					.registerTypeAdapter(Expression.class, new AstNodeDeserializer())
+					.registerTypeAdapter(Executable.class, new AstNodeDeserializer())
 					.registerTypeAdapter(Statement.class, new AstNodeDeserializer());
 
 			gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {

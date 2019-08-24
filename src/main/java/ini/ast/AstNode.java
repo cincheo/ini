@@ -95,6 +95,8 @@ public interface AstNode {
 			return NumberLiteral.class;
 		case AstNode.PARAMETER:
 			return Parameter.class;
+		case AstNode.PROCESS:
+			return Process.class;
 		case AstNode.RETURN_STATEMENT:
 			return ReturnStatement.class;
 		case AstNode.RULE:
