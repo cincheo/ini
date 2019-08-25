@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -20,8 +21,8 @@ import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
 
 import ini.ast.Executable;
+import ini.ast.Function;
 import ini.ast.Invocation;
-import ini.ast.UserType;
 import ini.broker.CoreBrokerClient;
 import ini.broker.DeployRequest;
 import ini.eval.Context;
@@ -45,15 +46,12 @@ public class Main {
 
 		jsap.registerParameter(new Switch("version").setLongFlag("version").setHelp("Print the INI version and exit."));
 
-		jsap.registerParameter(new Switch("pretty-print-ast").setShortFlag('a').setLongFlag("pretty-print-ast")
-				.setHelp("Pretty print the parsed program."));
-
-		jsap.registerParameter(new Switch("parse-only").setShortFlag('p').setLongFlag("parse-only")
-				.setHelp("Only parse the program without executing it."));
-
 		jsap.registerParameter(new Switch("debug").setLongFlag("debug")
 				.setHelp("Execute the program in debug mode - step through the program."));
 
+//		jsap.registerParameter(new Switch("shell").setShortFlag('s').setLongFlag("shell")
+//				.setHelp("Start INI in shell mode so that the user can interact with INI by typing statements."));
+		
 		jsap.registerParameter(
 				new Switch("help").setShortFlag('h').setLongFlag("help").setHelp("Print this usage message."));
 
@@ -116,15 +114,6 @@ public class Main {
 			parser.deamon = true;
 		}
 
-		if (commandLineConfig.getBoolean("pretty-print-ast")) {
-			for (UserType t : parser.parsedTypes) {
-				t.prettyPrint(System.out);
-			}
-			for (Executable f : parser.parsedFunctionList) {
-				f.prettyPrint(System.out);
-			}
-		}
-
 		AstAttrib attrib = null;
 
 		try {
@@ -140,10 +129,6 @@ public class Main {
 				attrib.printErrors(System.err);
 				return;
 			}
-		}
-
-		if (commandLineConfig.getBoolean("parse-only")) {
-			return;
 		}
 
 		parseConfiguration(parser);
@@ -177,8 +162,28 @@ public class Main {
 				Arrays.asList(ArrayUtils.toStringArray(commandLineConfig.getObjectArray("watch"))),
 				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("parameters")));
 
+		/*if(commandLineConfig.getBoolean("shell")) {
+			Scanner keyboard = new Scanner(System.in);
+			while(true) {
+				System.out.print("> ");
+				String command = keyboard.nextLine();
+				evalCommand(parser, command);
+			}
+		}*/
+		
 	}
 
+/*	private static final String TMP_FUNCTION_NAME = "_root_tmp_";
+	
+	private synchronized static Context getRootContext() {
+	}
+	
+	private static void evalCommand(IniParser parser, String command) {
+		parser.parseAdditionalCode(code);
+		IniEval eval = new IniEval(parser, new Context(new Function(parser, null, "<command>", null, null)));
+		eval.eval();
+	}*/
+	
 	public static void parseConfiguration(IniParser parser) {
 		try {
 			parser.configuration = new Gson().fromJson(FileUtils.readFileToString(new File("ini_config.json"), "UTF8"),
@@ -201,10 +206,7 @@ public class Main {
 
 		Context context = null;
 		Executable main = parser.parsedFunctionMap.get("main");
-		if (main == null) {
-			parser.out.println("Error: no main function found.");
-			return;
-		} else {
+		if (main != null) {
 			// Ini2Pml converter = new Ini2Pml(parser);
 			// StringBuffer out = new StringBuffer();
 			// converter.generateObserverdVariabsles(main);

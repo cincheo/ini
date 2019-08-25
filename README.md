@@ -50,7 +50,10 @@ function main() {
 }
 ```
 
-Then refer to the "Getting started" section to run the program.
+Then, run the program by typing the following command in a shell:
+
+``bash
+$ bin/ini 
 
 ### A factorial function
 
@@ -64,6 +67,11 @@ function fac(n) {
   case n > 1 {
     return n * fac2(n-1)
   }
+}
+
+// prints out the result of the function
+function main(args) {
+  println(fac(to_int(args[0]))
 }
 ```
 

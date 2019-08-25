@@ -142,20 +142,19 @@ terminal IDENTIFIER, TIDENTIFIER;
 terminal QUESTION, DOLLAR;
 terminal LF, END;
 // keywords
-terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT, ELSE;
+terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT, ELSE, DECLARE;
 
-non terminal lf, lf_opt, end_opt;
+non terminal lf, lf_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
 non terminal function, param_list_opt, param_list, param;
-non terminal import_list_opt, import_list, import_decl;
-non terminal binding_list_opt, binding_list, binding, type_list_opt, type_list, type, at_binding_conf_type;
+non terminal import_decl;
+non terminal binding, type_list_opt, type_list, type, at_binding_conf_type;
 non terminal var_list;
-non terminal statement_list_opt, statement_list, statement, expr, no_paren_expr;
+non terminal statement_list_opt, statement_list, top_level_statement, statement, expr, no_paren_expr;
 non terminal assignment_expr, var_access, sync_var_access, set_var_access, single_string, string_expr, case_expr, lambda_expr;
 non terminal ret_statement;
 non terminal invocation, dot_invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
 non terminal rule_list_opt, rule_list, rule, guard;
-non terminal frule_list_opt, frule_list, frule;
 non terminal logical_expr_opt, logical_expr, algebraic_expr, set_logical_expr, boolean_literal;
 non terminal set_decl, constructor_expr, assignment_list;
 non terminal at_expr, at_binding, annotations_opt;
@@ -191,27 +190,13 @@ lf ::= lf LF | LF;
 
 lf_opt ::= lf |;
 
-end_opt ::= END |;
-
-ini_program ::= lf_opt import_list_opt binding_list_opt program_elt_list_opt;
+ini_program ::= lf_opt program_elt_list_opt;
 
 program_elt_list_opt ::= program_elt_list lf_opt |;
 
-program_elt_list ::= program_elt_list lf_opt program_elt | program_elt ;
+program_elt_list ::= program_elt_list lf program_elt | program_elt ;
 
-program_elt ::= function | usertype ;
-
-import_list_opt ::= import_list lf_opt |;
-
-import_list ::= import_list lf import_decl:i
-	{:
-		parser.parsedImportList.add((Import)i);
-	:}
-	| import_decl:i
-	{:
-		parser.parsedImportList.add((Import)i);
-	:}
-;
+program_elt ::= import_decl | binding | at_binding | function | usertype | top_level_statement;
 
 import_decl ::= IMPORT:itoken STRING:filePath
 	{:
@@ -226,34 +211,16 @@ import_decl ::= IMPORT:itoken STRING:filePath
 			throw new RuntimeException("Cannot import file '" + i.filePath + "'" 
 				+ (i.token != null ? " at " + i.token.getLocation() : ""));
 		}
+		parser.parsedImportList.add(i);
 		RESULT = i;
 	:}
 ;
 
-
-binding_list_opt ::= binding_list lf_opt |;
-
-binding_list ::= binding_list lf binding:b
+binding ::= DECLARE:d IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
 	{:
-		parser.parsedBindingList.add((Binding)b);
-	:}
-	| binding:b
-	{:
-		parser.parsedBindingList.add((Binding)b);
-	:}
-	| binding_list lf at_binding:b
-	{:
-		parser.parsedAtBindingList.add((AtBinding)b);
-	:}
-	| at_binding:b
-	{:
-		parser.parsedAtBindingList.add((AtBinding)b);
-	:}
-;
-
-binding ::= IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
-	{:
-		RESULT = new Binding(parser, (Token)name, name.toString(), (List)types, (TypeVariable)rtype, (List)a);
+		Binding b = new Binding(parser, (Token)d, name.toString(), (List)types, (TypeVariable)rtype, (List)a);
+		parser.parsedBindingList.add(b);
+		RESULT = b;
 	:}
 ;
 
@@ -264,9 +231,11 @@ at_binding_conf_type ::=
 :}
 ;
 
-at_binding ::= AT IDENTIFIER:name at_binding_conf_type:ct LPAREN:ft type_list_opt:rt RPAREN IMPLIES STRING:className
+at_binding ::= DECLARE:d AT IDENTIFIER:name at_binding_conf_type:ct LPAREN:ft type_list_opt:rt RPAREN IMPLIES STRING:className
 	{:
-		RESULT = new AtBinding(parser, (Token)name, name.toString(), (List)ct, (List) rt, className.toString());
+		AtBinding b = new AtBinding(parser, (Token)d, name.toString(), (List)ct, (List) rt, className.toString());
+		parser.parsedAtBindingList.add(b);
+		RESULT = b;
 	:}
 ;
 
@@ -344,24 +313,6 @@ rule_list ::= rule_list:l lf rule:r
 		RESULT = list;
 	:}
 	| rule:r
-	{:
-		List l=new ArrayList();
-		l.add(r);
-		RESULT=l;
-	:}
-;
-
-frule_list_opt ::= lf_opt frule_list:rl lf_opt {: RESULT=rl; :}
-	| lf_opt {: RESULT=new ArrayList(); :} 
-;
-
-frule_list ::= frule_list:l lf frule:r
-	{:
-		List list=(List)l;
-		list.add(r);
-		RESULT = list;
-	:}
-	| frule:r
 	{:
 		List l=new ArrayList();
 		l.add(r);
@@ -473,6 +424,13 @@ assignment_list ::= assignment_list:l COMMA lf_opt IDENTIFIER:f ASSIGN:a expr:e
 		list.add(new Assignment(parser,(Token)f,new Variable(parser,(Token)f,f.toString()),(Expression)e));
 		RESULT=list;
 	:}
+;
+
+top_level_statement ::= /*pre_post_op:e {: RESULT = e; :}
+	| assignment_expr:e {: RESULT = e; :} 
+	|*/ invocation:e {: RESULT = e; :}
+	| dot_invocation:e {: RESULT = e; :}
+	| case_expr:e {: RESULT = e; :}
 ;
 
 statement ::= pre_post_op:e {: RESULT = e; :}
@@ -675,25 +633,6 @@ rule ::= at_expr:at logical_expr_opt:g LCPAREN statement_list_opt:l RCPAREN
 		RESULT = new Rule(parser,((AstNode)g).token(),null,(Expression)g,(Sequence)l, null);
 	:}
 ;
-
-frule ::= guard:g LCPAREN statement_list_opt:l RCPAREN
-	{:
-		RESULT = new Rule(parser,((AstNode)g).token(),null,(Expression)g,(Sequence)l, null);
-	:}
-;
-
-/*rule_body ::= statement_list_opt:l ret_expr_opt:ret
-	{:
-		if(ret!=null) {
-			if(l!=null) {
-				((Sequence)l).last().setNext(ret);
-			} else {
-				l = new Sequence(ret);
-			}
-		}
-		RESULT = l;
-	:}
-;*/		
 
 logical_expr_opt ::= ANDAND logical_expr:e {: RESULT = e; :} | ;
 

@@ -92,6 +92,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "case"		        { return symbol(sym.CASE); }
   "default"		        { return symbol(sym.DEFAULT); }
   "else"		        { return symbol(sym.ELSE); }
+  "declare"		        { return symbol(sym.DECLARE); }
 
   {DecIntegerLiteral}   { return symbol(sym.INT); }
   {DecFloatLiteral}		{ return symbol(sym.NUM); }
@@ -136,7 +137,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   {WhiteSpaceChar}      { /* ignore */ }
 
   // THIS LOOK-AHEAD SHOULD BE SOLVED IN THE PARSER FOR BETTER PERFS
-  {ParameterList} / {WhiteSpace}* "=>"  { yypushback(yylength()); yybegin(LAMBDA); return symbol(sym.LAMBDA); }
+  {ParameterList} / {WhiteSpace}* "=>"  { Symbol s = symbol(sym.LAMBDA); yypushback(yylength()); yybegin(LAMBDA); return s; }
 
   {Identifier}          { return symbol(sym.IDENTIFIER); }
   {TypeIdentifier}      { return symbol(sym.TIDENTIFIER); }
@@ -183,11 +184,10 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   {Comment}             { /* ignore */ }
   {WhiteSpaceChar}      { /* ignore */ }
   // POTENTIAL PB UNDER WINDOWS?
-  "\n" / "\n"           { yybegin(YYINITIAL); return symbol(sym.END); }
-  "\n" / "type"         { yybegin(YYINITIAL); return symbol(sym.END); }
-  "\n" / "function"     { yybegin(YYINITIAL); return symbol(sym.END); }
-  "\n" / "process"      { yybegin(YYINITIAL); return symbol(sym.END); }
-  //"\n" / <<EOF>>               { yybegin(YYINITIAL); return symbol(sym.END); }
+  "\n" / "\n"           { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
+  "\n" / "type"         { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
+  "\n" / "function"     { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
+  "\n" / "process"      { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
   <<EOF>>               { yybegin(YYINITIAL); return symbol(sym.END); }
   "\n"                  { return symbol(sym.LF); }
 }

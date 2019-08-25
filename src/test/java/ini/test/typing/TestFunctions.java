@@ -58,7 +58,7 @@ public class TestFunctions extends TestCase {
 	public void testWrongParameterType() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"process main() { @init() { f(1.2) } }"+
+					"process main() { @init() { f(1.2) } }\n"+
 					"process f(n) { @end() { return n+1 } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
@@ -73,7 +73,7 @@ public class TestFunctions extends TestCase {
 	public void testPolymorphicFunction() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"process main() { @init() { println(f([1,3]))\n println(f(\"13\")) } }"+
+					"process main() { @init() { println(f([1,3]))\n println(f(\"13\")) } }\n"+
 					"process f(l) { @end() { swap(l[0],l[1])\n return l } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
@@ -86,7 +86,7 @@ public class TestFunctions extends TestCase {
 	public void testWrongPolymorphicFunctionInvocation() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"process main() { @init() { println(f([1,3]))\n println(f(\"13\"))\n println(f(1.2))\n } }"+
+					"process main() { @init() { println(f([1,3]))\n println(f(\"13\"))\n println(f(1.2))\n } }\n"+
 					"process f(l) { @end() { swap(l[0],l[1])\n return l } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
@@ -102,7 +102,7 @@ public class TestFunctions extends TestCase {
 	public void testBindingInvocationParameterType() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"f1(Int)=>Void [class=\"any\", member=\"any\"]\n"+
+					"declare f1(Int)=>Void [class=\"any\", member=\"any\"]\n"+
 					"process f2() { @init() { f1(2.1) } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
@@ -116,7 +116,7 @@ public class TestFunctions extends TestCase {
 	public void testBindingInvocationResultType() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"f1(Int)=>Int [class=\"any\", method=\"any\"]\n"+
+					"declare f1(Int)=>Int [class=\"any\", method=\"any\"]\n"+
 					"process f2() { @init() && f1(2)==1.2 {} }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
@@ -135,7 +135,7 @@ public class TestFunctions extends TestCase {
 					"		f=10.4\n"+
 					"		fac(f)"+
 					"	}"+
-					"}"+
+					"}\n"+
 					"process fac(n) {"+
 					"	@init() {"+
 					"		f=1\n"+
@@ -163,7 +163,7 @@ public class TestFunctions extends TestCase {
 			IniParser parser = IniParser.parseCode("function main() {"+
 					"	f=10\n"+
 					"	fac(f)"+
-					"}"+
+					"}\n"+
 					"process fac(n) {"+
 					"	@init() {"+
 					"		f=1\n"+
@@ -187,7 +187,7 @@ public class TestFunctions extends TestCase {
 	public void testVoidReturnType() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"function nothing() {}"+
+					"function nothing() {}\n"+
 					"process main() { @init() { i = 1\n i = nothing() } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();

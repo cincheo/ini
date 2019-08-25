@@ -21,7 +21,7 @@ public class TestTypingRules extends TestCase {
 					"	@init() {"+ 
 					"		println(f(\"a\",\"b\"))"+
 					"	}"+
-					"}"+
+					"}\n"+
 					"function f(i,j) {"+
 					"	case 0.0 == i/j {"+
 					"		return 0"+
@@ -59,7 +59,7 @@ public class TestTypingRules extends TestCase {
 			IniParser parser = IniParser.parseCode(
 					"function main() {"+ 
 					"	println(f(\"a\"))"+
-					"}"+
+					"}\n"+
 					"function f(i) {"+
 					"	return -i"+
 					"}");

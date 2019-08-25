@@ -34,7 +34,7 @@ public class TestArrays extends TestCase {
 	public void testWrongParameterType() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"process main() { @init() { f(1.2) } }"+
+					"process main() { @init() { f(1.2) } }\n"+
 					"process f(n) { @end() { return n+1 } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
@@ -62,7 +62,7 @@ public class TestArrays extends TestCase {
 	public void testWrongPolymorphicFunctionInvocation() {
 		try {
 			IniParser parser = IniParser.parseCode(
-					"process main() { @init() {\n println(f([1,3]))\n println(f(\"13\"))\n println(f(1.2))\n } }"+
+					"process main() { @init() {\n println(f([1,3]))\n println(f(\"13\"))\n println(f(1.2))\n } }\n"+
 					"process f(l) { @end() {\n swap(l[0],l[1])\n return l\n } }");
 			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
 			AstAttrib attrib = parser.attrib();
