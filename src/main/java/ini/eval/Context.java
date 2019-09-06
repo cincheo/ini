@@ -6,9 +6,7 @@ import java.util.Map;
 
 import ini.ast.Executable;
 import ini.eval.data.Data;
-import ini.eval.data.Data.Kind;
 import ini.eval.data.DataReference;
-import ini.eval.data.RawData;
 
 public class Context {
 
@@ -42,19 +40,26 @@ public class Context {
 		variables.remove(name);
 	}
 
+	public boolean hasBinding(String name) {
+		return variables.containsKey(name);
+	}
+
 	public Data get(String name) {
 		return variables.get(name);
 	}
 
+	public Executable getExecutable(String name) {
+		Data d = variables.get(name);
+		if(d.isExecutable()) {
+			return d.getValue();
+		} else {
+			return null;
+		}
+	}
+	
 	public Data getOrCreate(String name) {
 		if (!variables.containsKey(name)) {
-			if(executable.parser.parsedFunctionMap.containsKey(name)) {
-				RawData data = new RawData(name);
-				data.setKind(Kind.FUNCTIONAL);
-				bind(name, data);
-			} else {
-				bind(name, new DataReference(null));
-			}
+			bind(name, new DataReference(null));
 		}
 		return variables.get(name);
 	}

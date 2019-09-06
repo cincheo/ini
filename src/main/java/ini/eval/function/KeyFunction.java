@@ -1,38 +1,41 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
 import ini.eval.IniEval;
-import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
+import ini.type.TypingConstraint.Kind;
 
-import java.util.List;
+public class KeyFunction extends BuiltInExecutable {
 
-public class KeyFunction extends IniFunction {
-
-	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		return new RawData(eval.eval(params.get(0)).keyOf(eval.eval(params.get(1))));
+	public KeyFunction(IniParser parser) {
+		super(parser, "key", "dictData", "data");
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints,
-			Invocation invocation) {
-//		Type k = new Type(parser);
-//		Type v = new Type(parser);
-//		Type mkv = parser.ast.getDependentType("Map", k, v);
-//		//constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,t1,t2,invocation,invocation));
-//		return parser.ast.getFunctionalType(k, mkv, v);
+	public void eval(IniEval eval) {
+		eval.result = new RawData(getArgument(eval, 0).keyOf(getArgument(eval, 1)));
+	}
 
-		Type mkv = new Type(parser,"Map");
-		Type k = new Type(parser);
-		Type v = new Type(parser);
+	@Override
+	protected void buildTypingConstraints() {
+		Type k = parser.types.createType();
+		Type v = parser.types.createType();
+		Type mkv = parser.types.createMapType(k, v);
+		addTypingConstraint(Kind.EQ, getParameterType(0), mkv);
+		addTypingConstraint(Kind.EQ, getParameterType(1), v);
+		addTypingConstraint(Kind.EQ, getReturnType(), k);
+	}
+
+	@Override
+	public Type getFunctionalType(AstAttrib attrib) {
+		Type mkv = new Type(attrib.parser.types, "Map");
+		Type k = new Type(attrib.parser.types);
+		Type v = new Type(attrib.parser.types);
 		mkv.addTypeParameter(k);
 		mkv.addTypeParameter(v);
-		Type functionType = new Type(parser,"function");
+		Type functionType = new Type(attrib.parser.types, "function");
 		functionType.setReturnType(k);
 		functionType.addTypeParameter(mkv);
 		functionType.addTypeParameter(v);

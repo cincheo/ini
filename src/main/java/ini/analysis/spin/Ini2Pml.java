@@ -369,17 +369,17 @@ public class Ini2Pml {
 	}
 
 	public void generateTypeDeclaration(Type type) {
-		if (type == parser.ast.INT || type == parser.ast.LONG) {
+		if (type == parser.types.INT || type == parser.types.LONG) {
 			variableDeclaration.append("byte ");
-		} else if (type == parser.ast.BOOLEAN) {
+		} else if (type == parser.types.BOOLEAN) {
 			variableDeclaration.append("bool ");
 		}
 	}
 
 	public String convertType(Type type) {
-		if (type == parser.ast.INT || type == parser.ast.LONG) {
+		if (type == parser.types.INT || type == parser.types.LONG) {
 			return "byte";
-		} else if (type == parser.ast.BOOLEAN) {
+		} else if (type == parser.types.BOOLEAN) {
 			return "bool";
 		}
 		return null;

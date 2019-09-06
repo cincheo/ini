@@ -1,37 +1,45 @@
 package ini.eval.function;
 
-import java.util.List;
-
-import ini.ast.Expression;
-import ini.ast.Invocation;
 import ini.broker.BrokerClient;
 import ini.broker.Channel;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
+import ini.type.TypingConstraint.Kind;
 
-public class ProduceFunction extends IniFunction {
+public class ProduceFunction extends BuiltInExecutable {
+
+	public ProduceFunction(IniParser parser) {
+		super(parser, "produce", "channel", "data");
+	}
 
 	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		Channel channel = new Channel(eval.eval(params.get(0)).getValue());
-		Data data = eval.eval(params.get(1));
+	public void eval(IniEval eval) {
+		Channel channel = new Channel(getArgument(eval, 0).getValue());
+		Data data = getArgument(eval, 1);
 		try {
-			BrokerClient.createDefaultInstance(eval.parser, channel.isGlobal()).produce(channel.getName(),
+			BrokerClient.createDefaultInstance(eval.parser.env, channel.isGlobal()).produce(channel.getName(),
 					RawData.rawCopy(data));
 			// KafkaClient.runProducer(topic, RawData.rawCopy(message));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		return null;
+		eval.result = data;
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		return parser.ast.getFunctionalType(parser.ast.VOID, parser.ast.STRING, parser.ast.ANY);
+	protected void buildTypingConstraints() {
+		addTypingConstraint(Kind.EQ, getParameterType(0), parser.types.STRING);
+		addTypingConstraint(Kind.EQ, getReturnType(), parser.types.VOID);
+	}
+	
+	@Override
+	public Type getFunctionalType(AstAttrib attrib) {
+		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID, attrib.parser.types.STRING,
+				attrib.parser.types.ANY);
 	}
 
 }

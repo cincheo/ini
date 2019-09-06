@@ -1,37 +1,45 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
+import java.util.Map;
+
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
+import ini.type.TypingConstraint.Kind;
 
-import java.util.List;
-import java.util.Map;
+public class SwapFunction extends BuiltInExecutable {
 
-public class SwapFunction extends IniFunction {
-
+	public SwapFunction(IniParser parser) {
+		super(parser, "swap", "data1", "data2");
+	}
+	
 	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		Data d1 = eval.eval(params.get(0));
-		if(d1.isUndefined()) return null;
-		Data d2 = eval.eval(params.get(1));
-		if(d2.isUndefined()) return null;
+	public void eval(IniEval eval) {
+		eval.result = null;
+		Data d1 = getArgument(eval, 0);
+		if(d1.isUndefined()) return;
+		Data d2 = getArgument(eval, 1);
+		if(d2.isUndefined()) return;
 		Object o = d1.getValue();
 		d1.setValue(d2.getValue());
 		d2.setValue(o);
 		Map<Object,Data> refs = d1.getReferences();
 		d1.setReferences(d2.getReferences());
 		d2.setReferences(refs);
-		return null;
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		Type t = new Type(parser);
-		return parser.ast.getFunctionalType(parser.ast.VOID, t, t);
+	public Type getFunctionalType(AstAttrib attrib) {
+		Type t = new Type(parser.types);
+		return parser.types.createFunctionalType(parser.types.VOID, t, t);
+	}
+
+	@Override
+	protected void buildTypingConstraints() {
+		addTypingConstraint(Kind.EQ, getParameterType(0), getParameterType(1));
+		addTypingConstraint(Kind.EQ, getReturnType(), parser.types.VOID);
 	}
 	
 }

@@ -15,102 +15,81 @@ import ini.eval.at.*;
 
 parser code {:
 
-	public Ast ast;
+	public Types types;
 	public PrintStream out = System.out;
 	public PrintStream err = System.err;
+	private int userTypeIndex = 1;
 
-	public Map<String,Executable> parsedFunctionMap=new HashMap<String,Executable>();
-	public List<UserType> parsedTypes=new ArrayList<UserType>();
-	public List<Executable> parsedFunctionList=new ArrayList<Executable>();
-	public List<Binding> parsedBindingList=new ArrayList<Binding>();
-	public List<AtBinding> parsedAtBindingList=new ArrayList<AtBinding>();
-	public List<Import> parsedImportList=new ArrayList<Import>();
+	public int nextUserTypeIndex() {
+		return userTypeIndex++;
+	}
 
-	public boolean deamon = false;
+	//public Map<String,Executable> parsedFunctionMap=new HashMap<String,Executable>();
+	//public List<Executable> parsedFunctionList=new ArrayList<Executable>();
+	//public List<Binding> parsedBindingList=new ArrayList<Binding>();
+	//public List<AtBinding> parsedAtBindingList=new ArrayList<AtBinding>();
+	//public List<Import> parsedImportList=new ArrayList<Import>();
+	//public List<AstNode> parsedAst =  new ArrayList<AstNode>();
+	public List<AstNode> topLevels =  new ArrayList<AstNode>();
 
-	public ini.broker.CoreBrokerClient coreBrokerClient;
+	public IniEnv env;
+	public List<Executable> builtInExecutables;
 
-	public Configuration configuration;
-
-	public String environment = "development";
-
-	public String node = "main";
+	private List<Executable> createBuiltInExecutables() {
+		return Arrays.asList( //
+			new ClearFunction(this), //
+			new CopyFunction(this), //
+			new ErrorFunction(this), //
+			new FirstFunction(this), //
+			new KeyFunction(this), //
+			new PrintFunction(this), //
+			new PrintlnFunction(this), //
+			new ProduceFunction(this), //
+			new RestFunction(this), //
+			new SizeFunction(this), //
+			new SleepFunction(this), //
+			new SwapFunction(this), //
+			new ToStringFunction(this), //
+			new WaitFunction(this)
+		);
+	}
 	
-	public EnvironmentConfiguration getEnvironmentConfiguration() {
-		return configuration.environments.get(environment);
-	}
-
-	protected static IniParser createParser(String fileName) throws java.io.FileNotFoundException {
+	public static IniParser createParserForFile(IniEnv env, IniParser parent, String fileName) throws java.io.FileNotFoundException {
       IniScanner scanner= new IniScanner(new java.io.FileReader(fileName));
       scanner.setFileName(fileName);
       IniParser parser= new IniParser(scanner);
-      parser.ast = new Ast(parser);
-      return parser;
-	}
-
-	protected static IniParser createParser(Ast ast, String fileName) throws java.io.FileNotFoundException {
-      IniScanner scanner= new IniScanner(new java.io.FileReader(fileName));
-      scanner.setFileName(fileName);
-      IniParser parser= new IniParser(scanner);
-      parser.ast = ast;
-      return parser;
-	}
-
-	public static IniParser parseFile(String fileName) throws java.io.FileNotFoundException {
-      IniScanner scanner= new IniScanner(new java.io.FileReader(fileName));
-      scanner.setFileName(fileName);
-	  IniParser parser= new IniParser(scanner);
-      parser.ast = new Ast(parser);
-      try {
-    	parser.parse();
-	  	for (Binding b : parser.parsedBindingList) {
-			IniFunction.functions.put(b.name, new BoundJavaFunction(b));
-	  	}
-	  	for (AtBinding b : parser.parsedAtBindingList) {
-			//At.atPredicates.put(b.name, ((At)Class.forName(b.className).newInstance()).getClass());
-			At.atPredicates.put(b.name, (Class<? extends At>)Class.forName(b.className));
-	  	}
-	  } catch(Exception e) {
-	  	e.printStackTrace();
-	  	parser.errors.add(new SyntaxError(null, "internal parser error"));
+      if(env==null) {
+      	env = new IniEnv();
+      }
+      parser.env = env;
+      if(parent != null) {
+	      parser.types = parent.types;
+	      parser.builtInExecutables = parser.builtInExecutables;
+	  } else {
+	      parser.types = new Types(parser);
+	      parser.builtInExecutables = parser.createBuiltInExecutables();
 	  }
       return parser;
 	}
 
-	public static IniParser parseCode(String code,PrintStream out,PrintStream err) throws Exception {
-		IniScanner scanner= new IniScanner(new java.io.StringReader(code));
-		scanner.setFileName("<none>");
-		IniParser parser= new IniParser(scanner);
-		parser.out = out;
-		parser.err = err;
-      parser.ast = new Ast(parser);
-      try {
-		parser.parse();
-		for (Binding b : parser.parsedBindingList) {
-			IniFunction.functions.put(b.name, new BoundJavaFunction(b));
-		}
-	  } catch(Exception e) {
-		if(parser.errors.size()==0) {
-			e.printStackTrace();
-			parser.errors.add(new SyntaxError(null, "internal parser error"));
-		}
+	public static IniParser createParserForCode(IniEnv env, IniParser parent, String code) throws Exception {
+      IniScanner scanner= new IniScanner(new java.io.StringReader(code));
+      scanner.setFileName("<none>");
+      IniParser parser= new IniParser(scanner);
+      if(env==null) {
+      	env = new IniEnv();
+      }
+      parser.env = env;
+      if(parent != null) {
+	      parser.types = parent.types;
+	      parser.builtInExecutables = parser.builtInExecutables;
+	  } else {
+	      parser.types = new Types(parser);
+	      parser.builtInExecutables = parser.createBuiltInExecutables();
 	  }
-		return parser;
+      return parser;
 	}
 
-	public static IniParser parseCode(String code) throws Exception {
-		return parseCode(code,System.out,System.err);
-	}
-	
-	public ini.type.AstAttrib attrib() throws Exception {
-		return ini.Main.attrib(this);
-	}
-	
-	public void evalMainFunction() throws Exception {
-		ini.Main.evalMainFunction(this,null);
-	}
-	
-	
 	public List<SyntaxError> errors = new ArrayList<SyntaxError>();
 	
   public void syntax_error(java_cup.runtime.Symbol current) {
@@ -148,7 +127,7 @@ non terminal lf, lf_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
 non terminal function, param_list_opt, param_list, param;
 non terminal import_decl;
-non terminal binding, type_list_opt, type_list, type, at_binding_conf_type;
+non terminal binding, type_list_opt, type_list, type, type_decl_list_opt, type_decl_list, type_decl, at_binding_conf_type;
 non terminal var_list;
 non terminal statement_list_opt, statement_list, top_level_statement, statement, expr, no_paren_expr;
 non terminal assignment_expr, var_access, sync_var_access, set_var_access, single_string, string_expr, case_expr, lambda_expr;
@@ -194,32 +173,44 @@ ini_program ::= lf_opt program_elt_list_opt;
 
 program_elt_list_opt ::= program_elt_list lf_opt |;
 
-program_elt_list ::= program_elt_list lf program_elt | program_elt ;
+program_elt_list ::= program_elt_list lf program_elt:e  {: parser.topLevels.add((AstNode)e); :} 
+	| program_elt:e {: parser.topLevels.add((AstNode)e); :};
 
-program_elt ::= import_decl | binding | at_binding | function | usertype | top_level_statement;
+program_elt ::= import_decl:e {: RESULT=e; :} 
+	| binding:e {: RESULT=e; :} 
+	| at_binding:e {: RESULT=e; :} 
+	| function:e {: RESULT=e; :} 
+	| usertype:e {: RESULT=e; :} 
+	| top_level_statement:e {: RESULT=e; :};
 
 import_decl ::= IMPORT:itoken STRING:filePath
 	{:
 		Import i = new Import(parser, (Token)itoken, filePath.toString());
 		try {
-			IniParser localParser = IniParser.createParser(parser.ast,filePath.toString());
+			IniParser localParser = IniParser.createParserForFile(parser.env, parser, filePath.toString());
 			localParser.parse();
-			parser.parsedFunctionMap.putAll(localParser.parsedFunctionMap);
-			parser.parsedBindingList.addAll(localParser.parsedBindingList);
-			parser.parsedFunctionList.addAll(localParser.parsedFunctionList);
+			i.importParser = localParser;
+			//parser.parsedFunctionMap.putAll(localParser.parsedFunctionMap);
+			//parser.parsedBindingList.addAll(localParser.parsedBindingList);
+			//parser.parsedFunctionList.addAll(localParser.parsedFunctionList);
 		} catch (java.io.FileNotFoundException e) {
 			throw new RuntimeException("Cannot import file '" + i.filePath + "'" 
 				+ (i.token != null ? " at " + i.token.getLocation() : ""));
 		}
-		parser.parsedImportList.add(i);
+		//parser.parsedImportList.add(i);
 		RESULT = i;
 	:}
 ;
 
 binding ::= DECLARE:d IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
 	{:
-		Binding b = new Binding(parser, (Token)d, name.toString(), (List)types, (TypeVariable)rtype, (List)a);
-		parser.parsedBindingList.add(b);
+		Binding b = new Binding(parser, (Token)d, name.toString(), (List)null, (List)types, (TypeVariable)rtype, (List)a);
+		//parser.parsedBindingList.add(b);
+		RESULT = b;
+	:} 
+	| DECLARE:d LPAREN type_decl_list_opt:typedecls RPAREN IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
+	{:
+		Binding b = new Binding(parser, (Token)d, name.toString(), (List)typedecls, (List)types, (TypeVariable)rtype, (List)a);
 		RESULT = b;
 	:}
 ;
@@ -234,7 +225,7 @@ at_binding_conf_type ::=
 at_binding ::= DECLARE:d AT IDENTIFIER:name at_binding_conf_type:ct LPAREN:ft type_list_opt:rt RPAREN IMPLIES STRING:className
 	{:
 		AtBinding b = new AtBinding(parser, (Token)d, name.toString(), (List)ct, (List) rt, className.toString());
-		parser.parsedAtBindingList.add(b);
+		//parser.parsedAtBindingList.add(b);
 		RESULT = b;
 	:}
 ;
@@ -243,17 +234,19 @@ function ::= FUNCTION:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPA
 	{:
 		//System.out.println("created function "+name);
 		Function f = new Function(parser, (Token)def, name.toString(), (List)vars, (Sequence)statements);
-		parser.parsedFunctionMap.put(f.name,f);
-		parser.parsedFunctionList.add(f);
+		//parser.parsedFunctionMap.put(f.name,f);
+		//parser.parsedFunctionList.add(f);
 		//f.prettyPrint(System.out);
+		RESULT = f;
 	:} 
 	| PROCESS:def IDENTIFIER:name LPAREN param_list_opt:vars RPAREN LCPAREN rule_list_opt:rules RCPAREN
 	{:
 		//System.out.println("created process "+name);
 		Process p = new Process(parser, (Token)def, name.toString(), (List)vars, (List)rules);
-		parser.parsedFunctionMap.put(p.name,p);
-		parser.parsedFunctionList.add(p);
+		//parser.parsedFunctionMap.put(p.name,p);
+		//parser.parsedFunctionList.add(p);
 		//p.prettyPrint(System.out);
+		RESULT = p;
 	:} 
 ;
 
@@ -354,6 +347,32 @@ type ::= TIDENTIFIER:i {: RESULT = new TypeVariable(parser,(Token)i,i.toString()
 	| type:t MULT {: RESULT = new TypeVariable(parser,((TypeVariable)t).token,(TypeVariable)t); :}
 ;
 
+type_decl_list_opt ::= type_decl_list:l {: RESULT = l; :} | ;
+
+type_decl_list ::= type_decl_list:l COMMA type_decl:t
+	{:
+		List list=(List)l;
+		list.add(t);
+		RESULT=list;
+	:}
+		| type_decl:t
+	{:
+		List l=new ArrayList();
+		l.add(t);
+		RESULT=l;
+	:}
+;
+
+type_decl ::= TIDENTIFIER:i {: RESULT = new TypeVariable(parser,(Token)i,i.toString(), true); :}
+	| TIDENTIFIER:i LT TIDENTIFIER:s {: 
+		TypeVariable tv = new TypeVariable(parser,(Token)i,i.toString(), true);
+		TypeVariable sv = new TypeVariable(parser,(Token)s,s.toString());
+		tv.superType = sv;
+		RESULT = tv;
+	:}
+;
+
+
 assignment_expr ::= var_access:v ASSIGN:a expr:e
 	{:
 		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
@@ -426,9 +445,9 @@ assignment_list ::= assignment_list:l COMMA lf_opt IDENTIFIER:f ASSIGN:a expr:e
 	:}
 ;
 
-top_level_statement ::= /*pre_post_op:e {: RESULT = e; :}
+top_level_statement ::= pre_post_op:e {: RESULT = e; :}
 	| assignment_expr:e {: RESULT = e; :} 
-	|*/ invocation:e {: RESULT = e; :}
+	| invocation:e {: RESULT = e; :}
 	| dot_invocation:e {: RESULT = e; :}
 	| case_expr:e {: RESULT = e; :}
 ;
@@ -475,9 +494,9 @@ lambda_expr ::= LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN sta
 	RESULT = new Function(parser, (Token)def, null, (List)vars, (Sequence)statements);	
 :} | LAMBDA param_list_opt:vars IMPLIES:def LCPAREN statement_list_opt:statements RCPAREN {:
 	RESULT = new Function(parser, (Token)def, null, (List)vars, (Sequence)statements);	
-:} | LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def statement:s {:
+:} | LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def expr:s {:
 	RESULT = new Function(parser, (Token)def, null, (List)vars, new Sequence(s));
-:} | LAMBDA param_list_opt:vars IMPLIES:def statement:s {:
+:} | LAMBDA param_list_opt:vars IMPLIES:def expr:s {:
 	RESULT = new Function(parser, (Token)def, null, (List)vars, new Sequence(s));	
 :}
 ;
@@ -663,8 +682,8 @@ set_decl ::= LSPAREN:l expr:lb DOTDOT expr:ub RSPAREN:r {:
 usertype ::= TYPE:t TIDENTIFIER:i ASSIGN constructor_list:l lf_opt END
 	{:
 		UserType type = new UserType(parser,(Token)t,i.toString(),(List)l);
-		// System.out.println(">>>>>>> usertype: "+type);
-		parser.parsedTypes.add(type);
+		// parser.parsedTypes.add(type);
+		RESULT = type;
 	:}
 ;
 

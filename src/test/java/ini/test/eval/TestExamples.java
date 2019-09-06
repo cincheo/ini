@@ -7,6 +7,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import ini.test.IniTestCase;
+
 public class TestExamples extends IniTestCase {
 
 	public TestExamples(String name) {

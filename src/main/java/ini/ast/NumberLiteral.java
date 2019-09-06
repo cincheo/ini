@@ -15,13 +15,13 @@ public class NumberLiteral extends AstElement implements Expression {
 		this.value=value;
 		this.typeInfo = TypeInfo.getTypeInfoForInstance(value);
 		if(value instanceof Byte) {
-			this.type = parser.ast.BYTE;
+			this.type = parser.types.BYTE;
 		} if(value instanceof Integer) {
-			this.type = parser.ast.INT;
+			this.type = parser.types.INT;
 		} else if(value instanceof Float) {
-			this.type = parser.ast.FLOAT;
+			this.type = parser.types.FLOAT;
 		} else if(value instanceof Double) {
-			this.type = parser.ast.FLOAT;
+			this.type = parser.types.DOUBLE;
 		}
 		this.nodeTypeId=AstNode.NUMBER_LITERAL;
 	}

@@ -47,8 +47,8 @@ public class StartWebServiceFunction extends IniFunction {
 
 	@Override
 	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		return parser.ast.getFunctionalType(parser.ast.VOID, parser.ast.INT,
-				parser.ast.getFunctionalType(parser.ast.VOID, parser.ast.STRING, parser.ast.ANY));
+		return parser.types.createFunctionalType(parser.types.VOID, parser.types.INT,
+				parser.types.createFunctionalType(parser.types.VOID, parser.types.STRING, parser.types.ANY));
 	}
 
 	public class Handler extends AbstractHandler {
@@ -68,7 +68,7 @@ public class StartWebServiceFunction extends IniFunction {
 			response.setStatus(HttpServletResponse.SC_OK);
 			baseRequest.setHandled(true);
 			// dispatch to ini function...
-			eval.invoke(function, baseRequest.getPathInfo(), response.getWriter());
+			eval.invoke(function, new Object[] {baseRequest.getPathInfo(), response.getWriter()});
 		}
 
 	}

@@ -1,44 +1,54 @@
 package ini.eval.function;
 
-import ini.Main;
-import ini.ast.Binding;
-import ini.ast.Expression;
-import ini.ast.Invocation;
-import ini.eval.IniEval;
-import ini.eval.data.Data;
-import ini.eval.data.RawData;
-import ini.parser.IniParser;
-import ini.type.Type;
-import ini.type.TypingConstraint;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class BoundJavaFunction extends IniFunction {
+import ini.Main;
+import ini.ast.Binding;
+import ini.ast.Executable;
+import ini.ast.Parameter;
+import ini.ast.TypeVariable;
+import ini.eval.IniEval;
+import ini.eval.data.Data;
+import ini.eval.data.RawData;
+import ini.type.AstAttrib;
+import ini.type.Type;
+import ini.type.TypingConstraint;
+
+public class BoundJavaFunction extends Executable {
 
 	public Binding binding;
 
 	public BoundJavaFunction(Binding binding) {
+		super(binding.parser, binding.token, binding.name, new ArrayList<>());
 		this.binding = binding;
+		int i = 0;
+		if (binding.parameterTypes != null) {
+			for (TypeVariable t : binding.parameterTypes) {
+				parameters.add(new Parameter(binding.parser, t.token, "arg" + (i++)));
+			}
+		}
 	}
 
 	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
+	public void eval(IniEval eval) {
+		// TODO: FOR PERFORMANCE, MOVE JAVA MEMBER LOOKUP IN THE CONSTRUCTOR
+
 		Object result = null;
 		try {
-			Object[] args = new Object[params.size()];
-			int i = 0;
-			for (Expression e : params) {
+			Object[] args = new Object[parameters.size()];
+			List<Type> ts = binding.getFunctionalType().getTypeParameters();
+			for (int i = 0; i < parameters.size(); i++) {
 				// System.out.println("-- constructing param "+e+" -
 				// "+binding.getFunctionalType());
-				Data d = eval.eval(e);
+				Data d = getArgument(eval, i);
 				Object o = null;
-				List<Type> ts = binding.getFunctionalType().getTypeParameters();
 				if (ts == null) {
 					o = RawData.dataToObject(null, d);
 				} else {
@@ -47,13 +57,13 @@ public class BoundJavaFunction extends IniFunction {
 				// System.out.println("-- "+o);
 				// TODO: handle data structure (at least collections)
 				args[i] = o;
-				i++;
 			}
 			Class<?> c = Class.forName(binding.className);
 			boolean invoked = false;
 
 			switch (binding.getKind()) {
 			case CONSTRUCTOR:
+				// TODO: MOVE IN BINDING'S CONSTRUCTOR
 				for (Constructor<?> constr : c.getConstructors()) {
 					try {
 						result = constr.newInstance(args);
@@ -68,10 +78,11 @@ public class BoundJavaFunction extends IniFunction {
 				}
 				if (!invoked) {
 					throw new RuntimeException(
-							"Cannot instantiate object (" + binding + ") with " + getArgsString(args));
+							"Cannot instantiate object for binding " + binding + ", args = " + getArgsString(args));
 				}
 				break;
 			case METHOD:
+				// TODO: MOVE IN BINDING'S CONSTRUCTOR
 				for (Method m : c.getMethods()) {
 					if (m.getName().equals(binding.getMemberName())) {
 						try {
@@ -95,36 +106,36 @@ public class BoundJavaFunction extends IniFunction {
 					}
 				}
 				if (!invoked) {
-					throw new RuntimeException("Cannot invoke method (" + binding + ") with " + getArgsString(args));
+					throw new RuntimeException(
+							"Cannot invoke method for binding " + binding + ", args = " + getArgsString(args));
 				}
 				break;
 			case FIELD:
-				for (Field f : c.getFields()) {
-					if (f.getName().equals(binding.getMemberName())) {
-						try {
-							if (Modifier.isStatic(f.getModifiers())) {
-								result = f.get(null);
-								invoked = true;
-								break;
-							} else {
-								result = f.get(args[0]);
-								invoked = true;
-								break;
-							}
-						} catch (Exception e) {
-							// swallow
+				Field f = c.getField(binding.getMemberName());
+				if (f != null) {
+					try {
+						if (Modifier.isStatic(f.getModifiers())) {
+							result = f.get(null);
+							invoked = true;
+							break;
+						} else {
+							result = f.get(args[0]);
+							invoked = true;
+							break;
 						}
+					} catch (Exception e) {
+						// swallow
 					}
 				}
 				if (!invoked) {
-					throw new RuntimeException("Cannot access field (" + binding + ") with " + getArgsString(args));
+					throw new RuntimeException("Cannot access field in " + binding + ", args = " + getArgsString(args));
 				}
 				break;
 			}
 		} catch (Throwable e) {
 			throw new RuntimeException("Cannot invoke " + binding, e);
 		}
-		return RawData.objectToData(result);
+		eval.result = RawData.objectToData(result);
 	}
 
 	private String getArgsString(Object[] args) {
@@ -142,7 +153,13 @@ public class BoundJavaFunction extends IniFunction {
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
+	protected void buildTypingConstraints() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public Type getFunctionalType(AstAttrib attrib) {
 		return binding.getFunctionalType();
 	}
 

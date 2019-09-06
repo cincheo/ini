@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 
+import ini.IniEnv;
 import ini.Main;
 import ini.ast.AstNode;
 import ini.ast.Executable;
@@ -21,14 +22,13 @@ import ini.ast.Statement;
 import ini.ast.VariableAccess;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
-import ini.parser.IniParser;
 
 public class CoreBrokerClient {
 
-	private IniParser parser;
+	private IniEnv env;
 
-	public CoreBrokerClient(IniParser parser) {
-		this.parser = parser;
+	public CoreBrokerClient(IniEnv env) {
+		this.env = env;
 	}
 
 	private static final boolean VERBOSE = false;
@@ -71,8 +71,8 @@ public class CoreBrokerClient {
 					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo();
 				}
 			});
-			spawnRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, parser.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(parser.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
+			spawnRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(),
+					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
 							SpawnRequest.class));
 		}
 		return spawnRequestBrokerClient;
@@ -105,8 +105,8 @@ public class CoreBrokerClient {
 				}
 			});
 
-			deployRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, parser.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(parser.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
+			deployRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(),
+					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
 							DeployRequest.class));
 		}
 		return deployRequestBrokerClient;
@@ -115,8 +115,8 @@ public class CoreBrokerClient {
 	private synchronized BrokerClient<FetchRequest> getFetchRequestBrokerClient() {
 		if (fetchRequestBrokerClient == null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
-			fetchRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, parser.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(parser.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
+			fetchRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(),
+					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
 							FetchRequest.class));
 		}
 		return fetchRequestBrokerClient;
@@ -125,7 +125,7 @@ public class CoreBrokerClient {
 	public void startSpawnRequestConsumer(Consumer<SpawnRequest> handler) {
 		new Thread() {
 			public void run() {
-				getSpawnRequestBrokerClient().consume(parser.node + SPAWN_REQUEST_SUFFIX, request -> {
+				getSpawnRequestBrokerClient().consume(env.node + SPAWN_REQUEST_SUFFIX, request -> {
 					Main.LOGGER.info("" + request);
 					handler.accept(request);
 				});
@@ -140,7 +140,7 @@ public class CoreBrokerClient {
 	public void startFetchRequestConsumer(Consumer<FetchRequest> handler) {
 		new Thread() {
 			public void run() {
-				getFetchRequestBrokerClient().consume(parser.node + FETCH_REQUEST_SUFFIX, request -> {
+				getFetchRequestBrokerClient().consume(env.node + FETCH_REQUEST_SUFFIX, request -> {
 					Main.LOGGER.info("" + request);
 					handler.accept(request);
 				});
@@ -177,7 +177,7 @@ public class CoreBrokerClient {
 	public void startDeployRequestConsumer(Consumer<DeployRequest> handler) {
 		new Thread() {
 			public void run() {
-				getDeployRequestBrokerClient().consume(parser.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
+				getDeployRequestBrokerClient().consume(env.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
 					Main.LOGGER.info("" + deployRequest);
 					handler.accept(deployRequest);
 				});

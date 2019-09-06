@@ -1,30 +1,33 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
 import ini.eval.IniEval;
-import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
+import ini.type.TypingConstraint.Kind;
 
-import java.util.List;
+public class SizeFunction extends BuiltInExecutable {
 
-public class SizeFunction extends IniFunction {
-
-	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		return new RawData(eval.eval(params.get(0)).getSize());
+	public SizeFunction(IniParser parser) {
+		super(parser, "size", "arrayData");
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		Type l = new Type(parser,"Map");
-		Type t = new Type(parser);
-		l.addTypeParameter(parser.ast.INT);
-		l.addTypeParameter(t);
-		return parser.ast.getFunctionalType(parser.ast.INT, l);
+	public void eval(IniEval eval) {
+		eval.result = new RawData(getArgument(eval, 0).getSize());
+	}
+
+	@Override
+	public Type getFunctionalType(AstAttrib attrib) {
+		Type t = new Type(attrib.parser.types);
+		return attrib.parser.types.createFunctionalType(attrib.parser.types.INT, attrib.parser.types.createArrayType(t));
+	}
+
+	@Override
+	protected void buildTypingConstraints() {
+		addTypingConstraint(Kind.EQ, getParameterType(0), parser.types.createArrayType(parser.types.createType()));
+		addTypingConstraint(Kind.EQ, getReturnType(), parser.types.INT);
 	}
 	
 }

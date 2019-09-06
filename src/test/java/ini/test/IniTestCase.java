@@ -1,13 +1,16 @@
-package ini.test.eval;
+package ini.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ini.Main;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import junit.framework.TestCase;
 
 public abstract class IniTestCase extends TestCase {
@@ -25,9 +28,34 @@ public abstract class IniTestCase extends TestCase {
 		super.setUp();
 		outputStream = new ByteArrayOutputStream();
 		out = new PrintStream(outputStream);
-		System.setOut(out);
+		//System.setOut(out);
 	}
 
+	protected void parseAndAttribCode(String code, Consumer<IniParser> parsingAssertions, Consumer<AstAttrib> attribAssertions) {
+		try {
+			IniParser parser = IniParser.createParserForCode(null, null, code);
+			parser.parse();
+			parsingAssertions.accept(parser);
+			AstAttrib attrib = Main.attrib(parser);
+			attribAssertions.accept(attrib);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	protected void parseAndAttribFile(String file, Consumer<IniParser> parsingAssertions, Consumer<AstAttrib> attribAssertions) {
+		try {
+			IniParser parser = IniParser.createParserForFile(null, null, file);
+			parser.parse();
+			parsingAssertions.accept(parser);
+			AstAttrib attrib = Main.attrib(parser);
+			attribAssertions.accept(attrib);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
 	protected void testFile(String file, BiConsumer<IniParser, String> assertions) {
 		testFile(file, 0, null, assertions);
 	}
@@ -42,13 +70,14 @@ public abstract class IniTestCase extends TestCase {
 
 	protected void testFile(String file, long sleepTime, String node, BiConsumer<IniParser, String> assertions) {
 		try {
-			IniParser parser = file == null ? IniParser.parseCode("process main() {}") : IniParser.parseFile(file);
-			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+			IniParser parser = file == null ? IniParser.createParserForCode(null, null, "process main() {}") : IniParser.createParserForFile(null, null, file);
 			if (node != null) {
-				parser.deamon = true;
-				parser.node = node;
+				parser.env.deamon = true;
+				parser.env.node = node;
 			}
-			parser.evalMainFunction();
+			parser.parse();
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+			Main.evalMainFunction(parser, null);
 			if (sleepTime > 0) {
 				Thread.sleep(sleepTime);
 			}

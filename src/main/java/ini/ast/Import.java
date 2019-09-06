@@ -7,6 +7,7 @@ import java.io.PrintStream;
 public class Import extends AstElement implements Comparable<Import> {
 
 	public String filePath;
+	public IniParser importParser;
 	
 	public Import(IniParser parser, Token token, String filePath) {
 		super(parser, token);

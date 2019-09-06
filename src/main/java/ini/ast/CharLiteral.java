@@ -11,7 +11,7 @@ public class CharLiteral extends AstElement implements Expression {
 	public CharLiteral(IniParser parser, Token token, char value) {
 		super(parser, token);
 		this.value = value;
-		this.type = parser.ast.CHAR;
+		this.type = parser.types.CHAR;
 		this.nodeTypeId = AstNode.CHAR_LITERAL;
 	}
 

@@ -15,7 +15,7 @@ public class StringLiteral extends AstElement implements Expression {
 		this.value = this.value.replace("\\r", "\r");
 		this.value = this.value.replace("\\\"", "\"");
 		this.value = this.value.replace("\\\\", "\\");
-		this.type = parser.ast.STRING;
+		this.type = parser.types.STRING;
 		this.nodeTypeId = AstNode.STRING_LITERAL;
 	}
 

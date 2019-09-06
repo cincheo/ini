@@ -47,7 +47,7 @@ public abstract class AstElement implements AstNode {
 		this.parser = parser;
 		this.token = token;
 		if (parser != null) {
-			this.owner = parser.node;
+			this.owner = parser.env.node;
 		}
 	}
 

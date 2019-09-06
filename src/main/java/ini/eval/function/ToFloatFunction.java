@@ -21,10 +21,10 @@ public class ToFloatFunction extends IniFunction {
 	@Override
 	public Type getType(IniParser parser,
 			List<TypingConstraint> constraints, Invocation invocation) {
-		Type t = new Type(parser);
+		Type t = new Type(parser.types);
 		constraints.add(new TypingConstraint(TypingConstraint.Kind.LTE, t,
-				parser.ast.DOUBLE, invocation, invocation));
-		return parser.ast.getFunctionalType(parser.ast.FLOAT, t);
+				parser.types.DOUBLE, invocation, invocation));
+		return parser.types.createFunctionalType(parser.types.FLOAT, t);
 	}
 
 }

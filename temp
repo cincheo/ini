@@ -1,0 +1,57 @@
+0. [String = _T9 at '"a"' <none>:1(30)]
+1. [Void = Void at 'main()' <none>:1(1)]
+2. [_T9 <= Double at '-i' <none>:2(24)]
+3. [_T9 = _T10 at 'i' <none>:2(25) and at '-i' <none>:2(24)]
+4. [_T10 = _T8 at 'return -i' <none>:2(17) and at 'f(i)' <none>:2(1)]
+===============================
+0. *[_T9 = String at '"a"' <none>:1(30)]
+1. [String <= Double at '"a"' <none>:1(30) and at '-i' <none>:2(24)]
+2. *[_T10 = String at '-i' <none>:2(24) and at '"a"' <none>:1(30)]
+3. *[_T8 = String at 'f(i)' <none>:2(1) and at '"a"' <none>:1(30)]
+===============================
+0. [String = String at '"a"' <none>:1(38) and at '"b"' <none>:1(42)]
+1. [String <= Double at '"a"*"b"' <none>:1(40)]
+2. [_T11 = String at '"a"*"b"' <none>:1(40)]
+3. [_T11 = Any at '"a"*"b"' <none>:1(40)]
+4. [Void = Void at 'process main()' <none>:1(1)]
+===============================
+0. [String <= Double at '"a"*"b"' <none>:1(40)]
+1. *[_T11 = String at '"a"*"b"' <none>:1(40)]
+2. [String = Any at '"a"*"b"' <none>:1(40)]
+===============================
+0. [String = _T13 at '"a"' <none>:1(40)]
+1. [String = _T14 at '"b"' <none>:1(44)]
+2. [_T12 = Any at 'f("a","b")' <none>:1(37)]
+3. [Void = Void at 'process main()' <none>:1(1)]
+4. [_T13 <= Double at 'i/j' <none>:2(32)]
+5. [_T13 = _T14 at 'i' <none>:2(31) and at 'j' <none>:2(33)]
+6. [Double = Float at '0.0' <none>:2(24) and at 'i/j' <none>:2(32)]
+7. [Int = _T12 at 'return 0' <none>:2(38) and at 'f(i,j)' <none>:2(1)]
+===============================
+0. *[_T13 = String at '"a"' <none>:1(40)]
+1. *[_T14 = String at '"b"' <none>:1(44)]
+2. *[_T12 = Any at 'f("a","b")' <none>:1(37)]
+3. [String <= Double at '"a"' <none>:1(40) and at 'i/j' <none>:2(32)]
+4. [Int = Any at 'return 0' <none>:2(38) and at 'f("a","b")' <none>:1(37)]
+===============================
+
+
+
+0. [String = String at '"a"' <none>:1(38) and at '"b"' <none>:1(42)]
+1. [String <= Double at '"a"*"b"' <none>:1(40)]
+2. [_T8 = String at '"a"*"b"' <none>:1(40)]
+3. [Void = Void at 'process main()' <none>:1(1)]
+===============================
+0. [String <= Double at '"a"*"b"' <none>:1(40)]
+1. *[_T8 = String at '"a"*"b"' <none>:1(40)]
+===============================
+
+0. [String = String at '"a"' <none>:1(38) and at '"b"' <none>:1(42)]
+1. [String <= Double at '"a"*"b"' <none>:1(40)]
+2. [_T1 = String at '"a"*"b"' <none>:1(40)]
+3. [_T1 = Any at '"a"*"b"' <none>:1(40)]
+4. [Void = Void at 'process main()' <none>:1(1)]
+===============================
+0. [String <= Double at '"a"*"b"' <none>:1(40)]
+1. *[_T1 = String at '"a"*"b"' <none>:1(40)]
+2. [String = Any at '"a"*"b"' <none>:1(40)]

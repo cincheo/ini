@@ -10,30 +10,40 @@ public class Binding extends NamedElement {
 
 	public String className;
 	public String member;
+	public String memberName;
 	public List<TypeVariable> parameterTypes;
+	public List<TypeVariable> typeParameters;
 	public TypeVariable returnType;
 
 	public enum Kind {
 		FIELD, METHOD, CONSTRUCTOR
 	}
 
-	public Binding(IniParser parser, Token token, String name,
+	public Binding(IniParser parser, Token token, String name, List<TypeVariable> typeParameters,
 			List<TypeVariable> parameterTypes, TypeVariable returnType, List<Expression> annotations) {
 		super(parser, token, name);
 		this.annotations = annotations;
 		this.parameterTypes = parameterTypes;
+		this.typeParameters = typeParameters;
+		if (parameterTypes != null) {
+			for (TypeVariable v : parameterTypes) {
+				v.typeParameters = typeParameters;
+			}
+		}
 		this.returnType = returnType;
 		this.className = getAnnotationValue("class");
 		this.member = getAnnotationValue("member");
+		this.memberName = this.member.split("\\(")[0];
 		this.nodeTypeId = AstNode.BINDING;
 	}
 
 	@Override
 	public void prettyPrint(PrintStream out) {
-		out.print(name + " => " + "\"" + className + "\"" + "," + "\"" + member
-				+ "\"");
-		if(annotations != null) {
-			out.print(" "+annotations);
+		out.print(name + "(");
+		prettyPrintList(out, parameterTypes, ",");
+		out.print(")=>" + returnType);
+		if (annotations != null) {
+			out.print(" " + annotations);
 		}
 	}
 
@@ -49,18 +59,20 @@ public class Binding extends NamedElement {
 	}
 
 	public String getMemberName() {
-		return member.split("\\(")[0];
+		return memberName;
 	}
 
 	public Type getFunctionalType() {
-		Type t = new Type(parser,"function");
-		t.setReturnType(returnType.getType());
-		if (parameterTypes != null) {
-			for (TypeVariable v : parameterTypes) {
-				t.addTypeParameter(v.getType());
+		if (type == null) {
+			type = new Type(parser.types, "function");
+			type.setReturnType(returnType.getType());
+			if (parameterTypes != null) {
+				for (TypeVariable v : parameterTypes) {
+					type.addTypeParameter(v.getType());
+				}
 			}
 		}
-		return t;
+		return type;
 	}
 
 }

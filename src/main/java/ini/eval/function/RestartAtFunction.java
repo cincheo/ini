@@ -23,6 +23,6 @@ public class RestartAtFunction extends IniFunction {
 	@Override
 	public Type getType(IniParser parser, List<TypingConstraint> constraints,
 			Invocation invocation) {
-		return parser.ast.getFunctionalType(parser.ast.VOID, parser.ast.THREAD);
+		return parser.types.createFunctionalType(parser.types.VOID, parser.types.THREAD);
 	}
 }

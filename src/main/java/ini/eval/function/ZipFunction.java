@@ -33,7 +33,7 @@ public class ZipFunction extends IniFunction {
 	@Override
 	public Type getType(IniParser parser, List<TypingConstraint> constraints,
 			Invocation invocation) {
-		return parser.ast.getFunctionalType(parser.ast.VOID);
+		return parser.types.createFunctionalType(parser.types.VOID);
 	}
 
 	public void doZip(String fileName, String zipFileName) {

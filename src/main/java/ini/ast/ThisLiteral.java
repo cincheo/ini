@@ -8,7 +8,7 @@ public class ThisLiteral extends AstElement implements Expression {
 
 	public ThisLiteral(IniParser parser, Token token) {
 		super(parser, token);
-		this.type = parser.ast.THREAD;
+		this.type = parser.types.THREAD;
 		this.nodeTypeId=AstNode.THIS_LITERAL;
 	}
 

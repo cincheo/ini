@@ -1,11 +1,19 @@
 package ini.ast;
 
+import java.io.PrintStream;
 import java.util.List;
 
-import ini.parser.IniParser;
-import ini.type.Type;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
-public abstract class Executable extends NamedElement {
+import ini.eval.IniEval;
+import ini.eval.data.Data;
+import ini.parser.IniParser;
+import ini.type.AstAttrib;
+import ini.type.Type;
+import ini.type.TypingConstraint;
+import ini.type.TypingConstraint.Kind;
+
+public abstract class Executable extends NamedElement implements Expression {
 
 	public List<Parameter> parameters;
 
@@ -14,22 +22,77 @@ public abstract class Executable extends NamedElement {
 		this.parameters = parameters;
 	}
 
-	transient public Type functionType = null;
+	protected final Data getArgument(IniEval eval, int index) {
+		return eval.invocationStack.peek().get(parameters.get(index).name);
+	}
 
-	public Type getFunctionType() {
-		functionType = new Type(parser, "function");
+	protected final Data getArgument(IniEval eval, String name) {
+		return eval.invocationStack.peek().get(name);
+	}
+
+	protected final Type getParameterType(int index) {
+		return getType().getTypeParameters().get(index);
+	}
+
+	protected final Type getReturnType() {
+		return getType().getReturnType();
+	}
+
+	protected final void addTypingConstraint(Kind kind, Type leftType, Type rightType, AstNode origin) {
+		getType().addTypingConstraint(kind, leftType, rightType, origin);
+	}
+
+	@Override
+	public void prettyPrint(PrintStream out) {
+		out.print(name + "(");
+		prettyPrintList(out, parameters, ",");
+		out.print(")");
+	}
+
+	@Override
+	public String toString() {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream out = new PrintStream(baos);
+		out.print(name + "(");
+		prettyPrintList(out, parameters, ",");
+		out.print(")");
+		try {
+			return baos.toString("UTF-8");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public abstract void eval(IniEval eval);
+
+	public final Type getType() {
+		if (this.type == null) {
+			this.type = parser.types.createFunctionalType(parser.types.createType());
+			for (int i = 0; i < parameters.size(); i++) {
+				this.type.addTypeParameter(new Type(parser.types));
+			}
+			buildTypingConstraints();
+		}
+		return this.type;
+	}
+
+	abstract protected void buildTypingConstraints();
+	
+	public Type getFunctionalType(AstAttrib attrib) {
+		Type functionalType = new Type(parser.types, "function");
 		if (name != null && name.equals("main")) {
 			if (parameters != null && parameters.size() == 1) {
-				functionType.addTypeParameter(parser.ast.getDependentType("Map", parser.ast.INT, parser.ast.STRING));
+				functionalType
+						.addTypeParameter(parser.types.getDependentType("Map", parser.types.INT, parser.types.STRING));
 			}
-			functionType.setReturnType(parser.ast.VOID);
+			functionalType.setReturnType(parser.types.VOID);
 		} else {
-			functionType.setReturnType(new Type(parser));
+			functionalType.setReturnType(new Type(parser.types));
 		}
 		for (int i = 0; i < parameters.size(); i++) {
-			functionType.addTypeParameter(new Type(parser));
+			functionalType.addTypeParameter(new Type(parser.types));
 		}
-		return functionType;
+		return functionalType;
 	}
 
 }

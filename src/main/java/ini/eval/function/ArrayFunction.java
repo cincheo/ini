@@ -21,13 +21,13 @@ public class ArrayFunction extends IniFunction {
 
 	@Override
 	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		Type t = new Type(parser,"Map");
-		t.addTypeParameter(parser.ast.INT);
-		t.addTypeParameter(new Type(parser));
-		Type functionType = new Type(parser,"function");
+		Type t = new Type(parser.types,"Map");
+		t.addTypeParameter(parser.types.INT);
+		t.addTypeParameter(new Type(parser.types));
+		Type functionType = new Type(parser.types,"function");
 		functionType.setReturnType(t);
 		functionType.addTypeParameter(t);
-		functionType.addTypeParameter(parser.ast.INT);
+		functionType.addTypeParameter(parser.types.INT);
 		//constraints.add(new TypingConstraint(TypingConstraint.Kind.EQ,t1,t2,invocation,invocation));
 		return functionType;
 	}

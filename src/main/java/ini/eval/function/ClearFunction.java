@@ -1,28 +1,35 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
+import ini.type.TypingConstraint.Kind;
 
-import java.util.List;
+public class ClearFunction extends BuiltInExecutable {
 
-public class ClearFunction extends IniFunction {
+	public ClearFunction(IniParser parser) {
+		super(parser, "clear", "data");
+	}
 
 	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		Data d = eval.eval(params.get(0));
+	public void eval(IniEval eval) {
+		Data d = getArgument(eval, 0);
 		d.setValue(null);
 		d.setReferences(null);
-		return null;
+		eval.result = d;
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		return parser.ast.ANY;
+	protected void buildTypingConstraints() {
+		addTypingConstraint(Kind.EQ, getParameterType(0), getReturnType());
 	}
-	
+
+	@Override
+	public Type getFunctionalType(AstAttrib attrib) {
+		Type t = attrib.parser.types.createType();
+		return attrib.parser.types.createFunctionalType(t, t);
+	}
+
 }

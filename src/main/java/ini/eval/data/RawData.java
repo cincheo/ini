@@ -17,8 +17,8 @@ import java.util.Set;
 import ini.ast.Assignment;
 import ini.ast.BooleanLiteral;
 import ini.ast.Constructor;
+import ini.ast.Executable;
 import ini.ast.Expression;
-import ini.ast.Function;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
 import ini.ast.StringLiteral;
@@ -43,6 +43,11 @@ public class RawData implements Data {
 	private transient List<DataObserver> dataObservers;
 
 	private Constructor constructor;
+
+	@Override
+	public boolean isExecutable() {
+		return kind == Kind.EXECUTABLE;
+	}
 
 	@Override
 	public Data getIfAvailable() {
@@ -401,8 +406,8 @@ public class RawData implements Data {
 		Object oldValue = this.value;
 		this.value = value;
 		this.typeInfo = TypeInfo.getTypeInfoForInstance(value);
-		if (value instanceof Function) {
-			this.kind = Kind.FUNCTIONAL;
+		if (value instanceof Executable) {
+			this.kind = Kind.EXECUTABLE;
 		}
 		notifyDataObservers(oldValue);
 	}

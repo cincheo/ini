@@ -9,12 +9,14 @@ import java.util.Map;
 public interface Data {
 
 	public enum Kind {
-		REGULAR, INT_SET, FUNCTIONAL
+		REGULAR, INT_SET, EXECUTABLE
 	}
 
 	static final String UPPER_BOUND_KEY = "upperBound";
 	static final String LOWER_BOUND_KEY = "lowerBound";
 
+	boolean isExecutable();
+	
 	boolean isPrimitive();
 	
 	boolean isUndefined();

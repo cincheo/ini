@@ -1,18 +1,19 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
 import ini.eval.IniEval;
-import ini.eval.data.Data;
-
-import java.util.List;
+import ini.parser.IniParser;
 
 public class PrintlnFunction extends PrintFunction {
 
+	public PrintlnFunction(IniParser parser) {
+		super(parser);
+		this.name = "println";
+	}
+	
 	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		super.eval(eval, params);
+	public void eval(IniEval eval) {
+		super.eval(eval);
 		eval.parser.out.println();
-		return null;
 	}
 	
 }

@@ -1,5 +1,6 @@
 package ini.eval.function;
 
+import ini.Main;
 import ini.ast.Expression;
 import ini.ast.Invocation;
 import ini.eval.IniEval;
@@ -19,20 +20,21 @@ public class EvalStringFunction extends IniFunction {
 	@Override
 	public Data eval(final IniEval eval, final List<Expression> params) {
 		String code = eval.eval(params.get(0)).getValue();
-		ByteArrayOutputStream baos;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			PrintStream out = new PrintStream(baos = new ByteArrayOutputStream());
-			IniParser parser = IniParser.parseCode(code,out,out);
+			IniParser parser = IniParser.createParserForCode(eval.parser.env, eval.parser, code);
+			parser.out = new PrintStream(baos);
+			parser.parse();
 			if(parser.hasErrors()) {
-				parser.printErrors(out);
+				parser.printErrors(parser.out);
 				return new RawData(baos.toString());
 			}
-			AstAttrib attrib = parser.attrib();
+			AstAttrib attrib = Main.attrib(parser);
 			if(attrib.hasErrors()) {
-				attrib.printErrors(out);
+				parser.printErrors(parser.out);
 				return new RawData(baos.toString());
 			}
-			parser.evalMainFunction();
+			Main.evalMainFunction(parser, null);
 		} catch (Exception e) {
 			throw new RuntimeException("cannot evaluate string", e);
 		}
@@ -42,7 +44,7 @@ public class EvalStringFunction extends IniFunction {
 	@Override
 	public Type getType(IniParser parser, List<TypingConstraint> constraints,
 			Invocation invocation) {
-		return parser.ast.getFunctionalType(parser.ast.ANY, parser.ast.STRING);
+		return parser.types.createFunctionalType(parser.types.ANY, parser.types.STRING);
 	}
 
 }

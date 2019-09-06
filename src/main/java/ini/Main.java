@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -20,8 +19,8 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
 
+import ini.ast.AstNode;
 import ini.ast.Executable;
-import ini.ast.Function;
 import ini.ast.Invocation;
 import ini.broker.CoreBrokerClient;
 import ini.broker.DeployRequest;
@@ -29,8 +28,22 @@ import ini.eval.Context;
 import ini.eval.IniDebug;
 import ini.eval.IniEval;
 import ini.eval.data.RawData;
+import ini.eval.function.ClearFunction;
+import ini.eval.function.CopyFunction;
+import ini.eval.function.ErrorFunction;
+import ini.eval.function.FirstFunction;
+import ini.eval.function.KeyFunction;
+import ini.eval.function.PrintFunction;
+import ini.eval.function.PrintlnFunction;
+import ini.eval.function.ProduceFunction;
+import ini.eval.function.RestFunction;
+import ini.eval.function.SizeFunction;
+import ini.eval.function.SleepFunction;
+import ini.eval.function.ToStringFunction;
+import ini.eval.function.WaitFunction;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
+import ini.type.TypingConstraint;
 
 public class Main {
 
@@ -39,9 +52,9 @@ public class Main {
 	public static final String VERSION = "pre-alpha 2";
 
 	public static void main(String[] args) throws Exception {
-		
+
 		MDC.put("node", ".");
-		
+
 		JSAP jsap = new JSAP();
 
 		jsap.registerParameter(new Switch("version").setLongFlag("version").setHelp("Print the INI version and exit."));
@@ -49,9 +62,11 @@ public class Main {
 		jsap.registerParameter(new Switch("debug").setLongFlag("debug")
 				.setHelp("Execute the program in debug mode - step through the program."));
 
-//		jsap.registerParameter(new Switch("shell").setShortFlag('s').setLongFlag("shell")
-//				.setHelp("Start INI in shell mode so that the user can interact with INI by typing statements."));
-		
+		// jsap.registerParameter(new
+		// Switch("shell").setShortFlag('s').setLongFlag("shell")
+		// .setHelp("Start INI in shell mode so that the user can interact with
+		// INI by typing statements."));
+
 		jsap.registerParameter(
 				new Switch("help").setShortFlag('h').setLongFlag("help").setHelp("Print this usage message."));
 
@@ -102,8 +117,11 @@ public class Main {
 			System.exit(-1);
 		}
 
-		IniParser parser = commandLineConfig.contains("file") ? IniParser.parseFile(commandLineConfig.getString("file"))
-				: IniParser.parseCode("process main() {}");
+		IniParser parser = commandLineConfig.contains("file")
+				? IniParser.createParserForFile(null, null, commandLineConfig.getString("file"))
+				: IniParser.createParserForCode(null, null, "process main() {}");
+
+		parser.parse();
 
 		if (parser.hasErrors()) {
 			parser.printErrors(System.err);
@@ -111,7 +129,7 @@ public class Main {
 		}
 
 		if (commandLineConfig.userSpecified("node") || commandLineConfig.userSpecified("deamon")) {
-			parser.deamon = true;
+			parser.env.deamon = true;
 		}
 
 		AstAttrib attrib = null;
@@ -135,26 +153,26 @@ public class Main {
 
 		String systemEnv = System.getenv("INI_ENV");
 		if (systemEnv != null) {
-			parser.environment = systemEnv;
+			parser.env.environment = systemEnv;
 		}
 
 		String commandLineEnv = commandLineConfig.getString("env");
 		if (commandLineEnv != null) {
-			parser.environment = commandLineEnv;
+			parser.env.environment = commandLineEnv;
 		}
 
 		String systemNode = System.getenv("INI_NODE");
 		if (systemNode != null) {
-			parser.node = systemNode;
+			parser.env.node = systemNode;
 		}
 
-		if (parser.configuration.node != null) {
-			parser.node = parser.configuration.node;
+		if (parser.env.configuration.node != null) {
+			parser.env.node = parser.env.configuration.node;
 		}
 
 		String commandLineNode = commandLineConfig.getString("node");
 		if (commandLineNode != null) {
-			parser.node = commandLineNode;
+			parser.env.node = commandLineNode;
 		}
 
 		evalMainFunction(parser, commandLineConfig.getBoolean("debug"),
@@ -162,32 +180,29 @@ public class Main {
 				Arrays.asList(ArrayUtils.toStringArray(commandLineConfig.getObjectArray("watch"))),
 				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("parameters")));
 
-		/*if(commandLineConfig.getBoolean("shell")) {
-			Scanner keyboard = new Scanner(System.in);
-			while(true) {
-				System.out.print("> ");
-				String command = keyboard.nextLine();
-				evalCommand(parser, command);
-			}
-		}*/
-		
+		/*
+		 * if(commandLineConfig.getBoolean("shell")) { Scanner keyboard = new
+		 * Scanner(System.in); while(true) { System.out.print("> "); String
+		 * command = keyboard.nextLine(); evalCommand(parser, command); } }
+		 */
+
 	}
 
-/*	private static final String TMP_FUNCTION_NAME = "_root_tmp_";
-	
-	private synchronized static Context getRootContext() {
-	}
-	
-	private static void evalCommand(IniParser parser, String command) {
-		parser.parseAdditionalCode(code);
-		IniEval eval = new IniEval(parser, new Context(new Function(parser, null, "<command>", null, null)));
-		eval.eval();
-	}*/
-	
+	/*
+	 * private static final String TMP_FUNCTION_NAME = "_root_tmp_";
+	 * 
+	 * private synchronized static Context getRootContext() { }
+	 * 
+	 * private static void evalCommand(IniParser parser, String command) {
+	 * parser.parseAdditionalCode(code); IniEval eval = new IniEval(parser, new
+	 * Context(new Function(parser, null, "<command>", null, null)));
+	 * eval.eval(); }
+	 */
+
 	public static void parseConfiguration(IniParser parser) {
 		try {
-			parser.configuration = new Gson().fromJson(FileUtils.readFileToString(new File("ini_config.json"), "UTF8"),
-					Configuration.class);
+			parser.env.configuration = new Gson()
+					.fromJson(FileUtils.readFileToString(new File("ini_config.json"), "UTF8"), ConfigurationFile.class);
 		} catch (Exception e) {
 			throw new RuntimeException("cannot read configuration", e);
 		}
@@ -200,41 +215,27 @@ public class Main {
 	public static void evalMainFunction(IniParser parser, boolean debug, List<String> breakpoints,
 			List<String> watchedVariables, String[] args) {
 
-		MDC.put("node", parser.node);
-		
+		if (args == null) {
+			args = new String[0];
+		}
+
+		MDC.put("node", parser.env.node);
+
 		parseConfiguration(parser);
 
-		Context context = null;
-		Executable main = parser.parsedFunctionMap.get("main");
-		if (main != null) {
-			// Ini2Pml converter = new Ini2Pml(parser);
-			// StringBuffer out = new StringBuffer();
-			// converter.generateObserverdVariabsles(main);
-			// converter.generate(main, out);
-			// System.out.println(converter.variableDeclaration.toString() +
-			// out.toString() + converter.initPromelaCode);
-			if (main.parameters != null && main.parameters.size() > 1) {
-				parser.out.println("Error: main function must have no parameters or one parameter (list of strings).");
-				return;
-			}
-			context = new Context(main);
-			// System.out.println("=====>
-			// "+Arrays.asList(config.getObjectArray("parameters")));
-			if (main.parameters != null && main.parameters.size() == 1) {
-				context.bind(main.parameters.get(0).name, RawData.objectToData(args));
-			}
-		}
+		Context context = new Context((Executable) null);
 		IniEval eval;
 		if (debug) {
 			eval = new IniDebug(parser, context, breakpoints, watchedVariables);
 		} else {
 			eval = new IniEval(parser, context);
 		}
+
 		try {
-			if (parser.deamon) {
+			if (parser.env.deamon) {
 				LOGGER.info("Starting INI deamon...");
-				parser.coreBrokerClient = new CoreBrokerClient(parser);
-				parser.coreBrokerClient.startSpawnRequestConsumer(request -> {
+				parser.env.coreBrokerClient = new CoreBrokerClient(parser.env);
+				parser.env.coreBrokerClient.startSpawnRequestConsumer(request -> {
 					LOGGER.info("processing " + request);
 					Invocation invocation = new Invocation(parser, null, request.spawnedProcessName, request.parameters
 							.stream().map(data -> RawData.dataToExpression(parser, data)).collect(Collectors.toList()));
@@ -246,30 +247,50 @@ public class Main {
 					}.start();
 				});
 
-				parser.coreBrokerClient.startFetchRequestConsumer(request -> {
+				parser.env.coreBrokerClient.startFetchRequestConsumer(request -> {
 					LOGGER.info("processing " + request);
-					parser.coreBrokerClient.sendDeployRequest(request.sourceNode,
-							new DeployRequest(parser.node, parser.parsedFunctionMap.get(request.fetchedName)));
+					parser.env.coreBrokerClient.sendDeployRequest(request.sourceNode, new DeployRequest(parser.env.node,
+							eval.getRootContext().getExecutable(request.fetchedName)));
 				});
 
-				parser.coreBrokerClient.startDeployRequestConsumer(request -> {
-					if (parser.parsedFunctionMap.containsKey(request.executable.name)) {
-						Executable oldf = parser.parsedFunctionMap.get(request.executable.name);
-						parser.parsedFunctionMap.remove(request.executable.name);
-						parser.parsedFunctionList.remove(oldf);
-					}
-					parser.parsedFunctionMap.put(request.executable.name, request.executable);
-					parser.parsedFunctionList.add(request.executable);
+				parser.env.coreBrokerClient.startDeployRequestConsumer(request -> {
+					eval.eval(request.executable);
 					Main.LOGGER.info("deployed function " + request.executable.name);
 				});
 			}
 
-			LOGGER.info("Environment: " + parser.environment);
-			LOGGER.info("INI started - node " + parser.node);
+			LOGGER.info("Environment: " + parser.env.environment);
+			LOGGER.info("INI started - node " + parser.env.node);
 
-			//eval.invoke(function, params)
-			//eval.eval(main);
-			eval.executeProcessOrFunction(main);
+			Executable main = null;
+			for (AstNode topLevel : parser.topLevels) {
+				eval.eval(topLevel);
+				if ((topLevel instanceof Executable) && "main".equals(((Executable) topLevel).name)) {
+					main = (Executable) topLevel;
+				}
+			}
+
+			if (main != null) {
+				// Ini2Pml converter = new Ini2Pml(parser);
+				// StringBuffer out = new StringBuffer();
+				// converter.generateObserverdVariabsles(main);
+				// converter.generate(main, out);
+				// System.out.println(converter.variableDeclaration.toString() +
+				// out.toString() + converter.initPromelaCode);
+				if (main.parameters != null && main.parameters.size() > 1) {
+					parser.out.println(
+							"Error: main function must have no parameters or one parameter (list of strings).");
+					return;
+				}
+				/*
+				 * context = new Context(main); if (main.parameters != null &&
+				 * main.parameters.size() == 1) {
+				 * context.bind(main.parameters.get(0).name,
+				 * RawData.objectToData(args)); }
+				 */
+				eval.invoke(main, args);
+			}
+
 		} catch (Exception e) {
 			eval.printError(parser.err, e);
 			parser.err.println("Java stack:");
@@ -288,14 +309,22 @@ public class Main {
 		attrib.createTypes();
 
 		if (!attrib.hasErrors()) {
-			for (Executable executable : parser.parsedFunctionList) {
-				attrib.invoke(executable);
-			}
-			// attrib.printConstraints(System.out);
-			attrib.unify();
-			// System.out.println("===============================");
-			// attrib.printConstraints(System.out);
-			// System.err.println("===============================");
+			parser.topLevels.forEach(node -> attrib.eval(node));
+			parser.topLevels.forEach(node -> {
+				if (node instanceof Executable) {
+					attrib.invoke((Executable) node);
+				}
+			});
+			
+			attrib.printConstraints("", attrib.invocationStack.peek().getExecutableType().getTypingConstraints(), System.out);
+			List<TypingConstraint> substituted = attrib.applySubstitution(attrib.invocationStack.peek().getExecutableType().getTypingConstraints(),
+					attrib.errors);
+			System.out.println("===============================");
+			attrib.printConstraints("", substituted, System.out);
+			attrib.unify(substituted);
+			System.out.println("===============================");
+			attrib.printConstraints("", substituted, System.out);
+			System.err.println("===============================");
 			// System.err.println(Type.types);
 			// System.err.println(Type.aliases);
 			// System.err.println(Constructor.constructors);

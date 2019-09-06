@@ -11,7 +11,7 @@ public class BooleanLiteral extends AstElement implements Expression {
 	public BooleanLiteral(IniParser parser, Token token, boolean value) {
 		super(parser, token);
 		this.value=value;
-		this.type = parser.ast.BOOLEAN;
+		this.type = parser.types.BOOLEAN;
 		this.nodeTypeId=AstNode.BOOLEAN_LITERAL;
 	}
 

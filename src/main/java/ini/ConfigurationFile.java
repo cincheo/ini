@@ -2,7 +2,7 @@ package ini;
 
 import java.util.Map;
 
-public class Configuration {
+public class ConfigurationFile {
 
 	public String node;
 	

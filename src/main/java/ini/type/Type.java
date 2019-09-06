@@ -1,16 +1,22 @@
 package ini.type;
 
-import ini.ast.UserType;
-import ini.parser.IniParser;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import ini.ast.AstNode;
+import ini.ast.Executable;
+import ini.ast.UserType;
+import ini.parser.Types;
 
 public class Type {
 
-	boolean constructorType = false;
+	public boolean constructorType = false;
+	private List<TypingConstraint> typingConstraints;
+	public Executable executable = null;
 
 	public boolean isLTE(Type type) {
 		if (type == this) {
@@ -26,32 +32,30 @@ public class Type {
 		return type.isLTE(this);
 	}
 
-	static int index = 1;
-
 	public Class<?> toJavaType() {
-		if(this==parser.ast.VOID) {
+		if (this == types.VOID) {
 			return void.class;
-		} else if(this==parser.ast.CHAR) {
+		} else if (this == types.CHAR) {
 			return char.class;
-		} else if(this==parser.ast.DOUBLE) {
+		} else if (this == types.DOUBLE) {
 			return double.class;
-		} else if(this==parser.ast.FLOAT) {
+		} else if (this == types.FLOAT) {
 			return float.class;
-		} else if(this==parser.ast.LONG) {
+		} else if (this == types.LONG) {
 			return long.class;
-		} else if(this==parser.ast.INT) {
+		} else if (this == types.INT) {
 			return int.class;
-		} else if(this==parser.ast.BYTE) {
+		} else if (this == types.BYTE) {
 			return byte.class;
-		} else if(this==parser.ast.BOOLEAN) {
+		} else if (this == types.BOOLEAN) {
 			return boolean.class;
-		} else if(this==parser.ast.STRING) {
+		} else if (this == types.STRING) {
 			return String.class;
 		} else {
 			return null;
 		}
 	}
-	
+
 	public boolean variable = true;
 
 	protected String name;
@@ -59,15 +63,15 @@ public class Type {
 	Type returnType;
 	Map<String, Type> fields = null;
 
-	IniParser parser;
-	
-	public Type(IniParser parser) {
-		this.parser = parser;
-		this.name = "_T" + (index++);
+	Types types;
+
+	public Type(Types types) {
+		this.types = types;
+		this.name = "_T" + (types.nextIndex());
 	}
 
-	public Type(IniParser parser, String name) {
-		this.parser = parser;
+	public Type(Types types, String name) {
+		this.types = types;
 		this.name = name;
 	}
 
@@ -76,11 +80,33 @@ public class Type {
 	public Type superType = null;
 	public List<Type> subTypes = null;
 
+	public void setSuperType(Type type) {
+		this.superType = type;
+	}
+
 	public void addSubType(Type type) {
 		if (subTypes == null) {
 			subTypes = new ArrayList<Type>();
 		}
 		subTypes.add(type);
+	}
+
+	public void addTypingConstraint(TypingConstraint constraint) {
+		if (typingConstraints == null) {
+			typingConstraints = new ArrayList<>();
+		}
+		typingConstraints.add(constraint);
+	}
+
+	public void addTypingConstraint(TypingConstraint.Kind kind, Type leftType, Type rightType, AstNode origin) {
+		if (typingConstraints == null) {
+			typingConstraints = new ArrayList<>();
+		}
+		typingConstraints.add(new TypingConstraint(kind, leftType, rightType, origin, null));
+	}
+
+	public boolean hasTypingConstraints() {
+		return typingConstraints != null && !typingConstraints.isEmpty();
 	}
 
 	public boolean hasSubTypes() {
@@ -103,8 +129,7 @@ public class Type {
 				return "[" + fieldsString(fields) + "]";
 			}
 		} else if (isFunctional()) {
-			return "(" + typeParametersString(typeParameters) + ")->"
-					+ returnType;
+			return "(" + typeParametersString(typeParameters) + ")->" + returnType;
 		} else {
 			return name;
 		}
@@ -120,18 +145,18 @@ public class Type {
 
 	public String toString() {
 		if (isList()) {
-			if (typeParameters.get(1) == parser.ast.CHAR) {
+			if (typeParameters.get(1) == types.CHAR) {
 				return "String";
 			} else {
 				return typeParameters.get(1).toString() + "*";
 			}
 		} else {
-			return getFullName();// +(variable?"%":"");
+			return getFullName();
 		}
 	}
 
 	public boolean isList() {
-		return isMap() && typeParameters.get(0) == parser.ast.INT;
+		return isMap() && typeParameters.get(0) == types.INT;
 	}
 
 	static public String typeParametersString(List<Type> typeParameters) {
@@ -154,8 +179,7 @@ public class Type {
 		for (int i = 0; i < fieldList.size(); i++) {
 			s += fieldList.get(i).getKey();
 			s += ":";
-			s += fieldList.get(i).getValue() == null ? null : fieldList.get(i)
-					.getValue().getName();
+			s += fieldList.get(i).getValue() == null ? null : fieldList.get(i).getValue().getName();
 			if (i < fieldList.size() - 1) {
 				s += ",";
 			}
@@ -181,7 +205,11 @@ public class Type {
 		fields.put(name, type);
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<Type> getTypeParameters() {
+		if (typeParameters == null) {
+			return Collections.EMPTY_LIST;
+		}
 		return typeParameters;
 	}
 
@@ -194,6 +222,60 @@ public class Type {
 			return false;
 		} else {
 			return getFullName().equals(((Type) o).getFullName());
+		}
+	}
+
+	public Type deepCopy() {
+		if (types.isPrimitive(this)) {
+			return this;
+		} else {
+			Type copy = new Type(this.types, this.name);
+			if (this.typeParameters != null) {
+				copy.typeParameters = new ArrayList<>();
+				for (Type t : this.typeParameters) {
+					copy.typeParameters.add(t.deepCopy());
+				}
+			}
+			copy.constructorType = this.constructorType;
+			copy.executable = this.executable;
+			if (this.fields != null) {
+				copy.fields = new HashMap<>();
+				for (Entry<String, Type> e : this.fields.entrySet()) {
+					copy.fields.put(e.getKey(), e.getValue().deepCopy());
+				}
+			}
+			if (this.returnType != null) {
+				copy.returnType = this.returnType.deepCopy();
+			}
+			copy.subTypes = subTypes;
+			copy.superType = superType;
+			if (this.typingConstraints != null) {
+				copy.typingConstraints = new ArrayList<>();
+				for (TypingConstraint c : this.typingConstraints) {
+					copy.typingConstraints.add(c.deepCopy());
+				}
+			}
+			copy.userType = this.userType;
+			copy.variable = this.variable;
+			return copy;
+		}
+	}
+
+	public Type substitute(List<Type> parameters, List<Type> arguments, List<Type> freeVariables) {
+		int index = parameters.indexOf(this);
+		if (index >= 0) {
+			return arguments.get(index);
+		} else {
+			if (this.typeParameters != null && !this.typeParameters.isEmpty()) {
+				List<Type> l = new ArrayList<>();
+				for (Type t : this.typeParameters) {
+					l.add(t.substitute(parameters, arguments, freeVariables));
+				}
+			}
+			if (this.name.startsWith("_")) {
+				freeVariables.add(this);
+			}
+			return this;
 		}
 	}
 
@@ -220,8 +302,7 @@ public class Type {
 					// ((TypeVariable) fieldList.get(i).getValue())
 					// .substitute(substitution);
 					if (fieldList.get(i).getValue().equals(substitution.left)) {
-						fields.put(fieldList.get(i).getKey(),
-								substitution.right);
+						fields.put(fieldList.get(i).getKey(), substitution.right);
 					}
 				}
 			}
@@ -257,6 +338,10 @@ public class Type {
 
 	public boolean hasTypeParameters() {
 		return typeParameters != null && !typeParameters.isEmpty();
+	}
+
+	public List<TypingConstraint> getTypingConstraints() {
+		return typingConstraints;
 	}
 
 }

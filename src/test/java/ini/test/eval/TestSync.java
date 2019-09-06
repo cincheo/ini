@@ -1,5 +1,7 @@
 package ini.test.eval;
 
+import ini.test.IniTestCase;
+
 public class TestSync extends IniTestCase {
 
 	public TestSync(String name) {

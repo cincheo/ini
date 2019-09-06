@@ -1,5 +1,7 @@
 package ini.test.eval;
 
+import ini.test.IniTestCase;
+
 public class TestUpdate extends IniTestCase {
 
 	public TestUpdate(String name) {

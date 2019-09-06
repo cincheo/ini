@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class UserType extends NamedElement {
 
-	private static int index = 1;
+	//private static int index = 1;
 	
 	public List<Constructor> constructors = new ArrayList<Constructor>();
 	public Map<String, Constructor> constructorMap = new HashMap<String, Constructor>();
@@ -19,7 +19,7 @@ public class UserType extends NamedElement {
 		super(parser, token, name);
 		
 		if (this.name == null) {
-			this.name = "_T" + index++;
+			this.name = "_T" + parser.nextUserTypeIndex();
 		}
 
 		this.constructors = constructors;
@@ -33,10 +33,10 @@ public class UserType extends NamedElement {
 			}
 			constructorMap.put(constructor.name, constructor);
 			constructor.userType = this;
-			parser.ast.register(constructor);
+			parser.types.register(constructor);
 		}
-		parser.ast.userTypes.add(this);
-		parser.ast.userTypeMap.put(this.name, this);
+		parser.types.userTypes.add(this);
+		parser.types.userTypeMap.put(this.name, this);
 		this.nodeTypeId = AstNode.USER_TYPE;
 	}
 	

@@ -9,15 +9,15 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
+import ini.IniEnv;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
-import ini.parser.IniParser;
 
 public interface BrokerClient<T> {
 
 	boolean VERBOSE = false;
 
-	public static BrokerClient<Data> createDefaultInstance(IniParser parser, boolean global) {
+	public static BrokerClient<Data> createDefaultInstance(IniEnv env, boolean global) {
 		if (global) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
 			gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
@@ -29,8 +29,8 @@ public interface BrokerClient<T> {
 				}
 			});
 
-			return new KafkaBrokerClient<>(VERBOSE, parser.getEnvironmentConfiguration(), new ConsumerConfiguration<>(
-					parser.getEnvironmentConfiguration().consumerGroupId, gsonBuilder, Data.class));
+			return new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(), new ConsumerConfiguration<>(
+					env.getEnvironmentConfiguration().consumerGroupId, gsonBuilder, Data.class));
 		} else {
 			return new LocalBrokerClient<>(new ConsumerConfiguration<>());
 		}

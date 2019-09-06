@@ -1,5 +1,7 @@
 package ini.test.eval;
 
+import ini.test.IniTestCase;
+
 public class TestEvents extends IniTestCase {
 
 	public TestEvents(String name) {

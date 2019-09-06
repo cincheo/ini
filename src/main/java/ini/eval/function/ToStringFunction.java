@@ -1,26 +1,31 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
 import ini.eval.IniEval;
-import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
+import ini.type.TypingConstraint.Kind;
 
-import java.util.List;
+public class ToStringFunction extends BuiltInExecutable {
 
-public class ToStringFunction extends IniFunction {
-
-	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		return new RawData(eval.eval(params.get(0)).toPrettyString());
+	public ToStringFunction(IniParser parser) {
+		super(parser, "to_string", "data");
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		return parser.ast.getFunctionalType(parser.ast.STRING, new Type(parser));
+	public void eval(IniEval eval) {
+		eval.result = new RawData(getArgument(eval, 0).toPrettyString());
+	}
+
+	@Override
+	public Type getFunctionalType(AstAttrib attrib) {
+		return attrib.parser.types.createFunctionalType(attrib.parser.types.STRING, attrib.parser.types.ANY);
+	}
+
+	@Override
+	protected void buildTypingConstraints() {
+		addTypingConstraint(Kind.EQ, getReturnType(), parser.types.STRING);
 	}
 
 }

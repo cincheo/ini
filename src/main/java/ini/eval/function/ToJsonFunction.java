@@ -22,7 +22,7 @@ public class ToJsonFunction extends IniFunction {
 	@Override
 	public Type getType(IniParser parser,
 			List<TypingConstraint> constraints, Invocation invocation) {
-		return parser.ast.getFunctionalType(parser.ast.STRING, parser.ast.ANY);
+		return parser.types.createFunctionalType(parser.types.STRING, parser.types.ANY);
 	}
 	
 }

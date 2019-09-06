@@ -184,6 +184,13 @@ public class DataReference implements Data {
 		return referencedData.getIfAvailable();
 	}
 
+	@Override
+	public boolean isExecutable() {
+		if (isPending())
+			return false;
+		return referencedData.isExecutable();
+	}
+	
 	public boolean isPending() {
 		return this.referencedData == null;
 	}

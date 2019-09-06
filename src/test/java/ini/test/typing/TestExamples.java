@@ -1,10 +1,8 @@
 package ini.test.typing;
 
-import ini.parser.IniParser;
-import ini.type.AstAttrib;
-import junit.framework.TestCase;
+import ini.test.IniTestCase;
 
-public class TestExamples extends TestCase {
+public class TestExamples extends IniTestCase {
 
 	public TestExamples(String name) {
 		super(name);
@@ -15,136 +13,99 @@ public class TestExamples extends TestCase {
 	}
 
 	public void testAlgebraicExpressions() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/algebraic_expressions.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/algebraic_expressions.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
 
 	public void testComparator() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/comparator.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/comparator.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
 
 	public void testCountOccurences() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/count_occurences.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/count_occurences.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
 
 	public void testFac() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/fac.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/fac.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
 
 	public void testFibonacci() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/fibonacci.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/fibonacci.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
 
 	public void testSort() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/sort.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/sort.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
 
 	public void testPrettyPrinter() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/pretty_printer.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/pretty_printer.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
-	
+
 	public void testHttpServer() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/unpublished/http_server.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/unpublished/http_server.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
 
 	public void testUpdate() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/unpublished/update.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/unpublished/update.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
-	
+
 	public void testWebService() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/unpublished/web_service.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/unpublished/web_service.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
-	
+
 	public void testIO() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/unpublished/io.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/unpublished/io.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
 
 	public void testLCSS() {
-		try {
-			IniParser parser = IniParser.parseFile("ini/examples/lcss.ini");
-			assertEquals("expected 0 errors: "+parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = parser.attrib();
-			assertEquals("expected 0 error: "+attrib.errors, 0, attrib.errors.size());
-		} catch (Exception e) {
-			fail();
-		}
+		parseAndAttribFile("ini/examples/lcss.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+		});
 	}
-	
-	
+
 }
