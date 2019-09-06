@@ -6,7 +6,6 @@ import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class RestFunction extends BuiltInExecutable {
 
@@ -31,11 +30,4 @@ public class RestFunction extends BuiltInExecutable {
 				attrib.parser.types.createArrayType(t));
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		Type t = parser.types.createType();
-		addTypingConstraint(Kind.EQ, getParameterType(0), parser.types.createArrayType(t));
-		addTypingConstraint(Kind.EQ, getReturnType(), parser.types.createArrayType(t));
-	}
-	
 }

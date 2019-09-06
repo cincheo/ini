@@ -19,7 +19,6 @@ import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
 
 public class BoundJavaFunction extends Executable {
 
@@ -152,12 +151,6 @@ public class BoundJavaFunction extends Executable {
 		return s;
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	@Override
 	public Type getFunctionalType(AstAttrib attrib) {
 		return binding.getFunctionalType();

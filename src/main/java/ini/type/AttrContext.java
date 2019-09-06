@@ -4,29 +4,21 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import ini.ast.Executable;
 import ini.ast.Variable;
 import ini.parser.Types;
 
 public class AttrContext {
 
-	private Executable executable;
 	private Type executableType;
 	private Types types;
 
-	public AttrContext(Types types, Executable executable, Type executableType) {
+	public AttrContext(Types types, Type executableType) {
 		this.types = types;
-		this.executable = executable;
 		this.executableType = executableType;
-		if(executableType == null) {
-			// root type
-			executableType = types.createType();
-		}
 	}
 
 	public AttrContext(AttrContext context) {
 		this.types = context.types;
-		this.executable = context.executable;
 		this.executableType = context.executableType;
 		this.variables = new HashMap<String, Type>(context.variables);
 	}

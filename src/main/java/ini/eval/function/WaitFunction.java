@@ -4,7 +4,6 @@ import ini.eval.IniEval;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class WaitFunction extends BuiltInExecutable {
 
@@ -23,9 +22,4 @@ public class WaitFunction extends BuiltInExecutable {
 		return attrib.parser.types.createFunctionalType(t, t);
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		addTypingConstraint(Kind.EQ, getParameterType(0), getReturnType());
-	}
-	
 }

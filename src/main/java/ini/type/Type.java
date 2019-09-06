@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import ini.ast.AstNode;
 import ini.ast.Executable;
 import ini.ast.UserType;
 import ini.parser.Types;
@@ -15,7 +14,6 @@ import ini.parser.Types;
 public class Type {
 
 	public boolean constructorType = false;
-	private List<TypingConstraint> typingConstraints;
 	public Executable executable = null;
 
 	public boolean isLTE(Type type) {
@@ -89,24 +87,6 @@ public class Type {
 			subTypes = new ArrayList<Type>();
 		}
 		subTypes.add(type);
-	}
-
-	public void addTypingConstraint(TypingConstraint constraint) {
-		if (typingConstraints == null) {
-			typingConstraints = new ArrayList<>();
-		}
-		typingConstraints.add(constraint);
-	}
-
-	public void addTypingConstraint(TypingConstraint.Kind kind, Type leftType, Type rightType, AstNode origin) {
-		if (typingConstraints == null) {
-			typingConstraints = new ArrayList<>();
-		}
-		typingConstraints.add(new TypingConstraint(kind, leftType, rightType, origin, null));
-	}
-
-	public boolean hasTypingConstraints() {
-		return typingConstraints != null && !typingConstraints.isEmpty();
 	}
 
 	public boolean hasSubTypes() {
@@ -249,12 +229,6 @@ public class Type {
 			}
 			copy.subTypes = subTypes;
 			copy.superType = superType;
-			if (this.typingConstraints != null) {
-				copy.typingConstraints = new ArrayList<>();
-				for (TypingConstraint c : this.typingConstraints) {
-					copy.typingConstraints.add(c.deepCopy());
-				}
-			}
 			copy.userType = this.userType;
 			copy.variable = this.variable;
 			return copy;
@@ -338,10 +312,6 @@ public class Type {
 
 	public boolean hasTypeParameters() {
 		return typeParameters != null && !typeParameters.isEmpty();
-	}
-
-	public List<TypingConstraint> getTypingConstraints() {
-		return typingConstraints;
 	}
 
 }

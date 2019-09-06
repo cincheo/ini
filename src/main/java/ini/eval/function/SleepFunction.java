@@ -4,7 +4,6 @@ import ini.eval.IniEval;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class SleepFunction extends BuiltInExecutable {
 
@@ -26,10 +25,4 @@ public class SleepFunction extends BuiltInExecutable {
 		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID, attrib.parser.types.INT);
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		addTypingConstraint(Kind.EQ, getParameterType(0), parser.types.INT);
-		addTypingConstraint(Kind.EQ, getReturnType(), parser.types.VOID);
-	}
-	
 }

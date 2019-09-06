@@ -5,7 +5,6 @@ import ini.eval.data.Data;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class ClearFunction extends BuiltInExecutable {
 
@@ -19,11 +18,6 @@ public class ClearFunction extends BuiltInExecutable {
 		d.setValue(null);
 		d.setReferences(null);
 		eval.result = d;
-	}
-
-	@Override
-	protected void buildTypingConstraints() {
-		addTypingConstraint(Kind.EQ, getParameterType(0), getReturnType());
 	}
 
 	@Override

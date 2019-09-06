@@ -5,7 +5,6 @@ import ini.eval.data.Data;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class PrintFunction extends BuiltInExecutable {
 
@@ -22,11 +21,6 @@ public class PrintFunction extends BuiltInExecutable {
 			d.prettyPrint(eval.parser.out);
 		}
 		eval.result = null;
-	}
-	
-	@Override
-	protected void buildTypingConstraints() {
-		addTypingConstraint(Kind.EQ, type.getReturnType(), parser.types.VOID);
 	}
 	
 	@Override

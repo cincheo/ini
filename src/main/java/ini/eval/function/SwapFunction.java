@@ -7,7 +7,6 @@ import ini.eval.data.Data;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class SwapFunction extends BuiltInExecutable {
 
@@ -36,10 +35,5 @@ public class SwapFunction extends BuiltInExecutable {
 		return parser.types.createFunctionalType(parser.types.VOID, t, t);
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		addTypingConstraint(Kind.EQ, getParameterType(0), getParameterType(1));
-		addTypingConstraint(Kind.EQ, getReturnType(), parser.types.VOID);
-	}
 	
 }

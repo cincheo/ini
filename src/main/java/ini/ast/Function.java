@@ -6,7 +6,6 @@ import java.util.List;
 import ini.eval.IniEval;
 import ini.eval.IniEval.ReturnException;
 import ini.parser.IniParser;
-import ini.type.TypingConstraint.Kind;
 
 public class Function extends Executable {
 
@@ -43,17 +42,6 @@ public class Function extends Executable {
 			}
 		} catch (ReturnException e) {
 			// swallow
-		}
-	}
-
-	@Override
-	protected void buildTypingConstraints() {
-		if ("main".equals(this.name)) {
-			if (parameters != null && parameters.size() == 1) {
-				addTypingConstraint(Kind.EQ, getParameterType(0), parser.types.createArrayType(parser.types.STRING),
-						parameters.get(0));
-			}
-			addTypingConstraint(Kind.EQ, getReturnType(), parser.types.VOID, this);
 		}
 	}
 

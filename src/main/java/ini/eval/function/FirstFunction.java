@@ -6,7 +6,6 @@ import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class FirstFunction extends BuiltInExecutable {
 
@@ -24,14 +23,6 @@ public class FirstFunction extends BuiltInExecutable {
 		}
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		Type t = parser.types.createType();
-		addTypingConstraint(Kind.EQ, getReturnType(), t);
-		addTypingConstraint(Kind.EQ, getParameterType(0), parser.types.createArrayType(t));
-	}
-	
-	
 	@Override
 	public Type getFunctionalType(AstAttrib attrib) {
 		Type t = attrib.parser.types.createType();

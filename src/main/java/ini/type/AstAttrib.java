@@ -4,9 +4,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-
-import javax.xml.bind.TypeConstraintException;
-
 import java.util.Stack;
 
 import ini.ast.ArrayAccess;
@@ -54,14 +51,16 @@ public class AstAttrib {
 
 	List<Function> attributedFunctions = new ArrayList<Function>();
 
-	//private List<TypingConstraint> constraints = new ArrayList<>();
+	private List<TypingConstraint> constraints = new ArrayList<>();
 	public List<TypingError> errors = new ArrayList<TypingError>();
 
 	public AstAttrib(IniParser parser) {
 		this.parser = parser;
-		AttrContext rootContext = new AttrContext(parser.types, (Executable) null, parser.types.createType());
+		AttrContext rootContext = new AttrContext(parser.types, (Type) null);
 		for (Executable e : parser.builtInExecutables) {
-			rootContext.bind(e.name, e.getType());
+			Type t = parser.types.createType();
+			t.executable = e;
+			rootContext.bind(e.name, t);
 		}
 		invocationStack.push(rootContext);
 	}
@@ -71,8 +70,7 @@ public class AstAttrib {
 		if (leftType == parser.types.ANY || rightType == parser.types.ANY) {
 			return;
 		}
-		invocationStack.peek().getExecutableType()
-				.addTypingConstraint(new TypingConstraint(kind, leftType, rightType, leftOrigin, rightOrigin));
+		constraints.add(new TypingConstraint(kind, leftType, rightType, leftOrigin, rightOrigin));
 	}
 
 	/*
@@ -102,33 +100,38 @@ public class AstAttrib {
 		return invocationStack.get(0);
 	}
 
-	public void invoke(Executable executable) {
-		invocationStack.push(new AttrContext(parser.types, executable, executable.getType()));
+	public void invoke(Executable executable, Type executableType) {
+		if (executable == null) {
+			throw new RuntimeException("cannot invoke null exutable");
+		}
+		invocationStack.push(new AttrContext(parser.types, executableType));
 		evaluationStack.push(executable);
-		evalExecutable(executable);
+		evalExecutable(executable, executableType);
 		evaluationStack.pop();
 		invocationStack.pop();
 	}
 
-	private void evalExecutable(Executable executable) {
+	private void evalExecutable(Executable executable, Type executableType) {
 		if (executable instanceof Process) {
-			evalProcess((Process) executable);
+			evalProcess((Process) executable, executableType);
+		} else if (executable instanceof Function) {
+			evalFunction((Function) executable, executableType);
 		} else {
-			evalFunction((Function) executable);
+			// external executable
 		}
 	}
 
-	private void evalProcess(Process process) {
+	private void evalProcess(Process process, Type executableType) {
 		// if (process.functionType == null) {
 		// invoke(process);
 		// }
 
 		hadReturnStatement = false;
-		Type typeVar = process.getType();
+		//Type typeVar = process.getType();
 
 		for (int i = 0; i < process.parameters.size(); i++) {
 			// handle default values?
-			invocationStack.peek().bind(process.parameters.get(i).name, typeVar.getTypeParameters().get(i));
+			invocationStack.peek().bind(process.parameters.get(i).name, executableType.getTypeParameters().get(i));
 		}
 
 		for (Rule rule : process.initRules) {
@@ -148,7 +151,7 @@ public class AstAttrib {
 		}
 
 		if (!hadReturnStatement) {
-			addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getReturnType(), parser.types.VOID, process, process);
+			addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, process, process);
 		}
 
 		// result = typeVar;
@@ -156,18 +159,17 @@ public class AstAttrib {
 
 	}
 
-	private void evalFunction(Function function) {
+	private void evalFunction(Function function, Type executableType) {
 		// evaluationStack.push(function);
 		// if (function.functionType == null) {
 		// invoke(function);
 		// }
 
 		hadReturnStatement = false;
-		Type typeVar = function.getType();
 
 		for (int i = 0; i < function.parameters.size(); i++) {
 			// handle default values?
-			invocationStack.peek().bind(function.parameters.get(i).name, typeVar.getTypeParameters().get(i));
+			invocationStack.peek().bind(function.parameters.get(i).name, executableType.getTypeParameters().get(i));
 		}
 
 		Sequence<Statement> s = ((Function) function).statements;
@@ -177,7 +179,7 @@ public class AstAttrib {
 		}
 
 		if (!hadReturnStatement) {
-			addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getReturnType(), parser.types.VOID, function,
+			addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, function,
 					function);
 		}
 
@@ -411,7 +413,8 @@ public class AstAttrib {
 		case AstNode.FUNCTION:
 		case AstNode.PROCESS:
 
-			result = node.getType();
+			result = parser.types.createType();
+			result.executable = (Executable) node;
 			if (((NamedElement) node).name != null) {
 				getRootContext().bind(((NamedElement) node).name, result);
 			}
@@ -431,18 +434,21 @@ public class AstAttrib {
 
 			if (typeVar != null) {
 
+				executable = typeVar.executable;
+				typeVar = executable.getFunctionalType(this);
+				
 				// TODO: check number of arguments against default values
 				if (invocation.arguments.size() > typeVar.getTypeParameters().size()) {
 					addError(new TypingError(invocation, "wrong number of arguments"));
 				}
 
-				Type args = parser.types.createType();
 				for (int i = 0; i < invocation.arguments.size(); i++) {
 					if (i < typeVar.getTypeParameters().size()) {
-						args.addTypeParameter(eval(invocation.arguments.get(i)));
+						addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
+								eval(invocation.arguments.get(i)), invocation, invocation);
 					}
 				}
-				addTypingConstraint(TypingConstraint.Kind.SUBST, typeVar, args, invocation, null);
+				invoke(executable, typeVar);
 				result = typeVar.getReturnType();
 			}
 			// System.out.println("====> " + typeVar);
@@ -490,10 +496,9 @@ public class AstAttrib {
 				result = parser.types.VOID;
 			}
 
-			executable = getFirstEnclosingNode(Executable.class);
-			typeVar = executable.getType();
+			typeVar = invocationStack.peek().getExecutableType();
 
-			addTypingConstraint(TypingConstraint.Kind.EQ, result, typeVar.getReturnType(), node, executable);
+			addTypingConstraint(TypingConstraint.Kind.EQ, result, typeVar.getReturnType(), node, typeVar.executable);
 
 			break;
 
@@ -691,13 +696,10 @@ public class AstAttrib {
 		return !errors.isEmpty();
 	}
 
-	public void printConstraints(String indent, List<TypingConstraint> constraints, PrintStream out) {
+	public void printConstraints(String indent, PrintStream out) {
 		int i = 0;
 		for (TypingConstraint constraint : constraints) {
 			out.println(indent + (i++) + ". " + constraint.toString());
-			if(constraint.kind == Kind.SUBST) {
-				printConstraints(indent + "    ", constraint.left.getTypingConstraints(), out);
-			}
 		}
 	}
 
@@ -724,7 +726,7 @@ public class AstAttrib {
 		out.print("'" + node + "'" + (node != null && node.token() != null ? " at " + node.token().getLocation() : ""));
 	}
 
-	public void unify(List<TypingConstraint> constraints) {
+	public void unify() {
 		// remove wrong constraints
 		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
 			if (c.left == null || c.right == null) {
@@ -752,7 +754,7 @@ public class AstAttrib {
 			}
 			// System.out.println("===> after substitution");
 			// printConstraints(System.out);
-			simplify(constraints);
+			simplify();
 			// System.out.println("===> after simplification");
 			// printConstraints(System.out);
 		}
@@ -769,72 +771,7 @@ public class AstAttrib {
 
 	}
 
-	public List<TypingConstraint> applySubstitution(List<TypingConstraint> constraints, List<TypingError> errors) {
-		List<TypingConstraint> result = new ArrayList<>();
-		for (TypingConstraint c : constraints) {
-			if (c.kind == Kind.SUBST) {
-				result.addAll(applySubstitution(apply(c), errors));
-			} else {
-				result.add(c);
-			}
-		}
-		return result;
-	}
-	
-	int subst_id = 0;
-	
-	private List<TypingConstraint> apply(TypingConstraint constraint) {
-		List<TypingConstraint> result = new ArrayList<>();
-		subst_id++;
-			// performs the substitution of all the typing constraints in the
-			// left type
-			if (constraint.left.hasTypingConstraints()) {
-				for (TypingConstraint c : constraint.left.getTypingConstraints()) {
-					TypingConstraint newC = c.deepCopy();
-					if (c.kind != Kind.SUBST) {
-						List<Type> freeVariables = new ArrayList<>();
-						// substitute left part (replace all arguments and generate free types for other types)
-						newC.left = newC.left.substitute(constraint.left.getTypeParameters(), constraint.right.getTypeParameters(), freeVariables);
-						// substitute right part (replace all arguments and generate free types for other types)
-						newC.right = newC.right.substitute(constraint.left.getTypeParameters(), constraint.right.getTypeParameters(), freeVariables);
-						for(Type t : freeVariables) {
-							t.name += "_"+subst_id;
-						}
-						
-						/*int index = left.getTypeParameters().indexOf(newC.left);
-						if (index >= 0) {
-							newC.left = right.typeParameters.get(index);
-						}
-						// substitute right part
-						index = left.getTypeParameters().indexOf(newC.right);
-						if (index >= 0) {
-							newC.right = right.typeParameters.get(index);
-						}*/
-					} else {
-						// case of nested substitution
-						newC.right.typeParameters = new ArrayList<>(newC.right.typeParameters);
-						for (int i = 0; i < newC.right.getTypeParameters().size(); i++) {
-							// substitute type arguments
-							int index = constraint.left.getTypeParameters().indexOf(newC.right.getTypeParameters().get(i));
-							if (index >= 0) {
-								newC.right.getTypeParameters().set(i, constraint.right.getTypeParameters().get(index));
-							} else {
-								newC.right.getTypeParameters().get(i).name += "_"+subst_id;
-								
-							}
-							// could lead to infinite loop?
-							// List<TypingConstraint> l = newC.reduce(errors);
-							// result.addAll(l);
-						}
-					}
-					result.add(newC);
-				}
-			}
-			return result;
-		
-	}
-
-	public void simplify(List<TypingConstraint> constraints) {
+	public void simplify() {
 		boolean simplified = true;
 		while (simplified) {
 			simplified = false;

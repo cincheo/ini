@@ -8,7 +8,6 @@ import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class ProduceFunction extends BuiltInExecutable {
 
@@ -30,12 +29,6 @@ public class ProduceFunction extends BuiltInExecutable {
 		eval.result = data;
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		addTypingConstraint(Kind.EQ, getParameterType(0), parser.types.STRING);
-		addTypingConstraint(Kind.EQ, getReturnType(), parser.types.VOID);
-	}
-	
 	@Override
 	public Type getFunctionalType(AstAttrib attrib) {
 		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID, attrib.parser.types.STRING,

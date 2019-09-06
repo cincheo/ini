@@ -11,10 +11,6 @@ public class TypingConstraint implements TypingElement {
 
 	public enum Kind {
 		EQ, LTE, GTE,
-		// substitution constraints will reduce by returning the all the
-		// constraints in the left type substituted with the type parameters
-		// defined in the right type
-		SUBST
 	}
 
 	public Type left;
@@ -42,19 +38,16 @@ public class TypingConstraint implements TypingElement {
 		if (used) {
 			s += "*";
 		}
-		s += "[" + left.getFullName();
+		s += "[" + (left==null?"null":left.getFullName());
 		switch (kind) {
 		case EQ:
-			s = s + " = " + right.getFullName();
+			s = s + " = " + (right==null?"null":right.getFullName());
 			break;
 		case LTE:
-			s = s + " <= " + right.getFullName();
+			s = s + " <= " + (right==null?"null":right.getFullName());
 			break;
 		case GTE:
-			s = s + " >= " + right.getFullName();
-			break;
-		case SUBST:
-			s = s + "(" + Type.typeParametersString(right.typeParameters) + ")";
+			s = s + " >= " + (right==null?"null":right.getFullName());
 			break;
 		}
 		s = s + (leftOrigin != null ? " at '" + leftOrigin.toString() + "'"

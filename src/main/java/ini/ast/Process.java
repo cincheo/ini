@@ -14,7 +14,6 @@ import ini.eval.at.At;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
-import ini.type.TypingConstraint.Kind;
 
 public class Process extends Executable {
 
@@ -174,15 +173,4 @@ public class Process extends Executable {
 			 */
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		if ("main".equals(this.name)) {
-			if (parameters != null && parameters.size() == 1) {
-				addTypingConstraint(Kind.EQ, getParameterType(0), parser.types.createArrayType(parser.types.STRING),
-						parameters.get(0));
-			}
-			addTypingConstraint(Kind.EQ, getReturnType(), parser.types.VOID, this);
-		}
-	}
-	
 }

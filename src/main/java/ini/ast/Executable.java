@@ -10,8 +10,6 @@ import ini.eval.data.Data;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
-import ini.type.TypingConstraint.Kind;
 
 public abstract class Executable extends NamedElement implements Expression {
 
@@ -36,10 +34,6 @@ public abstract class Executable extends NamedElement implements Expression {
 
 	protected final Type getReturnType() {
 		return getType().getReturnType();
-	}
-
-	protected final void addTypingConstraint(Kind kind, Type leftType, Type rightType, AstNode origin) {
-		getType().addTypingConstraint(kind, leftType, rightType, origin);
 	}
 
 	@Override
@@ -71,13 +65,10 @@ public abstract class Executable extends NamedElement implements Expression {
 			for (int i = 0; i < parameters.size(); i++) {
 				this.type.addTypeParameter(new Type(parser.types));
 			}
-			buildTypingConstraints();
 		}
 		return this.type;
 	}
 
-	abstract protected void buildTypingConstraints();
-	
 	public Type getFunctionalType(AstAttrib attrib) {
 		Type functionalType = new Type(parser.types, "function");
 		if (name != null && name.equals("main")) {

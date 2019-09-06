@@ -22,6 +22,7 @@ import com.martiansoftware.jsap.UnflaggedOption;
 import ini.ast.AstNode;
 import ini.ast.Executable;
 import ini.ast.Invocation;
+import ini.ast.NamedElement;
 import ini.broker.CoreBrokerClient;
 import ini.broker.DeployRequest;
 import ini.eval.Context;
@@ -311,19 +312,16 @@ public class Main {
 		if (!attrib.hasErrors()) {
 			parser.topLevels.forEach(node -> attrib.eval(node));
 			parser.topLevels.forEach(node -> {
-				if (node instanceof Executable) {
-					attrib.invoke((Executable) node);
+				if (node instanceof Executable && "main".equals(((NamedElement) node).name)) {
+					attrib.invoke((Executable) node, ((Executable) node).getFunctionalType(attrib));
 				}
 			});
-			
-			attrib.printConstraints("", attrib.invocationStack.peek().getExecutableType().getTypingConstraints(), System.out);
-			List<TypingConstraint> substituted = attrib.applySubstitution(attrib.invocationStack.peek().getExecutableType().getTypingConstraints(),
-					attrib.errors);
+
+			attrib.printConstraints("", System.out);
 			System.out.println("===============================");
-			attrib.printConstraints("", substituted, System.out);
-			attrib.unify(substituted);
+			attrib.unify();
 			System.out.println("===============================");
-			attrib.printConstraints("", substituted, System.out);
+			attrib.printConstraints("", System.out);
 			System.err.println("===============================");
 			// System.err.println(Type.types);
 			// System.err.println(Type.aliases);

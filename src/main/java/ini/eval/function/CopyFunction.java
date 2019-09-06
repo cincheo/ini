@@ -6,7 +6,6 @@ import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint.Kind;
 
 public class CopyFunction extends BuiltInExecutable {
 
@@ -21,11 +20,6 @@ public class CopyFunction extends BuiltInExecutable {
 		eval.result = d;
 	}
 
-	@Override
-	protected void buildTypingConstraints() {
-		addTypingConstraint(Kind.EQ, getParameterType(0), getReturnType(), this);
-	}
-	
 	@Override
 	public Type getFunctionalType(AstAttrib attrib) {
 		Type functionType = new Type(attrib.parser.types,"function");
