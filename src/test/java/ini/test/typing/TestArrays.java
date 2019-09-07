@@ -17,9 +17,9 @@ public class TestArrays extends IniTestCase {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 2 error: " + attrib.errors, 2, attrib.errors.size());
-			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Int' is not compatible with 'Float'",
+			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Int' is not compatible with 'Double'",
 					attrib.errors.get(0).message);
-			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Int' is not compatible with 'Float'",
+			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Int' is not compatible with 'Double'",
 					attrib.errors.get(1).message);
 		});
 	}
@@ -29,9 +29,9 @@ public class TestArrays extends IniTestCase {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 2 error: " + attrib.errors, 2, attrib.errors.size());
-			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Float' is not compatible with 'Int'",
+			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Double' is not compatible with 'Int'",
 					attrib.errors.get(0).message);
-			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Float' is not compatible with 'Int'",
+			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Double' is not compatible with 'Int'",
 					attrib.errors.get(1).message);
 		});
 	}

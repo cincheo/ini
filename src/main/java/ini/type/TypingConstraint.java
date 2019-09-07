@@ -115,7 +115,7 @@ public class TypingConstraint implements TypingElement {
 			result.add(new TypingConstraint(Kind.EQ, left, left, leftOrigin, leftOrigin));
 			return result;
 		}
-		if (left.isVariable() || right.isVariable()) {
+		if (left.hasVariablePart() || right.hasVariablePart()) {
 			if (left.getName() != null && left.getName().equals(right.getName())) {
 				if (left.getTypeParameters().size() == right.getTypeParameters().size()) {
 					for (int i = 0; i < left.getTypeParameters().size(); i++) {

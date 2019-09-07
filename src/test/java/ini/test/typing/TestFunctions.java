@@ -50,8 +50,7 @@ public class TestFunctions extends IniTestCase {
 
 	public void testWrongParameterType() {
 		parseAndAttribCode("process main() { @init() { f(1.2) } }\n" //
-				+ "process f(n) { @end() { return n+1 } }",
-				parser -> {
+				+ "process f(n) { @end() { return n+1 } }", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
 
@@ -89,30 +88,28 @@ public class TestFunctions extends IniTestCase {
 	}
 
 	public void testBindingInvocationParameterType() {
-		parseAndAttribCode(
-				"declare f1(Int)=>Void [class=\"any\", member=\"any\"]\n" + "process f2() { @init() { f1(2.1) } }",
-				parser -> {
+		parseAndAttribCode("declare f1(Int)=>Void [class=\"any\", member=\"any\"]\n" //
+				+ "process f2() { @init() { f1(2.1) } }", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
 
 					assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
 					assertEquals("wrong type of error: " + attrib.errors,
-							"type mismatch: 'Double' is not compatible with 'Int'", attrib.errors.get(0).message);
+							"type mismatch: 'Int' is not compatible with 'Double'", attrib.errors.get(0).message);
 				});
 	}
 
 	public void testBindingInvocationResultType() {
-		parseAndAttribCode(
-				"declare f1(Int)=>Int [class=\"any\", method=\"any\"]\n" + "process f2() { @init() && f1(2)==1.2 {} }",
-				parser -> {
+		parseAndAttribCode("declare f1(Int)=>Int [class=\"any\", method=\"any\"]\n" //
+				+ "process f2() { @init() && f1(2)==1.2 {} }", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
 
 					assertEquals("expected 2 errors: " + attrib.errors, 2, attrib.errors.size());
 					assertEquals("wrong type of error: " + attrib.errors,
-							"type mismatch: 'Int' is not compatible with 'Float'", attrib.errors.get(0).message);
+							"type mismatch: 'Int' is not compatible with 'Double'", attrib.errors.get(0).message);
 					assertEquals("wrong type of error: " + attrib.errors,
-							"type mismatch: 'Int' is not compatible with 'Float'", attrib.errors.get(1).message);
+							"type mismatch: 'Int' is not compatible with 'Double'", attrib.errors.get(1).message);
 				});
 	}
 
@@ -147,12 +144,37 @@ public class TestFunctions extends IniTestCase {
 	}
 
 	public void testRightFacInvocation() {
-		parseAndAttribCode("function main() {" + "	f=10\n" + "	fac(f)" + "}\n" + "process fac(n) {" + "	@init() {"
-				+ "		f=1\n" + "		i=2" + "	}\n" + "	i <= n {" + "		f=f*i++" + "	}\n"
-				+ "	@end() {" + "		return f" + "	}" + "}", parser -> {
+		parseAndAttribCode("function main() {" //
+				+ "	f=10\n" //
+				+ "	fac(f)" //
+				+ "}\n" //
+				+ "process fac(n) {" //
+				+ "	@init() {" + "		f=1\n" //
+				+ "		i=2" //
+				+ "	}\n" //
+				+ "	i <= n {" //
+				+ "		f=f*i++" //
+				+ "	}\n" + "	@end() {" //
+				+ "		return f" //
+				+ "	}" //
+				+ "}", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
+					assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
+				});
+	}
 
+	public void testFunctionVariableClash() {
+		parseAndAttribCode("function main() {" //
+				+ "	f=1\n" //
+				+ "	f=f(2)\n" //
+				+ "	println(f)" //
+				+ "}\n" //
+				+ "function f(n) {" //
+				+ "	return n+1" //
+				+ "}", parser -> {
+					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+				}, attrib -> {
 					assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
 				});
 	}

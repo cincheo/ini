@@ -45,10 +45,18 @@ parser code {:
 			new PrintFunction(this), //
 			new PrintlnFunction(this), //
 			new ProduceFunction(this), //
+			new ReadKeyboardFunction(this), //
 			new RestFunction(this), //
 			new SizeFunction(this), //
 			new SleepFunction(this), //
 			new SwapFunction(this), //
+			new TimeFunction(this), //
+			new ToIntFunction(this), //
+			new ToLongFunction(this), //
+			new ToByteFunction(this), //
+			new ToCharFunction(this), //
+			new ToFloatFunction(this), //
+			new ToDoubleFunction(this), //
 			new ToStringFunction(this), //
 			new WaitFunction(this)
 		);

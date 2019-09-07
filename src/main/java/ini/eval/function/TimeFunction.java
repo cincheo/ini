@@ -1,26 +1,25 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
 import ini.eval.IniEval;
-import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
 
-import java.util.List;
+public class TimeFunction extends BuiltInExecutable {
 
-public class TimeFunction extends IniFunction {
-
-	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		return new RawData((long)System.currentTimeMillis());
+	public TimeFunction(IniParser parser) {
+		super(parser, "time");
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
-		return parser.types.createFunctionalType(parser.types.LONG);
+	public void eval(IniEval eval) {
+		eval.result = new RawData((long)System.currentTimeMillis());
+	}
+
+	@Override
+	public Type getFunctionalType(AstAttrib attrib) {
+		return attrib.parser.types.createFunctionalType(attrib.parser.types.LONG);
 	}
 	
 }

@@ -85,15 +85,27 @@ public class AstAttrib {
 
 	private Type lookup(NamedElement element) {
 		if (invocationStack.peek().hasBinding(element.name)) {
-			return invocationStack.peek().get(element.name);
-		} else {
-			if (getRootContext().hasBinding(element.name)) {
-				return getRootContext().get(element.name);
-			} else {
-				addError(new TypingError(element, "undefined symbol '" + element.name + "'"));
-				return null;
+			Type t = invocationStack.peek().get(element.name);
+			if (t.executable != null) {
+				return t;
 			}
 		}
+		if (getRootContext().hasBinding(element.name)) {
+			return getRootContext().get(element.name);
+		} else {
+			addError(new TypingError(element, "undefined symbol '" + element.name + "'"));
+			return null;
+		}
+	}
+
+	private Type lookupInvocationContext(Executable executable) {
+		int i = invocationStack.size() - 1;
+		while (i >= 0) {
+			if (invocationStack.get(i).getExecutableType().executable == executable) {
+				return invocationStack.get(i).getExecutableType();
+			}
+		}
+		return null;
 	}
 
 	private AttrContext getRootContext() {
@@ -103,6 +115,9 @@ public class AstAttrib {
 	public void invoke(Executable executable, Type executableType) {
 		if (executable == null) {
 			throw new RuntimeException("cannot invoke null exutable");
+		}
+		if (executableType.executable == null) {
+			executableType.executable = executable;
 		}
 		invocationStack.push(new AttrContext(parser.types, executableType));
 		evaluationStack.push(executable);
@@ -122,12 +137,8 @@ public class AstAttrib {
 	}
 
 	private void evalProcess(Process process, Type executableType) {
-		// if (process.functionType == null) {
-		// invoke(process);
-		// }
 
 		hadReturnStatement = false;
-		//Type typeVar = process.getType();
 
 		for (int i = 0; i < process.parameters.size(); i++) {
 			// handle default values?
@@ -151,19 +162,13 @@ public class AstAttrib {
 		}
 
 		if (!hadReturnStatement) {
-			addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, process, process);
+			addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, process,
+					process);
 		}
-
-		// result = typeVar;
-		// evaluationStack.pop();
 
 	}
 
 	private void evalFunction(Function function, Type executableType) {
-		// evaluationStack.push(function);
-		// if (function.functionType == null) {
-		// invoke(function);
-		// }
 
 		hadReturnStatement = false;
 
@@ -183,8 +188,6 @@ public class AstAttrib {
 					function);
 		}
 
-		// result = typeVar;
-		// evaluationStack.pop();
 	}
 
 	// @SuppressWarnings("unchecked")
@@ -219,7 +222,7 @@ public class AstAttrib {
 		case AstNode.BINDING:
 			// TODO: register here?
 			Binding binding = ((Binding) node);
-			result = binding.getType();
+			result = binding.getFunctionalType();
 			// TODO: change
 			if (binding.typeParameters != null) {
 				for (TypeVariable tv : binding.typeParameters) {
@@ -422,6 +425,7 @@ public class AstAttrib {
 
 		case AstNode.INVOCATION:
 			Invocation invocation = (Invocation) node;
+			
 			if (invocation.name.equals("regexp")) {
 				for (Expression e : invocation.arguments) {
 					result = eval(e);
@@ -435,8 +439,21 @@ public class AstAttrib {
 			if (typeVar != null) {
 
 				executable = typeVar.executable;
-				typeVar = executable.getFunctionalType(this);
-				
+
+				// a null executable corresponds to a binding
+				if (executable != null) {
+					if (!evaluationStack.contains(executable)) {
+						// create a new type for each invocation to handle
+						// polymorphic functions
+						typeVar = executable.getFunctionalType(this);
+					} else {
+						// in case of recursion, we use the type calculated in
+						// the
+						// enclosing invocation of the executable
+						typeVar = lookupInvocationContext(executable);
+					}
+				}
+
 				// TODO: check number of arguments against default values
 				if (invocation.arguments.size() > typeVar.getTypeParameters().size()) {
 					addError(new TypingError(invocation, "wrong number of arguments"));
@@ -448,7 +465,10 @@ public class AstAttrib {
 								eval(invocation.arguments.get(i)), invocation, invocation);
 					}
 				}
-				invoke(executable, typeVar);
+
+				if (executable != null && !evaluationStack.contains(executable)) {
+					invoke(executable, typeVar);
+				}
 				result = typeVar.getReturnType();
 			}
 			// System.out.println("====> " + typeVar);
@@ -672,13 +692,6 @@ public class AstAttrib {
 		}
 		evaluationStack.pop();
 		return result;
-	}
-
-	Type getOrCreateNodeTypeVariable(AstNode node) {
-		if (node.getType() == null) {
-			node.setType(parser.types.createType());
-		}
-		return node.getType();
 	}
 
 	boolean isNumber(Type type) {

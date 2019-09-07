@@ -33,7 +33,9 @@ public class Binding extends NamedElement {
 		this.returnType = returnType;
 		this.className = getAnnotationValue("class");
 		this.member = getAnnotationValue("member");
-		this.memberName = this.member.split("\\(")[0];
+		if (member != null) {
+			this.memberName = this.member.split("\\(")[0];
+		}
 		this.nodeTypeId = AstNode.BINDING;
 	}
 

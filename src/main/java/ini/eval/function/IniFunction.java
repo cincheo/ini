@@ -30,24 +30,24 @@ public abstract class IniFunction {
 		functions.put("eval", new EvalFunction()); //??
 		functions.put("eval_string", new EvalStringFunction()); //??
 		//functions.put("error", new ErrorFunction()); //B
-		functions.put("to_char", new ToCharFunction());
+		//functions.put("to_char", new ToCharFunction());
 		//functions.put("to_string", new ToStringFunction());
-		functions.put("to_byte", new ToByteFunction());
-		functions.put("to_int", new ToIntFunction());
-		functions.put("to_float", new ToFloatFunction());
-		functions.put("to_double", new ToDoubleFunction());
+		//functions.put("to_byte", new ToByteFunction());
+		//functions.put("to_int", new ToIntFunction());
+		//functions.put("to_float", new ToFloatFunction());
+		//functions.put("to_double", new ToDoubleFunction());
 		functions.put("parse_number", new ParseNumberFunction());
-		functions.put("to_long", new ToLongFunction());
+		//functions.put("to_long", new ToLongFunction());
 		functions.put("start_web_service", new StartWebServiceFunction()); //??
 		functions.put("stop_web_service", new StopWebServiceFunction()); //??
 		//functions.put("clear", new ClearFunction()); //B
 		//functions.put("swap", new SwapFunction()); //B
 		//functions.put("copy", new CopyFunction()); //B
-		functions.put("time", new TimeFunction());
+		//functions.put("time", new TimeFunction());
 		//functions.put("mod", new ModFunction()); //M
 		//functions.put("pow", new PowFunction()); //M
 		//functions.put("size", new SizeFunction()); //B
-		functions.put("read_keyboard", new ReadKeyboardFunction()); //IO
+		//functions.put("read_keyboard", new ReadKeyboardFunction()); //B
 		functions.put("zip", new ZipFunction()); //IO
 		functions.put("upload_ftp", new UploadFTPFunction()); //NET
 		functions.put("stop", new KillAt());

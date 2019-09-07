@@ -176,7 +176,7 @@ public class Types {
 
 	public Type createFunctionalType(Type returnType, Type... parameterTypes) {
 		Type t = new Type(this, "function");
-		t.variable = true;
+		t.variable = false;
 		for (Type p : parameterTypes) {
 			t.addTypeParameter(p);
 		}

@@ -312,7 +312,7 @@ public class Main {
 		if (!attrib.hasErrors()) {
 			parser.topLevels.forEach(node -> attrib.eval(node));
 			parser.topLevels.forEach(node -> {
-				if (node instanceof Executable && "main".equals(((NamedElement) node).name)) {
+				if (node instanceof Executable /*&& "main".equals(((NamedElement) node).name)*/) {
 					attrib.invoke((Executable) node, ((Executable) node).getFunctionalType(attrib));
 				}
 			});

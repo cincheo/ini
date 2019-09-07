@@ -1,34 +1,34 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
-import ini.eval.IniEval;
-import ini.eval.data.Data;
-import ini.eval.data.RawData;
-import ini.parser.IniParser;
-import ini.type.Type;
-import ini.type.TypingConstraint;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
 
-public class ReadKeyboardFunction extends IniFunction {
+import ini.eval.IniEval;
+import ini.eval.data.RawData;
+import ini.parser.IniParser;
+import ini.type.AstAttrib;
+import ini.type.Type;
 
-	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					System.in));
-			return new RawData(in.readLine());
-		} catch (IOException e) {
-		} 
-		return new RawData(null);
+public class ReadKeyboardFunction extends BuiltInExecutable {
+
+	public ReadKeyboardFunction(IniParser parser) {
+		super(parser, "read_keyboard");
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
+	public void eval(IniEval eval) {
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					System.in));
+			eval.result = new RawData(in.readLine());
+		} catch (IOException e) {
+		} 
+		eval.result = new RawData(null);
+	}
+
+	@Override
+	public Type getFunctionalType(AstAttrib attrib) {
 		return parser.types.createFunctionalType(parser.types.STRING);
 	}
 	

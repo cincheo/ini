@@ -314,4 +314,19 @@ public class Type {
 		return typeParameters != null && !typeParameters.isEmpty();
 	}
 
+	public boolean hasVariablePart() {
+		if (variable) {
+			return true;
+		} else {
+			if (typeParameters != null) {
+				for (Type t : typeParameters) {
+					if (t.hasVariablePart()) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 }

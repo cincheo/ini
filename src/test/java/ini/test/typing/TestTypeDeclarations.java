@@ -1,7 +1,5 @@
 package ini.test.typing;
 
-import org.junit.Ignore;
-
 import ini.test.IniTestCase;
 
 public class TestTypeDeclarations extends IniTestCase {
@@ -22,9 +20,6 @@ public class TestTypeDeclarations extends IniTestCase {
 		});
 	}
 
-	// TODO: remove message "Couldn't repair and continue parse" on standard
-	// error
-	@Ignore
 	public void _testUnallowedEmptyConstructorDeclaration() {
 		parseAndAttribCode("type Tree = Leaf | Node[value:Int,left:Tree,right:Tree]\n", parser -> {
 			assertEquals("expected 1 errors: " + parser.errors, 1, parser.errors.size());
@@ -55,7 +50,7 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testIllegalDuplicateTypeDeclaration() {
-		parseAndAttribCode("type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n"
+		parseAndAttribCode("type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n" //
 				+ "type Tree = Text[value:Int]\n", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
@@ -66,7 +61,7 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testIllegalSameNameForTypeAndExternalConstructor() {
-		parseAndAttribCode("type Tree1 = Leaf[value:Int] | Node[value:Int,left:Tree1,right:Tree1]\n"
+		parseAndAttribCode("type Tree1 = Leaf[value:Int] | Node[value:Int,left:Tree1,right:Tree1]\n" //
 				+ "type Tree2 = Tree1[value:Int]\n", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
@@ -87,8 +82,9 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testUseOfAnonymousConstructor1() {
-		parseAndAttribCode("type Tree = [value:Int,left:Tree,right:Tree]\n" + "process main() {"
-				+ "  @init() { t = Tree[value = 1] }" + "}", parser -> {
+		parseAndAttribCode("type Tree = [value:Int,left:Tree,right:Tree]\n" //
+				+ "process main() {" + "  @init() { t = Tree[value = 1] }" //
+				+ "}", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
 					assertEquals("expected 0 errors: " + attrib.errors, 0, attrib.errors.size());
@@ -106,20 +102,26 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testUseUndeclaredConstructorInMatchExpression() {
-		parseAndAttribCode("function f() {" + "  case n ~ C[value==2] {" + "    println(n)" + "  }" + "}", parser -> {
-
-			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
-		}, attrib -> {
-			assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
-			assertEquals("wrong type of error: " + attrib.errors, "undeclared constructor 'C'",
-					attrib.errors.get(0).message);
-		});
+		parseAndAttribCode("function f() {" //
+				+ "  case n ~ C[value==2] {" //
+				+ "    println(n)" //
+				+ "  }" //
+				+ "}", parser -> {
+					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+				}, attrib -> {
+					assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
+					assertEquals("wrong type of error: " + attrib.errors, "undeclared constructor 'C'",
+							attrib.errors.get(0).message);
+				});
 	}
 
 	public void testUseUndeclaredConstructorInConstructor() {
-		parseAndAttribCode(
-				"process f() {\n" + "  @init() {\n" + "    c = C[value=2]\n" + "    println(c)\n" + "  }\n" + "}",
-				parser -> {
+		parseAndAttribCode("process f() {\n" //
+				+ "  @init() {\n" //
+				+ "    c = C[value=2]\n" //
+				+ "    println(c)\n" //
+				+ "  }\n" //
+				+ "}", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
 					assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
