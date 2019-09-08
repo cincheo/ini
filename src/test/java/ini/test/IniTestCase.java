@@ -28,7 +28,7 @@ public abstract class IniTestCase extends TestCase {
 		super.setUp();
 		outputStream = new ByteArrayOutputStream();
 		out = new PrintStream(outputStream);
-		//System.setOut(out);
+		System.setOut(out);
 	}
 
 	protected void parseAndAttribCode(String code, Consumer<IniParser> parsingAssertions, Consumer<AstAttrib> attribAssertions) {
@@ -77,6 +77,8 @@ public abstract class IniTestCase extends TestCase {
 			}
 			parser.parse();
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+			AstAttrib attrib = Main.attrib(parser);
+			assertEquals("expected 0 errors: " + attrib.errors, 0, attrib.errors.size());
 			Main.evalMainFunction(parser, null);
 			if (sleepTime > 0) {
 				Thread.sleep(sleepTime);

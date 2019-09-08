@@ -52,6 +52,7 @@ parser code {:
 			new SwapFunction(this), //
 			new TimeFunction(this), //
 			new ToIntFunction(this), //
+			new ToJsonFunction(this), //
 			new ToLongFunction(this), //
 			new ToByteFunction(this), //
 			new ToCharFunction(this), //

@@ -122,11 +122,14 @@ public class Main {
 				? IniParser.createParserForFile(null, null, commandLineConfig.getString("file"))
 				: IniParser.createParserForCode(null, null, "process main() {}");
 
-		parser.parse();
-
-		if (parser.hasErrors()) {
-			parser.printErrors(System.err);
-			return;
+		try {
+			parser.parse();
+		} catch (Exception e) {
+			if (parser.hasErrors()) {
+				parser.printErrors(System.err);
+				e.printStackTrace();
+				return;
+			}
 		}
 
 		if (commandLineConfig.userSpecified("node") || commandLineConfig.userSpecified("deamon")) {
@@ -312,16 +315,20 @@ public class Main {
 		if (!attrib.hasErrors()) {
 			parser.topLevels.forEach(node -> attrib.eval(node));
 			parser.topLevels.forEach(node -> {
-				if (node instanceof Executable /*&& "main".equals(((NamedElement) node).name)*/) {
+				if (node instanceof Executable /*
+												 * &&
+												 * "main".equals(((NamedElement)
+												 * node).name)
+												 */) {
 					attrib.invoke((Executable) node, ((Executable) node).getFunctionalType(attrib));
 				}
 			});
 
-			attrib.printConstraints("", System.out);
-			System.out.println("===============================");
+			attrib.printConstraints("", System.err);
+			System.err.println("===============================");
 			attrib.unify();
-			System.out.println("===============================");
-			attrib.printConstraints("", System.out);
+			System.err.println("===============================");
+			attrib.printConstraints("", System.err);
 			System.err.println("===============================");
 			// System.err.println(Type.types);
 			// System.err.println(Type.aliases);

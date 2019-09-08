@@ -184,7 +184,6 @@ public class TestFunctions extends IniTestCase {
 				parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
-
 					assertEquals("expected 2 errors: " + attrib.errors, 2, attrib.errors.size());
 					assertEquals("wrong type of error: " + attrib.errors,
 							"type mismatch: 'Void' is not compatible with 'Int'", attrib.errors.get(0).message);

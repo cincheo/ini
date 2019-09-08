@@ -50,7 +50,7 @@ import ini.ast.Token;
 	//}
 %}	
 
-LineTerminator= \r|\n|\r\n
+LineTerminator= \n|\r\n
 InputCharacter = [^\r\n]
 WhiteSpace = {LineTerminator} | [ \t\f]
 WhiteSpaceChar = [ \t\f]
@@ -184,12 +184,12 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   {Comment}             { /* ignore */ }
   {WhiteSpaceChar}      { /* ignore */ }
   // POTENTIAL PB UNDER WINDOWS?
-  "\n" / "\n"           { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
-  "\n" / "type"         { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
-  "\n" / "function"     { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
-  "\n" / "process"      { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
+  {LineTerminator} {LineTerminator}           { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
+  {LineTerminator} / "type"         { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
+  {LineTerminator} / "function"     { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
+  {LineTerminator} / "process"      { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
   <<EOF>>               { yybegin(YYINITIAL); return symbol(sym.END); }
-  "\n"                  { return symbol(sym.LF); }
+  {LineTerminator}                  { return symbol(sym.LF); }
 }
 
 <LAMBDA> {
@@ -203,4 +203,4 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "\n"                  { return symbol(sym.LF); }
 }
 
-.|\n { System.out.println("unmatched:"+yytext()); }
+.|\n { System.out.println("unmatched: '"+yytext()+"'"); }

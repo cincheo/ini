@@ -108,7 +108,7 @@ public class Type {
 			} else {
 				return "[" + fieldsString(fields) + "]";
 			}
-		} else if (isFunctional()) {
+		} else if (name!=null && "function".equals(name)) {
 			return "(" + typeParametersString(typeParameters) + ")->" + returnType;
 		} else {
 			return name;
@@ -299,7 +299,7 @@ public class Type {
 	}
 
 	public boolean isFunctional() {
-		return name != null && name.equals("function");
+		return name != null && name.equals("function") || executable !=null;
 	}
 
 	public Map<String, Type> getFields() {

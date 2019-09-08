@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Stack;
 
+import ini.Main;
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
 import ini.ast.AstNode;
@@ -37,6 +38,7 @@ import ini.ast.TypeVariable;
 import ini.ast.UnaryOperator;
 import ini.ast.UserType;
 import ini.ast.Variable;
+import ini.eval.function.BoundJavaFunction;
 import ini.parser.IniParser;
 import ini.type.TypingConstraint.Kind;
 
@@ -71,6 +73,12 @@ public class AstAttrib {
 			return;
 		}
 		constraints.add(new TypingConstraint(kind, leftType, rightType, leftOrigin, rightOrigin));
+		if (kind == Kind.EQ && leftType != null && rightType != null) {
+			if (leftType.executable == null)
+				leftType.executable = rightType.executable;
+			if (rightType.executable == null)
+				rightType.executable = leftType.executable;
+		}
 	}
 
 	/*
@@ -84,6 +92,18 @@ public class AstAttrib {
 	 */
 
 	private Type lookup(NamedElement element) {
+		// boolean hasFunctionInRootContext =
+		// getRootContext().hasBinding(element.name);
+
+		/*
+		 * if (invocationStack.peek().hasBinding(element.name)) { return
+		 * invocationStack.peek().get(element.name); } if
+		 * (getRootContext().hasBinding(element.name)) { return
+		 * getRootContext().get(element.name); } addError(new
+		 * TypingError(element, "undefined symbol '" + element.name + "'"));
+		 * return null;
+		 */
+
 		if (invocationStack.peek().hasBinding(element.name)) {
 			Type t = invocationStack.peek().get(element.name);
 			if (t.executable != null) {
@@ -93,9 +113,12 @@ public class AstAttrib {
 		if (getRootContext().hasBinding(element.name)) {
 			return getRootContext().get(element.name);
 		} else {
-			addError(new TypingError(element, "undefined symbol '" + element.name + "'"));
+			if (!invocationStack.peek().hasBinding(element.name) && !getRootContext().hasBinding(element.name)) {
+				addError(new TypingError(element, "undefined symbol '" + element.name + "'"));
+			}
 			return null;
 		}
+
 	}
 
 	private Type lookupInvocationContext(Executable executable) {
@@ -104,12 +127,21 @@ public class AstAttrib {
 			if (invocationStack.get(i).getExecutableType().executable == executable) {
 				return invocationStack.get(i).getExecutableType();
 			}
+			i--;
 		}
 		return null;
 	}
 
 	private AttrContext getRootContext() {
 		return invocationStack.get(0);
+	}
+
+	private Type getFunctionalType(Invocation invocation) {
+		Type t = parser.types.createFunctionalType(parser.types.createType());
+		for (Expression e : invocation.arguments) {
+			t.addTypeParameter(eval(e));
+		}
+		return t;
 	}
 
 	public void invoke(Executable executable, Type executableType) {
@@ -170,6 +202,7 @@ public class AstAttrib {
 
 	private void evalFunction(Function function, Type executableType) {
 
+		// TODO: implicit return of lambdas with one expression...
 		hadReturnStatement = false;
 
 		for (int i = 0; i < function.parameters.size(); i++) {
@@ -223,6 +256,7 @@ public class AstAttrib {
 			// TODO: register here?
 			Binding binding = ((Binding) node);
 			result = binding.getFunctionalType();
+			result.executable = new BoundJavaFunction(binding);
 			// TODO: change
 			if (binding.typeParameters != null) {
 				for (TypeVariable tv : binding.typeParameters) {
@@ -274,6 +308,10 @@ public class AstAttrib {
 			// TypingConstraint(TypingConstraint.Kind.EQ, t1, t2, ((Assignment)
 			// node).assignee, ((Assignment) node).assignment)); }
 
+			if (t1 != null && t2 != null) {
+				t1.executable = t2.executable;
+			}
+
 			if (t2 != null && (!t2.isVariable() && !t2.hasFields() || t2.isFunctional())) {
 				addTypingConstraint(TypingConstraint.Kind.EQ, t1, t2, ((Assignment) node).assignee,
 						((Assignment) node).assignment);
@@ -321,6 +359,8 @@ public class AstAttrib {
 				break;
 			case PLUS:
 				if (t1 == parser.types.STRING || t2 == parser.types.STRING) {
+					// addTypingConstraint(TypingConstraint.Kind.EQ, t2,
+					// parser.types.STRING, b.left, b.right);
 					result = parser.types.STRING;
 				} else {
 					result = parser.types.createType();
@@ -425,7 +465,7 @@ public class AstAttrib {
 
 		case AstNode.INVOCATION:
 			Invocation invocation = (Invocation) node;
-			
+
 			if (invocation.name.equals("regexp")) {
 				for (Expression e : invocation.arguments) {
 					result = eval(e);
@@ -440,36 +480,58 @@ public class AstAttrib {
 
 				executable = typeVar.executable;
 
-				// a null executable corresponds to a binding
-				if (executable != null) {
+				if (executable == null) {
+					// this should not happen
+					Main.LOGGER.error(
+							"typing may be incomplete for " + invocation + " at " + invocation.token.getLocation());
+					// Type t = getFunctionalType(invocation);
+					// addTypingConstraint(TypingConstraint.Kind.EQ, typeVar, t,
+					// invocation, invocation);
+				} else {
+
 					if (!evaluationStack.contains(executable)) {
 						// create a new type for each invocation to handle
 						// polymorphic functions
 						typeVar = executable.getFunctionalType(this);
+						typeVar.executable = executable;
 					} else {
 						// in case of recursion, we use the type calculated in
 						// the
 						// enclosing invocation of the executable
 						typeVar = lookupInvocationContext(executable);
 					}
-				}
 
-				// TODO: check number of arguments against default values
-				if (invocation.arguments.size() > typeVar.getTypeParameters().size()) {
-					addError(new TypingError(invocation, "wrong number of arguments"));
-				}
+					// TODO: check number of arguments against default values
+					if (executable.parameters.size() != typeVar.getTypeParameters().size()) {
+						throw new RuntimeException("unconsistent type for executable");
+					}
+					if (invocation.arguments.size() > typeVar.getTypeParameters().size()) {
+						addError(new TypingError(invocation, "wrong number of arguments"));
+					}
 
-				for (int i = 0; i < invocation.arguments.size(); i++) {
-					if (i < typeVar.getTypeParameters().size()) {
-						addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
-								eval(invocation.arguments.get(i)), invocation, invocation);
+					for (int i = 0; i < typeVar.getTypeParameters().size(); i++) {
+						if (i < invocation.arguments.size()) {
+							addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
+									eval(invocation.arguments.get(i)), invocation, invocation);
+						} else {
+							if (executable.parameters.get(i).defaultValue != null) {
+								addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
+										eval(executable.parameters.get(i).defaultValue), invocation, invocation);
+							} else {
+								addError(new TypingError(invocation, "wrong number of arguments"));
+								break;
+							}
+						}
+					}
+
+					if (executable != null && !evaluationStack.contains(executable)) {
+						invoke(executable, typeVar);
 					}
 				}
-
-				if (executable != null && !evaluationStack.contains(executable)) {
-					invoke(executable, typeVar);
-				}
 				result = typeVar.getReturnType();
+			} else {
+				Main.LOGGER
+						.error("typing may be incomplete for " + invocation + " at " + invocation.token.getLocation());
 			}
 			// System.out.println("====> " + typeVar);
 			break;

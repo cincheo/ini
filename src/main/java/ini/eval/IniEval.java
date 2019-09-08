@@ -489,10 +489,15 @@ public class IniEval {
 
 			case AstNode.VARIABLE:
 				name = ((Variable) node).name;
-				if (!invocationStack.peek().hasBinding(name) && getRootContext().hasBinding(name)) {
-					result = getRootContext().get(name);
-				} else {
+				Assignment a = getParentNode(Assignment.class);
+				if (a != null && a.assignee == node) {
 					result = invocationStack.peek().getOrCreate(name);
+				} else {
+					if (!invocationStack.peek().hasBinding(name) && getRootContext().hasBinding(name)) {
+						result = getRootContext().get(name);
+					} else {
+						result = invocationStack.peek().getOrCreate(name);
+					}
 				}
 				break;
 
@@ -548,6 +553,14 @@ public class IniEval {
 			if (nodeType.isAssignableFrom(evaluationStack.get(i).getClass())) {
 				return (T) evaluationStack.get(i);
 			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	<T> T getParentNode(Class<T> nodeType) {
+		if (nodeType.isAssignableFrom(evaluationStack.get(evaluationStack.size() - 2).getClass())) {
+			return (T) evaluationStack.get(evaluationStack.size() - 2);
 		}
 		return null;
 	}

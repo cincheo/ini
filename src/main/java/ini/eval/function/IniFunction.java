@@ -53,7 +53,7 @@ public abstract class IniFunction {
 		functions.put("stop", new KillAt());
 		functions.put("restart", new RestartAtFunction()); 
 		functions.put("reconfigure", new ReconfigureAtFunction()); //B
-		functions.put("to_json", new ToJsonFunction()); //B
+		//functions.put("to_json", new ToJsonFunction()); //B
 		//functions.put("produce", new ProduceFunction()); //B
 		//functions.put("wait", new WaitFunction());
 	}
