@@ -2,7 +2,6 @@ package ini.eval.function;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -13,27 +12,30 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
+import ini.ast.Executable;
 import ini.eval.IniEval;
-import ini.eval.data.Data;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
 
-public class StartWebServiceFunction extends IniFunction {
+public class StartWebServiceFunction extends BuiltInExecutable {
 
 	public static Map<Integer, Server> servers = new HashMap<>();
 
+	public StartWebServiceFunction(IniParser parser) {
+		super(parser, "start_web_service", "port", "handler");
+	}
+
 	@Override
-	public Data eval(final IniEval eval, final List<Expression> params) {
+	public void eval(IniEval eval) {
+		final int port = getArgument(eval, 0).getNumber().intValue();
+		final Handler handler = new Handler(eval.fork(), getArgument(eval, 1).getValue());
 		new Thread() {
 			@Override
 			public void run() {
-				int port = eval.eval(params.get(0)).getNumber().intValue();
 				Server server = new Server(port);
 				servers.put(port, server);
-				server.setHandler(new Handler(eval.fork(), eval.eval(params.get(1)).getValue().toString()));
+				server.setHandler(handler);
 				try {
 					server.start();
 					server.join();
@@ -42,11 +44,11 @@ public class StartWebServiceFunction extends IniFunction {
 				}
 			}
 		}.start();
-		return null;
+		eval.result = null;
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints, Invocation invocation) {
+	public Type getFunctionalType(AstAttrib attrib) {
 		return parser.types.createFunctionalType(parser.types.VOID, parser.types.INT,
 				parser.types.createFunctionalType(parser.types.VOID, parser.types.STRING, parser.types.ANY));
 	}
@@ -54,11 +56,11 @@ public class StartWebServiceFunction extends IniFunction {
 	public class Handler extends AbstractHandler {
 
 		IniEval eval;
-		String function;
+		Executable executable;
 
-		public Handler(IniEval eval, String function) {
+		public Handler(IniEval eval, Executable executable) {
 			this.eval = eval;
-			this.function = function;
+			this.executable = executable;
 		}
 
 		@Override
@@ -68,7 +70,7 @@ public class StartWebServiceFunction extends IniFunction {
 			response.setStatus(HttpServletResponse.SC_OK);
 			baseRequest.setHandled(true);
 			// dispatch to ini function...
-			eval.invoke(function, new Object[] {baseRequest.getPathInfo(), response.getWriter()});
+			eval.invoke(executable, new Object[] { baseRequest.getPathInfo(), response.getWriter() });
 		}
 
 	}

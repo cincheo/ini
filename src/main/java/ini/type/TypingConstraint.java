@@ -38,16 +38,16 @@ public class TypingConstraint implements TypingElement {
 		if (used) {
 			s += "*";
 		}
-		s += "[" + (left==null?"null":left.getFullName());
+		s += "[" + (left == null ? "null" : left.getFullName());
 		switch (kind) {
 		case EQ:
-			s = s + " = " + (right==null?"null":right.getFullName());
+			s = s + " = " + (right == null ? "null" : right.getFullName());
 			break;
 		case LTE:
-			s = s + " <= " + (right==null?"null":right.getFullName());
+			s = s + " <= " + (right == null ? "null" : right.getFullName());
 			break;
 		case GTE:
-			s = s + " >= " + (right==null?"null":right.getFullName());
+			s = s + " >= " + (right == null ? "null" : right.getFullName());
 			break;
 		}
 		s = s + (leftOrigin != null ? " at '" + leftOrigin.toString() + "'"
@@ -68,14 +68,14 @@ public class TypingConstraint implements TypingElement {
 		if (this == substitution) {
 			return;
 		}
-		if (left.isVariable()) {
+		if (left.hasVariablePart()) {
 			left.substitute(substitution);
 			if (left.equals(substitution.left)) {
 				left = substitution.right;
 				leftOrigin = substitution.rightOrigin;
 			}
 		}
-		if (right.isVariable()) {
+		if (right.hasVariablePart()) {
 			right.substitute(substitution);
 			if (right.equals(substitution.left)) {
 				right = substitution.right;
@@ -85,7 +85,7 @@ public class TypingConstraint implements TypingElement {
 	}
 
 	public void normalize() {
-		if (!left.isVariable() && right.isVariable()) {
+		if ((!left.isVariable() && right.isVariable()) || (!left.hasVariablePart() && right.hasVariablePart())) {
 			Type tmp = left;
 			left = right;
 			right = tmp;

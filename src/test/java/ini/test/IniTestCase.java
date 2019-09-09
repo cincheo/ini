@@ -31,31 +31,41 @@ public abstract class IniTestCase extends TestCase {
 		System.setOut(out);
 	}
 
-	protected void parseAndAttribCode(String code, Consumer<IniParser> parsingAssertions, Consumer<AstAttrib> attribAssertions) {
+	protected void parseAndAttribCode(String code, Consumer<IniParser> parsingAssertions,
+			Consumer<AstAttrib> attribAssertions) {
+		IniParser parser = null;
 		try {
-			IniParser parser = IniParser.createParserForCode(null, null, code);
+			parser = IniParser.createParserForCode(null, null, code);
 			parser.parse();
 			parsingAssertions.accept(parser);
 			AstAttrib attrib = Main.attrib(parser);
 			attribAssertions.accept(attrib);
 		} catch (Exception e) {
+			if (parser != null && parser.hasErrors()) {
+				parser.printErrors(System.err);
+			}
 			e.printStackTrace();
 			fail();
 		}
 	}
 
-	protected void parseAndAttribFile(String file, Consumer<IniParser> parsingAssertions, Consumer<AstAttrib> attribAssertions) {
+	protected void parseAndAttribFile(String file, Consumer<IniParser> parsingAssertions,
+			Consumer<AstAttrib> attribAssertions) {
+		IniParser parser = null;
 		try {
-			IniParser parser = IniParser.createParserForFile(null, null, file);
+			parser = IniParser.createParserForFile(null, null, file);
 			parser.parse();
 			parsingAssertions.accept(parser);
 			AstAttrib attrib = Main.attrib(parser);
 			attribAssertions.accept(attrib);
 		} catch (Exception e) {
+			if (parser != null && parser.hasErrors()) {
+				parser.printErrors(System.err);
+			}
 			fail();
 		}
 	}
-	
+
 	protected void testFile(String file, BiConsumer<IniParser, String> assertions) {
 		testFile(file, 0, null, assertions);
 	}
@@ -69,8 +79,10 @@ public abstract class IniTestCase extends TestCase {
 	}
 
 	protected void testFile(String file, long sleepTime, String node, BiConsumer<IniParser, String> assertions) {
+		IniParser parser = null;
 		try {
-			IniParser parser = file == null ? IniParser.createParserForCode(null, null, "process main() {}") : IniParser.createParserForFile(null, null, file);
+			parser = file == null ? IniParser.createParserForCode(null, null, "process main() {}")
+					: IniParser.createParserForFile(null, null, file);
 			if (node != null) {
 				parser.env.deamon = true;
 				parser.env.node = node;
@@ -87,6 +99,9 @@ public abstract class IniTestCase extends TestCase {
 				assertions.accept(parser, outputStream.toString());
 			}
 		} catch (Exception e) {
+			if (parser != null && parser.hasErrors()) {
+				parser.printErrors(System.err);
+			}
 			e.printStackTrace();
 			fail();
 		}
@@ -95,5 +110,5 @@ public abstract class IniTestCase extends TestCase {
 	protected String getOut() {
 		return outputStream.toString();
 	}
-	
+
 }

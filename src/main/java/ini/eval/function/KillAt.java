@@ -1,28 +1,27 @@
 package ini.eval.function;
 
-import ini.ast.Expression;
-import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.eval.at.At;
-import ini.eval.data.Data;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
-import ini.type.TypingConstraint;
 
-import java.util.List;
+public class KillAt extends BuiltInExecutable {
 
-public class KillAt extends IniFunction {
-
+	public KillAt(IniParser parser) {
+		super(parser, "stop", "name");
+	}
+	
 	@Override
-	public Data eval(IniEval eval, List<Expression> params) {
-		At at = (At)eval.eval(params.get(0)).getValue();
+	public void eval(IniEval eval) {
+		At at = (At)getArgument(eval, 0).getValue();
 		at.terminate();
-		return null;
+		eval.result = null;
 	}
 
 	@Override
-	public Type getType(IniParser parser, List<TypingConstraint> constraints,
-			Invocation invocation) {
+	public Type getFunctionalType(AstAttrib attrib) {
 		return parser.types.createFunctionalType(parser.types.VOID, parser.types.THREAD);
 	}
+	
 }

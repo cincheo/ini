@@ -232,11 +232,29 @@ public class TestFunctions extends IniTestCase {
 				+ "		return 1" + "	}" + "}", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
-
 					assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
 					assertEquals("wrong type of error: " + attrib.errors,
 							"type mismatch: 'Int' is not compatible with 'Float'", attrib.errors.get(0).message);
 				});
 	}
 
+	public void testBindings() {
+		testFile("ini/test/typing/functions/bindings.ini", (parser,out) -> {
+			// TODO: should be 3 (Int) - to be fixed in bindings implementation
+			assertEquals("3.0", out);
+		});
+	}
+
+	public void testWrongBindings() {
+		parseAndAttribFile("ini/test/typing/functions/wrong_bindings.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 2 errors: " + attrib.errors, 2, attrib.errors.size());
+			assertEquals("wrong type of error: " + attrib.errors,
+					"type mismatch: 'Int' is not compatible with 'Double'", attrib.errors.get(0).message);
+			assertEquals("wrong type of error: " + attrib.errors,
+					"type mismatch: 'Int' is not compatible with 'Double'", attrib.errors.get(1).message);
+		});
+	}
+	
 }

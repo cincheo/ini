@@ -25,12 +25,15 @@ public class Binding extends NamedElement {
 		this.annotations = annotations;
 		this.parameterTypes = parameterTypes;
 		this.typeParameters = typeParameters;
+		this.returnType = returnType;
 		if (parameterTypes != null) {
 			for (TypeVariable v : parameterTypes) {
 				v.typeParameters = typeParameters;
 			}
+			if(returnType!=null) {
+				returnType.typeParameters = typeParameters;
+			}
 		}
-		this.returnType = returnType;
 		this.className = getAnnotationValue("class");
 		this.member = getAnnotationValue("member");
 		if (member != null) {

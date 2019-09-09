@@ -595,7 +595,11 @@ public class RawData implements Data {
 			implodeString();
 		}
 		if (getValue() != null) {
-			out.print((Object) getValue());
+			if(getValue() instanceof Throwable) {
+				((Throwable)getValue()).printStackTrace(out);
+			} else {
+				out.print((Object) getValue());
+			}
 		} else {
 			if (kind == Data.Kind.INT_SET || isIndexedSet()) {
 				if (references != null && references.containsKey(Data.LOWER_BOUND_KEY)) {

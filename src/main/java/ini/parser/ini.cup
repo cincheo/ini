@@ -42,6 +42,7 @@ parser code {:
 			new ErrorFunction(this), //
 			new FirstFunction(this), //
 			new KeyFunction(this), //
+			new KillAt(this), //
 			new PrintFunction(this), //
 			new PrintlnFunction(this), //
 			new ProduceFunction(this), //
@@ -59,7 +60,11 @@ parser code {:
 			new ToFloatFunction(this), //
 			new ToDoubleFunction(this), //
 			new ToStringFunction(this), //
-			new WaitFunction(this)
+			new WaitFunction(this), //
+			// ========================
+			// will be removed from default builtins and accessed through bindings
+			new StartWebServiceFunction(this), //
+			new StopWebServiceFunction(this)
 		);
 	}
 	
@@ -220,6 +225,11 @@ binding ::= DECLARE:d IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLI
 	| DECLARE:d LPAREN type_decl_list_opt:typedecls RPAREN IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
 	{:
 		Binding b = new Binding(parser, (Token)d, name.toString(), (List)typedecls, (List)types, (TypeVariable)rtype, (List)a);
+		RESULT = b;
+	:}
+	| DECLARE:d type_decl_list_opt:typedecls
+	{:
+		Binding b = new Binding(parser, (Token)d, (String)null, (List)typedecls, (List)null, (TypeVariable)null, (List)null);
 		RESULT = b;
 	:}
 ;

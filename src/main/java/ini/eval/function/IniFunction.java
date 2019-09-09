@@ -38,8 +38,8 @@ public abstract class IniFunction {
 		//functions.put("to_double", new ToDoubleFunction());
 		functions.put("parse_number", new ParseNumberFunction());
 		//functions.put("to_long", new ToLongFunction());
-		functions.put("start_web_service", new StartWebServiceFunction()); //??
-		functions.put("stop_web_service", new StopWebServiceFunction()); //??
+		//functions.put("start_web_service", new StartWebServiceFunction()); //??
+		//functions.put("stop_web_service", new StopWebServiceFunction()); //??
 		//functions.put("clear", new ClearFunction()); //B
 		//functions.put("swap", new SwapFunction()); //B
 		//functions.put("copy", new CopyFunction()); //B
@@ -50,7 +50,7 @@ public abstract class IniFunction {
 		//functions.put("read_keyboard", new ReadKeyboardFunction()); //B
 		functions.put("zip", new ZipFunction()); //IO
 		functions.put("upload_ftp", new UploadFTPFunction()); //NET
-		functions.put("stop", new KillAt());
+		//functions.put("stop", new KillAt()); //B
 		functions.put("restart", new RestartAtFunction()); 
 		functions.put("reconfigure", new ReconfigureAtFunction()); //B
 		//functions.put("to_json", new ToJsonFunction()); //B

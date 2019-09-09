@@ -515,11 +515,13 @@ public class IniEval {
 			// printNode(System.err, evaluationStack.peek());
 			// System.err.println();
 			// printInvocationStackTrace(System.err);
-			if (e instanceof RuntimeException
-					&& StringUtils.equals(evaluationStack.peek().toString(), e.getMessage())) {
+			if (e instanceof RuntimeException && StringUtils.equals(
+					evaluationStack.peek().toString() + " at " + evaluationStack.peek().token().getLocation(),
+					e.getMessage())) {
 				throw e;
 			} else {
-				throw new RuntimeException(evaluationStack.peek().toString(), e);
+				throw new RuntimeException(
+						evaluationStack.peek().toString() + " at " + evaluationStack.peek().token().getLocation(), e);
 			}
 		}
 		return result;

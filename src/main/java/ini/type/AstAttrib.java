@@ -255,18 +255,36 @@ public class AstAttrib {
 		case AstNode.BINDING:
 			// TODO: register here?
 			Binding binding = ((Binding) node);
-			result = binding.getFunctionalType();
-			result.executable = new BoundJavaFunction(binding);
-			// TODO: change
-			if (binding.typeParameters != null) {
-				for (TypeVariable tv : binding.typeParameters) {
-					if (tv.superType != null) {
-						// add constraints for supertypes
-						addTypingConstraint(Kind.LTE, tv.getType(), tv.getType().superType, tv, tv.superType);
+			if (binding.name == null) {
+				// case of a type dependency declaration
+				if (binding.typeParameters != null) {
+					for (TypeVariable v : binding.typeParameters) {
+						Type t = parser.types.getSimpleType(v.name);
+						if (v.superType != null) {
+							Type st = parser.types.getSimpleType(v.superType.name);
+							if (t.superType != null && t.superType != st) {
+								addError(new TypingError(v, "cannot override existing supertype '" + t.superType
+										+ "' in '" + v.name + "'"));
+							} else {
+								t.superType = st;
+							}
+						}
 					}
 				}
+			} else {
+				result = binding.getFunctionalType();
+				result.executable = new BoundJavaFunction(binding);
+				// TODO: change
+				if (binding.typeParameters != null) {
+					for (TypeVariable tv : binding.typeParameters) {
+						if (tv.superType != null) {
+							// add constraints for supertypes
+							addTypingConstraint(Kind.LTE, tv.getType(), tv.getType().superType, tv, tv.superType);
+						}
+					}
+				}
+				getRootContext().bind(binding.name, result);
 			}
-			getRootContext().bind(binding.name, result);
 			break;
 
 		case AstNode.ARRAY_ACCESS:
@@ -511,8 +529,11 @@ public class AstAttrib {
 
 					for (int i = 0; i < typeVar.getTypeParameters().size(); i++) {
 						if (i < invocation.arguments.size()) {
-							addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
-									eval(invocation.arguments.get(i)), invocation, invocation);
+							addTypingConstraint(
+									/*(executable instanceof BoundJavaFunction) ? TypingConstraint.Kind.GTE
+											: */TypingConstraint.Kind.EQ,
+									typeVar.getTypeParameters().get(i), eval(invocation.arguments.get(i)), invocation,
+									invocation);
 						} else {
 							if (executable.parameters.get(i).defaultValue != null) {
 								addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
@@ -873,7 +894,7 @@ public class AstAttrib {
 					if (c.left.hasFields() || c.right.hasFields()) {
 						c.kind = TypingConstraint.Kind.EQ;
 					}
-					continue;
+					// continue;
 				}
 
 				// skip
