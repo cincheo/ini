@@ -8,6 +8,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -48,10 +54,8 @@ public class Main {
 		jsap.registerParameter(new Switch("debug").setLongFlag("debug")
 				.setHelp("Execute the program in debug mode - step through the program."));
 
-		// jsap.registerParameter(new
-		// Switch("shell").setShortFlag('s').setLongFlag("shell")
-		// .setHelp("Start INI in shell mode so that the user can interact with
-		// INI by typing statements."));
+		jsap.registerParameter(new Switch("shell").setShortFlag('s').setLongFlag("shell")
+				.setHelp("Start INI in shell mode so that the user can interact with INI by typing statements."));
 
 		jsap.registerParameter(
 				new Switch("help").setShortFlag('h').setLongFlag("help").setHelp("Print this usage message."));
@@ -164,16 +168,40 @@ public class Main {
 			parser.env.node = commandLineNode;
 		}
 
-		evalMainFunction(parser, commandLineConfig.getBoolean("debug"),
+		IniEval eval = mainEval(parser, commandLineConfig.getBoolean("debug"),
 				Arrays.asList(ArrayUtils.toStringArray(commandLineConfig.getObjectArray("breakpoints"))),
 				Arrays.asList(ArrayUtils.toStringArray(commandLineConfig.getObjectArray("watch"))),
 				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("parameters")));
 
-		/*
-		 * if(commandLineConfig.getBoolean("shell")) { Scanner keyboard = new
-		 * Scanner(System.in); while(true) { System.out.print("> "); String
-		 * command = keyboard.nextLine(); evalCommand(parser, command); } }
-		 */
+		if (commandLineConfig.getBoolean("shell")) {
+
+			Terminal terminal = TerminalBuilder.terminal();
+			LineReader reader = LineReaderBuilder.builder()
+                    .terminal(terminal)
+                    .variable(LineReader.SECONDARY_PROMPT_PATTERN, "%M%P > ")
+                    .build();
+			
+            while (true) {
+                String line = null;
+                try {
+                    line = reader.readLine("> ");
+                    line = line.trim();
+                    eval.result = null;
+					eval.evalCode(line);
+					if(eval.result != null) {
+						terminal.writer().println(eval.result.toPrettyString());
+					}
+                    terminal.flush();
+                } catch(EndOfFileException e) {
+                	break;
+                } catch(UserInterruptException e) {
+                	break;
+                } catch(Exception e) {
+                	e.printStackTrace();
+                }
+            }
+                    
+		}
 
 	}
 
@@ -197,13 +225,13 @@ public class Main {
 		}
 	}
 
-	public static void evalMainFunction(IniParser parser, String[] args) {
-		evalMainFunction(parser, false, null, null, args);
+	public static IniEval mainEval(IniParser parser, String[] args) {
+		return mainEval(parser, false, null, null, args);
 	}
 
-	public static void evalMainFunction(IniParser parser, boolean debug, List<String> breakpoints,
+	public static IniEval mainEval(IniParser parser, boolean debug, List<String> breakpoints,
 			List<String> watchedVariables, String[] args) {
-
+		IniEval returnedEval;
 		if (args == null) {
 			args = new String[0];
 		}
@@ -219,7 +247,7 @@ public class Main {
 		} else {
 			eval = new IniEval(parser, context);
 		}
-
+		returnedEval = eval;
 		try {
 			if (parser.env.deamon) {
 				LOGGER.info("Starting INI deamon...");
@@ -269,7 +297,7 @@ public class Main {
 				if (main.parameters != null && main.parameters.size() > 1) {
 					parser.out.println(
 							"Error: main function must have no parameters or one parameter (list of strings).");
-					return;
+					return eval;
 				}
 				/*
 				 * context = new Context(main); if (main.parameters != null &&
@@ -279,12 +307,14 @@ public class Main {
 				 */
 				eval.invoke(main, args);
 			}
+			return eval;
 
 		} catch (Exception e) {
 			eval.printError(parser.err, e);
 			parser.err.println("Java stack:");
 			e.printStackTrace(parser.err);
 		}
+		return returnedEval;
 	}
 
 	static void printUsage(PrintStream out, JSAP jsap) {
@@ -309,12 +339,12 @@ public class Main {
 				}
 			});
 
-			attrib.printConstraints("", System.err);
-			System.err.println("===============================");
+			//attrib.printConstraints("", System.err);
+			//System.err.println("===============================");
 			attrib.unify();
-			System.err.println("===============================");
-			attrib.printConstraints("", System.err);
-			System.err.println("===============================");
+			//System.err.println("===============================");
+			//attrib.printConstraints("", System.err);
+			//System.err.println("===============================");
 			// System.err.println(Type.types);
 			// System.err.println(Type.aliases);
 			// System.err.println(Constructor.constructors);

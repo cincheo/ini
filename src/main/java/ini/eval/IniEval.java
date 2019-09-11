@@ -843,4 +843,19 @@ public class IniEval {
 				new SpawnRequest(parser.env.node, executable.name, arguments));
 	}
 
+	public void evalCode(String code) throws Exception {
+		IniParser parser = IniParser.createParserForCode(this.parser.env, this.parser, code);
+		try {
+			parser.parse();
+		} catch (Exception e) {
+			if (parser.hasErrors()) {
+				parser.printErrors(System.err);
+				return;
+			}
+		}
+		for (AstNode node : parser.topLevels) {
+			eval(node);
+		}
+	}
+
 }

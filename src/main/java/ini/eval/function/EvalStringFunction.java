@@ -34,7 +34,7 @@ public class EvalStringFunction extends IniFunction {
 				parser.printErrors(parser.out);
 				return new RawData(baos.toString());
 			}
-			Main.evalMainFunction(parser, null);
+			Main.mainEval(parser, null);
 		} catch (Exception e) {
 			throw new RuntimeException("cannot evaluate string", e);
 		}
