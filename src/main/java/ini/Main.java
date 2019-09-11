@@ -22,29 +22,14 @@ import com.martiansoftware.jsap.UnflaggedOption;
 import ini.ast.AstNode;
 import ini.ast.Executable;
 import ini.ast.Invocation;
-import ini.ast.NamedElement;
 import ini.broker.CoreBrokerClient;
 import ini.broker.DeployRequest;
 import ini.eval.Context;
 import ini.eval.IniDebug;
 import ini.eval.IniEval;
 import ini.eval.data.RawData;
-import ini.eval.function.ClearFunction;
-import ini.eval.function.CopyFunction;
-import ini.eval.function.ErrorFunction;
-import ini.eval.function.FirstFunction;
-import ini.eval.function.KeyFunction;
-import ini.eval.function.PrintFunction;
-import ini.eval.function.PrintlnFunction;
-import ini.eval.function.ProduceFunction;
-import ini.eval.function.RestFunction;
-import ini.eval.function.SizeFunction;
-import ini.eval.function.SleepFunction;
-import ini.eval.function.ToStringFunction;
-import ini.eval.function.WaitFunction;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
-import ini.type.TypingConstraint;
 
 public class Main {
 

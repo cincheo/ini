@@ -510,29 +510,12 @@ public class IniEval {
 
 			}
 
-			// evaluationStack.pop();
-
 		} catch (ReturnException e) {
-			// evaluationStack.pop();
 			throw e;
 		} catch (EvalException e) {
-			// evaluationStack.pop();
 			throw e;
 		} catch (Exception e) {
-			// printNode(System.err, evaluationStack.peek());
-			// System.err.println();
-			// printInvocationStackTrace(System.err);
 			throw new EvalException(this, e);
-			// if (e instanceof RuntimeException && StringUtils.equals(
-			// evaluationStack.peek().toString() + " at " +
-			// evaluationStack.peek().token().getLocation(),
-			// e.getMessage())) {
-			// throw e;
-			// } else {
-			// throw new RuntimeException(
-			// evaluationStack.peek().toString() + " at " +
-			// evaluationStack.peek().token().getLocation(), e);
-			// }
 		} finally {
 			evaluationStack.pop();
 		}

@@ -135,14 +135,6 @@ public class AstAttrib {
 		return invocationStack.get(0);
 	}
 
-	private Type getFunctionalType(Invocation invocation) {
-		Type t = parser.types.createFunctionalType(parser.types.createType());
-		for (Expression e : invocation.arguments) {
-			t.addTypeParameter(eval(e));
-		}
-		return t;
-	}
-
 	public void invoke(Executable executable, Type executableType) {
 		if (executable == null) {
 			throw new RuntimeException("cannot invoke null exutable");
@@ -232,7 +224,6 @@ public class AstAttrib {
 
 	}
 
-	// @SuppressWarnings("unchecked")
 	public Type eval(AstNode node) {
 		Executable executable;
 		Sequence<Statement> s;

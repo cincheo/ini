@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class TypingConstraint implements TypingElement {
+public class TypingConstraint {
 
 	public enum Kind {
 		EQ, LTE, GTE,
