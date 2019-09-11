@@ -79,7 +79,15 @@ public interface Data {
 	
 	List<DataObserver> getDataObservers();
 
+	/**
+	 * Gets the data only if available (may return null or block depending on the implementation).
+	 */
 	Data getIfAvailable();
+	
+	/**
+	 * Non-blocking way to know if a data has an available value.
+	 */
+	boolean isAvailable();
 	
 	/**
 	 * Equals by value (including maps).

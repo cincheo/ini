@@ -6,19 +6,22 @@ import java.io.InputStreamReader;
 
 public class Utils {
 
-	public static long mod(long x, long y) {
-		return x % y;
+	public static Number mod(Number x, Number y) {
+		if (x instanceof Integer) {
+			return (int) x % (int) y;
+		} else {
+			return (long) x % (long) y;
+		}
 	}
-	
+
 	public static String read_keyboard() {
 		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					System.in));
+			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 			return in.readLine();
 		} catch (IOException e) {
-		} 
+		}
 		return null;
-		
+
 	}
-	
+
 }

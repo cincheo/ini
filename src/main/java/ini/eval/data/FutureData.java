@@ -23,6 +23,11 @@ public class FutureData extends RawData {
 		return this;
 	}
 
+	@Override
+	public boolean isAvailable() {
+		return available;
+	}
+	
 	private void sync() {
 		if (!available) {
 			try {

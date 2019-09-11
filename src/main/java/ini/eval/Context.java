@@ -5,36 +5,43 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ini.ast.Executable;
+import ini.ast.Invocation;
 import ini.eval.data.Data;
 import ini.eval.data.DataReference;
 
 public class Context {
 
-	Executable executable;
+	private Executable executable;
+	private Invocation invocation;
 
 	public boolean noRulesApplied = false;
-	
-	public Context(Executable executable) {
+
+	public Context(Executable executable, Invocation invocation) {
 		this.executable = executable;
+		this.invocation = invocation;
 	}
 
 	public Context(Context context) {
 		this.executable = context.executable;
+		this.invocation = context.invocation;
 		this.variables.putAll(context.variables);
-		//this.threadAt.putAll(context.threadAt);
+		// this.threadAt.putAll(context.threadAt);
 	}
-	
+
 	private Map<String, Data> variables = new HashMap<String, Data>();
 
-	//private Map<String, Thread> threadAt = new HashMap<String, Thread>();
-	
+	// private Map<String, Thread> threadAt = new HashMap<String, Thread>();
+
 	public void bind(String name, Data data) {
+		if (name == null) {
+			throw new RuntimeException("cannot bing null name");
+		}
 		variables.put(name, data);
 	}
-	
-	/*public void bindAt(String atName, Thread t) {
-		threadAt.put(atName, t);
-	}*/
+
+	/*
+	 * public void bindAt(String atName, Thread t) { threadAt.put(atName, t); }
+	 */
 
 	public void unbind(String name) {
 		variables.remove(name);
@@ -50,13 +57,13 @@ public class Context {
 
 	public Executable getExecutable(String name) {
 		Data d = variables.get(name);
-		if(d.isExecutable()) {
+		if (d.isExecutable()) {
 			return d.getValue();
 		} else {
 			return null;
 		}
 	}
-	
+
 	public Data getOrCreate(String name) {
 		if (!variables.containsKey(name)) {
 			bind(name, new DataReference(null));
@@ -66,7 +73,8 @@ public class Context {
 
 	@Override
 	public String toString() {
-		return variables.toString();
+		return (invocation == null ? "<root>"
+				: invocation.name + " at " + invocation.token.getLocation()) + " - " + variables.toString();
 	}
 
 	public void prettyPrint(PrintStream out) {

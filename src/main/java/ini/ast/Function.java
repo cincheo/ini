@@ -9,10 +9,11 @@ import ini.parser.IniParser;
 
 public class Function extends Executable {
 
-	public Sequence<Statement> statements;
+	public Sequence<AstNode> statements;
+	public boolean oneExpressionLambda = false;
 
 	public Function(IniParser parser, Token token, String name, List<Parameter> parameters,
-			Sequence<Statement> statements) {
+			Sequence<AstNode> statements) {
 		super(parser, token, name, parameters);
 		this.statements = statements;
 		this.nodeTypeId = AstNode.FUNCTION;
@@ -20,10 +21,13 @@ public class Function extends Executable {
 
 	@Override
 	public void prettyPrint(PrintStream out) {
-		out.print("function " + name + "(");
+		if(name != null) {
+			out.print("function " + name);
+		}
+		out.print("(");
 		prettyPrintList(out, parameters, ",");
 		out.println(") {");
-		Sequence<Statement> s = statements;
+		Sequence<AstNode> s = statements;
 		while (s != null) {
 			s.get().prettyPrint(out);
 			out.println();
@@ -35,7 +39,7 @@ public class Function extends Executable {
 	@Override
 	public void eval(IniEval eval) {
 		try {
-			Sequence<Statement> s = this.statements;
+			Sequence<AstNode> s = this.statements;
 			while (s != null) {
 				eval.eval(s.get());
 				s = s.next();

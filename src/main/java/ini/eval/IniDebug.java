@@ -92,7 +92,7 @@ public class IniDebug extends IniEval {
 					System.out.println("Context:");
 					invocationStack.peek().prettyPrint(System.out);
 					System.out.println("Evaluation stack:");
-					printEvaluationStackTrace(System.out);
+					printEvaluationStackTrace(evaluationStack, System.out);
 				} else if (s.equalsIgnoreCase("w")) {
 					System.out.print("[INI] Enter variable name: ");
 					String variableName = readKeyboard();

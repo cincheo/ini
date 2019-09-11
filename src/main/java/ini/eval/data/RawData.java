@@ -24,6 +24,7 @@ import ini.ast.NumberLiteral;
 import ini.ast.StringLiteral;
 import ini.ast.Variable;
 import ini.broker.TypeInfo;
+import ini.eval.EvalException;
 import ini.parser.IniParser;
 import ini.type.Type;
 
@@ -577,6 +578,11 @@ public class RawData implements Data {
 		}
 		return ret.toString();
 	}
+	
+	@Override
+	public boolean isAvailable() {
+		return true;
+	}
 
 	public String toPrettyString() {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -596,7 +602,17 @@ public class RawData implements Data {
 		}
 		if (getValue() != null) {
 			if(getValue() instanceof Throwable) {
-				((Throwable)getValue()).printStackTrace(out);
+				if(getValue() instanceof EvalException) {
+					out.println(((EvalException)getValue()).getMessage());
+					out.println("Invocation stack:");
+					((EvalException)getValue()).printInvocationStackTrace(out);
+					out.println("Evaluation stack:");
+					((EvalException)getValue()).printEvaluationStackTrace(out);
+					out.println("JVM stack:");
+					((EvalException)getValue()).printStackTrace(out);
+				} else {
+					((Throwable)getValue()).printStackTrace(out);
+				}
 			} else {
 				out.print((Object) getValue());
 			}

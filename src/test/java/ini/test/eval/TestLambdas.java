@@ -83,5 +83,23 @@ public class TestLambdas extends IniTestCase {
 	public void testLambdaHiddingFunction() {
 		testFile("ini/test/lambdas/lambdaHiddingFunction.ini", (p, out) -> assertEquals("1", out));
 	}
+
+	public void testLambdaOneExpr() {
+		testFile("ini/test/lambdas/lambdaOneExpr.ini", (p, out) -> assertEquals("3", out));
+	}
+
+	public void testWrongLambdaOneExpr() {
+		parseAndAttribFile("ini/test/lambdas/wrongLambdaOneExpr.ini", parser -> {
+			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
+		}, attrib -> {
+			assertEquals("expected 2 errors: " + attrib.errors, 2, attrib.errors.size());
+			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Int' is not compatible with 'Double'",
+					attrib.errors.get(0).message);
+			assertEquals("wrong type of error: " + attrib.errors, "type mismatch: 'Int' is not compatible with 'Double'",
+					attrib.errors.get(1).message);
+		});
+	}
+	
+	
 	
 }

@@ -17,19 +17,18 @@ import ini.parser.IniParser;
 
 public class Process extends Executable {
 
-	public List<Rule> initRules=new ArrayList<Rule>();
-	public List<Rule> atRules=new ArrayList<Rule>();
-	public List<Rule> rules=new ArrayList<Rule>();
-	public List<Rule> endRules=new ArrayList<Rule>();
-	public List<Rule> errorRules=new ArrayList<Rule>();
+	public List<Rule> initRules = new ArrayList<Rule>();
+	public List<Rule> atRules = new ArrayList<Rule>();
+	public List<Rule> rules = new ArrayList<Rule>();
+	public List<Rule> endRules = new ArrayList<Rule>();
+	public List<Rule> errorRules = new ArrayList<Rule>();
 
-	public Process(IniParser parser, Token token, String name,
-			List<Parameter> parameters, List<Rule> rules) {
+	public Process(IniParser parser, Token token, String name, List<Parameter> parameters, List<Rule> rules) {
 		super(parser, token, name, parameters);
 		this.rules = rules;
-		for(Rule r:new ArrayList<Rule>(rules)) {
-			if(r.atPredicate!=null) {
-				switch(r.atPredicate.kind) {
+		for (Rule r : new ArrayList<Rule>(rules)) {
+			if (r.atPredicate != null) {
+				switch (r.atPredicate.kind) {
 				case INIT:
 					this.initRules.add(r);
 					this.rules.remove(r);
@@ -78,12 +77,12 @@ public class Process extends Executable {
 		}
 		out.println("}");
 	}
-	
+
 	@Override
 	public String toString() {
 		return "process " + super.toString();
 	}
-	
+
 	@Override
 	public void eval(IniEval eval) {
 		List<At> ats = null;
@@ -144,6 +143,7 @@ public class Process extends Executable {
 			for (Rule rule : this.endRules) {
 				eval.eval(rule);
 			}
+			// unlocks waiting invokers
 			Context ctx = eval.invocationStack.peek();
 			Data r = ctx.get(IniEval.PROCESS_RESULT);
 			if (r != null) {
@@ -165,12 +165,19 @@ public class Process extends Executable {
 					caught = true;
 				}
 			}
+			// unlocks waiting invokers
+			Context ctx = eval.invocationStack.peek();
+			Data r = ctx.get(IniEval.PROCESS_RESULT);
+			if (r != null) {
+				r.copyData(new RawData());
+			}
 			if (!caught) {
 				throw e;
 			}
-		} /*
-			 * finally { At.destroyAll(ats); }
-			 */
+		} /*finally {
+			//At.destroyAll(ats);
+		}*/
+
 	}
 
 }

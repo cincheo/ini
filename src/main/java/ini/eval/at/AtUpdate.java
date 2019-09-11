@@ -5,6 +5,7 @@ import java.util.Map;
 
 import ini.eval.Context;
 import ini.eval.IniEval;
+import ini.eval.IniThread;
 import ini.eval.data.Data;
 import ini.eval.data.DataObserver;
 import ini.eval.data.DataReference;
@@ -49,7 +50,7 @@ public class AtUpdate extends At {
 					Map<String, Data> variables = new HashMap<String, Data>();
 					variables.put(getAtPredicate().outParameters.get(0).toString(), oldData);
 					variables.put(getAtPredicate().outParameters.get(1).toString(), data);
-					execute(eval, variables);
+					execute(new IniThread(eval, AtUpdate.this, getRule()).setVariables(variables));
 					break;
 				default:
 					Context ctx = new Context(eval.invocationStack.peek());
@@ -81,7 +82,8 @@ public class AtUpdate extends At {
 	public boolean checkTerminated() {
 		// getThreadExecutor().shutdownNow();
 		// return getThreadExecutor().getTaskCount() == 0;
-		//System.out.println("update :" + (getThreadExecutor().getActiveCount() == 0));
+		// System.out.println("update :" + (getThreadExecutor().getActiveCount()
+		// == 0));
 		return getThreadExecutor().getActiveCount() == 0;
 	}
 

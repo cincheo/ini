@@ -13,7 +13,6 @@ public class IniThread extends Thread {
 	public final IniEval parent;
 	public final AstNode toEval;
 	public IniEval child;
-	public Map<String, Data> variables;
 	public String atName;
 	static int threadCount = 1;
 	private At at;
@@ -23,22 +22,18 @@ public class IniThread extends Thread {
 		this.toEval = toEval;
 		this.at = at;
 		if ((toEval instanceof Rule) && ((Rule) toEval).atPredicate != null) {
-			this.setName(((Rule) toEval).atPredicate.toString() + ":"
-					+ threadCount++);
+			this.setName(((Rule) toEval).atPredicate.toString() + ":" + threadCount++);
 		}
+		child = parent.fork();
 	}
 
-	public IniThread(IniEval parent, At at, AstNode toEval,
-			Map<String, Data> variables) {
-		this(parent, at, toEval);
-		this.variables = variables;
-	}
-
-	public IniThread(IniEval parent, At at, AstNode toEval,
-			Map<String, Data> variables, String atName) {
-		this(parent, at, toEval);
-		this.variables = variables;
-		this.atName = atName;
+	public IniThread setVariables(Map<String, Data> variables) {
+		if (variables != null) {
+			for (String variable : variables.keySet()) {
+				child.invocationStack.peek().bind(variable, variables.get(variable));
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -48,18 +43,11 @@ public class IniThread extends Thread {
 		}
 
 		try {
-			child = parent.fork();
-			if (variables != null) {
-				for (String variable : variables.keySet()) {
-					child.invocationStack.peek().bind(variable,
-							variables.get(variable));
-				}
-			}
 			child.eval(toEval);
 		} catch (KilledException e) {
 		} finally {
 			if (at != null) {
-				//System.out.println("------pop: " + at);
+				// System.out.println("------pop: " + at);
 				at.popThread();
 			}
 		}

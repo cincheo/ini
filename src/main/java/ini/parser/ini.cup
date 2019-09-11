@@ -158,6 +158,7 @@ non terminal field_match_expr_list_opt, field_match_expr_list;
 non terminal list_concat_expr;
 
 precedence left DOLLAR;
+precedence left IMPLIES;
 precedence left ASSIGN;
 precedence left OROR;
 precedence left ANDAND;
@@ -170,7 +171,6 @@ precedence left EQUALS, GT, GTE, LT, LTE, NOTEQUALS;
 precedence left TUBE;
 precedence left LF;
 precedence left END;
-precedence left IMPLIES;
 precedence left DOT, INVDOT;
 
 start with ini_program;
@@ -514,9 +514,13 @@ lambda_expr ::= LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN sta
 :} | LAMBDA param_list_opt:vars IMPLIES:def LCPAREN statement_list_opt:statements RCPAREN {:
 	RESULT = new Function(parser, (Token)def, null, (List)vars, (Sequence)statements);	
 :} | LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def expr:s {:
-	RESULT = new Function(parser, (Token)def, null, (List)vars, new Sequence(s));
+	Function f = new Function(parser, (Token)def, null, (List)vars, new Sequence(s));
+	f.oneExpressionLambda = true;
+	RESULT = f;
 :} | LAMBDA param_list_opt:vars IMPLIES:def expr:s {:
-	RESULT = new Function(parser, (Token)def, null, (List)vars, new Sequence(s));	
+	Function f = new Function(parser, (Token)def, null, (List)vars, new Sequence(s));	
+	f.oneExpressionLambda = true;
+	RESULT = f;
 :}
 ;
 

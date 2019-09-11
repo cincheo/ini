@@ -49,7 +49,6 @@ public class AstAttrib {
 	public Stack<AstNode> evaluationStack = new Stack<AstNode>();
 	public Type result;
 	public boolean forceVariableDeclaration = false;
-	boolean hadReturnStatement = false;
 
 	List<Function> attributedFunctions = new ArrayList<Function>();
 
@@ -170,7 +169,7 @@ public class AstAttrib {
 
 	private void evalProcess(Process process, Type executableType) {
 
-		hadReturnStatement = false;
+		invocationStack.peek().hadReturnStatement = false;
 
 		for (int i = 0; i < process.parameters.size(); i++) {
 			// handle default values?
@@ -193,7 +192,7 @@ public class AstAttrib {
 			eval(rule);
 		}
 
-		if (!hadReturnStatement) {
+		if (!invocationStack.peek().hadReturnStatement) {
 			addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, process,
 					process);
 		}
@@ -202,24 +201,34 @@ public class AstAttrib {
 
 	private void evalFunction(Function function, Type executableType) {
 
-		// TODO: implicit return of lambdas with one expression...
-		hadReturnStatement = false;
+		invocationStack.peek().hadReturnStatement = false;
 
 		for (int i = 0; i < function.parameters.size(); i++) {
 			// handle default values?
 			invocationStack.peek().bind(function.parameters.get(i).name, executableType.getTypeParameters().get(i));
 		}
 
-		Sequence<Statement> s = ((Function) function).statements;
+		Sequence<AstNode> s = ((Function) function).statements;
 		while (s != null) {
 			eval(s.get());
 			s = s.next();
 		}
 
-		if (!hadReturnStatement) {
-			addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, function,
-					function);
+		if(function.oneExpressionLambda) {
+			if(function.statements.get() instanceof Expression) {
+				addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), result, function,
+						function);
+			} else {
+				addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, function,
+						function);
+			}
+		} else {
+			if (!invocationStack.peek().hadReturnStatement) {
+				addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, function,
+						function);
+			}
 		}
+
 
 	}
 
@@ -592,7 +601,7 @@ public class AstAttrib {
 
 		case AstNode.RETURN_STATEMENT:
 
-			hadReturnStatement = true;
+			invocationStack.peek().hadReturnStatement = true;
 			if (((ReturnStatement) node).expression != null) {
 				result = eval(((ReturnStatement) node).expression);
 			} else {
@@ -855,7 +864,7 @@ public class AstAttrib {
 			// printConstraints(System.out);
 		}
 		for (TypingConstraint c : constraints) {
-			if (!c.left.isVariable() && !c.right.isVariable() && c.left != c.right) {
+			if (!c.left.isVariable() && !c.right.isVariable() && !c.left.equals(c.right)) {
 				addError(new TypingError(c.leftOrigin,
 						"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
 				if (c.leftOrigin != c.rightOrigin) {

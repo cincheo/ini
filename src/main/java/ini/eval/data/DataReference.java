@@ -190,9 +190,18 @@ public class DataReference implements Data {
 			return false;
 		return referencedData.isExecutable();
 	}
-	
+
 	public boolean isPending() {
 		return this.referencedData == null;
+	}
+
+	@Override
+	public boolean isAvailable() {
+		if (isPending()) {
+			return false;
+		} else {
+			return this.referencedData.isAvailable();
+		}
 	}
 
 	public Kind getKind() {

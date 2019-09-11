@@ -227,7 +227,7 @@ public class Main {
 
 		parseConfiguration(parser);
 
-		Context context = new Context((Executable) null);
+		Context context = new Context((Executable) null, null);
 		IniEval eval;
 		if (debug) {
 			eval = new IniDebug(parser, context, breakpoints, watchedVariables);

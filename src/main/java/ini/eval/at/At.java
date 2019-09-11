@@ -96,9 +96,9 @@ public abstract class At {
 		eval(eval);
 	}
 
-	public void execute(IniEval eval, Map<String, Data> variables) {
+	public void execute(IniThread thread) {
 		// System.out.println(">>>> Excute: " + eval);
-		getThreadExecutor().execute(new IniThread(eval, this, rule, variables));
+		getThreadExecutor().execute(thread);
 		// System.out.println(">>>> Excute 2: " + this);
 	}
 

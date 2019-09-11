@@ -80,7 +80,7 @@ public class TestExamples extends IniTestCase {
 				// swallow
 			}
 			assertEquals(
-					"Server started on 8080\nlocalhost connected to server\nGET REQUEST: / - HTTP/1.1\nlocalhost connected to server\nGET REQUEST: /stop - HTTP/1.1\n",
+					"Server started on 8080\nlocalhost connected to server\nGET REQUEST: / - HTTP/1.1\nlocalhost connected to server\nGET REQUEST: /stop - HTTP/1.1\nClosing server\n",
 					getOut());
 		} catch (Exception e) {
 			e.printStackTrace();

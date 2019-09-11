@@ -59,6 +59,7 @@ public class BoundJavaFunction extends Executable {
 			}
 			Class<?> c = Class.forName(binding.className);
 			boolean invoked = false;
+			Exception cause = null;
 
 			switch (binding.getKind()) {
 			case CONSTRUCTOR:
@@ -90,6 +91,10 @@ public class BoundJavaFunction extends Executable {
 								invoked = true;
 								break;
 							} else {
+								if (args[0] == null) {
+									cause = new Exception(
+											"cannot invoke '" + binding.getMemberName() + "()' on null object");
+								}
 								Main.LOGGER.debug("invoking " + binding.getMemberName() + " on " + args[0]
 										+ " from thread " + Thread.currentThread().getName());
 								result = m.invoke(args[0], Arrays.copyOfRange(args, 1, args.length));
@@ -105,8 +110,14 @@ public class BoundJavaFunction extends Executable {
 					}
 				}
 				if (!invoked) {
-					throw new RuntimeException(
-							"Cannot invoke method for binding " + binding + ", args = " + getArgsString(args));
+					if (cause == null) {
+						throw new RuntimeException(
+								"Cannot invoke method for binding " + binding + ", args = " + getArgsString(args));
+					} else {
+						throw new RuntimeException(
+								"Cannot invoke method for binding " + binding + ", args = " + getArgsString(args),
+								cause);
+					}
 				}
 				break;
 			case FIELD:

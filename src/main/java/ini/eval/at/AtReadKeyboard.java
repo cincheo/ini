@@ -10,6 +10,7 @@ import java.util.Map;
 import ini.ast.Expression;
 import ini.ast.Variable;
 import ini.eval.IniEval;
+import ini.eval.IniThread;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
 
@@ -17,7 +18,7 @@ public class AtReadKeyboard extends At {
 
 	int numInput;
 	boolean isCurrentEvent = false;
-	
+
 	@Override
 	public void eval(final IniEval eval) {
 		getKeyboardThread().register(new AtContext(eval, this));
@@ -49,8 +50,7 @@ class KeyboardThread extends Thread {
 			try {
 				input = br.readLine();
 				for (AtContext atContext : observers) {
-					atContext.variables.put(atContext.variables.keySet()
-							.iterator().next(), new RawData(input));
+					atContext.variables.put(atContext.variables.keySet().iterator().next(), new RawData(input));
 					atContext.eval();
 				}
 			} catch (Exception e) {
@@ -79,7 +79,7 @@ class AtContext {
 	}
 
 	public void eval() {
-		at.execute(eval,variables);
+		at.execute(new IniThread(eval, at, at.getRule()).setVariables(variables));
 	}
 
 	@Override

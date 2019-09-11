@@ -11,6 +11,7 @@ public class AttrContext {
 
 	private Type executableType;
 	private Types types;
+	public boolean hadReturnStatement = false;
 
 	public AttrContext(Types types, Type executableType) {
 		this.types = types;

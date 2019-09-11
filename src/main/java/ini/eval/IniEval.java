@@ -7,8 +7,6 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-
 import ini.Main;
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
@@ -47,12 +45,10 @@ import ini.broker.FetchRequest;
 import ini.broker.SpawnRequest;
 import ini.eval.at.At;
 import ini.eval.data.Data;
-import ini.eval.data.Data.Kind;
 import ini.eval.data.DataReference;
 import ini.eval.data.FutureData;
 import ini.eval.data.RawData;
 import ini.eval.function.BoundJavaFunction;
-import ini.eval.function.IniFunction;
 import ini.parser.IniParser;
 
 public class IniEval {
@@ -125,6 +121,9 @@ public class IniEval {
 
 			case AstNode.ASSIGNMENT:
 				d = eval(((Assignment) node).assignee);
+				if ("s".equals(d.toString())) {
+					System.out.println();
+				}
 				if (d instanceof DataReference) {
 					Data d2 = eval(((Assignment) node).assignment);
 					if (d2.isPrimitive()) {
@@ -139,7 +138,9 @@ public class IniEval {
 				break;
 
 			case AstNode.BINDING:
-				getRootContext().bind(((Binding) node).name, new RawData(new BoundJavaFunction(((Binding) node))));
+				if (((Binding) node).name != null) {
+					getRootContext().bind(((Binding) node).name, new RawData(new BoundJavaFunction(((Binding) node))));
+				}
 				break;
 
 			case AstNode.AT_BINDING:
@@ -291,7 +292,7 @@ public class IniEval {
 						if (f.parameters.size() < invocation.arguments.size()) {
 							throw new RuntimeException("wrong number of parameters at " + node);
 						}
-						Context ctx = new Context(f);
+						Context ctx = new Context(f, invocation);
 						for (int i = 0; i < f.parameters.size(); i++) {
 							if (i > invocation.arguments.size() - 1) {
 								if (f.parameters.get(i).defaultValue == null) {
@@ -306,23 +307,26 @@ public class IniEval {
 								ctx.bind(f.parameters.get(i).name, eval(invocation.arguments.get(i)));
 							}
 						}
-						invocationStack.push(ctx);
 
-						if (f instanceof Process) {
-							final Process process = (Process) f;
-							result = new FutureData();
-							ctx.bind(PROCESS_RESULT, result);
-							IniEval child = fork();
-							new Thread(new Runnable() {
-								@Override
-								public void run() {
-									process.eval(child);
-								}
-							}).start();
-						} else {
-							f.eval(this);
+						invocationStack.push(ctx);
+						try {
+							if (f instanceof Process) {
+								final Process process = (Process) f;
+								result = new FutureData();
+								ctx.bind(PROCESS_RESULT, result);
+								IniEval child = fork();
+								new Thread(new Runnable() {
+									@Override
+									public void run() {
+										process.eval(child);
+									}
+								}).start();
+							} else {
+								f.eval(this);
+							}
+						} finally {
+							invocationStack.pop();
 						}
-						invocationStack.pop();
 					}
 				}
 
@@ -506,28 +510,36 @@ public class IniEval {
 
 			}
 
-			evaluationStack.pop();
+			// evaluationStack.pop();
 
 		} catch (ReturnException e) {
-			evaluationStack.pop();
+			// evaluationStack.pop();
+			throw e;
+		} catch (EvalException e) {
+			// evaluationStack.pop();
 			throw e;
 		} catch (Exception e) {
 			// printNode(System.err, evaluationStack.peek());
 			// System.err.println();
 			// printInvocationStackTrace(System.err);
-			if (e instanceof RuntimeException && StringUtils.equals(
-					evaluationStack.peek().toString() + " at " + evaluationStack.peek().token().getLocation(),
-					e.getMessage())) {
-				throw e;
-			} else {
-				throw new RuntimeException(
-						evaluationStack.peek().toString() + " at " + evaluationStack.peek().token().getLocation(), e);
-			}
+			throw new EvalException(this, e);
+			// if (e instanceof RuntimeException && StringUtils.equals(
+			// evaluationStack.peek().toString() + " at " +
+			// evaluationStack.peek().token().getLocation(),
+			// e.getMessage())) {
+			// throw e;
+			// } else {
+			// throw new RuntimeException(
+			// evaluationStack.peek().toString() + " at " +
+			// evaluationStack.peek().token().getLocation(), e);
+			// }
+		} finally {
+			evaluationStack.pop();
 		}
 		return result;
 	}
 
-	public void printEvaluationStackTrace(PrintStream out) {
+	public static void printEvaluationStackTrace(Stack<AstNode> evaluationStack, PrintStream out) {
 		for (int i = evaluationStack.size() - 1; i >= 0; i--) {
 			AstNode node = evaluationStack.get(i);
 			out.print("    ");
@@ -536,7 +548,7 @@ public class IniEval {
 		}
 	}
 
-	public void printInvocationStackTrace(PrintStream out) {
+	public static void printInvocationStackTrace(Stack<Context> invocationStack, PrintStream out) {
 		for (int i = invocationStack.size() - 1; i >= 0; i--) {
 			Context context = invocationStack.get(i);
 			out.print("    ");
@@ -545,7 +557,7 @@ public class IniEval {
 		}
 	}
 
-	public void printNode(PrintStream out, AstNode node) {
+	public static void printNode(PrintStream out, AstNode node) {
 		out.print("'" + node + "'" + (node != null && node.token() != null ? " at " + node.token().getLocation() : ""));
 	}
 
@@ -691,7 +703,7 @@ public class IniEval {
 		if (executable.parameters.size() < params.length) {
 			throw new RuntimeException("wrong number of parameters for " + executable.name);
 		}
-		Context ctx = new Context(executable);
+		Context ctx = new Context(executable, null);
 		for (int i = 0; i < executable.parameters.size(); i++) {
 			if (i > params.length - 1) {
 				if (executable.parameters.get(i).defaultValue == null) {
@@ -710,7 +722,8 @@ public class IniEval {
 		executeProcessOrFunction(executable);
 		invocationStack.pop();
 		// TODO: handle collections
-		return result == null ? null : result.getValue();
+
+		return result == null ? null : (result.isAvailable() ? result.getValue() : null);
 	}
 
 	private Executable lookupExecutable(Invocation invocation) {
@@ -742,7 +755,7 @@ public class IniEval {
 		out.println("Error: " + e);
 
 		out.println("Evaluation stack:");
-		printEvaluationStackTrace(out);
+		printEvaluationStackTrace(this.evaluationStack, out);
 		out.println("Context:");
 		invocationStack.peek().prettyPrint(out);
 		if (!thread) {
@@ -845,136 +858,6 @@ public class IniEval {
 		Main.LOGGER.info("spawn request to " + targetNode + " / " + executable.name + " - " + arguments);
 		parser.env.coreBrokerClient.sendSpawnRequest(targetNode,
 				new SpawnRequest(parser.env.node, executable.name, arguments));
-	}
-
-	private void old(Invocation invocation, Executable f, String node) {
-		boolean spawned = false;
-		// first check if function/process needs to be spawned
-		String targetNode = null;
-		targetNode = getTargetNode(invocation);
-		String targetName = invocation.name;
-		Data data = invocationStack.peek().get(targetName);
-		f = null;
-		if (data != null && data.getKind() == Kind.EXECUTABLE) {
-			if (data.getValue() instanceof Executable) {
-				// lambda case
-				f = (Executable) data.getValue();
-				targetName = null;
-			} else {
-				// functional variable case
-				targetName = data.getValue();
-			}
-		}
-		if (targetNode != null) {
-			List<Data> arguments = new ArrayList<>();
-			if (IniFunction.functions.containsKey(targetName)) {
-				for (Expression argument : invocation.arguments) {
-					arguments.add(eval(argument));
-				}
-				// TODO: parse-time
-				throw new RuntimeException("cannot spawn a function... please only spawn processes");
-			} else {
-				Data argument = null;
-				if (!getRootContext().hasBinding(targetName)) {
-					throw new RuntimeException("undefined function");
-				}
-				f = getRootContext().get(targetName).getValue();
-				for (int i = 0; i < f.parameters.size(); i++) {
-					if (i > invocation.arguments.size() - 1) {
-						if (f.parameters.get(i).defaultValue == null) {
-							throw new RuntimeException("no value or default value given for parameter '"
-									+ f.parameters.get(i).name + "' at " + node);
-						} else {
-							argument = eval(f.parameters.get(i).defaultValue);
-						}
-					} else {
-						argument = eval(invocation.arguments.get(i));
-					}
-					arguments.add(argument);
-				}
-				// TODO: parse-time
-				if (!(f instanceof Process)) {
-					throw new RuntimeException("cannot spawn a function... please only spawn processes");
-				}
-			}
-			Main.LOGGER.info("spawn request to " + targetNode + " / " + targetName + " - " + arguments);
-			parser.env.coreBrokerClient.sendSpawnRequest(targetNode,
-					new SpawnRequest(parser.env.node, targetName, arguments));
-			spawned = true;
-		}
-		if (!spawned) {
-			// try built-in INI functions first
-			targetNode = null;
-			if (IniFunction.functions.containsKey(targetName)) {
-				IniFunction iniFunction = IniFunction.functions.get(targetName);
-				// if (iniFunction instanceof BoundJavaFunction) {
-				// targetNode = getTargetNode(((BoundJavaFunction)
-				// iniFunction).binding);
-				// }
-			}
-			if (targetNode == null && IniFunction.functions.containsKey(targetName)) {
-				result = IniFunction.functions.get(targetName).eval(this, invocation.arguments);
-			} else {
-				f = targetName != null ? null/* lookupExecutable(targetName) */ : f;
-				if (f == null) {
-					if (targetNode != null) {
-						parser.env.coreBrokerClient.sendFetchRequest(targetNode,
-								new FetchRequest(parser.env.node, targetName));
-					} else if (!parser.env.node.equals(invocation.owner)) {
-						parser.env.coreBrokerClient.sendFetchRequest(invocation.owner,
-								new FetchRequest(parser.env.node, targetName));
-					}
-					do {
-						Main.LOGGER.debug("waiting for function '" + targetName + "' to be deployed");
-						try {
-							Thread.sleep(20);
-						} catch (Exception e) {
-						}
-						f = getRootContext().get(targetName).getValue();
-					} while (f == null);
-					Main.LOGGER.info("f after fetch: " + f + " - " + invocation.arguments);
-				}
-
-				// lookupExecutable(targetName);
-
-				if (f.parameters.size() < invocation.arguments.size()) {
-					throw new RuntimeException("wrong number of parameters at " + node);
-				}
-				Context ctx = new Context(f);
-				for (int i = 0; i < f.parameters.size(); i++) {
-					if (i > invocation.arguments.size() - 1) {
-						if (f.parameters.get(i).defaultValue == null) {
-							throw new RuntimeException("no value or default value given for parameter '"
-									+ f.parameters.get(i).name + "' at " + node);
-						} else {
-							invocationStack.push(ctx);
-							ctx.bind(f.parameters.get(i).name, eval(f.parameters.get(i).defaultValue));
-							invocationStack.pop();
-						}
-					} else {
-						ctx.bind(f.parameters.get(i).name, eval(invocation.arguments.get(i)));
-					}
-				}
-				invocationStack.push(ctx);
-
-				if (f instanceof Process) {
-					final Process process = (Process) f;
-					result = new FutureData();
-					ctx.bind(PROCESS_RESULT, result);
-					IniEval child = fork();
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							process.eval(child);
-						}
-					}).start();
-				} else {
-					f.eval(this);
-				}
-				invocationStack.pop();
-			}
-		}
-
 	}
 
 }
