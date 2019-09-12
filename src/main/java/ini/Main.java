@@ -128,7 +128,9 @@ public class Main {
 		AstAttrib attrib = null;
 
 		try {
-			attrib = attrib(parser);
+			attrib = new AstAttrib(parser);			
+			attrib.attrib(parser);
+			attrib.unify();
 		} catch (Exception e) {
 			if (attrib != null)
 				attrib.printError(System.err, e);
@@ -321,35 +323,6 @@ public class Main {
 		out.println("Usage: ini " + jsap.getUsage());
 		out.println();
 		out.println(jsap.getHelp());
-	}
-
-	public static AstAttrib attrib(IniParser parser) throws Exception {
-		AstAttrib attrib = new AstAttrib(parser);
-		attrib.createTypes();
-
-		if (!attrib.hasErrors()) {
-			parser.topLevels.forEach(node -> attrib.eval(node));
-			parser.topLevels.forEach(node -> {
-				if (node instanceof Executable /*
-												 * &&
-												 * "main".equals(((NamedElement)
-												 * node).name)
-												 */) {
-					attrib.invoke((Executable) node, ((Executable) node).getFunctionalType(attrib));
-				}
-			});
-
-			//attrib.printConstraints("", System.err);
-			//System.err.println("===============================");
-			attrib.unify();
-			//System.err.println("===============================");
-			//attrib.printConstraints("", System.err);
-			//System.err.println("===============================");
-			// System.err.println(Type.types);
-			// System.err.println(Type.aliases);
-			// System.err.println(Constructor.constructors);
-		}
-		return attrib;
 	}
 
 }

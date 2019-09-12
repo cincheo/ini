@@ -102,6 +102,7 @@ public class IniEval {
 		String name;
 		Executable f;
 		Data d;
+		int i;
 
 		try {
 			evaluationStack.push(node);
@@ -109,8 +110,24 @@ public class IniEval {
 			switch (node.nodeTypeId()) {
 
 			case AstNode.IMPORT:
-				for (AstNode n : ((Import) node).importParser.topLevels) {
-					result = eval(n);
+				try {
+					IniParser localParser = ((Import) node).importParser;
+					if (localParser == null) {
+						localParser = IniParser.createParserForFile(parser.env, parser,
+								((Import) node).filePath.toString());
+						localParser.parse();
+					}
+					if (localParser.hasErrors()) {
+						localParser.printErrors(parser.err);
+						throw new EvalException(this, "Error while importing file '" + ((Import) node).filePath);
+					} else {
+						for (AstNode n : localParser.topLevels) {
+							result = eval(n);
+						}
+					}
+				} catch (java.io.FileNotFoundException e) {
+					throw new RuntimeException("Cannot import file '" + ((Import) node).filePath + "'"
+							+ (((Import) node).token != null ? " at " + ((Import) node).token.getLocation() : ""));
 				}
 				break;
 
@@ -293,7 +310,7 @@ public class IniEval {
 							throw new RuntimeException("wrong number of parameters at " + node);
 						}
 						Context ctx = new Context(f, invocation);
-						for (int i = 0; i < f.parameters.size(); i++) {
+						for (i = 0; i < f.parameters.size(); i++) {
 							if (i > invocation.arguments.size() - 1) {
 								if (f.parameters.get(i).defaultValue == null) {
 									throw new RuntimeException("no value or default value given for parameter '"
@@ -333,7 +350,7 @@ public class IniEval {
 				break;
 
 			case AstNode.LIST_EXPRESSION:
-				int i = 0;
+				i = 0;
 				d = new RawData(null);
 				d.setKind(Data.Kind.INT_SET);
 				for (Expression e : ((ListExpression) node).elements) {
@@ -427,6 +444,12 @@ public class IniEval {
 						.intValue()) {
 					throw new RuntimeException("invalid set bounds");
 				}
+				i = 0;
+				for (int j = d.get(Data.LOWER_BOUND_KEY).getNumber().intValue(); j <= d.get(Data.UPPER_BOUND_KEY)
+						.getNumber().intValue(); j++) {
+					d.set(i++, new RawData(j));
+				}
+
 				result = d;
 				break;
 

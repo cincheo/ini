@@ -29,7 +29,9 @@ public class EvalStringFunction extends IniFunction {
 				parser.printErrors(parser.out);
 				return new RawData(baos.toString());
 			}
-			AstAttrib attrib = Main.attrib(parser);
+			AstAttrib attrib = new AstAttrib(parser);
+			attrib.attrib(parser);
+			attrib.unify();
 			if(attrib.hasErrors()) {
 				parser.printErrors(parser.out);
 				return new RawData(baos.toString());

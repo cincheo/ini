@@ -200,18 +200,6 @@ program_elt ::= import_decl:e {: RESULT=e; :}
 import_decl ::= IMPORT:itoken STRING:filePath
 	{:
 		Import i = new Import(parser, (Token)itoken, filePath.toString());
-		try {
-			IniParser localParser = IniParser.createParserForFile(parser.env, parser, filePath.toString());
-			localParser.parse();
-			i.importParser = localParser;
-			//parser.parsedFunctionMap.putAll(localParser.parsedFunctionMap);
-			//parser.parsedBindingList.addAll(localParser.parsedBindingList);
-			//parser.parsedFunctionList.addAll(localParser.parsedFunctionList);
-		} catch (java.io.FileNotFoundException e) {
-			throw new RuntimeException("Cannot import file '" + i.filePath + "'" 
-				+ (i.token != null ? " at " + i.token.getLocation() : ""));
-		}
-		//parser.parsedImportList.add(i);
 		RESULT = i;
 	:}
 ;
@@ -485,6 +473,7 @@ no_paren_expr ::= var_access:e {: RESULT=e; :}
 	| dot_invocation:e {: RESULT=e; :}
 	| CHAR:c {: RESULT = new CharLiteral(parser,(Token)c,c.toString().charAt(0)); :}
 	| list_expr:l {: RESULT=l; :}
+	| set_decl:l {: RESULT=l; :}
 ;
 
 expr ::= var_access:e {: RESULT=e; :}

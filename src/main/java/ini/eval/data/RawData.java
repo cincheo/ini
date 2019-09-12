@@ -619,8 +619,8 @@ public class RawData implements Data {
 		} else {
 			if (kind == Data.Kind.INT_SET || isIndexedSet()) {
 				if (references != null && references.containsKey(Data.LOWER_BOUND_KEY)) {
-					int min = ((Double) minIndex()).intValue();
-					int max = ((Double) maxIndex()).intValue();
+					int min = ((Number) minIndex()).intValue();
+					int max = ((Number) maxIndex()).intValue();
 					out.print("[" + min + ".." + max + "]");
 				} else {
 					out.print("[");

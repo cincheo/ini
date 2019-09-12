@@ -38,7 +38,9 @@ public abstract class IniTestCase extends TestCase {
 			parser = IniParser.createParserForCode(null, null, code);
 			parser.parse();
 			parsingAssertions.accept(parser);
-			AstAttrib attrib = Main.attrib(parser);
+			AstAttrib attrib = new AstAttrib(parser);
+			attrib.attrib(parser);
+			attrib.unify();
 			attribAssertions.accept(attrib);
 		} catch (Exception e) {
 			if (parser != null && parser.hasErrors()) {
@@ -56,7 +58,9 @@ public abstract class IniTestCase extends TestCase {
 			parser = IniParser.createParserForFile(null, null, file);
 			parser.parse();
 			parsingAssertions.accept(parser);
-			AstAttrib attrib = Main.attrib(parser);
+			AstAttrib attrib = new AstAttrib(parser);
+			attrib.attrib(parser);
+			attrib.unify();
 			attribAssertions.accept(attrib);
 		} catch (Exception e) {
 			if (parser != null && parser.hasErrors()) {
@@ -89,7 +93,9 @@ public abstract class IniTestCase extends TestCase {
 			}
 			parser.parse();
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
-			AstAttrib attrib = Main.attrib(parser);
+			AstAttrib attrib = new AstAttrib(parser);
+			attrib.attrib(parser);
+			attrib.unify();
 			assertEquals("expected 0 errors: " + attrib.errors, 0, attrib.errors.size());
 			Main.mainEval(parser, null);
 			if (sleepTime > 0) {

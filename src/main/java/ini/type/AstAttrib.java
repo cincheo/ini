@@ -206,21 +206,20 @@ public class AstAttrib {
 			s = s.next();
 		}
 
-		if(function.oneExpressionLambda) {
-			if(function.statements.get() instanceof Expression) {
+		if (function.oneExpressionLambda) {
+			if (function.statements.get() instanceof Expression) {
 				addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), result, function,
 						function);
 			} else {
-				addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, function,
-						function);
+				addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID,
+						function, function);
 			}
 		} else {
 			if (!invocationStack.peek().hadReturnStatement) {
-				addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID, function,
-						function);
+				addTypingConstraint(TypingConstraint.Kind.EQ, executableType.getReturnType(), parser.types.VOID,
+						function, function);
 			}
 		}
-
 
 	}
 
@@ -241,9 +240,20 @@ public class AstAttrib {
 		switch (node.nodeTypeId()) {
 
 		case AstNode.IMPORT:
-			for (AstNode n : ((Import) node).importParser.topLevels) {
-				result = eval(n);
+			IniParser localParser = ((Import) node).importParser;
+			if (localParser == null) {
+				try {
+					((Import) node).importParser = localParser = IniParser.createParserForFile(parser.env, parser,
+							((Import) node).filePath.toString());
+					localParser.parse();
+				} catch (Exception e) {
+					if (localParser.hasErrors()) {
+						localParser.printErrors(parser.err);
+					}
+					addError(new TypingError(node, "Cannot import file '" + ((Import) node).filePath + "'"));
+				}
 			}
+			attrib(localParser);
 			break;
 
 		case AstNode.USER_TYPE:
@@ -530,10 +540,11 @@ public class AstAttrib {
 					for (int i = 0; i < typeVar.getTypeParameters().size(); i++) {
 						if (i < invocation.arguments.size()) {
 							addTypingConstraint(
-									/*(executable instanceof BoundJavaFunction) ? TypingConstraint.Kind.GTE
-											: */TypingConstraint.Kind.EQ,
-									typeVar.getTypeParameters().get(i), eval(invocation.arguments.get(i)), invocation,
-									invocation);
+									/*
+									 * (executable instanceof BoundJavaFunction)
+									 * ? TypingConstraint.Kind.GTE :
+									 */TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
+									eval(invocation.arguments.get(i)), invocation, invocation);
 						} else {
 							if (executable.parameters.get(i).defaultValue != null) {
 								addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
@@ -683,13 +694,14 @@ public class AstAttrib {
 			t2 = eval(((SetDeclaration) node).upperBound);
 			addTypingConstraint(TypingConstraint.Kind.EQ, t2, parser.types.INT, ((SetDeclaration) node).upperBound,
 					((SetDeclaration) node).upperBound);
-			result = parser.types.getDependentType("Set", parser.types.INT);
+			result = parser.types.createArrayType(parser.types.INT);
 			break;
 
 		case AstNode.SET_EXPRESSION:
 			Expression set = ((SetExpression) node).set;
 
-			Type t = parser.types.createType("Set");
+			Type t = parser.types.createType("Map");
+			t.addTypeParameter(parser.types.INT);
 			if (set instanceof Variable && invocationStack.peek().get(((Variable) set).name) == null) {
 				if ((typeVar = parser.types.types.get(((Variable) set).name)) != null) {
 					t.addTypeParameter(typeVar);
@@ -822,7 +834,9 @@ public class AstAttrib {
 		out.print("'" + node + "'" + (node != null && node.token() != null ? " at " + node.token().getLocation() : ""));
 	}
 
-	public void unify() {
+	public AstAttrib unify() {
+		printConstraints("", System.err);
+
 		// remove wrong constraints
 		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
 			if (c.left == null || c.right == null) {
@@ -864,10 +878,13 @@ public class AstAttrib {
 				}
 			}
 		}
+		System.err.println("==================");
+		printConstraints("", System.err);
+		return this;
 
 	}
 
-	public void simplify() {
+	private void simplify() {
 		boolean simplified = true;
 		while (simplified) {
 			simplified = false;
@@ -940,7 +957,7 @@ public class AstAttrib {
 		errors.add(error);
 	}
 
-	public void createTypes() {
+	public void createTypes(IniParser parser) {
 		Type type;
 
 		// pass -1: create anonymous constructors
@@ -1073,6 +1090,22 @@ public class AstAttrib {
 			}
 			return type;
 		}
+	}
+
+	public AstAttrib attrib(IniParser parser) {
+		this.createTypes(parser);
+
+		if (!this.hasErrors()) {
+			parser.topLevels.forEach(node -> this.eval(node));
+			parser.topLevels.forEach(node -> {
+				if (node instanceof Executable) {
+					this.invoke((Executable) node, ((Executable) node).getFunctionalType(this));
+				}
+			});
+
+		}
+		return this;
+
 	}
 
 }
