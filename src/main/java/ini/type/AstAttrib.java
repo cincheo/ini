@@ -1,6 +1,7 @@
 package ini.type;
 
 import java.io.PrintStream;
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -230,6 +231,7 @@ public class AstAttrib {
 		Type t1 = null;
 		Type t2 = null;
 		Type typeVar = null;
+		Constructor c = null;
 
 		evaluationStack.push(node);
 
@@ -260,7 +262,80 @@ public class AstAttrib {
 			// TODO: should register and constructs types in parser.types
 			// (instead of implicit registration)
 			// IGNORE FOR NOW
+			t1 = new Type((UserType)node);
+			if (parser.types.types.containsKey(((UserType)node).name)) {
+				addError(new TypingError(((UserType)node), "duplicate type name '" + ((UserType)node).name + "'"));
+			} else {
+				parser.types.register(((UserType)node).name, t1);
+			}
+			((UserType)node).type = t1;
+			for(Constructor constructor : ((UserType)node).constructors) {
+				eval(constructor);
+			}
+			result = t1;
+
+			// create field types
+			if (!(((UserType)node).constructors == null || ((UserType)node).constructors.isEmpty())) {
+				t1 = ((UserType)node).constructors.get(0).type;
+				if (t1.hasFields()) {
+					for (Entry<String, Type> field : t1.getFields().entrySet()) {
+						((UserType)node).type.addField(field.getKey(), field.getValue());
+					}
+					for (int i = 1; i < ((UserType)node).constructors.size(); i++) {
+						t1 = ((UserType)node).constructors.get(i).type;
+						if (!t1.hasFields()) {
+							((UserType)node).type.fields.clear();
+						} else {
+							for (Entry<String, Type> field : t1.getFields().entrySet()) {
+								Type fieldType = ((UserType)node).type.fields.get(field.getKey());
+								if (fieldType != null && fieldType != field.getValue()) {
+									((UserType)node).type.fields.remove(field.getKey());
+								}
+							}
+						}
+					}
+				}
+			}
+			
 			break;
+
+		case AstNode.CONSTRUCTOR:
+			c = (Constructor)node;
+			t1 = parser.types.createType(c.name);
+			t1.superType = c.userType.type;
+			c.userType.type.addSubType(t1);
+			t1.variable = false;
+			t1.constructorType = true;
+			c.type = t1;
+			if (parser.types.types.containsKey(c.name)) {
+				if (c.name.equals(c.userType.name)) {
+					if (c.userType.constructors.size() == 1) {
+						// the constructor type will override the user type
+						// type T = [x:Int]
+						t1.constructorType = false;
+						parser.types.types.put(c.name, t1);
+					} else {
+						// constructor cannot be named after the type name
+						// or anonymous when it is not the sole constructor
+						addError(new TypingError(c, "illegal constructor '" + c.name + "'"));
+					}
+				} else {
+					addError(new TypingError(c, "duplicate type name '" + c.name + "'"));
+				}
+			} else {
+				parser.types.register(c.name, t1);
+			}
+			if (c.fields != null) {
+				for (Field f : c.fields) {
+					t1 = getFieldType(f.constructor);
+					if (t1 == null || t1.constructorType) {
+						addError(new TypingError(f.constructor, "illegal type reference"));
+					}
+					c.type.addField(f.name, t1);
+				}
+			}
+			result = c.type;
+		break;
 
 		case AstNode.BINDING:
 			// TODO: register here?
@@ -657,7 +732,7 @@ public class AstAttrib {
 
 		case AstNode.SET_CONSTRUCTOR:
 			if (((SetConstructor) node).name != null) {
-				Constructor c = parser.types.constructors.get(((SetConstructor) node).name);
+				c = parser.types.constructors.get(((SetConstructor) node).name);
 				// System.out.println("CONSTRUCTORS2="+parser.ast.constructors);
 				// System.out.println("TYPE2="+parser.ast.types);
 				// System.out.println("======>"+c);
@@ -718,7 +793,7 @@ public class AstAttrib {
 					((SetExpression) node).set);
 			for (Variable v : ((SetExpression) node).variables) {
 				t2 = eval(v);
-				addTypingConstraint(TypingConstraint.Kind.EQ, t2, t.getTypeParameters().get(0), v, v);
+				addTypingConstraint(TypingConstraint.Kind.EQ, t2, t.getTypeParameters().get(1), v, v);
 			}
 			eval(((SetExpression) node).expression);
 			result = parser.types.BOOLEAN;
@@ -1093,7 +1168,7 @@ public class AstAttrib {
 	}
 
 	public AstAttrib attrib(IniParser parser) {
-		this.createTypes(parser);
+		//this.createTypes(parser);
 
 		if (!this.hasErrors()) {
 			parser.topLevels.forEach(node -> this.eval(node));

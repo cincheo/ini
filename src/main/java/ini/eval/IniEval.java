@@ -62,6 +62,7 @@ public class IniEval {
 	boolean rulePassed = false;
 	public boolean kill = false;
 	public static final String PROCESS_RESULT = "__process_result";
+	private Pattern stringPlaceHolderPattern = Pattern.compile("(\\{([^\\}]*)\\})");
 
 	public IniEval(IniParser parser, Context rootContext) {
 		this.parser = parser;
@@ -467,6 +468,13 @@ public class IniEval {
 				break;
 
 			case AstNode.STRING_LITERAL:
+				/*Matcher m = stringPlaceHolderPattern.matcher(((StringLiteral) node).value);
+				StringBuffer substitutedString = new StringBuffer();
+				while(m.find()) {
+					m.appendReplacement(substitutedString, invocationStack.peek().get(m.group(2)).toString());
+				}
+				d = new RawData(substitutedString.length()>0?substitutedString.toString():((StringLiteral) node).value);
+*/
 				d = new RawData(((StringLiteral) node).value);
 				d.setKind(Data.Kind.INT_SET);
 				result = d;

@@ -144,12 +144,12 @@ non terminal import_decl;
 non terminal binding, type_list_opt, type_list, type, type_decl_list_opt, type_decl_list, type_decl, at_binding_conf_type;
 non terminal var_list;
 non terminal statement_list_opt, statement_list, top_level_statement, statement, expr, no_paren_expr;
-non terminal assignment_expr, var_access, sync_var_access, set_var_access, single_string, string_expr, case_expr, lambda_expr;
+non terminal assignment_expr, var_access, set_var_access, single_string, string_expr, case_expr, lambda_expr;
 non terminal ret_statement;
 non terminal invocation, dot_invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
 non terminal rule_list_opt, rule_list, rule, guard;
 non terminal logical_expr_opt, logical_expr, algebraic_expr, set_logical_expr, boolean_literal;
-non terminal set_decl, constructor_expr, assignment_list;
+non terminal constructor_expr, assignment_list;
 non terminal at_expr, at_binding, annotations_opt;
 non terminal usertype, constructor_list, constructor, list_constructor, constructor_or_type;
 non terminal field_list_opt, field_list, field;
@@ -388,7 +388,7 @@ assignment_expr ::= var_access:v ASSIGN:a expr:e
 	{: 
 		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
 	:}
-	| set_var_access:v ASSIGN:a set_decl:e 
+	| set_var_access:v ASSIGN:a list_expr:e 
 	{: 
 		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
 	:}
@@ -417,6 +417,9 @@ single_string ::= STRING:s {: RESULT=new StringLiteral(parser,(Token)s,s.toStrin
 list_expr ::= LSPAREN:open arg_list_opt:l RSPAREN:close
 	{:
 		RESULT = new ListExpression(parser,(Token)open,(List)l);
+	:}
+	| LSPAREN:l expr:lb DOTDOT expr:ub RSPAREN:r {:
+		RESULT = new SetDeclaration(parser,(Token)l,(Expression)lb,(Expression)ub);
 	:}
 ;
 
@@ -473,15 +476,10 @@ no_paren_expr ::= var_access:e {: RESULT=e; :}
 	| dot_invocation:e {: RESULT=e; :}
 	| CHAR:c {: RESULT = new CharLiteral(parser,(Token)c,c.toString().charAt(0)); :}
 	| list_expr:l {: RESULT=l; :}
-	| set_decl:l {: RESULT=l; :}
 ;
 
 expr ::= var_access:e {: RESULT=e; :}
-	| var_access:v ASSIGN:a expr:e 
-	{:
-		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
-	:}
-	| sync_var_access:e {: RESULT=e; :} 
+	| assignment_expr:e {: RESULT=e; :}
     | THIS:t {: RESULT = new ThisLiteral(parser,(Token)t); :}
 	| invocation:e {: RESULT=e; :}
 	| dot_invocation:e {: RESULT=e; :}
@@ -490,9 +488,7 @@ expr ::= var_access:e {: RESULT=e; :}
 	| string_expr:e {: RESULT=e; :}
 	| list_expr:l {: RESULT=l; :}
 	| constructor_expr: e {: RESULT=e; :}
-	| set_decl:e {: RESULT = e; :}
 	| set_var_access:e {: RESULT = e; :}
-//	| FUNCTION:f LPAREN IDENTIFIER:i RPAREN {: RESULT = new FunctionLiteral(parser,(Token)f,i.toString()); :}
 	| list_concat_expr:e {: RESULT = e; :}
 	| lambda_expr: e {: RESULT = e; :}
 ;
@@ -540,7 +536,6 @@ logical_expr ::= boolean_literal:e {: RESULT=e; :}
 	{:
 		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
 	:}
-	| sync_var_access:e {: RESULT=e; :} 
 	| invocation:e {: RESULT=e; :}
 	| logical_expr:e1 ANDAND:op logical_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.AND,(Expression)e1,(Expression)e2); :}
 	| logical_expr:e1 OROR:op logical_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.OR,(Expression)e1,(Expression)e2); :}
@@ -676,7 +671,7 @@ guard ::= logical_expr:e {: RESULT=e; :}
 	| set_logical_expr:e {: RESULT=e; :}
 ;
 
-set_logical_expr ::= var_list:l OF:of set_decl:s TUBE logical_expr:e
+set_logical_expr ::= var_list:l OF:of list_expr:s TUBE logical_expr:e
 	{:
 		RESULT = new SetExpression(parser,(Token)of,(List)l,(Expression)s,(Expression)e);
 	:}
@@ -684,11 +679,6 @@ set_logical_expr ::= var_list:l OF:of set_decl:s TUBE logical_expr:e
 	{:
 		RESULT = new SetExpression(parser,(Token)of,(List)l,(Expression)s,(Expression)e);
 	:}	
-;
-
-set_decl ::= LSPAREN:l expr:lb DOTDOT expr:ub RSPAREN:r {:
-	RESULT = new SetDeclaration(parser,(Token)l,(Expression)lb,(Expression)ub);
-:}
 ;
 
 usertype ::= TYPE:t TIDENTIFIER:i ASSIGN constructor_list:l lf_opt END

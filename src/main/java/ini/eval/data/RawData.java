@@ -30,6 +30,18 @@ import ini.type.Type;
 
 public class RawData implements Data {
 
+	/*public static void main(String[] args) {
+		String test = "coucou petit crétin ${i++} coucou {f(4)} tutu";
+		Pattern p = Pattern.compile("(\\{([^\\}]*)\\})");
+		Matcher m = p.matcher(test);
+		StringBuffer result = new StringBuffer(test);
+		result.set
+		while(m.find()) {
+			m.appendReplacement(result, "EVAL("+m.group(2)+")");
+		}
+		System.out.println(result);
+	}*/
+	
 	// for serialization / deserialization
 	private int typeInfo = 0;
 

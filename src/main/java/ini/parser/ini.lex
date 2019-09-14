@@ -23,9 +23,11 @@ import ini.ast.Token;
 %state CHAR
 %state USERTYPE
 %state LAMBDA
+%state EMBEDED_EXPRESSION1
+%state EMBEDED_EXPRESSION2
 
 %{
-	//StringBuffer string=new StringBuffer();
+	StringBuffer string=new StringBuffer();
 	String fileName;
 	public void setFileName(String name) {
 		fileName=name;
@@ -45,6 +47,13 @@ import ini.ast.Token;
 		                    yyline+1,yycolumn+1,
 		                    yycolumn+1+0));
 	}
+	private Symbol symbol(int type, String text) {
+		return new Symbol(sym.STRING,yyline,yycolumn,
+		    new Token(sym.STRING,fileName,text,
+		                    yyline+1,yycolumn+1,
+		                    yycolumn+1+0));
+	}
+	
 	//private Symbol symbol(int type,Object value) {
 	//	return new Symbol(type,yyline,yycolumn,value);
 	//}
@@ -159,10 +168,13 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
 }*/
 
 <STRING> {
-  (\\\"|[^\"\n])*     { return symbol(sym.STRING); }
+  "\\{"				{ string.append("{"); }
+  "{" / ([^}\n])* "}"   { yybegin(EMBEDED_EXPRESSION1); yypushback(yytext().length()); Symbol s = symbol(sym.STRING, string.toString()); string.setLength(0); return s; }
+  (\\\"|[^\"\n]) 		{ string.append(yytext()); }
+/*  (\\\"|[^\"\n])*     { return symbol(sym.STRING); }*/
 /*  {StringText}        { return symbol(sym.STRING); }*/
-  "\""                { yybegin(YYINITIAL); }
-  "\n"                { yybegin(YYINITIAL); }
+  "\""                { yybegin(YYINITIAL); Symbol s = symbol(sym.STRING, string.toString()); string.setLength(0); return s; }
+  "\n"                { yybegin(YYINITIAL); Symbol s = symbol(sym.STRING, string.toString()); string.setLength(0); return s; }
 }
 
 <CHAR> {
@@ -201,6 +213,43 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   {WhiteSpaceChar}      { /* ignore */ }
   "=>"                  { yybegin(YYINITIAL); return symbol(sym.IMPLIES); }
   "\n"                  { return symbol(sym.LF); }
+}
+
+<EMBEDED_EXPRESSION1> {
+  "{" 					{ Symbol s = symbol(sym.PLUS); yybegin(EMBEDED_EXPRESSION2); yypushback(yylength());  return s; }
+  "}"					{ yybegin(STRING); return symbol(sym.PLUS); }
+}
+
+<EMBEDED_EXPRESSION2> {
+  "{" 					{ return symbol(sym.LPAREN); }
+  {Identifier}          { return symbol(sym.IDENTIFIER); }
+  {DecIntegerLiteral}   { return symbol(sym.INT); }
+  {DecFloatLiteral}		{ return symbol(sym.NUM); }
+  "("                   { return symbol(sym.LPAREN); }
+  ")"                   { return symbol(sym.RPAREN); }
+  "["                   { return symbol(sym.LSPAREN); }
+  "]"                   { return symbol(sym.RSPAREN); }
+  ","                   { return symbol(sym.COMMA); }
+  "." / {Identifier} "(" { return symbol(sym.INVDOT); }
+  "."                   { return symbol(sym.DOT); }
+  "="                   { return symbol(sym.ASSIGN); }
+  "=="                  { return symbol(sym.EQUALS); }
+  "!="                  { return symbol(sym.NOTEQUALS); }
+  "~"                   { return symbol(sym.MATCHES); }
+  "||"                  { return symbol(sym.OROR); }
+  "?"                   { return symbol(sym.QUESTION); }
+  "$"                   { return symbol(sym.DOLLAR); }
+  "&"                   { return symbol(sym.AND); }
+  "&&"                  { return symbol(sym.ANDAND); }
+  "=>"                  { return symbol(sym.IMPLIES); }
+  "!"                   { return symbol(sym.NOT); }
+  "+"                   { return symbol(sym.PLUS); }
+  "++"                  { return symbol(sym.PLUSPLUS); }
+  "-"                   { return symbol(sym.MINUS); }
+  "--"                  { return symbol(sym.MINUSMINUS); }
+  "/"                   { return symbol(sym.DIV); }
+  "*"                   { return symbol(sym.MULT); }
+  "}"					{ Symbol s = symbol(sym.RPAREN); yybegin(EMBEDED_EXPRESSION1); yypushback(yylength());  return s; }
 }
 
 .|\n { System.out.println("unmatched: '"+yytext()+"'"); }

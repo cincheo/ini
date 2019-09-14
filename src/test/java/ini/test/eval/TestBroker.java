@@ -9,7 +9,7 @@ public class TestBroker extends IniTestCase {
 		System.err.println("WARINING: this test case will take a while");
 	}
 
-	public void testCoordinator() {
+	public void _testCoordinator() {
 		new Thread() {
 			@Override
 			public void run() {
@@ -24,7 +24,7 @@ public class TestBroker extends IniTestCase {
 		});
 	}
 
-	public void testDeploymentClient() {
+	public void _testDeploymentClient() {
 		new Thread() {
 			@Override
 			public void run() {
