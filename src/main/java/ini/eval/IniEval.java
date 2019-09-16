@@ -62,7 +62,6 @@ public class IniEval {
 	boolean rulePassed = false;
 	public boolean kill = false;
 	public static final String PROCESS_RESULT = "__process_result";
-	private Pattern stringPlaceHolderPattern = Pattern.compile("(\\{([^\\}]*)\\})");
 
 	public IniEval(IniParser parser, Context rootContext) {
 		this.parser = parser;
@@ -75,7 +74,7 @@ public class IniEval {
 		this.invocationStack.push(rootContext);
 	}
 
-	private String getTargetNode(AstElement element) {
+	private final String getTargetNode(AstElement element) {
 		String targetNode = null;
 		if (element.annotations != null && !element.annotations.isEmpty()) {
 			for (Expression e : element.annotations) {
@@ -291,15 +290,6 @@ public class IniEval {
 
 				f = lookupExecutable(invocation);
 
-				if (f == null) {
-					if (!parser.env.node.equals(invocation.owner)) {
-						f = fetchExectuable(invocation.owner, invocation.name);
-					}
-					if (f == null) {
-						throw new RuntimeException("cannot find executable '" + invocation.name + "'");
-					}
-				}
-
 				if (f != null) {
 
 					String targetNode = getTargetNode(invocation);
@@ -468,13 +458,15 @@ public class IniEval {
 				break;
 
 			case AstNode.STRING_LITERAL:
-				/*Matcher m = stringPlaceHolderPattern.matcher(((StringLiteral) node).value);
-				StringBuffer substitutedString = new StringBuffer();
-				while(m.find()) {
-					m.appendReplacement(substitutedString, invocationStack.peek().get(m.group(2)).toString());
-				}
-				d = new RawData(substitutedString.length()>0?substitutedString.toString():((StringLiteral) node).value);
-*/
+				/*
+				 * Matcher m = stringPlaceHolderPattern.matcher(((StringLiteral)
+				 * node).value); StringBuffer substitutedString = new
+				 * StringBuffer(); while(m.find()) {
+				 * m.appendReplacement(substitutedString,
+				 * invocationStack.peek().get(m.group(2)).toString()); } d = new
+				 * RawData(substitutedString.length()>0?substitutedString.
+				 * toString():((StringLiteral) node).value);
+				 */
 				d = new RawData(((StringLiteral) node).value);
 				d.setKind(Data.Kind.INT_SET);
 				result = d;
@@ -745,13 +737,26 @@ public class IniEval {
 		if (d != null && d.isExecutable()) {
 			return d.getValue();
 		} else {
+			String targetNode = null;
+			Executable e = null;
 			d = getRootContext().get(invocation.name);
 			if (d != null && d.isExecutable()) {
-				return d.getValue();
-			} else {
-				// cannot find looked up executable...
-				return null;
+				e = d.getValue();
+				if (e instanceof BoundJavaFunction && ((BoundJavaFunction) e).binding.className == null) {
+					targetNode = getTargetNode(((BoundJavaFunction) e).binding);
+				} else {
+					return d.getValue();
+				}
 			}
+			if (targetNode == null) {
+				if (!parser.env.node.equals(invocation.owner)) {
+					targetNode = invocation.owner;
+				}
+			}
+			if (targetNode != null) {
+				e = fetchExectuable(targetNode, invocation.name);
+			}
+			return e;
 		}
 	}
 
@@ -834,7 +839,7 @@ public class IniEval {
 		return -n.doubleValue();
 	}
 
-	Executable fetchExectuable(String node, String executableName) {
+	final private Executable fetchExectuable(String node, String executableName) {
 		Executable result = null;
 		parser.env.coreBrokerClient.sendFetchRequest(node, new FetchRequest(parser.env.node, executableName));
 		do {
@@ -843,13 +848,14 @@ public class IniEval {
 				Thread.sleep(20);
 			} catch (Exception e) {
 			}
-			result = getRootContext().get(executableName).getValue();
-		} while (result == null);
+			result = getRootContext().get(executableName) == null ? null
+					: getRootContext().get(executableName).getValue();
+		} while (result == null || (result instanceof BoundJavaFunction));
 		Main.LOGGER.info("executable after fetch: " + result);
 		return result;
 	}
 
-	void spawnExecutable(Invocation invocation, Executable executable, String targetNode) {
+	final private void spawnExecutable(Invocation invocation, Executable executable, String targetNode) {
 		List<Data> arguments = new ArrayList<>();
 		Data argument = null;
 		for (int i = 0; i < executable.parameters.size(); i++) {

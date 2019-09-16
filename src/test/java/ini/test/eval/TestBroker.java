@@ -9,7 +9,10 @@ public class TestBroker extends IniTestCase {
 		System.err.println("WARINING: this test case will take a while");
 	}
 
-	public void _testCoordinator() {
+	public void testCoordinator() {
+		if(skipTestsUsingBroker) {
+			return;
+		}
 		new Thread() {
 			@Override
 			public void run() {
@@ -24,7 +27,10 @@ public class TestBroker extends IniTestCase {
 		});
 	}
 
-	public void _testDeploymentClient() {
+	public void testDeploymentClient() {
+		if(skipTestsUsingBroker) {
+			return;
+		}
 		new Thread() {
 			@Override
 			public void run() {

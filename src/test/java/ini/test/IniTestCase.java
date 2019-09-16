@@ -17,6 +17,8 @@ public abstract class IniTestCase extends TestCase {
 
 	static final Logger logger = LoggerFactory.getLogger("test");
 
+	protected static boolean skipTestsUsingBroker = false;
+	
 	private ByteArrayOutputStream outputStream;
 	private PrintStream out;
 

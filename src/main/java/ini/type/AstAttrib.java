@@ -910,7 +910,7 @@ public class AstAttrib {
 	}
 
 	public AstAttrib unify() {
-		printConstraints("", System.err);
+		//printConstraints("", System.err);
 
 		// remove wrong constraints
 		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -953,8 +953,8 @@ public class AstAttrib {
 				}
 			}
 		}
-		System.err.println("==================");
-		printConstraints("", System.err);
+		//System.err.println("==================");
+		//printConstraints("", System.err);
 		return this;
 
 	}

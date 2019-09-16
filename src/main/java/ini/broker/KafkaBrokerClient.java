@@ -176,9 +176,9 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		} finally {
-			producer.flush();
-		}
+		}// finally {
+		//	producer.flush();
+		//}
 	}
 
 }
