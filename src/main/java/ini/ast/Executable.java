@@ -47,7 +47,7 @@ public abstract class Executable extends NamedElement implements Expression {
 	public String toString() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream out = new PrintStream(baos);
-		out.print(name + "(");
+		out.print((name == null ? "<lambda>" : name) + "(");
 		prettyPrintList(out, parameters, ",");
 		out.print(")");
 		try {
