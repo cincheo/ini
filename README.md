@@ -18,7 +18,7 @@ INI is built around two first-class entities.
  
 ### Typical Uses/Applications
 
-- Pipelines for Big Data / ML / DL
+- Pipelines for Big Data/ML/DL
 - IoT/Robotics
 - Distributed Computing
 - Multi-Agent Systems
@@ -32,6 +32,49 @@ INI is built around two first-class entities.
 - Functional style: programmers familiar with functional programming can use functions and recursion.
 - Auto-deployment: processes and functions are automatically deployed with annotations, either in push or in pull mode.
 - Type inference: programs are strongly typed-checked with type inference (still under development).
+
+## Quick start
+
+Requirements: Java 1.8+, Apache Maven (in your path)
+
+Build with:
+
+```console
+$ cd {ini_root_dir}
+$ maven package -Dmaven.test.skip=true
+```
+
+Start an INI shell (UNIX-based OS):
+
+```console
+$ cd {ini_root_dir}
+$ bin/ini --shell
+>
+```
+
+Basic command-line use with INI shell:
+
+```console
+> s = "hello world" # defines a string variable 's'
+hello world
+> println(s) # prints out the content of s
+hello world
+> l = [1..4] # defines a list containing 4 integers
+[1..4]
+> inc = i => i+1 # defines a lambda that increments an integer
+<lambda>(i)
+> import "ini/lib/collect.ini" # imports the lib to support function about collections
+select(l,function)
+> l.map(inc) # increments all the integers in 'l'
+[2,3,4,5]
+```
+
+Launch INI program (UNIX-based OS):
+
+```console
+$ cd {ini_root_dir}
+$ bin/ini {ini_file}
+```
 
 ## Examples
 
