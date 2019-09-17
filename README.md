@@ -1,27 +1,26 @@
 
 ## About INI
 
-INI has been designed to keep distributed computing as simple as it can be. It natively handles processes, deployment, communication and synchronization.
+When industrializing Big Data and Machine Learning (especially Deep Learning), one major concern is to build data pipelines that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). 
 
-INI is not meant to be a general-purpose language. It will not address all programming issues programmers can face. On the other hand, it will help programmers to efficiently build and deploy distributed data pipelines or calculations.
+All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. Having to setup pipelines for Data Science PoCs in order to get users feedbacks ASAP often dramatically slows down the industrialization of ML-based systems and is often a cause of failure for such projects.
+
+INI aims at filling a gap by providing a language to prototype, implement, and deploy pipelines and distributed streaming computation efficiently. It is a scripting language that has been designed to keep distributed computing as simple as it can be. It natively handles processes, deployment, communication and synchronization.
+
+INI is not meant to be a general-purpose language, nor a low-level performance-driven language. It does not address all programming issues programmers can face. On the other hand, it helps programmers building and deploying distributed data pipelines or calculations.
 
 By default, INI uses Kafka as a broker.
 
 ### Language Design Philosophy
 
-INI allows to use functions and functional programming as well as process programming together in a neat and simple way.
-For the process part, INI has been built around a simple construct called a *rule*, which follows the syntax below:
+INI is built around two first-class entities.
 
-```javascript
-rule := guard '{' statements '}'
-```
-
-The underlying idea, besides code clarity, is also that it is well-suited to be formally verified and validated with Model Checking, as shown in Truong Giang Le's PhD thesis: https://tel.archives-ouvertes.fr/tel-00953368/document. 
-
-For more details, download the [INI language specifications](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
-
+- Functions, as in functional programming, used for pure and safe calculations.
+- Processes, which are executed asynchronously, multithreaded, and react to their environment through events.
+ 
 ### Typical Uses/Applications
 
+- Pipelines for Big Data / ML / DL
 - IoT/Robotics
 - Distributed Computing
 - Multi-Agent Systems
