@@ -80,21 +80,6 @@ $ bin/ini {ini_file}
 
 The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specifications [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf).
 
-### Hello world
-
-INI entry point is the ``main`` function or process. To create an INI program that says ``"Hello world``:
-
-```javascript
-function main() {
-  println("Hello world")
-}
-```
-
-Then, run the program by typing the following command in a shell:
-
-``bash
-$ bin/ini 
-
 ### A factorial function
 
 For pure local calculations, INI programmers can define functions. Here is a typical factorial calculation with INI. 
@@ -105,40 +90,15 @@ function fac(n) {
     return 1
   }
   case n > 1 {
-    return n * fac2(n-1)
+    return n * fac(n-1)
   }
 }
 
 // prints out the result of the function
+####################
+# to_int TO BE FIXED
 function main(args) {
   println(fac(to_int(args[0]))
-}
-```
-
-### Lambdas
-
-INI supports lambdas (anonymous functions). It uses the typical arrow syntax (``=>``). The following example shows the use of a lambda expression to map a list ``l`` to another list where all the elements have been incremented. It uses the ``collect.ini`` lib, which provides basic functions to manipulate collections.
-
-```javascript
-import "ini/lib/collect.ini"
-
-function main() {
-  l = [1, 2, 3]
-  l = map(l, e => return e+1)  // l = [2, 3, 4]
-}
-```
-
-INI is not object oriented. However, for readability, it provides a dot-invocation syntactic sugar. In INI: ``f(a, b)`` is rigorously equivalent to ``a.f(b)``. This allows us to chain invocations in a nicer way. For instance, to map a list and print it out:  
-
-```javascript
-import "ini/lib/collect.ini"
-
-function main() {
-  l = [1, 2, 3]
-  l.map(e => return e+1).foreach(e => println(e))  // prints 2\n3\n4\n
-  // equivalent regular function invocation style (much harder to read):
-  foreach(map(l, e => return e+1), e => println(e))  // also prints 2\n3\n4\n
-  
 }
 ```
 
@@ -220,26 +180,51 @@ The above program behaves as depicted here:
 - ``2`` is consumed from ``"c2"`` by ``p("c2", "c")``, and ``3`` is produced to ``"c"``,
 - finally, ``3`` is consumed from ``"c"`` by ``main``, and the pipeline stops there.
 
-## INI nodes and auto-deployment
+## Distributed mode
 
-By default spawned processes are deployed on the current node (called ``main`` if unspecified). However, by simply using annotations, the programmer can decide on which (remote) INI node the process shall be spawned. There are two ways to deploy processes or functions:
+So far, we have shown the INI capabilities without taking into account deployment on remote machines nor distributed communication between them. So, all the given examples execute locally, on a single INI instance. Below, we explain how to use INI to support easy deployment and communication amongst an arbitrary number of INI nodes distributed across the network.
+
+### Broker configuration
+
+First install and start Apache Kafka:
+
+```console
+$ cd kafka_{version}
+$ bin/zookeeper-server-start.sh config/zookeeper.properties
+$ bin/kafka-server-start.sh config/server.properties
+```
+
+Launch an INI node:
+
+```console
+$ cd {ini_root_dir}
+$ bin/ini -n {node_name} {ini_file} # alternatively set the INI_NODE environment variable
+```
+
+For development (JUnit tests), INI uses the ``development`` environment, which defaults to a locally-installed Kafka broker. In order to use another Kafka instance, modify the ``ini_config.json`` configuration file to set the right connection parameters.
+
+Ultimately, once moving an INI program to production, you should modify the ``production`` environment to connect to the production Kafka broker. Then, select the ``production`` environment by setting the ``INI_ENV`` system environment variable to ``production``, or by using the ``--env`` option when running INI.
+
+### INI nodes and auto-deployment
+
+By default processes or functions are started on the current node (as given by the ``-n`` starting option). However, by simply using annotations, the programmer can decide on which (remote) INI node the process or functions shall be executed. There are two ways to deploy processes or functions remotely:
 
 - Push the process/function on a remote node.
 - Pull the process/function from a remote node.
 
 ### Push/spawn a process on a target node
 
-Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the ``node`` annotation when starting the processes. Additionally, we also need to prefix the names of the channels with ``global:``. By default, channels remain local to the current process and this prefix is required so that the channels become visible by all nodes (through the Kafka broker).
+Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the ``node`` annotation when starting the processes. Additionally, we also need to prefix the names of the channels with ``+``. By default, channels remain local to the current process and this prefix is required so that the channels become visible by all nodes (through the Kafka broker).
 
 ```javascript
 process main() {
   @init() {
-    p("global:c1", "global:c2") [node="n1"]
-    p("global:c2", "global:c")  [node="n1"]
+    p("+c1", "+c2") [node="n1"]
+    p("+c2", "+c")  [node="n1"]
     println("processes started")
-    produce("global:c1", 1)
+    produce("+c1", 1)
   }
-  @consume(v) [channel="global:c"] {
+  @consume(v) [channel="+c"] {
     println("end of pipeline: "+v)
   }
 }
@@ -265,46 +250,5 @@ function main() {
 ``` 
 
 Note that the binding of ``hello``, also defines the functional type ``(String) => String``, since INI cannot infer it from the function implementation.
-
-## Getting started
-
-### Quick start
-
-Requirements: Java 1.8+, Apache Maven (in your path)
-
-Build with:
-
-```console
-$ cd {ini_root_dir}
-$ maven package -Dmaven.test.skip=true
-```
-
-Launch INI program (UNIX-based OS):
-
-```console
-$ cd {ini_root_dir}
-$ bin/ini {ini_file}
-```
-
-### Distributed mode and configuration
-
-Install and start Apache Kafka:
-
-```console
-$ cd kafka_{version}
-$ bin/zookeeper-server-start.sh config/zookeeper.properties
-$ bin/kafka-server-start.sh config/server.properties
-```
-
-Launch an INI node:
-
-```console
-$ cd {ini_root_dir}
-$ bin/ini -n {node_name} {ini_file} # alternatively set the INI_NODE environment variable
-```
-
-For development (JUnit tests), INI uses the ``development`` environment, which defaults to a locally-installed Kafka broker. In order to use another Kafka instance, modify the ``ini_config.json`` configuration file to set the right connection parameters.
-
-Ultimately, once moving an INI program to production, you should modify the ``production`` environment to connect to the production Kafka broker. Then, select the ``production`` environment by setting the ``INI_ENV`` system environment variable to ``production``, or by using the ``--env`` option when running INI.
 
 

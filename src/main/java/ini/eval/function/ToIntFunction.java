@@ -1,6 +1,7 @@
 package ini.eval.function;
 
 import ini.eval.IniEval;
+import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
@@ -14,7 +15,12 @@ public class ToIntFunction extends BuiltInExecutable {
 
 	@Override
 	public void eval(IniEval eval) {
-		eval.result = new RawData(getArgument(eval, 0).getNumber().intValue());
+		Data d = getArgument(eval, 0);
+		if(d.getValue() instanceof String) {
+			eval.result = new RawData(Integer.parseInt(d.getValue()));
+		} else {
+			eval.result = new RawData(getArgument(eval, 0).getNumber().intValue());
+		}
 	}
 
 	@Override
