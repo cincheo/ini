@@ -848,7 +848,11 @@ public class AstAttrib {
 					addError(new TypingError(node, "undeclared field or variable"));
 				}
 			} else {
-				result = invocationStack.peek().getOrCreate((Variable) node);
+				//if (!invocationStack.peek().hasBinding(((Variable) node).name) && getRootContext().hasBinding(((Variable) node).name)) {
+				//	result = getRootContext().get(((Variable) node).name);
+				//} else {
+					result = invocationStack.peek().getOrCreate((Variable) node);
+				//}
 			}
 			break;
 
