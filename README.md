@@ -1,7 +1,7 @@
 
 ## About INI
 
-When industrializing Big Data and Machine Learning (especially Deep Learning), one major concern is to build data pipelines that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). 
+When *industrializing Big Data and Machine Learning* (especially Deep Learning), *one major concern is to build data pipelines* that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). 
 
 All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. Having to setup pipelines for Data Science PoCs in order to get users feedbacks ASAP often dramatically slows down the industrialization of ML-based systems and is often a cause of failure for such projects.
 
