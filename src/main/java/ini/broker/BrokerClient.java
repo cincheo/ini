@@ -18,7 +18,7 @@ public interface BrokerClient<T> {
 	boolean VERBOSE = false;
 
 	public static BrokerClient<Data> createDefaultInstance(IniEnv env, boolean global) {
-		if (global) {
+		if (global && env.coreBrokerClient != null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
 			gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
 				@Override

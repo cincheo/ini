@@ -5,4 +5,4 @@
 # uncomment and change the path if Java is not in your path yet
 # export PATH=$PATH:/usr/local/java/bin
 
-java -classpath target/ini.jar ini.Main $*
+java -Xss10M -classpath target/ini.jar ini.Main $*

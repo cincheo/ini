@@ -49,46 +49,35 @@ public class Main {
 
 		JSAP jsap = new JSAP();
 
+		jsap.registerParameter(
+				new Switch("help").setShortFlag('h').setLongFlag("help").setHelp("Prints this usage message."));
+
 		jsap.registerParameter(new Switch("version").setLongFlag("version").setHelp("Print the INI version and exit."));
-
-		jsap.registerParameter(new Switch("debug").setLongFlag("debug")
-				.setHelp("Execute the program in debug mode - step through the program."));
-
-		jsap.registerParameter(new Switch("shell").setShortFlag('s').setLongFlag("shell")
-				.setHelp("Start INI in shell mode so that the user can interact with INI by typing statements."));
-
-		jsap.registerParameter(
-				new Switch("help").setShortFlag('h').setLongFlag("help").setHelp("Print this usage message."));
-
-		jsap.registerParameter(new FlaggedOption("breakpoints").setList(true).setListSeparator(',').setShortFlag('b')
-				.setLongFlag("breakpoints").setHelp(
-						"Install breakpoints on the program when run in debug mode (ignored when not in debug mode)."));
-
-		jsap.registerParameter(
-				new FlaggedOption("watch").setList(true).setListSeparator(',').setShortFlag('w').setLongFlag("watch")
-						.setHelp("Define variables to be watched during debug (ignored when not in debug mode)."));
 
 		jsap.registerParameter(new FlaggedOption("env").setLongFlag("env").setStringParser(JSAP.STRING_PARSER)
 				.setRequired(false).setList(false).setHelp(
-						"Define the environment name to be used, as defined in the 'ini_conf.json' file. Overrides the value defined in the INI_ENV system environment variable."));
+						"Defines the environment name to be used, as defined in the 'ini_conf.json' file. Overrides the value defined in the INI_ENV system environment variable."));
 
-		jsap.registerParameter(new Switch("deamon").setLongFlag("deamon").setShortFlag('d').setHelp(
-				"Tell INI to start as a deamon and listen to spawn and deployment request. Note that a node id should be defined in the environment or in the configuration, otherwise the default node id is 'main'. In deamon mode, the INI process never returns and a file to be evaluated is optional. Note that setting the --node option also triggers the deamon mode."));
+		jsap.registerParameter(new Switch("shell").setShortFlag('s').setLongFlag("shell")
+				.setHelp("Starts INI in shell mode so that the user can interact with INI by typing statements."));
 
 		jsap.registerParameter(new FlaggedOption("node").setLongFlag("node").setShortFlag('n')
 				.setStringParser(JSAP.STRING_PARSER).setRequired(false).setList(false).setHelp(
-						"Set the node id of the started INI deamon as used when a program spawns a new process (setting this option automatically sets the deamon mode). This option overrides the value defined in the INI_NODE system environment variable or in the 'ini_conf.json'. When a node id is not defined, the INI deamon starts with the 'main' node id."));
+						"Sets the node name and starts INI in deamon mode. The name of the node is used by other INI nodes to spawn and fetch processes and functions. This option overrides the value defined in the INI_NODE system environment variable or in the 'ini_conf.json'."));
 
 		jsap.registerParameter(new UnflaggedOption("file").setStringParser(JSAP.STRING_PARSER).setRequired(false)
-				.setList(false).setHelp(
-						"The INI file that must be parsed/executed - must contain a main function to be executed. If no file is passed, an endless INI process is started."));
+				.setList(false)
+				.setHelp("The INI file that must be parsed/executed (may contain a main function to be executed)."));
 
-		jsap.registerParameter(new UnflaggedOption("parameters").setStringParser(JSAP.STRING_PARSER).setRequired(false)
-				.setList(true).setGreedy(true).setHelp("The parameters to be passed to the main function."));
+		jsap.registerParameter(new UnflaggedOption("arg").setStringParser(JSAP.STRING_PARSER).setRequired(false)
+				.setList(true).setGreedy(true)
+				.setHelp("The arguments to be passed to the 'main' function, if defined in the given file."));
 
 		JSAPResult commandLineConfig = jsap.parse(args);
 
-		if (commandLineConfig.getBoolean("help")) {
+		if (commandLineConfig.getBoolean("help")
+				|| (!commandLineConfig.userSpecified("node") && !commandLineConfig.userSpecified("file")
+						&& !commandLineConfig.userSpecified("shell") && !commandLineConfig.userSpecified("version"))) {
 			printUsage(System.out, jsap);
 			System.exit(0);
 		}
@@ -128,7 +117,7 @@ public class Main {
 		AstAttrib attrib = null;
 
 		try {
-			attrib = new AstAttrib(parser);			
+			attrib = new AstAttrib(parser);
 			attrib.attrib(parser);
 			attrib.unify();
 		} catch (Exception e) {
@@ -170,39 +159,35 @@ public class Main {
 			parser.env.node = commandLineNode;
 		}
 
-		IniEval eval = mainEval(parser, commandLineConfig.getBoolean("debug"),
-				Arrays.asList(ArrayUtils.toStringArray(commandLineConfig.getObjectArray("breakpoints"))),
-				Arrays.asList(ArrayUtils.toStringArray(commandLineConfig.getObjectArray("watch"))),
-				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("parameters")));
+		IniEval eval = mainEval(parser, false, null, null,
+				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("arg")));
 
 		if (commandLineConfig.getBoolean("shell")) {
 
 			Terminal terminal = TerminalBuilder.terminal();
-			LineReader reader = LineReaderBuilder.builder()
-                    .terminal(terminal)
-                    .variable(LineReader.SECONDARY_PROMPT_PATTERN, "%M%P > ")
-                    .build();
-			
-            while (true) {
-                String line = null;
-                try {
-                    line = reader.readLine("> ");
-                    line = line.trim();
-                    eval.result = null;
+			LineReader reader = LineReaderBuilder.builder().terminal(terminal)
+					.variable(LineReader.SECONDARY_PROMPT_PATTERN, "%M%P > ").build();
+
+			while (true) {
+				String line = null;
+				try {
+					line = reader.readLine("> ");
+					line = line.trim();
+					eval.result = null;
 					eval.evalCode(line);
-					if(eval.result != null) {
+					if (eval.result != null) {
 						terminal.writer().println(eval.result.toPrettyString());
 					}
-                    terminal.flush();
-                } catch(EndOfFileException e) {
-                	break;
-                } catch(UserInterruptException e) {
-                	break;
-                } catch(Exception e) {
-                	e.printStackTrace();
-                }
-            }
-                    
+					terminal.flush();
+				} catch (EndOfFileException e) {
+					break;
+				} catch (UserInterruptException e) {
+					break;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
 		}
 
 	}
@@ -279,7 +264,11 @@ public class Main {
 			}
 
 			LOGGER.info("Environment: " + parser.env.environment);
-			LOGGER.info("INI started - node " + parser.env.node);
+			if (!parser.env.deamon) {
+				LOGGER.info("INI started in local mode: all channels will default to local channels");
+			} else {
+				LOGGER.info("INI started - node " + parser.env.node);
+			}
 
 			Executable main = null;
 			for (AstNode topLevel : parser.topLevels) {

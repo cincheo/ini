@@ -290,9 +290,13 @@ public class IniEval {
 
 				f = lookupExecutable(invocation);
 
-				if (f != null) {
-
-					String targetNode = getTargetNode(invocation);
+				if (f == null) {
+					throw new EvalException(this, "cannot find exectuable '" + invocation.name + "'");
+				} else {
+					String targetNode = null;
+					if (parser.env.deamon) {
+						targetNode = getTargetNode(invocation);
+					}
 
 					if (targetNode != null) {
 						spawnExecutable(invocation, f, targetNode);
@@ -840,10 +844,14 @@ public class IniEval {
 	}
 
 	final private Executable fetchExectuable(String node, String executableName) {
+		if (parser.env.coreBrokerClient == null) {
+			throw new EvalException(this, "cannot fetch missing executable '" + executableName + "' from node '" + node
+					+ "' - no core broker initialized");
+		}
 		Executable result = null;
 		parser.env.coreBrokerClient.sendFetchRequest(node, new FetchRequest(parser.env.node, executableName));
+		Main.LOGGER.debug("waiting for executable '" + executableName + "' to be deployed...");
 		do {
-			Main.LOGGER.debug("waiting for executable '" + executableName + "' to be deployed");
 			try {
 				Thread.sleep(20);
 			} catch (Exception e) {
@@ -851,7 +859,7 @@ public class IniEval {
 			result = getRootContext().get(executableName) == null ? null
 					: getRootContext().get(executableName).getValue();
 		} while (result == null || (result instanceof BoundJavaFunction));
-		Main.LOGGER.info("executable after fetch: " + result);
+		Main.LOGGER.info("fetched: " + result);
 		return result;
 	}
 

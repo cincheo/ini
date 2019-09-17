@@ -262,45 +262,45 @@ public class AstAttrib {
 			// TODO: should register and constructs types in parser.types
 			// (instead of implicit registration)
 			// IGNORE FOR NOW
-			t1 = new Type((UserType)node);
-			if (parser.types.types.containsKey(((UserType)node).name)) {
-				addError(new TypingError(((UserType)node), "duplicate type name '" + ((UserType)node).name + "'"));
+			t1 = new Type((UserType) node);
+			if (parser.types.types.containsKey(((UserType) node).name)) {
+				addError(new TypingError(((UserType) node), "duplicate type name '" + ((UserType) node).name + "'"));
 			} else {
-				parser.types.register(((UserType)node).name, t1);
+				parser.types.register(((UserType) node).name, t1);
 			}
-			((UserType)node).type = t1;
-			for(Constructor constructor : ((UserType)node).constructors) {
+			((UserType) node).type = t1;
+			for (Constructor constructor : ((UserType) node).constructors) {
 				eval(constructor);
 			}
 			result = t1;
 
 			// create field types
-			if (!(((UserType)node).constructors == null || ((UserType)node).constructors.isEmpty())) {
-				t1 = ((UserType)node).constructors.get(0).type;
+			if (!(((UserType) node).constructors == null || ((UserType) node).constructors.isEmpty())) {
+				t1 = ((UserType) node).constructors.get(0).type;
 				if (t1.hasFields()) {
 					for (Entry<String, Type> field : t1.getFields().entrySet()) {
-						((UserType)node).type.addField(field.getKey(), field.getValue());
+						((UserType) node).type.addField(field.getKey(), field.getValue());
 					}
-					for (int i = 1; i < ((UserType)node).constructors.size(); i++) {
-						t1 = ((UserType)node).constructors.get(i).type;
+					for (int i = 1; i < ((UserType) node).constructors.size(); i++) {
+						t1 = ((UserType) node).constructors.get(i).type;
 						if (!t1.hasFields()) {
-							((UserType)node).type.fields.clear();
+							((UserType) node).type.fields.clear();
 						} else {
 							for (Entry<String, Type> field : t1.getFields().entrySet()) {
-								Type fieldType = ((UserType)node).type.fields.get(field.getKey());
+								Type fieldType = ((UserType) node).type.fields.get(field.getKey());
 								if (fieldType != null && fieldType != field.getValue()) {
-									((UserType)node).type.fields.remove(field.getKey());
+									((UserType) node).type.fields.remove(field.getKey());
 								}
 							}
 						}
 					}
 				}
 			}
-			
+
 			break;
 
 		case AstNode.CONSTRUCTOR:
-			c = (Constructor)node;
+			c = (Constructor) node;
 			t1 = parser.types.createType(c.name);
 			t1.superType = c.userType.type;
 			c.userType.type.addSubType(t1);
@@ -335,7 +335,7 @@ public class AstAttrib {
 				}
 			}
 			result = c.type;
-		break;
+			break;
 
 		case AstNode.BINDING:
 			// TODO: register here?
@@ -583,15 +583,7 @@ public class AstAttrib {
 
 				executable = typeVar.executable;
 
-				if (executable == null) {
-					// this should not happen
-					Main.LOGGER.error(
-							"typing may be incomplete for " + invocation + " at " + invocation.token.getLocation());
-					// Type t = getFunctionalType(invocation);
-					// addTypingConstraint(TypingConstraint.Kind.EQ, typeVar, t,
-					// invocation, invocation);
-				} else {
-
+				if (executable != null) {
 					if (!evaluationStack.contains(executable)) {
 						// create a new type for each invocation to handle
 						// polymorphic functions
@@ -634,11 +626,14 @@ public class AstAttrib {
 					if (executable != null && !evaluationStack.contains(executable)) {
 						invoke(executable, typeVar);
 					}
+				} else {
+					Main.LOGGER.debug(
+							"typing may be incomplete for " + invocation + " at " + invocation.token.getLocation());
 				}
 				result = typeVar.getReturnType();
 			} else {
 				Main.LOGGER
-						.error("typing may be incomplete for " + invocation + " at " + invocation.token.getLocation());
+						.debug("typing may be incomplete for " + invocation + " at " + invocation.token.getLocation());
 			}
 			// System.out.println("====> " + typeVar);
 			break;
@@ -848,11 +843,13 @@ public class AstAttrib {
 					addError(new TypingError(node, "undeclared field or variable"));
 				}
 			} else {
-				//if (!invocationStack.peek().hasBinding(((Variable) node).name) && getRootContext().hasBinding(((Variable) node).name)) {
-				//	result = getRootContext().get(((Variable) node).name);
-				//} else {
-					result = invocationStack.peek().getOrCreate((Variable) node);
-				//}
+				// if (!invocationStack.peek().hasBinding(((Variable)
+				// node).name) && getRootContext().hasBinding(((Variable)
+				// node).name)) {
+				// result = getRootContext().get(((Variable) node).name);
+				// } else {
+				result = invocationStack.peek().getOrCreate((Variable) node);
+				// }
 			}
 			break;
 
@@ -914,7 +911,7 @@ public class AstAttrib {
 	}
 
 	public AstAttrib unify() {
-		//printConstraints("", System.err);
+		// printConstraints("", System.err);
 
 		// remove wrong constraints
 		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -957,8 +954,8 @@ public class AstAttrib {
 				}
 			}
 		}
-		//System.err.println("==================");
-		//printConstraints("", System.err);
+		// System.err.println("==================");
+		// printConstraints("", System.err);
 		return this;
 
 	}
@@ -1172,7 +1169,7 @@ public class AstAttrib {
 	}
 
 	public AstAttrib attrib(IniParser parser) {
-		//this.createTypes(parser);
+		// this.createTypes(parser);
 
 		if (!this.hasErrors()) {
 			parser.topLevels.forEach(node -> this.eval(node));

@@ -1,11 +1,13 @@
 {
 	environments: {
 		development: {
+			localMode:true,
 			consumerGroupId: "IniConsumer2",
 			coreConsumerGroupId: "CoreIniConsumer2",
 			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
 		},
 		test: {
+			localMode:true,
 			consumerGroupId: "IniConsumer2",
 			coreConsumerGroupId: "CoreIniConsumer2",
 			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
