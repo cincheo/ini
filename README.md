@@ -1,11 +1,9 @@
 
 ## About INI
 
-When **industrializing Big Data and Machine Learning** (especially Deep Learning), **one major concern is to build data pipelines** that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). 
+When **industrializing Big Data and Machine Learning** (especially Deep Learning), **one major concern is to build data pipelines** that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. 
 
-All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. Having to setup pipelines for Data Science PoCs in order to get users feedbacks ASAP often dramatically slows down the industrialization of ML-based systems and is often a cause of failure for such projects.
-
-**INI** aims at filling a gap by providing **a language to prototype, implement, and deploy pipelines** and distributed streaming computations efficiently. It is a scripting language that has been designed to keep distributed computing as simple as it can be. **It natively handles processes, deployment, communication and synchronization**.
+**INI** is a scripting language that aims at filling a gap by providing **a simple way to prototype, implement, and deploy pipelines** and distributed streaming computations efficiently. INI has been designed to keep distributed computing as simple as it can be. **It natively handles processes, deployment, communication and synchronization**.
 
 INI is not meant to be a general-purpose language, nor a low-level performance-driven language. It does not address all programming issues programmers can face. On the other hand, it helps programmers building and deploying distributed data pipelines or calculations.
 
