@@ -30,12 +30,14 @@ public class Token {
 		this.line = line;
 		this.charBegin = charBegin;
 		this.charEnd = charEnd;
-		// uncomment to debug the lexer - do not use logger because performance critical
-		//System.out.println("TOKEN: " + type + " - " + text);
+		// uncomment to debug the lexer - do not use logger because performance
+		// critical
+		// System.out.println("TOKEN: " + type + " - " + text);
 	}
 
 	public String getLocation() {
-		return "" + fileName + ":" + line + "(" + charBegin + ")";
+		return "<none>".equals(fileName) ? " at " + line + ":" + charBegin
+				: "" + fileName + " at " + line + ":" + charBegin;
 	}
 
 	String fileName;

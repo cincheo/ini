@@ -174,7 +174,7 @@ public class Main {
 					line = reader.readLine("> ");
 					line = line.trim();
 					eval.result = null;
-					eval.evalCode(line);
+					eval.evalCode(line+"\n");
 					if (eval.result != null) {
 						terminal.writer().println(eval.result.toPrettyString());
 					}

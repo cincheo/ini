@@ -10,14 +10,13 @@ public class SyntaxError {
 	public SyntaxError(Token origin, String message) {
 		super();
 		this.origin = origin;
-		this.message = message;
+		this.message = message.replace("\n", "<EOL>");
 	}
 
 	@Override
 	public String toString() {
-		return "SYNTAX ERROR" + ": " + message + (origin != null
-				? " at '" + origin.toString() + "'" + " " + origin.getLocation() + " (token code=" + origin.getType() + ")"
-				: "");
+		return "SYNTAX ERROR" + ": " + message
+				+ (origin != null ? origin.getLocation() + " (token code=" + origin.getType() + ")" : "");
 	}
 
 }
