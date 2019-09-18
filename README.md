@@ -3,7 +3,7 @@
 
 When industrializing *Big Data and Machine Learning* (especially Deep Learning), one major concern is to build *data pipelines* that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. 
 
-*INI* is a scripting language that aims at filling a gap by providing *a simple way to prototype, implement, and deploy pipelines* and distributed streaming computations.
+*INI* is a scripting (evaluated) language running on the top of a JVM. It aims at filling a gap by providing *a simple way to prototype, implement, and deploy pipelines* and distributed streaming computations.
 
 INI is not meant to be a general-purpose language, nor a low-level performance-driven language. It does not address all programming issues programmers can face. On the other hand, it helps programmers building and deploying distributed data pipelines or calculations.
 
