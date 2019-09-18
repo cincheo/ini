@@ -174,7 +174,7 @@ public class Main {
 					line = reader.readLine("> ");
 					line = line.trim();
 					eval.result = null;
-					eval.evalCode(line+"\n");
+					eval.evalCode(line + "\n");
 					if (eval.result != null) {
 						terminal.writer().println(eval.result.toPrettyString());
 					}
@@ -219,9 +219,6 @@ public class Main {
 	public static IniEval mainEval(IniParser parser, boolean debug, List<String> breakpoints,
 			List<String> watchedVariables, String[] args) {
 		IniEval returnedEval;
-		if (args == null) {
-			args = new String[0];
-		}
 
 		MDC.put("node", parser.env.node);
 
@@ -296,7 +293,7 @@ public class Main {
 				 * context.bind(main.parameters.get(0).name,
 				 * RawData.objectToData(args)); }
 				 */
-				eval.invoke(main, args);
+				eval.invoke(main, args == null ? new Object[0] : new Object[] { args });
 			}
 			return eval;
 

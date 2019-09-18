@@ -30,18 +30,15 @@ import ini.type.Type;
 
 public class RawData implements Data {
 
-	/*public static void main(String[] args) {
-		String test = "coucou petit crétin ${i++} coucou {f(4)} tutu";
-		Pattern p = Pattern.compile("(\\{([^\\}]*)\\})");
-		Matcher m = p.matcher(test);
-		StringBuffer result = new StringBuffer(test);
-		result.set
-		while(m.find()) {
-			m.appendReplacement(result, "EVAL("+m.group(2)+")");
-		}
-		System.out.println(result);
-	}*/
-	
+	/*
+	 * public static void main(String[] args) { String test =
+	 * "coucou petit crétin ${i++} coucou {f(4)} tutu"; Pattern p =
+	 * Pattern.compile("(\\{([^\\}]*)\\})"); Matcher m = p.matcher(test);
+	 * StringBuffer result = new StringBuffer(test); result.set while(m.find())
+	 * { m.appendReplacement(result, "EVAL("+m.group(2)+")"); }
+	 * System.out.println(result); }
+	 */
+
 	// for serialization / deserialization
 	private int typeInfo = 0;
 
@@ -411,16 +408,33 @@ public class RawData implements Data {
 		return (T) value;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		if (explodedString) {
 			references.clear();
 			explodedString = false;
 		}
 		Object oldValue = this.value;
-		this.value = value;
-		this.typeInfo = TypeInfo.getTypeInfoForInstance(value);
-		if (value instanceof Executable) {
-			this.kind = Kind.EXECUTABLE;
+		if (value != null && (value instanceof Iterable || value.getClass().isArray())) {
+			this.value = null;
+			this.typeInfo = 0;
+			this.kind = Kind.INT_SET;
+			int i = 0;
+			if (value.getClass().isArray()) {
+				for (Object o : ((Object[]) value)) {
+					set(i++, new RawData(o));
+				}
+			} else {
+				for (Object o : ((Iterable<Object>) value)) {
+					set(i++, new RawData(o));
+				}
+			}
+		} else {
+			this.value = value;
+			this.typeInfo = TypeInfo.getTypeInfoForInstance(value);
+			if (value instanceof Executable) {
+				this.kind = Kind.EXECUTABLE;
+			}
 		}
 		notifyDataObservers(oldValue);
 	}
@@ -590,7 +604,7 @@ public class RawData implements Data {
 		}
 		return ret.toString();
 	}
-	
+
 	@Override
 	public boolean isAvailable() {
 		return true;
@@ -613,17 +627,17 @@ public class RawData implements Data {
 			implodeString();
 		}
 		if (getValue() != null) {
-			if(getValue() instanceof Throwable) {
-				if(getValue() instanceof EvalException) {
-					out.println(((EvalException)getValue()).getMessage());
+			if (getValue() instanceof Throwable) {
+				if (getValue() instanceof EvalException) {
+					out.println(((EvalException) getValue()).getMessage());
 					out.println("Invocation stack:");
-					((EvalException)getValue()).printInvocationStackTrace(out);
+					((EvalException) getValue()).printInvocationStackTrace(out);
 					out.println("Evaluation stack:");
-					((EvalException)getValue()).printEvaluationStackTrace(out);
+					((EvalException) getValue()).printEvaluationStackTrace(out);
 					out.println("JVM stack:");
-					((EvalException)getValue()).printStackTrace(out);
+					((EvalException) getValue()).printStackTrace(out);
 				} else {
-					((Throwable)getValue()).printStackTrace(out);
+					((Throwable) getValue()).printStackTrace(out);
 				}
 			} else {
 				out.print((Object) getValue());
