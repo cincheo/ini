@@ -1,20 +1,20 @@
 
 ## About INI
 
-When **industrializing Big Data and Machine Learning** (especially Deep Learning), **one major concern is to build data pipelines** that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. 
+When *industrializing Big Data and Machine Learning* (especially Deep Learning), *one major concern is to build data pipelines* that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. 
 
-**INI** is a scripting language that aims at filling a gap by providing **a simple way to prototype, implement, and deploy pipelines** and distributed streaming computations efficiently. INI has been designed to keep distributed computing as simple as it can be. **It natively handles processes, deployment, communication and synchronization**.
+*INI* is a scripting language that aims at filling a gap by providing *a simple way to prototype, implement, and deploy pipelines* and distributed streaming computations efficiently. INI has been designed to keep distributed computing as simple as it can be. *It natively handles processes, deployment, communication and synchronization*.
 
 INI is not meant to be a general-purpose language, nor a low-level performance-driven language. It does not address all programming issues programmers can face. On the other hand, it helps programmers building and deploying distributed data pipelines or calculations.
 
-By default, INI uses **Kafka** as a broker.
+By default, INI uses *Kafka* as a broker.
 
 ### Language Design Philosophy
 
 INI is built around two first-class entities.
 
-- **Functions**, as in *functional programming*, used for pure and safe calculations.
-- **Processes**, which are asynchronous, multi-threaded, rule-based, and react to their environment through events (as in *reactive programming*).
+- *Functions*, as in *functional programming*, used for pure and safe calculations.
+- *Processes*, which are asynchronous, multi-threaded, rule-based, and react to their environment through events (as in *reactive programming*).
  
 ### Typical Uses/Applications
 
@@ -136,7 +136,7 @@ The second rule, guarded by ``i <= n``, continues to be executed until the ``i``
 
 Finally, note the ``@init`` and ``@end`` rules, which are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. 
 
-**Important note**: it is important to understand that INI processes are run asynchronously. They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, behaves this way because processes return future values instead of actual values. In our example, the ``main`` function waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
+**Note**: it is important to understand that INI processes are run asynchronously. They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, behaves this way because processes return future values instead of actual values. In our example, the ``main`` function waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
 
 ### A process awaking every second
 
