@@ -138,7 +138,7 @@ The second rule, guarded by ``i <= n``, continues to be executed until the ``i``
 
 The ``@init`` and ``@end`` rules are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. Event rules may be asynchronous and run in their own thread (it is not the case for ``@start`` and ``@end`` events).
 
-**Note**: it is important to understand that INI processes are run asynchronously. They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, behaves this way because processes return future values instead of actual values. In our example, the ``main`` function waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
+**Note**: it is important to understand that INI processes are run asynchronously. They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, processes return *futures* instead of actual values. On contrary to many ``await/async`` systems, this mechanism is completely transparent for the programmer. In our example, the ``main`` function implicitly waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
 
 ### A process awaking every second
 
