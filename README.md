@@ -268,3 +268,4 @@ Note that the binding of ``hello``, also defines the functional type ``(String) 
 License & contributing
 
 Currently, INI is licensed under the GPL, but this license may evolve to another Open Source license in the future.
+INI is authored by Renaud Pawlak.
