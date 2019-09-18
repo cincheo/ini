@@ -134,9 +134,9 @@ function main(args) {
 }
 ```
 
-The second rule, guarded by ``i <= n``, continues to be executed until the ``i`` variable value become greater than ``n``. In INI, looping in processes can be implemented this way, which means that there is no need for having loops as control flow constructs in the language. This design choice keeps the language small and simple, thus making INI programs usually easy to read and maintain.
+The second rule, guarded by ``i <= n``, continues to be executed until the ``i`` variable value become greater than ``n``.
 
-Finally, note the ``@init`` and ``@end`` rules, which are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. 
+The ``@init`` and ``@end`` rules are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. Event rules may be asynchronous and run in their own thread (it is not the case for ``@start`` and ``@end`` events).
 
 **Note**: it is important to understand that INI processes are run asynchronously. They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, behaves this way because processes return future values instead of actual values. In our example, the ``main`` function waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
 
