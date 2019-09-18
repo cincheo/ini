@@ -78,7 +78,7 @@ $ cd {ini_root_dir}
 $ bin/ini {ini_file} [{main_args}]
 ```
 
-## Examples
+# Examples
 
 The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specifications [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf). Other examples can be found [here](https://github.com/cincheo/ini/tree/master/ini/examples).
 
