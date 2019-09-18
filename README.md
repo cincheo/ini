@@ -1,5 +1,5 @@
 
-## About INI
+# About INI
 
 When industrializing *Big Data and Machine Learning* (especially Deep Learning), one major concern is to build *data pipelines* that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. 
 
@@ -9,7 +9,7 @@ INI is not meant to be a general-purpose language, nor a low-level performance-d
 
 By default, INI uses *Kafka* as a broker.
 
-### Language Design Philosophy
+## Language Design Philosophy
 
 INI is built around two first-class entities.
 
@@ -25,7 +25,7 @@ It natively support essential constructs for distributed programming:
 
 It comes with a built-in type inference engine to type check the programs and is able to use model checking in order to prove distributed programs correctness (WIP).
 
-### Typical Uses/Applications
+## Typical Uses/Applications
 
 - Pipelines for Big Data/Machine Learning/Deep Learning
 - IoT/Robotics
@@ -33,7 +33,7 @@ It comes with a built-in type inference engine to type check the programs and is
 - Multi-Agent Systems
 - Critical Systems
 
-## Quick start
+# Quick start
 
 Requirements: Java 1.8+, Apache Maven (in your path)
 
@@ -82,7 +82,7 @@ $ bin/ini {ini_file} [{main_args}]
 
 The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specifications [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf). Other examples can be found [here](https://github.com/cincheo/ini/tree/master/ini/examples).
 
-### A factorial function
+## A factorial function
 
 For pure local calculations, INI programmers can define functions. Here is a typical factorial calculation with INI. 
 
@@ -109,7 +109,7 @@ $ bin/ini fac.ini 3
 6
 ```
 
-### A factorial process (rule-based style)
+## A factorial process (rule-based style)
 
 On contrary to a function, a process runs asynchronously and can only contain rules. In an INI process, all the rules continue to be executed until none is applicable anymore or if the process has returned a value (using an explicit ``return`` statement). For instance, here is the factorial implementation with a process (rule-based style).
 
@@ -140,7 +140,7 @@ The ``@init`` and ``@end`` rules are called "event rules". The ``@init`` event i
 
 **Note**: it is important to understand that INI processes run asynchronously (in their own thread). They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, processes return *futures* instead of actual values. On contrary to many ``await/async`` systems, this mechanism is completely transparent for the programmer. In our example, the ``main`` function implicitly waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
 
-### A process awaking every second
+## A process awaking every second
 
 In INI, a process reacts to its environment through events. By default, a process will never end, unless none of the rules can apply anymore and all the events are terminated. 
 
@@ -159,7 +159,7 @@ process main() {
 
 Note the ``[time=1000]`` construct, which configures the ``@every`` event rule to be fired every second. This construct will be commonly used in INI programs and is called an *annotation*.
 
-### A simple 3-process data pipeline
+## A simple 3-process data pipeline
 
 The basics of process communication is provided by *channels* (similarly to Pi calculus and most agent-based systems). Processes can produce data in channels using the ``produce`` function, and consume data from channel using the ``@consume`` event.
 
@@ -194,11 +194,11 @@ The above program behaves as depicted here:
 - ``2`` is consumed from ``"c2"`` by ``p("c2", "c")``, and ``3`` is produced to ``"c"``,
 - finally, ``3`` is consumed from ``"c"`` by ``main``, and the pipeline stops there.
 
-## Distributed mode
+# Distributed mode
 
 So far, we have shown the INI capabilities without taking into account deployment on remote machines nor distributed communication between them. So, all the previous examples execute locally, on a single INI instance. Below, we explain how to use INI to support easy deployment and communication amongst an arbitrary number of INI nodes distributed across the network.
 
-### Broker configuration
+## Broker configuration
 
 First install and start Apache Kafka:
 
@@ -219,14 +219,14 @@ For development (JUnit tests), INI uses the ``development`` environment, which d
 
 Ultimately, once moving an INI program to production, you should modify the ``production`` environment to connect to the production Kafka broker. Then, select the ``production`` environment by setting the ``INI_ENV`` system environment variable to ``production``, or by using the ``--env`` option when running INI.
 
-### INI nodes and auto-deployment
+## INI nodes and auto-deployment
 
 By default processes or functions are started on the current node (as given by the ``-n`` starting option). However, by simply using annotations, the programmer can decide on which (remote) INI node the process or functions shall be executed. There are two ways to deploy processes or functions remotely:
 
 - Push the process/function on a remote node.
 - Pull the process/function from a remote node.
 
-### Push/spawn a process on a target node
+## Push/spawn a process on a target node
 
 Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the ``node`` annotation when starting the processes. Additionally, we also need to prefix the names of the channels with ``+``. By default, channels remain local to the current process and this prefix is required so that the channels become visible by all nodes (through the Kafka broker).
 
@@ -250,7 +250,7 @@ In that case, the program of the ``main`` node acts like a coordinator for all t
 
 A key point to remember is that when a process is spawned to a remote node, the required code (processes and functions) will be automatically fetched from the spawning node. So there is no need for the programmer to pre-deploy manually any piece of program on the INI nodes. INI will take care of all this transparently.
 
-### Pull from a server node
+## Pull from a server node
 
 In other cases, a given node may want to evaluate a function or a process that has been defined in another node. In that case, the target node may pull a function or a process from a remote server (any INI node). To do so, the target node needs to declare a function/process binding annotated with the right server node. For instance, the following program runs the ``hello(string)`` function, which has been defined on a node called ``server``. In that case, the ``hello`` method implementation is fetched from the server node and evaluated locally on the requesting node. 
 
@@ -265,7 +265,7 @@ function main() {
 
 Note that the binding of ``hello``, also defines the functional type ``(String) => String``, since INI cannot infer it from the function implementation.
 
-License & contributing
+# License & contributing
 
 Currently, INI is licensed under the GPL, but this license may evolve to another Open Source license in the future.
 INI is authored by Renaud Pawlak.
