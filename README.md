@@ -73,7 +73,7 @@ Launch INI program (UNIX-based OS):
 
 ```console
 $ cd {ini_root_dir}
-$ bin/ini {ini_file}
+$ bin/ini {ini_file} [{main_args}]
 ```
 
 ## Examples
