@@ -1,9 +1,9 @@
 
 ## About INI
 
-When *industrializing Big Data and Machine Learning* (especially Deep Learning), *one major concern is to build data pipelines* that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. 
+When industrializing *Big Data and Machine Learning* (especially Deep Learning), one major concern is to build *data pipelines* that allow the data to be transmitted from various sources (IoT devices, mobile/web applications, ERP databases, ...) to various targets (datalakes, Jupiter Notebooks, Hadoop FS, ...). All these Big Data pipelines require tremendous efforts in terms of infrastructure, but also in terms of development, deployment, and maintenance. 
 
-*INI* is a scripting language that aims at filling a gap by providing *a simple way to prototype, implement, and deploy pipelines* and distributed streaming computations efficiently. INI has been designed to keep distributed computing as simple as it can be. *It natively handles processes, deployment, communication and synchronization*.
+*INI* is a scripting language that aims at filling a gap by providing *a simple way to prototype, implement, and deploy pipelines* and distributed streaming computations.
 
 INI is not meant to be a general-purpose language, nor a low-level performance-driven language. It does not address all programming issues programmers can face. On the other hand, it helps programmers building and deploying distributed data pipelines or calculations.
 
@@ -15,23 +15,23 @@ INI is built around two first-class entities.
 
 - *Functions*, as in *functional programming*, used for pure and safe calculations.
 - *Processes*, which are asynchronous, multi-threaded, rule-based, and react to their environment through events (as in *reactive programming*).
- 
+
+It natively support essential constructs for distributed programming:
+
+- Reliable & scalable communication through channels.
+- Implicit multi-threading.
+- Synchronization mechanisms.
+- Automatic deployment (push and pull modes).
+
+It comes with a built-in type inference engine to type check the programs and is able to use model checking in order to prove distributed programs correctness (WIP).
+
 ### Typical Uses/Applications
 
-- Pipelines for Big Data/ML/DL
+- Pipelines for Big Data/Machine Learning/Deep Learning
 - IoT/Robotics
 - Distributed Computing
 - Multi-Agent Systems
 - Critical Systems
-
-### INI Main Features
-
-- Process oriented: programmers can define processes that will run on INI nodes.
-- Reactive and event-driven: processes react to events, including consume events that allow for inter-process communication.
-- Rule-based: processes and functions rely on rules for readability purpose.
-- Functional style: programmers familiar with functional programming can use functions and recursion.
-- Auto-deployment: processes and functions are automatically deployed with annotations, either in push or in pull mode.
-- Type inference: programs are strongly typed-checked with type inference (still under development).
 
 ## Quick start
 
