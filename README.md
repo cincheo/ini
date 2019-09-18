@@ -95,11 +95,16 @@ function fac(n) {
 }
 
 // prints out the result of the function
-####################
-# to_int TO BE FIXED
 function main(args) {
   println(fac(to_int(args[0]))
 }
+```
+
+To run the program, simply save it in a file (for instance ``fac.ini``), and type in:
+
+```console
+$ bin/ini fac.ini 3
+6
 ```
 
 ### A factorial process (rule-based style)
@@ -120,11 +125,18 @@ process fac(n) {
     return f
   }
 }
+
+// prints out the result of the function
+function main(args) {
+  println(fac(to_int(args[0]))
+}
 ```
 
 The second rule, guarded by ``i <= n``, continues to be executed until the ``i`` variable value become greater than ``n``. In INI, looping in processes can be implemented this way, which means that there is no need for having loops as control flow constructs in the language. This design choice keeps the language small and simple, thus making INI programs usually easy to read and maintain.
 
 Finally, note the ``@init`` and ``@end`` rules, which are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. 
+
+**Important note**: it is important to understand that INI processes are run asynchronously. They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, behaves this way because processes return future values instead of actual values. In our example, the ``main`` function waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
 
 ### A process awaking every second
 
@@ -182,7 +194,7 @@ The above program behaves as depicted here:
 
 ## Distributed mode
 
-So far, we have shown the INI capabilities without taking into account deployment on remote machines nor distributed communication between them. So, all the given examples execute locally, on a single INI instance. Below, we explain how to use INI to support easy deployment and communication amongst an arbitrary number of INI nodes distributed across the network.
+So far, we have shown the INI capabilities without taking into account deployment on remote machines nor distributed communication between them. So, all the previous examples execute locally, on a single INI instance. Below, we explain how to use INI to support easy deployment and communication amongst an arbitrary number of INI nodes distributed across the network.
 
 ### Broker configuration
 
