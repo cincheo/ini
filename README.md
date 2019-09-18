@@ -52,9 +52,11 @@ $ bin/ini --shell
 >
 ```
 
-Basic command-line use with INI shell:
+Type-in INI statement with INI shell:
 
 ```console
+$ cd {ini_root_dir}
+$ bin/ini --shell
 > s = "hello world" # defines a string variable 's'
 hello world
 > println(s) # prints out the content of s
@@ -69,7 +71,7 @@ select(l,function)
 [2,3,4,5]
 ```
 
-Launch INI program (UNIX-based OS):
+Launch INI programs (UNIX-based OS):
 
 ```console
 $ cd {ini_root_dir}
