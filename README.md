@@ -55,8 +55,6 @@ $ bin/ini --shell
 Type-in INI statement with INI shell:
 
 ```console
-$ cd {ini_root_dir}
-$ bin/ini --shell
 > s = "hello world" # defines a string variable 's'
 hello world
 > println(s) # prints out the content of s
@@ -116,12 +114,11 @@ On contrary to a function, a process runs asynchronously and can only contain ru
 ```javascript
 process fac(n) {
   @init() {
-    f=1
-    i=2
+    f = 1
   }
-  // this rule will loop until i > n
-  i <= n {
-    f=f*i++
+  // this rule will loop until n = 0
+  n > 0 {
+    f = f * n--
   }
   @end() {
     return f
