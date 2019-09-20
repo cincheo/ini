@@ -146,16 +146,16 @@ A famous example of guarded commands is the [Euclidean algorithm](https://en.wik
 
 ```javascript
 process gcd(a, b) {
-	a < b {
-		b = b - a
-	}
-	b < a {
-		a = a - b
-	}
-	@end() {
-		// the loop terminates when a == b == gcd(a,b) :)
-		return a
-	}
+  a < b {
+    b = b - a
+  }
+  b < a {
+    a = a - b
+  }
+  @end() {
+    // the loop terminates when a == b == gcd(a,b) :)
+    return a
+  }
 }
 
 gcd(25, 15) // result => 5
