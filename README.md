@@ -131,7 +131,7 @@ function main(args) {
 }
 ```
 
-The second rule, guarded by ``i <= n``, continues to be executed until the ``i`` variable value become greater than ``n``.
+The second rule, guarded by ``n > 0``, continues to be executed until the ``n`` variable value becomes ``0``.
 
 The ``@init`` and ``@end`` rules are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. Event rules may be asynchronous and run in their own thread (it is not the case for ``@start`` and ``@end`` events).
 
@@ -139,7 +139,7 @@ The ``@init`` and ``@end`` rules are called "event rules". The ``@init`` event i
 
 ## The Euclidean algorithm example
 
-A famous example of guarded commands is the [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm), which efficiently finds the Greatest Common Divisor of two integers. Here is the INI code, which is actually very simple:
+A famous example to demonstrate the use of guarded commands is the [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm), which efficiently finds the Greatest Common Divisor of two integers. Here is the INI code using a process and 2 rules (guarded commands):
 
 ```javascript
 process gcd(a, b) {
