@@ -10,10 +10,16 @@ import java.util.Stack;
 import ini.ast.Assignment;
 import ini.ast.AstNode;
 import ini.ast.AtPredicate;
+import ini.ast.AtPredicate.Kind;
 import ini.ast.BinaryOperator;
 import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
+import ini.ast.Channel;
 import ini.ast.CharLiteral;
+import ini.ast.Executable;
+import ini.ast.Expression;
+import ini.ast.Invocation;
+import ini.ast.Parameter;
 import ini.ast.Process;
 import ini.ast.Rule;
 import ini.ast.Sequence;
@@ -41,11 +47,101 @@ public class Ini2Pml {
 	public List<String> observedVariables = new ArrayList<String>();
 	public List<AstNode> exclusiveNodes = new ArrayList<AstNode>();
 
+	private StringBuilder header = new StringBuilder();
+	private StringBuilder body = new StringBuilder();
+
+	private StringBuilder out = body;
+	private int indent = 0;
+	private static final String INDENT = "  ";
+	private List<String> checkpoints = new ArrayList<>();
+
+	private List<String> channels = new ArrayList<>();
+
+	private int getOrCreateChannelId(String name) {
+		int index = channels.indexOf(name);
+		if (index >= 0) {
+			return index;
+		} else {
+			channels.add(name);
+			return channels.size() - 1;
+		}
+	}
+
+	private int getChannelId(String name) {
+		return channels.indexOf(name);
+	}
+
+	protected final Ini2Pml print(String string) {
+		out.append(string);
+		return this;
+	}
+
+	protected final Ini2Pml printLine(String string) {
+		indent();
+		out.append(string);
+		return this;
+	}
+
+	protected final Ini2Pml endLine() {
+		out.append("\n");
+		return this;
+	}
+
+	protected final Ini2Pml startIndent() {
+		indent++;
+		return this;
+	}
+
+	protected final Ini2Pml remove(int numberOfChars) {
+		out.delete(out.length() - numberOfChars, out.length());
+		return this;
+	}
+
+	protected final Ini2Pml endIndent() {
+		indent--;
+		return this;
+	}
+
+	protected final Ini2Pml indent() {
+		for (int i = 0; i < indent; i++) {
+			print(INDENT);
+		}
+		return this;
+	}
+
+	private final Ini2Pml selectHeader() {
+		out = header;
+		return this;
+	}
+
+	private final Ini2Pml selectBody() {
+		out = body;
+		return this;
+	}
+
+	public String getOutput() {
+		return header.toString() + body.toString();
+	}
+
 	public Ini2Pml(IniParser parser) {
 		this.parser = parser;
 	}
 
-	public void generate(AstNode node, StringBuffer out) {
+	public Ini2Pml beforeGenerate() {
+		return this;
+	}
+
+	public Ini2Pml afterGenerate() {
+		selectHeader();
+		printLine("chan channels[" + channels.size() + "]=[10] of {byte}").endLine();
+		for (String checkpoint : checkpoints) {
+			printLine("boolean " + checkpoint + "=false").endLine();
+		}
+		selectBody();
+		return this;
+	}
+
+	public Ini2Pml generate(AstNode node) {
 
 		evaluationStack.push(node);
 
@@ -62,9 +158,9 @@ public class Ini2Pml {
 			if (!exclusiveNodes.contains(a) && observedVariables.contains(a.assignee.toString())) {
 				out.append("atomic {\n");
 			}
-			generate(a.assignee, out);
+			generate(a.assignee);
 			out.append("=");
-			generate(a.assignment, out);
+			generate(a.assignment);
 			out.append(";\n");
 			if (!exclusiveNodes.contains(a) && observedVariables.contains(a.assignee.toString())) {
 				out.append("chan_" + a.assignee.toString() + "!" + a.assignee.toString() + "\n");
@@ -79,7 +175,7 @@ public class Ini2Pml {
 
 		case AstNode.BINARY_OPERATOR:
 			BinaryOperator b = (BinaryOperator) node;
-			generate(b.left, out);
+			generate(b.left);
 			switch (b.kind) {
 			case AND:
 				out.append(" && ");
@@ -126,7 +222,7 @@ public class Ini2Pml {
 			default:
 				throw new RuntimeException("unsuported operator: " + b);
 			}
-			generate(b.right, out);
+			generate(b.right);
 			break;
 
 		case AstNode.BOOLEAN_LITERAL:
@@ -151,32 +247,66 @@ public class Ini2Pml {
 
 			break;
 
+		case AstNode.CHANNEL:
+			getOrCreateChannelId(((Channel) node).name);
+			break;
+
 		case AstNode.FUNCTION:
 			break;
 
 		case AstNode.PROCESS:
 			Process process = (Process) node;
-			if (process.rules.size() > 0) {
-				if (process.name.equals("main")) {
-					activeProctypes.add("main");
-				}
-				out.append("proctype ");
-				out.append(process.name);
-				out.append("(");
-				// TODO Add parameters
-				out.append(")");
-				out.append("{\n");
-				// out.append("endM:\n");
-				out.append("do\n");
-				for (Rule r : process.rules) {
-					generate(r, out);
-				}
-				out.append("od;\n");
-				out.append("}\n");
+			if (process.name.equals("main")) {
+				activeProctypes.add("main");
 			}
+			print(process.name.equals("main") ? "active " : "").printLine("proctype ").print(process.name).print("(");
+			for (Parameter p : process.parameters) {
+				print("byte " + p.name + ", ");
+			}
+			if (!process.parameters.isEmpty()) {
+				remove(2);
+			}
+			// TODO Add parameters
+			print(") {").endLine().startIndent();
+			// out.append("endM:\n");
+			// printLine("do").startIndent();
+			for (Rule r : process.initRules) {
+				if (r.guard == null) {
+					generateStatements(r.statements);
+				} else {
+					generate(r);
+				}
+			}
+			// endIndent().indent().print("od").endIndent().endLine();
+			printLine("START: if\n").startIndent();
 
 			for (Rule r : process.atRules) {
 				switch (r.atPredicate.kind) {
+				case CONSUME:
+					// activeProctypes.add("consume" + r.hashCode());
+					// printLine("proctype ").print("consume" +
+					// r.hashCode()).print("(");
+					// TODO Add parameters
+					// print(") {").endLine().startIndent();
+					AstNode channelNode = r.atPredicate.getAnnotationNode("channel");
+					int channelId = getChannelId(channelNode.toString());
+					// printLine("START: if\n").startIndent();
+					printLine("CONSUME" + r.hashCode() + ":").endLine();
+					if (channelId >= 0) {
+						printLine(":: channels[" + channelId + "]?" + r.atPredicate.outParameters.get(0).toString()
+								+ " ->").endLine().startIndent();
+					} else {
+						printLine(":: channels[" + channelNode.toString() + "]?"
+								+ r.atPredicate.outParameters.get(0).toString() + " ->").endLine().startIndent();
+					}
+					// print(":: " + channel + "?" +
+					// r.atPredicate.outParameters.get(0).toString() + "
+					// ->").endLine()
+					// .startIndent();
+					generateStatements(r.statements).endIndent();
+					// endIndent().printLine("}").endLine();
+					break;
+
 				case EVERY:
 					out.append("proctype ");
 					out.append("every" + r.hashCode());
@@ -189,7 +319,7 @@ public class Ini2Pml {
 					// out.append("endE:\n");
 					out.append("do\n");
 					out.append(":: true ->\n");
-					generateStatements(r.statements, out);
+					generateStatements(r.statements);
 					out.append("od;\n");
 					out.append("}\n");
 					break;
@@ -210,7 +340,7 @@ public class Ini2Pml {
 					out.append("chan_" + observedVariable + " ? " + tempVariable + "->\n");
 					out.append("if\n");
 					out.append("::(" + tempVariable + " != " + observedVariable + ")->\n");
-					generateStatements(r.statements, out);
+					generateStatements(r.statements);
 					out.append(":: else -> skip;\n");
 					out.append("fi;\n");
 					out.append("}\n");
@@ -221,56 +351,66 @@ public class Ini2Pml {
 				}
 			}
 
-			initPromelaCode.append("init ");
-			initPromelaCode.append("{\n");
-			if (!process.initRules.isEmpty()) {
-				// initPromelaCode.append("atomic {\n");
-				for (Rule initRule : process.initRules) {
-					Sequence<Statement> exclusiveStatements = initRule.statements;
-					while (exclusiveStatements != null) {
-						exclusiveNodes.add((AstNode) exclusiveStatements.get());
-						exclusiveStatements = exclusiveStatements.next();
-					}
-					generateStatements(initRule.statements, initPromelaCode);
-				}
-				// initPromelaCode.append("}\n");
-			}
-			if (!activeProctypes.isEmpty()) {
-				if (activeProctypes.size() > 1) {
-					initPromelaCode.append("atomic {\n");
-				}
-				for (String p : activeProctypes) {
-					initPromelaCode.append("run " + p + "();\n");
-				}
-				if (activeProctypes.size() > 1) {
-					initPromelaCode.append("}\n");
-				}
-			}
-			if (!process.endRules.isEmpty()) {
-				// initPromelaCode.append("atomic {\n");
-				for (Rule endRule : process.endRules) {
-					Sequence<Statement> exclusiveStatements = endRule.statements;
-					while (exclusiveStatements != null) {
-						exclusiveNodes.add((AstNode) exclusiveStatements.get());
-						exclusiveStatements = exclusiveStatements.next();
-					}
-					generateStatements(endRule.statements, initPromelaCode);
-				}
-				// initPromelaCode.append("}\n");
-			}
-			initPromelaCode.append("}\n");
-			// System.out.println(">>>>>" + exclusiveNodes);
-			generateVariables(variableTypes);
-			// Generate temp variables
-			for (String v : observedVariables) {
-				generateTypeDeclaration(variableTypes.get(v));
-				variableDeclaration.append("temp_" + v + "\n");
-			}
-			generateRendezvousChannels();
+			endIndent().printLine("fi").endLine();
+			printLine("goto START").endLine();
+			endIndent().printLine("}").endLine();
+
+			/*
+			 * initPromelaCode.append("init "); initPromelaCode.append("{\n");
+			 * if (!process.initRules.isEmpty()) { // initPromelaCode.append(
+			 * "atomic {\n"); for (Rule initRule : process.initRules) {
+			 * Sequence<Statement> exclusiveStatements = initRule.statements;
+			 * while (exclusiveStatements != null) {
+			 * exclusiveNodes.add((AstNode) exclusiveStatements.get());
+			 * exclusiveStatements = exclusiveStatements.next(); }
+			 * generateStatements(initRule.statements, initPromelaCode); } //
+			 * initPromelaCode.append("}\n"); } if (!activeProctypes.isEmpty())
+			 * { if (activeProctypes.size() > 1) { initPromelaCode.append(
+			 * "atomic {\n"); } for (String p : activeProctypes) {
+			 * initPromelaCode.append("run " + p + "();\n"); } if
+			 * (activeProctypes.size() > 1) { initPromelaCode.append("}\n"); } }
+			 * if (!process.endRules.isEmpty()) { // initPromelaCode.append(
+			 * "atomic {\n"); for (Rule endRule : process.endRules) {
+			 * Sequence<Statement> exclusiveStatements = endRule.statements;
+			 * while (exclusiveStatements != null) {
+			 * exclusiveNodes.add((AstNode) exclusiveStatements.get());
+			 * exclusiveStatements = exclusiveStatements.next(); }
+			 * generateStatements(endRule.statements, initPromelaCode); } //
+			 * initPromelaCode.append("}\n"); } initPromelaCode.append("}\n");
+			 * // System.out.println(">>>>>" + exclusiveNodes);
+			 * generateVariables(variableTypes); // Generate temp variables for
+			 * (String v : observedVariables) {
+			 * generateTypeDeclaration(variableTypes.get(v));
+			 * variableDeclaration.append("temp_" + v + "\n"); }
+			 * generateRendezvousChannels();
+			 */
 			break;
 
 		case AstNode.INVOCATION:
-
+			if ("produce".equals(((Invocation) node).name)) {
+				printLine(((Invocation) node).arguments.get(0) + "!" + ((Invocation) node).arguments.get(1)).endLine();
+			} else {
+				for (AstNode n : parser.topLevels) {
+					if (n instanceof Process && ((Process) n).name.equals(((Invocation) node).name)) {
+						printLine("RUN " + ((Invocation) node).name + "(");
+						for (Expression e : ((Invocation) node).arguments) {
+							generate(e);
+							print(", ");
+						}
+						if (!((Invocation) node).arguments.isEmpty()) {
+							remove(2);
+						}
+						print(")").endLine();
+					}
+				}
+			}
+			String checkpoint = node.getAnnotationValue("checkpoint");
+			if (checkpoint != null) {
+				printLine(checkpoint + " = true").endLine();
+				if (!checkpoints.contains(checkpoint)) {
+					checkpoints.add(checkpoint);
+				}
+			}
 			break;
 
 		case AstNode.LIST_EXPRESSION:
@@ -291,7 +431,7 @@ public class Ini2Pml {
 			// TODO Generate a guard
 			out.append(rule.guard.toString());
 			out.append(") -> accept" + rule.hashCode() + ": progress" + rule.hashCode() + ":\n");
-			generateStatements(((Rule) node).statements, out);
+			generateStatements(((Rule) node).statements);
 			break;
 
 		case AstNode.CASE_STATEMENT:
@@ -299,11 +439,11 @@ public class Ini2Pml {
 			out.append("do\n");
 			boolean printDefault = (cs.defaultStatements != null);
 			for (Rule r : cs.cases) {
-				generate(r, out);
+				generate(r);
 			}
 			if (printDefault) {
 				out.append(":: else ->");
-				generateStatements(cs.defaultStatements, out);
+				generateStatements(cs.defaultStatements);
 			}
 			out.append("od;\n");
 			break;
@@ -340,7 +480,12 @@ public class Ini2Pml {
 
 		case AstNode.VARIABLE:
 			Variable v = (Variable) node;
-			out.append(v.name);
+			int channelId = getChannelId(v.name);
+			if (channelId >= 0) {
+				out.append("channels[" + channelId + "]");
+			} else {
+				out.append(v.name);
+			}
 			break;
 
 		default:
@@ -350,14 +495,16 @@ public class Ini2Pml {
 
 		evaluationStack.pop();
 
+		return this;
 	}
 
-	public void generateStatements(Sequence<Statement> s, StringBuffer out) {
+	public Ini2Pml generateStatements(Sequence<Statement> s) {
 		while (s != null) {
-			generate(s.get(), out);
+			generate(s.get());
 			s = s.next();
 			// out.append(";\n");
 		}
+		return this;
 	}
 
 	public void generateVariables(Map<String, Type> variableTypes) {
@@ -402,7 +549,7 @@ public class Ini2Pml {
 		if (observedVariables.contains(variable)) {
 			out.append("atomic {\n");
 		}
-		generateStatements(s, out);
+		generateStatements(s);
 		if (observedVariables.contains(variable)) {
 			out.append("chan_" + variable + "!" + variable + "\n");
 			out.append("}\n");

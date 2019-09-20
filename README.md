@@ -14,16 +14,16 @@ By default, INI uses *Kafka* as a broker.
 INI is built around two first-class entities.
 
 - *Functions*, as in *functional programming*, used for pure and safe calculations.
-- *Processes*, which are asynchronous, multi-threaded, rule-based, and react to their environment through events (as in *reactive programming*).
+- *Processes*, which are asynchronous, multi-threaded, rule-based, and react to their environment through events (as in *reactive programming*). Additionally, processes a built over an implicit repetition loop inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF))
 
-It natively support essential constructs for distributed programming:
+INI natively support essential constructs for distributed programming:
 
 - Reliable & scalable communication through channels.
 - Implicit multi-threading.
 - Synchronization mechanisms.
 - Automatic deployment (push and pull modes).
 
-It comes with a built-in type inference engine to type check the programs and is able to use model checking in order to prove distributed programs correctness (WIP).
+It comes with a built-in type inference engine to type check the programs. Also, thanks to Dijkstra's guarded-command paradigm, it is able to use model checking in order to prove distributed programs correctness (WIP).
 
 ## Typical Uses/Applications
 
@@ -80,7 +80,7 @@ $ bin/ini {ini_file} [{main_args}]
 
 # Examples
 
-The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full language specifications [here](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf). Other examples can be found [here](https://github.com/cincheo/ini/tree/master/ini/examples).
+The goal of these examples is to give a first overview of the INI syntax and semantics. Download the full [INI language specifications](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf). Other examples can be found [here](https://github.com/cincheo/ini/tree/master/ini/examples).
 
 ## A factorial function
 
@@ -111,7 +111,7 @@ $ bin/ini fac.ini 3
 
 ## A factorial process (rule-based style)
 
-On contrary to a function, a process runs asynchronously and can only contain rules. In an INI process, all the rules continue to be executed until none is applicable anymore or if the process has returned a value (using an explicit ``return`` statement). For instance, here is the factorial implementation with a process (rule-based style).
+On contrary to a function, a process runs asynchronously and can only contain rules (a.k.a. guarded commands). In an INI process, all the rules continue to be executed until none is applicable anymore or if the process has returned a value (using an explicit ``return`` statement). For instance, here is the factorial implementation with a process (rule-based style).
 
 ```javascript
 process fac(n) {
@@ -139,6 +139,29 @@ The second rule, guarded by ``i <= n``, continues to be executed until the ``i``
 The ``@init`` and ``@end`` rules are called "event rules". The ``@init`` event is a one-shot event that is evaluated before all other rules, while the ``@end`` event is a one-shot event evaluated once no rules are left to be applied. Event rules may be asynchronous and run in their own thread (it is not the case for ``@start`` and ``@end`` events).
 
 **Note**: it is important to understand that INI processes run asynchronously (in their own thread). They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, processes return *futures* instead of actual values. On contrary to many ``await/async`` systems, this mechanism is completely transparent for the programmer. In our example, the ``main`` function implicitly waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
+
+## The Euclidean algorithm example
+
+A famous example of guarded commands is the [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm), which efficiently finds the Greatest Common Divisor of two integers. Here is the INI code, which is actually very simple:
+
+```javascript
+process gcd(a, b) {
+	a < b {
+		b = b - a
+	}
+	b < a {
+		a = a - b
+	}
+	@end() {
+		// the loop terminates when a == b == gcd(a,b) :)
+		return a
+	}
+}
+
+gcd(25, 15) // result => 5
+gcd(17, 28) // result => 1
+gcd(1260, 51375) // result => 15
+```
 
 ## A process awaking every second
 
@@ -256,7 +279,7 @@ In other cases, a given node may want to evaluate a function or a process that h
 
 ```javascript
 // this is a binding to a function declared on a remote server
-hello(String)=>String [node="server"]
+declare hello(String)=>String [node="server"]
 
 function main() {
   println(hello("Renaud"))
@@ -264,6 +287,50 @@ function main() {
 ``` 
 
 Note that the binding of ``hello``, also defines the functional type ``(String) => String``, since INI cannot infer it from the function implementation.
+
+# Type Safety and Model Checking
+
+One of the most difficult point when building distributed applications (such as complex data pipelines and distributed computations), is  to ensure that they behave as expected. Since debugging them can be quite a complicated task, it is better to eliminate programming mistake as much as possible. To that purpose, INI provides two well-known mechanisms: strong typing through type inference, and formal validation through Model Checking.
+
+## Type Inference
+
+INI type system is formally defined in the [INI language specifications](https://github.com/cincheo/ini/raw/master/doc/ini_language_specs/ini_language_specs.pdf). Since INI implements type inference, the programmer does not have explicitly specify the types. Some exceptions can be noted, for instance when declaring bindings.
+
+## Model Checking
+
+Model checking is a robust technology that is used to prove properties when developing critical systems. Formal validation of INI programs is facilitated since the asynchronous part of the language is inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF)). Derivating from Dijkstra's work, the Promela language and the Spin model checker have been widely used in the past to prove the correctness of distributed/asynchronous programs. 
+
+To ensure formal validation with model checking, INI provides an option to generate Promela code out of an INI program, which is basically an abstraction of how the processes behave. One can then use the SPIN type checker to ensure program properties, through the use of *Temporal Logic* (TL) formulae.
+
+For instance, referring to the pipeline example given above, one can generate the corresponding abstract Promela code:
+
+```javascript
+chan channels[3]=[10] of {byte}
+boolean start=false
+boolean end=false
+active proctype main() {
+  RUN p(channels[1], channels[2])
+  RUN p(channels[2], channels[0])
+  c1!1
+  start = true
+  START: if
+    CONSUME1802598046:
+    :: channels[0]?v ->
+      end = true
+  fi
+  goto START
+}
+proctype p(byte in, byte out) {
+  START: if
+    CONSUME659748578:
+    :: channels[in]?v ->
+      out!v+1
+  fi
+  goto START
+}
+```
+
+It is possible to write a TL formula to ensure that the pipeline will terminate, i.e., that at some point in the process execution flow, the ``main``'s ``@consume`` event will be triggered on channel ``c``. 
 
 # License & contributing
 

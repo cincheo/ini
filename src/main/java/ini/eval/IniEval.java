@@ -17,6 +17,7 @@ import ini.ast.BinaryOperator;
 import ini.ast.Binding;
 import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
+import ini.ast.Channel;
 import ini.ast.CharLiteral;
 import ini.ast.Constructor;
 import ini.ast.ConstructorMatchExpression;
@@ -160,6 +161,10 @@ public class IniEval {
 				}
 				break;
 
+			case AstNode.CHANNEL:
+				getRootContext().bind(((Channel) node).name, new RawData((Channel) node));
+				break;
+				
 			case AstNode.AT_BINDING:
 				getRootContext().bind(((AtBinding) node).name, new RawData(node));
 				try {

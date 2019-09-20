@@ -102,6 +102,8 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "default"		        { return symbol(sym.DEFAULT); }
   "else"		        { return symbol(sym.ELSE); }
   "declare"		        { return symbol(sym.DECLARE); }
+  "declare" {WhiteSpaceChar}* "channel"	    { return symbol(sym.CHANNEL); }
+  "declare" {WhiteSpaceChar}* "predicate"	{ return symbol(sym.PREDICATE); }
 
   {DecIntegerLiteral}   { return symbol(sym.INT); }
   {DecFloatLiteral}		{ return symbol(sym.NUM); }
@@ -142,7 +144,9 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   {LineTerminator}      { return symbol(sym.LF); }
   "'"					{ yybegin(CHAR); }
   \"                    { yybegin(STRING); }
-  {Comment}             { /* ignore */ }
+  {TraditionalComment}  { /* ignore */ }
+  {DocumentationComment} { /* ignore */ }
+  {EndOfLineComment} { return symbol(sym.LF); }
   {WhiteSpaceChar}      { /* ignore */ }
 
   // THIS LOOK-AHEAD SHOULD BE SOLVED IN THE PARSER FOR BETTER PERFS

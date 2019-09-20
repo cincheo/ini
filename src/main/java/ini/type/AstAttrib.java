@@ -1,7 +1,6 @@
 package ini.type;
 
 import java.io.PrintStream;
-import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -14,6 +13,7 @@ import ini.ast.AstNode;
 import ini.ast.BinaryOperator;
 import ini.ast.Binding;
 import ini.ast.CaseStatement;
+import ini.ast.Channel;
 import ini.ast.Constructor;
 import ini.ast.ConstructorMatchExpression;
 import ini.ast.Executable;
@@ -241,6 +241,11 @@ public class AstAttrib {
 
 		switch (node.nodeTypeId()) {
 
+		case AstNode.AT_PREDICATE:
+			
+			
+			break;
+		
 		case AstNode.IMPORT:
 			IniParser localParser = ((Import) node).importParser;
 			if (localParser == null) {
@@ -370,6 +375,12 @@ public class AstAttrib {
 				}
 				getRootContext().bind(binding.name, result);
 			}
+			break;
+
+		case AstNode.CHANNEL:
+			result = parser.types.getDependentType("Channel", eval(((Channel) node).type));
+			;
+			getRootContext().bind(((Channel) node).name, result);
 			break;
 
 		case AstNode.ARRAY_ACCESS:
@@ -691,9 +702,9 @@ public class AstAttrib {
 
 			// invocationStack.push(new AttrContext(invocationStack.peek()));
 
-			// if(r.atPredicate!=null) {
-			// eval(r.atPredicate);
-			// }
+			if (r.atPredicate != null) {
+				eval(r.atPredicate);
+			}
 			if (r.guard != null) {
 				eval(r.guard);
 			}

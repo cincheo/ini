@@ -2,11 +2,11 @@ package ini;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -25,6 +25,7 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
 
+import ini.analysis.spin.Ini2Pml;
 import ini.ast.AstNode;
 import ini.ast.Executable;
 import ini.ast.Invocation;
@@ -64,6 +65,10 @@ public class Main {
 		jsap.registerParameter(new FlaggedOption("node").setLongFlag("node").setShortFlag('n')
 				.setStringParser(JSAP.STRING_PARSER).setRequired(false).setList(false).setHelp(
 						"Sets the node name and starts INI in deamon mode. The name of the node is used by other INI nodes to spawn and fetch processes and functions. This option overrides the value defined in the INI_NODE system environment variable or in the 'ini_conf.json'."));
+
+		jsap.registerParameter(new FlaggedOption("model-out").setLongFlag("model-out")
+				.setStringParser(JSAP.STRING_PARSER).setRequired(false).setList(false).setHelp(
+						"Generates the Promela model into the given file, so that it can be checked by the Spin model checker."));
 
 		jsap.registerParameter(new UnflaggedOption("file").setStringParser(JSAP.STRING_PARSER).setRequired(false)
 				.setList(false)
@@ -105,6 +110,9 @@ public class Main {
 		} catch (Exception e) {
 			if (parser.hasErrors()) {
 				parser.printErrors(System.err);
+				e.printStackTrace();
+				return;
+			} else {
 				e.printStackTrace();
 				return;
 			}
@@ -159,6 +167,27 @@ public class Main {
 			parser.env.node = commandLineNode;
 		}
 
+		String modelOut = commandLineConfig.getString("model-out");
+		if (modelOut != null) {
+			Ini2Pml converter = new Ini2Pml(parser);
+			converter.beforeGenerate();
+			for (AstNode statement : parser.topLevels) {
+				converter.generate(statement);
+			}
+			converter.afterGenerate();
+			/*
+			 * Executable mainExecutable = getMainExecutable(parser); if
+			 * (mainExecutable != null) {
+			 * converter.generateObserverdVariabsles(mainExecutable);
+			 * converter.generate(mainExecutable, out); System.out
+			 * .println(converter.variableDeclaration.toString() +
+			 * out.toString() + converter.initPromelaCode); FileUtils.write(new
+			 * File(modelOut), converter.variableDeclaration.toString() +
+			 * out.toString() + converter.initPromelaCode, "UTF-8"); }
+			 */
+			System.out.println(converter.getOutput());
+			FileUtils.write(new File(modelOut), converter.getOutput(), "UTF-8");
+		}
 		IniEval eval = mainEval(parser, false, null, null,
 				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("arg")));
 
@@ -192,16 +221,15 @@ public class Main {
 
 	}
 
-	/*
-	 * private static final String TMP_FUNCTION_NAME = "_root_tmp_";
-	 * 
-	 * private synchronized static Context getRootContext() { }
-	 * 
-	 * private static void evalCommand(IniParser parser, String command) {
-	 * parser.parseAdditionalCode(code); IniEval eval = new IniEval(parser, new
-	 * Context(new Function(parser, null, "<command>", null, null)));
-	 * eval.eval(); }
-	 */
+	public static Executable getMainExecutable(IniParser parser) {
+		Executable main = null;
+		for (AstNode topLevel : parser.topLevels) {
+			if ((topLevel instanceof Executable) && "main".equals(((Executable) topLevel).name)) {
+				main = (Executable) topLevel;
+			}
+		}
+		return main;
+	}
 
 	public static void parseConfiguration(IniParser parser) {
 		try {
@@ -276,12 +304,6 @@ public class Main {
 			}
 
 			if (main != null) {
-				// Ini2Pml converter = new Ini2Pml(parser);
-				// StringBuffer out = new StringBuffer();
-				// converter.generateObserverdVariabsles(main);
-				// converter.generate(main, out);
-				// System.out.println(converter.variableDeclaration.toString() +
-				// out.toString() + converter.initPromelaCode);
 				if (main.parameters != null && main.parameters.size() > 1) {
 					parser.out.println(
 							"Error: main function must have no parameters or one parameter (list of strings).");
@@ -293,7 +315,7 @@ public class Main {
 				 * context.bind(main.parameters.get(0).name,
 				 * RawData.objectToData(args)); }
 				 */
-				eval.invoke(main, args == null ? new Object[0] : new Object[] { args });
+				eval.invoke(main, args == null || args.length == 0 ? new Object[0] : new Object[] { args });
 			}
 			return eval;
 

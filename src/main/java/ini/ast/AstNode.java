@@ -24,7 +24,8 @@ public interface AstNode {
 	int BINDING = BINARY_OPERATOR + 1;
 	int BOOLEAN_LITERAL = BINDING + 1;
 	int CASE_STATEMENT = BOOLEAN_LITERAL + 1;
-	int CHAR_LITERAL = CASE_STATEMENT + 1;
+	int CHANNEL = CASE_STATEMENT + 1;
+	int CHAR_LITERAL = CHANNEL + 1;
 	int CONSTRUCTOR = CHAR_LITERAL + 1;
 	int CONSTRUCTOR_MATCH_EXPRESSION = CONSTRUCTOR + 1;
 	int FIELD_ACCESS = CONSTRUCTOR_MATCH_EXPRESSION + 1;
@@ -34,7 +35,8 @@ public interface AstNode {
 	int LIST_EXPRESSION = INVOCATION + 1;
 	int NUMBER_LITERAL = LIST_EXPRESSION + 1;
 	int PARAMETER = NUMBER_LITERAL + 1;
-	int PROCESS = PARAMETER + 1;
+	int PREDICATE = PARAMETER + 1;
+	int PROCESS = PREDICATE + 1;
 	int RETURN_STATEMENT = PROCESS + 1;
 	int RULE = RETURN_STATEMENT + 1;
 	int SET_CONSTRUCTOR = RULE + 1;
@@ -56,6 +58,10 @@ public interface AstNode {
 	Type getType();
 
 	void setType(Type type);
+	
+	String getAnnotationValue(String key);
+	
+	AstNode getAnnotationNode(String key);
 
 	public static Class<?> getClass(int nodeTypeId) {
 		switch (nodeTypeId) {

@@ -1,7 +1,8 @@
 package ini.eval.function;
 
+import ini.ast.Channel;
+import ini.ast.Channel.Visibility;
 import ini.broker.BrokerClient;
-import ini.broker.Channel;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
@@ -17,11 +18,11 @@ public class ProduceFunction extends BuiltInExecutable {
 
 	@Override
 	public void eval(IniEval eval) {
-		Channel channel = new Channel(getArgument(eval, 0).getValue());
+		Channel channel = getArgument(eval, 0).getValue();
 		Data data = getArgument(eval, 1);
 		try {
-			BrokerClient.createDefaultInstance(eval.parser.env, channel.isGlobal()).produce(channel.getName(),
-					RawData.rawCopy(data));
+			BrokerClient.createDefaultInstance(eval.parser.env, channel.visibility == Visibility.GLOBAL)
+					.produce(channel.mappedName, RawData.rawCopy(data));
 			// KafkaClient.runProducer(topic, RawData.rawCopy(message));
 		} catch (Exception e) {
 			throw new RuntimeException(e);

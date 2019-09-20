@@ -1,14 +1,5 @@
 package ini.eval.at;
 
-import ini.ast.Assignment;
-import ini.ast.AtPredicate;
-import ini.ast.Expression;
-import ini.ast.Rule;
-import ini.ast.Variable;
-import ini.eval.IniEval;
-import ini.eval.IniThread;
-import ini.eval.data.Data;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +8,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import ini.ast.Assignment;
+import ini.ast.AtPredicate;
+import ini.ast.Expression;
+import ini.ast.Rule;
+import ini.ast.Variable;
+import ini.eval.IniEval;
+import ini.eval.IniThread;
+import ini.eval.data.Data;
 
 public abstract class At {
 	protected boolean terminated = false;
@@ -210,5 +210,5 @@ public abstract class At {
 	public void setAtPredicate(AtPredicate atPredicate) {
 		this.atPredicate = atPredicate;
 	}
-
+	
 }

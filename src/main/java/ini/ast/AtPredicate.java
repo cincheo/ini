@@ -8,7 +8,7 @@ import java.util.List;
 public class AtPredicate extends NamedElement {
 
 	public enum Kind {
-		UPDATE, EVERY, CRON, INIT, END, ERROR, UPDATE_SYNC, USER_DEFINED
+		UPDATE, EVERY, CRON, INIT, END, ERROR, UPDATE_SYNC, CONSUME, USER_DEFINED
 	}
 	
 	public List<Expression> outParameters;
@@ -22,6 +22,9 @@ public class AtPredicate extends NamedElement {
 		this.outParameters = runtimeArguments;
 		if(name.equals("init")) {
 			kind=Kind.INIT;
+		}
+		if(name.equals("consume")) {
+			kind=Kind.CONSUME;
 		}
 		if(name.equals("end")) {
 			kind=Kind.END;

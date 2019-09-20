@@ -24,12 +24,6 @@ parser code {:
 		return userTypeIndex++;
 	}
 
-	//public Map<String,Executable> parsedFunctionMap=new HashMap<String,Executable>();
-	//public List<Executable> parsedFunctionList=new ArrayList<Executable>();
-	//public List<Binding> parsedBindingList=new ArrayList<Binding>();
-	//public List<AtBinding> parsedAtBindingList=new ArrayList<AtBinding>();
-	//public List<Import> parsedImportList=new ArrayList<Import>();
-	//public List<AstNode> parsedAst =  new ArrayList<AstNode>();
 	public List<AstNode> topLevels =  new ArrayList<AstNode>();
 
 	public IniEnv env;
@@ -135,13 +129,14 @@ terminal IDENTIFIER, TIDENTIFIER;
 terminal QUESTION, DOLLAR;
 terminal LF, END;
 // keywords
-terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT, ELSE, DECLARE;
+terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT, ELSE, DECLARE, CHANNEL, PREDICATE;
 
 non terminal lf, lf_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
 non terminal function, param_list_opt, param_list, param;
 non terminal import_decl;
 non terminal binding, type_list_opt, type_list, type, type_decl_list_opt, type_decl_list, type_decl, at_binding_conf_type;
+non terminal channel_decl, visibility, predicate_decl;
 non terminal var_list;
 non terminal statement_list_opt, statement_list, top_level_statement, statement, expr;
 non terminal identifier_assignment_list_opt, identifier_assignment_list;
@@ -198,6 +193,8 @@ program_elt ::= import_decl:e {: RESULT=e; :}
 	| at_binding:e {: RESULT=e; :} 
 	| function:e {: RESULT=e; :} 
 	| usertype:e {: RESULT=e; :} 
+	| channel_decl:e {: RESULT=e; :} 
+	| predicate_decl:e {: RESULT=e; :} 
 	| top_level_statement:e {: RESULT=e; :}
 ;
 
@@ -226,6 +223,23 @@ binding ::= DECLARE:d IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLI
 	:}
 ;
 
+channel_decl ::= CHANNEL:d visibility:v IDENTIFIER:name LPAREN type:t RPAREN annotations_opt:a
+	{:
+		RESULT = new Channel(parser, (Token)d, name.toString(), (TypeVariable)t, (Channel.Visibility)v, false, (List)a);
+	:}
+;
+
+predicate_decl ::= PREDICATE:d IDENTIFIER:name STRING:expression annotations_opt:a
+	{:
+		RESULT = new Predicate(parser, (Token)d, name.toString(), expression.toString());
+	:}
+;
+
+visibility ::= PLUS:v {: RESULT=Channel.Visibility.PRIVATE; :} 
+	| MINUS:v {: RESULT=Channel.Visibility.GLOBAL; :}
+	|
+};
+	
 at_binding_conf_type ::=
 | LSPAREN type_list_opt:ct RSPAREN
 {:
