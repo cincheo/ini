@@ -14,16 +14,16 @@ By default, INI uses *Kafka* as a broker.
 INI is built around two first-class entities.
 
 - *Functions*, as in *functional programming*, used for pure and safe calculations.
-- *Processes*, which are asynchronous, multi-threaded, rule-based, and react to their environment through events (as in *reactive programming*). Additionally, processes a built over an implicit repetition loop inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF))
+- *Processes*, which are asynchronous, multi-threaded, rule-based, and react to their environment through events (as in *reactive programming*). Rules in processes, implying an implicit repetition loop, are inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF))
 
 INI natively support essential constructs for distributed programming:
 
 - Reliable & scalable communication through channels.
 - Implicit multi-threading.
 - Synchronization mechanisms.
-- Automatic deployment (push and pull modes).
+- Declarative deployment (push and pull modes).
 
-It comes with a built-in type inference engine to type check the programs. Also, thanks to Dijkstra's guarded-command paradigm, it is able to use model checking in order to prove distributed programs correctness (WIP).
+It comes with a built-in type inference engine to type check the programs. Also, thanks to Dijkstra's guarded-command paradigm, it is well-suited to formal validation (especially model checking) in order to prove distributed programs correctness (WIP).
 
 ## Typical Uses/Applications
 
