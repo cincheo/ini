@@ -116,7 +116,7 @@ process fac(n) {
   @init() {
     f = 1
   }
-  // this rule will loop until n = 0
+  // this rule will loop until n == 0
   n > 0 {
     f = f * n--
   }
@@ -287,7 +287,7 @@ Note that the binding of ``hello``, also defines the functional type ``(String) 
 
 # Type Safety and Model Checking
 
-One of the most difficult point when building distributed applications (such as complex data pipelines and distributed computations), is  to ensure that they behave as expected. Since debugging them can be quite a complicated task, it is better to eliminate programming mistake as much as possible. To that purpose, INI provides two well-known mechanisms: strong typing through type inference, and formal validation through Model Checking.
+One of the most difficult point when building distributed applications (such as complex data pipelines and distributed computations), is  to ensure that they behave as expected. Since debugging them can be quite a complicated task, it is better to eliminate programming mistakes as much as possible. To that purpose, INI provides two well-known mechanisms: strong typing through *Type Inference*, and formal validation through *Model Checking*.
 
 ## Type Inference
 
