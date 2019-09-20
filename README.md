@@ -302,7 +302,13 @@ Model checking is a robust technology that is used to prove properties when deve
 
 To ensure formal validation with model checking, INI provides an option to generate Promela code out of an INI program, which is basically an abstraction of how the processes behave. One can then use the SPIN type checker to ensure program properties, through the use of *Temporal Logic* (TL) formulae.
 
-For instance, referring to the pipeline example given above, one can generate the corresponding abstract Promela code:
+For instance, referring to the pipeline example given above, we can generate the corresponding abstract Promela code with the ``model-out`` option.
+
+```console
+$ bin/ini --model-out model.pml pipeline.ini
+```
+
+The generated ``model.pml`` file.
 
 ```javascript
 chan channels[3]=[10] of {byte}
