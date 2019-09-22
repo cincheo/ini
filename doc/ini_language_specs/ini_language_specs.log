@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  22 AUG 2019 07:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2016.1.19)  22 SEP 2019 10:16
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -196,11 +196,11 @@ e
 ))
 \c@lstlisting=\count105
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 27.
+(Font)              <12> on input line 34.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 27.
+(Font)              <8> on input line 34.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 27.
+(Font)              <6> on input line 34.
 
 [1
 
@@ -210,80 +210,76 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <10.95> on input line 2.
  [2
 
-] [3])
+])
 \tf@toc=\write3
 \openout3 = `ini_language_specs.toc'.
 
- [4]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 51.
+ [3] [4
 
+]
+Chapter 1.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 54.
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 51.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 54.
  [5
 
 ]
-LaTeX Font Info:    Try loading font information for OML+cmr on input line 56.
+LaTeX Font Info:    Try loading font information for OML+cmr on input line 117.
+
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 56.
- [6]
-Chapter 1.
-[7
-
-] [8]
-Chapter 2.
-[9
-
-] [10] [11]
-Overfull \hbox (45.83401pt too wide) in paragraph at lines 238--239
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 117.
+ [6] [7]
+Overfull \hbox (45.83401pt too wide) in paragraph at lines 183--184
 []\OT1/cmr/m/n/10.95 For in-stance, the fol-low-ing code de-fines two bound fun
 c-tions to call the clas-si-cal \OT1/cmtt/m/n/10.95 System.out.println(..)
  []
 
-[12] [13] [14]
+[8] [9] [10]
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 356.
- [15] [16] [17] [18] [19]
-LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 534
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 307.
+ [11] [12] [13] [14] [15]
+LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 485
 .
-LaTeX Font Info:    No file OMScmtt.fd. on input line 534.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 485.
 
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 534.
+(Font)              for symbol `textbraceleft' on input line 485.
 
-[20] [21] [22]
+[16] [17] [18] [19]
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 704.
- [23]
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 655.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 732.
+(Font)              <9> on input line 682.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 732.
- [24]
-LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 764.
+(Font)              <5> on input line 682.
+ [20]
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 772.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 725.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 781.
+(Font)              <7> on input line 732.
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 781.
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 732.
 
 
-LaTeX Warning: Reference `subsubsec:bindings' on page 25 undefined on input lin
-e 803.
+LaTeX Warning: Reference `subsubsec:bindings' on page 21 undefined on input lin
+e 754.
 
-[25] [26] [27] [28]
-Chapter 3.
-[29
+[21] [22] [23] [24]
+Chapter 2.
+
+LaTeX Warning: Reference `sec:counting_occurences_in_a_list' on page 25 undefin
+ed on input line 868.
+
+[25
 
 ]
 \myBox1=\box35
@@ -294,34 +290,20 @@ Chapter 3.
 \myScoreStart2=\dimen128
 \myCenter2=\dimen129
 \myScoreEnd2=\dimen130
- [30] [31]
+ [26] [27]
 \myBox3=\box37
 \myScoreStart3=\dimen131
 \myCenter3=\dimen132
 \myScoreEnd3=\dimen133
- [32]
-Overfull \hbox (10.85796pt too wide) in paragraph at lines 1139--1140
+ [28]
+Overfull \hbox (10.85796pt too wide) in paragraph at lines 1090--1091
 \OT1/cmr/m/n/10.95 must be of the same type \OT1/cmtt/m/n/10.95 T\OT1/cmr/m/n/1
 0.95 . Then the type of the re-sult-ing list is \OT1/cmtt/m/n/10.95 T* \OT1/cmr
 /m/n/10.95 (equiv-a-lent to \OT1/cmtt/m/n/10.95 Dictionary(Int,T)\OT1/cmr/m/n/1
 0.95 ) 
  []
 
-[33] [34]
-Chapter 4.
-[35
-
-] [36]
-Overfull \hbox (17.35269pt too wide) in paragraph at lines 1306--1307
-[]\OT1/cmr/m/n/10.95 Note that this func-tion is poly-mor-phic. Its type is \OT
-1/cmtt/m/n/10.95 (Dictionary(Int,'T))-> Dictionary(Int,'T)\OT1/cmr/m/n/10.95 ,
- []
-
-[37] [38] [39] [40] [41] [42] [43] [44] [45] [46] [47]
-Chapter 5.
-[48
-
-] (./ini_language_specs.bbl [49]) [50
+[29] (./ini_language_specs.bbl [30]) [31
 
 ] (./ini_language_specs.aux)
 
@@ -332,13 +314,13 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 3000 strings out of 493089
- 43559 string characters out of 6134842
- 133378 words of memory out of 5000000
- 6453 multiletter control sequences out of 15000+600000
- 11955 words of font info for 43 fonts, out of 8000000 for 9000
+ 2996 strings out of 493089
+ 43473 string characters out of 6134842
+ 130354 words of memory out of 5000000
+ 6449 multiletter control sequences out of 15000+600000
+ 11786 words of font info for 42 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 38i,6n,32p,1425b,1443s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 38i,6n,32p,809b,1443s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -355,10 +337,10 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive
 015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/20
 15/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/201
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on ini_language_specs.pdf (51 pages, 322736 bytes).
+Output written on ini_language_specs.pdf (32 pages, 267813 bytes).
 PDF statistics:
- 234 PDF objects out of 1000 (max. 8388607)
- 163 compressed objects within 2 object streams
+ 172 PDF objects out of 1000 (max. 8388607)
+ 120 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
