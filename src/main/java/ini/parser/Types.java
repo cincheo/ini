@@ -22,14 +22,15 @@ public class Types {
 	}
 
 	private Set<Type> primitiveTypes = new HashSet<>();
-	
+
 	public boolean isPrimitive(Type type) {
 		return primitiveTypes.contains(type);
 	}
-	
+
 	public Types(IniParser parser) {
 		this.parser = parser;
 		ANY = getSimpleType("Any");
+		ANY.variable = true;
 		VOID = getSimpleType("Void");
 		CHAR = getSimpleType("Char");
 		DOUBLE = getSimpleType("Double");
@@ -42,7 +43,6 @@ public class Types {
 		STRING = getDependentType("Map", INT, CHAR);
 		aliases.put("String", STRING);
 		aliases.put("Number", DOUBLE);
-		primitiveTypes.add(ANY);
 		primitiveTypes.add(VOID);
 		primitiveTypes.add(CHAR);
 		primitiveTypes.add(DOUBLE);
@@ -103,6 +103,10 @@ public class Types {
 
 	public Map<String, Type> types = new HashMap<String, Type>();
 	public Map<String, Type> aliases = new HashMap<String, Type>();
+
+	public boolean isRegistered(String name) {
+		return types.containsKey(name) || aliases.containsKey(name) || constructors.containsKey(name);
+	}
 
 	public final Type ANY;
 	public final Type VOID;

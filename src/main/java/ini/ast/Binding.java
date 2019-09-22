@@ -28,10 +28,10 @@ public class Binding extends NamedElement {
 		this.returnType = returnType;
 		if (parameterTypes != null) {
 			for (TypeVariable v : parameterTypes) {
-				v.typeParameters = typeParameters;
+				v.context = typeParameters;
 			}
 			if(returnType!=null) {
-				returnType.typeParameters = typeParameters;
+				returnType.context = typeParameters;
 			}
 		}
 		this.className = getAnnotationValue("class");

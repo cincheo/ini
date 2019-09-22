@@ -11,12 +11,12 @@ import ini.ast.Executable;
 import ini.ast.UserType;
 import ini.parser.Types;
 
-public class Type {
+public final class Type {
 
 	public boolean constructorType = false;
 	public Executable executable = null;
 
-	public boolean isLTE(Type type) {
+	public final boolean isLTE(Type type) {
 		if (type == this) {
 			return true;
 		} else if (this.superType == null) {
@@ -26,11 +26,11 @@ public class Type {
 		}
 	}
 
-	public boolean isGTE(Type type) {
+	public final boolean isGTE(Type type) {
 		return type.isLTE(this);
 	}
 
-	public Class<?> toJavaType() {
+	public final Class<?> toJavaType() {
 		if (this == types.VOID) {
 			return void.class;
 		} else if (this == types.CHAR) {
@@ -78,18 +78,18 @@ public class Type {
 	public Type superType = null;
 	public List<Type> subTypes = null;
 
-	public void setSuperType(Type type) {
+	public final void setSuperType(Type type) {
 		this.superType = type;
 	}
 
-	public void addSubType(Type type) {
+	public final void addSubType(Type type) {
 		if (subTypes == null) {
 			subTypes = new ArrayList<Type>();
 		}
 		subTypes.add(type);
 	}
 
-	public boolean hasSubTypes() {
+	public final boolean hasSubTypes() {
 		return subTypes != null && !subTypes.isEmpty();
 	}
 
@@ -99,7 +99,7 @@ public class Type {
 		this.fields = new HashMap<String, Type>();
 	}
 
-	public String getFullName() {
+	public final String getFullName() {
 		if (hasTypeParameters()) {
 			return name + "(" + typeParametersString(typeParameters) + ")";
 		} else if (hasFields()) {
@@ -108,22 +108,22 @@ public class Type {
 			} else {
 				return "[" + fieldsString(fields) + "]";
 			}
-		} else if (name!=null && "function".equals(name)) {
+		} else if (name != null && "function".equals(name)) {
 			return "(" + typeParametersString(typeParameters) + ")->" + returnType;
 		} else {
 			return name;
 		}
 	}
 
-	public String getName() {
+	public final String getName() {
 		return name;
 	}
 
-	public boolean isVariable() {
+	public final boolean isVariable() {
 		return variable;
 	}
 
-	public String toString() {
+	public final String toString() {
 		if (isList()) {
 			if (typeParameters.get(1) == types.CHAR) {
 				return "String";
@@ -135,7 +135,7 @@ public class Type {
 		}
 	}
 
-	public boolean isList() {
+	public final boolean isList() {
 		return isMap() && typeParameters.get(0) == types.INT;
 	}
 
@@ -167,18 +167,18 @@ public class Type {
 		return s;
 	}
 
-	public boolean isMap() {
+	public final boolean isMap() {
 		return "Map".equals(name);
 	}
 
-	public void addTypeParameter(Type type) {
+	public final void addTypeParameter(Type type) {
 		if (typeParameters == null) {
 			typeParameters = new ArrayList<Type>();
 		}
 		typeParameters.add(type);
 	}
 
-	public void addField(String name, Type type) {
+	public final void addField(String name, Type type) {
 		if (fields == null) {
 			fields = new HashMap<String, Type>();
 		}
@@ -186,7 +186,7 @@ public class Type {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Type> getTypeParameters() {
+	public final List<Type> getTypeParameters() {
 		if (typeParameters == null) {
 			return Collections.EMPTY_LIST;
 		}
@@ -194,7 +194,7 @@ public class Type {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public final boolean equals(Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -205,7 +205,7 @@ public class Type {
 		}
 	}
 
-	public Type deepCopy() {
+	public final Type deepCopy() {
 		if (types.isPrimitive(this)) {
 			return this;
 		} else {
@@ -235,7 +235,7 @@ public class Type {
 		}
 	}
 
-	public Type substitute(List<Type> parameters, List<Type> arguments, List<Type> freeVariables) {
+	public final Type substitute(List<Type> parameters, List<Type> arguments, List<Type> freeVariables) {
 		int index = parameters.indexOf(this);
 		if (index >= 0) {
 			return arguments.get(index);
@@ -253,7 +253,7 @@ public class Type {
 		}
 	}
 
-	public void substitute(TypingConstraint substitution) {
+	public final void substitute(TypingConstraint substitution) {
 		if (hasTypeParameters()) {
 			for (int i = 0; i < typeParameters.size(); i++) {
 				if (typeParameters.get(i).isVariable()) {
@@ -290,31 +290,35 @@ public class Type {
 		}
 	}
 
-	public Type getReturnType() {
+	public final Type getReturnType() {
 		return returnType;
 	}
 
-	public void setReturnType(Type returnType) {
+	public final void setReturnType(Type returnType) {
 		this.returnType = returnType;
 	}
 
-	public boolean isFunctional() {
-		return name != null && name.equals("function") || executable !=null;
+	public final boolean isFunctional() {
+		return name != null && name.equals("function") || executable != null;
 	}
 
-	public Map<String, Type> getFields() {
+	public final boolean isChannel() {
+		return name != null && (name.equals("Channel") || (name.equals("Map") && typeParameters.get(1).isChannel()));
+	}
+
+	public final Map<String, Type> getFields() {
 		return fields;
 	}
 
-	public boolean hasFields() {
+	public final boolean hasFields() {
 		return fields != null && !fields.isEmpty();
 	}
 
-	public boolean hasTypeParameters() {
+	public final boolean hasTypeParameters() {
 		return typeParameters != null && !typeParameters.isEmpty();
 	}
 
-	public boolean hasVariablePart() {
+	public final boolean hasVariablePart() {
 		if (variable) {
 			return true;
 		} else {

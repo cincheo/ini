@@ -79,6 +79,9 @@ public class Context {
 
 	public void prettyPrint(PrintStream out) {
 		for (String v : variables.keySet()) {
+			if(v.equals(IniEval.PROCESS_RESULT)) {
+				continue;
+			}
 			out.print("   ");
 			prettyPrintVariable(out, v);
 			out.println();

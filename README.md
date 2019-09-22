@@ -116,7 +116,7 @@ process fac(n) {
   @init() {
     f = 1
   }
-  // this rule will loop until n == 0
+  // this rule will repeat until n == 0
   n > 0 {
     f = f * n--
   }
@@ -137,7 +137,7 @@ The ``@init`` and ``@end`` rules are called "event rules". The ``@init`` event i
 
 **Note**: it is important to understand that INI processes run asynchronously (in their own thread). They do not interrupt the thread of the function/process invoking them unless the invoking function/process reads the result of the invoked process. In that case, the invoking function/process waits until the invoked process returns a value. Under the hood, processes return *futures* instead of actual values. On contrary to many ``await/async`` systems, this mechanism is completely transparent for the programmer. In our example, the ``main`` function implicitly waits for the ``fac`` result because it uses it as an argument of the ``println`` function.
 
-## The Euclidean algorithm example
+## The Euclidean Algorithm example
 
 A famous example to demonstrate the use of guarded commands is the [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm), which efficiently finds the Greatest Common Divisor of two integers. Here is the INI code using a process and 2 rules (guarded commands):
 
@@ -150,7 +150,7 @@ process gcd(a, b) {
     a = a - b
   }
   @end() {
-    // the loop terminates when a == b == gcd(a,b) :)
+    // repetition terminates when a == b == gcd(a,b) :)
     return a
   }
 }

@@ -11,6 +11,7 @@ import ini.broker.BrokerClient;
 import ini.eval.IniEval;
 import ini.eval.IniThread;
 import ini.eval.data.Data;
+import ini.type.AstAttrib;
 
 public class AtConsume extends At {
 
@@ -27,8 +28,10 @@ public class AtConsume extends At {
 			public void run() {
 				do {
 					try {
-						channel = getInContext().get("channel").getValue();
-						brokerClient = BrokerClient.createDefaultInstance(eval.parser.env, channel.visibility==Visibility.GLOBAL);
+						channel = (getInContext().get("channel") == null ? getInContext().get("from")
+								: getInContext().get("channel")).getValue();
+						brokerClient = BrokerClient.createDefaultInstance(eval.parser.env,
+								channel.visibility == Visibility.GLOBAL);
 						brokerClient.consume(channel.mappedName, value -> {
 							Map<String, Data> variables = new HashMap<String, Data>();
 							variables.put(getAtPredicate().outParameters.get(0).toString(), value);
@@ -51,5 +54,11 @@ public class AtConsume extends At {
 		// TODO: interrupt properly
 		mainThread.interrupt();
 	}
-	
+
+	@Override
+	public void evalType(AstAttrib attrib) {
+		typeInParameters(attrib, true, attrib.parser.types.getDependentType("Channel", attrib.parser.types.createType()),
+				"from", "channel");
+	}
+
 }

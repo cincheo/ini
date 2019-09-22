@@ -31,7 +31,9 @@ parser code {:
 
 	private List<Executable> createBuiltInExecutables() {
 		return Arrays.asList( //
+			new AnyFunction(this), //
 			new ClearFunction(this), //
+			new ChannelFunction(this), //
 			new CopyFunction(this), //
 			new ErrorFunction(this), //
 			new FirstFunction(this), //
@@ -227,6 +229,10 @@ channel_decl ::= CHANNEL:d visibility:v IDENTIFIER:name LPAREN type:t RPAREN ann
 	{:
 		RESULT = new Channel(parser, (Token)d, name.toString(), (TypeVariable)t, (Channel.Visibility)v, false, (List)a);
 	:}
+	| CHANNEL:d visibility:v IDENTIFIER:name LSPAREN RSPAREN LPAREN type:t RPAREN annotations_opt:a
+	{:
+		RESULT = new Channel(parser, (Token)d, name.toString(), (TypeVariable)t, (Channel.Visibility)v, true, (List)a);
+	:}
 ;
 
 predicate_decl ::= PREDICATE:d IDENTIFIER:name STRING:expression annotations_opt:a
@@ -379,6 +385,11 @@ type_list ::= type_list:l COMMA type:t
 ;
 
 type ::= TIDENTIFIER:i {: RESULT = new TypeVariable(parser,(Token)i,i.toString()); :}
+	| TIDENTIFIER:i LPAREN type_list:types RPAREN {:
+		TypeVariable tv = new TypeVariable(parser,(Token)i,i.toString()); 
+		tv.typeParameters = (List)types;
+		RESULT = tv;
+	:}
 	| type:t MULT {: RESULT = new TypeVariable(parser,((TypeVariable)t).token,(TypeVariable)t); :}
 ;
 
@@ -412,10 +423,6 @@ assignment_expr ::= var_access:v ASSIGN:a expr:e
 	{:
 		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
 	:}
-	| set_var_access:v ASSIGN:a list_expr:e 
-	{: 
-		RESULT = new Assignment(parser,(Token)a,(VariableAccess)v,(Expression)e);
-	:}
 ;
 
 identifier_assignment ::= IDENTIFIER:v ASSIGN:a expr:e 
@@ -424,7 +431,7 @@ identifier_assignment ::= IDENTIFIER:v ASSIGN:a expr:e
 	:}
 ;
 
-set_var_access ::= TIDENTIFIER:v {: RESULT = new Variable(parser,(Token)v,v.toString()); :}
+set_var_access ::= TIDENTIFIER:v {: RESULT = new TypeVariable(parser,(Token)v,v.toString()); :}
 ;
 
 boolean_literal ::= TRUE:e {: RESULT=new BooleanLiteral(parser,(Token)e,true); :}
@@ -507,7 +514,7 @@ expr ::= var_access:e {: RESULT=e; :}
 	| string_expr:e {: RESULT=e; :}
 	| list_expr:l {: RESULT=l; :}
 	| constructor_expr: e {: RESULT=e; :}
-	| set_var_access:e {: RESULT = e; :}
+	//| set_var_access:e {: RESULT = e; :}
 	| list_concat_expr:e {: RESULT = e; :}
 	| lambda_expr: e {: RESULT = e; :}
 	| LPAREN expr:e RPAREN {: RESULT=e; :}
@@ -712,6 +719,10 @@ set_logical_expr ::= var_list:l OF:of list_expr:s TUBE logical_expr:e
 		RESULT = new SetExpression(parser,(Token)of,(List)l,(Expression)s,(Expression)e);
 	:}
 	| var_list:l OF:of set_var_access:s TUBE logical_expr:e
+	{:
+		RESULT = new SetExpression(parser,(Token)of,(List)l,(Expression)s,(Expression)e);
+	:}	
+	| var_list:l OF:of var_access:s TUBE logical_expr:e
 	{:
 		RESULT = new SetExpression(parser,(Token)of,(List)l,(Expression)s,(Expression)e);
 	:}	

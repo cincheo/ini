@@ -45,6 +45,11 @@ public class IniThread extends Thread {
 		try {
 			child.eval(toEval);
 		} catch (KilledException e) {
+			// swallow
+		} catch (EvalException e) {
+			e.printError(child.parser.out, true);
+			child.parser.out.println("Java stack:");
+			e.printStackTrace(child.parser.out);
 		} finally {
 			if (at != null) {
 				// System.out.println("------pop: " + at);

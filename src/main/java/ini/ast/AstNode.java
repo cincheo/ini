@@ -45,7 +45,8 @@ public interface AstNode {
 	int STRING_LITERAL = SET_EXPRESSION + 1;
 	int SUB_ARRAY_ACCESS = STRING_LITERAL + 1;
 	int THIS_LITERAL = SUB_ARRAY_ACCESS + 1;
-	int UNARY_OPERATOR = THIS_LITERAL + 1;
+	int TYPE_VARIABLE = THIS_LITERAL + 1;
+	int UNARY_OPERATOR = TYPE_VARIABLE + 1;
 	int USER_TYPE = UNARY_OPERATOR + 1;
 	int VARIABLE = USER_TYPE + 1;
 
@@ -59,9 +60,9 @@ public interface AstNode {
 
 	void setType(Type type);
 	
-	String getAnnotationValue(String key);
+	String getAnnotationValue(String... keys);
 	
-	AstNode getAnnotationNode(String key);
+	AstNode getAnnotationNode(String... keys);
 
 	public static Class<?> getClass(int nodeTypeId) {
 		switch (nodeTypeId) {

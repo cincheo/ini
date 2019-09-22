@@ -7,7 +7,7 @@ import java.util.Map;
 import ini.ast.Variable;
 import ini.parser.Types;
 
-public class AttrContext {
+public final class AttrContext {
 
 	private Type executableType;
 	private Types types;
@@ -26,19 +26,28 @@ public class AttrContext {
 
 	private Map<String, Type> variables = new HashMap<String, Type>();
 
-	public void bind(String name, Type type) {
+	public final void bind(String name, Type type) {
 		variables.put(name, type);
 	}
 
-	public boolean hasBinding(String name) {
+	public final boolean hasBinding(String name) {
 		return variables.containsKey(name);
 	}
 
-	public Type get(String name) {
+	/**
+	 * Returns true if the context contains a binding representing a global
+	 * declaration (for instance, functions and channels are global
+	 * declarations).
+	 */
+	public final boolean hasGlobalDeclarationBinding(String name) {
+		return variables.containsKey(name) && (variables.get(name).isChannel() || variables.get(name).isFunctional());
+	}
+
+	public final Type get(String name) {
 		return variables.get(name);
 	}
 
-	public Type getOrCreate(Variable variable) {
+	public final Type getOrCreate(Variable variable) {
 		if (!variables.containsKey(variable.name)) {
 			bind(variable.name, new Type(types));
 		}
@@ -46,11 +55,11 @@ public class AttrContext {
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		return variables.toString();
 	}
 
-	public void prettyPrint(PrintStream out) {
+	public final void prettyPrint(PrintStream out) {
 		for (String v : variables.keySet()) {
 			out.print("   ");
 			prettyPrintVariable(out, v);
@@ -58,7 +67,7 @@ public class AttrContext {
 		}
 	}
 
-	public void prettyPrintVariable(PrintStream out, String variableName) {
+	public final void prettyPrintVariable(PrintStream out, String variableName) {
 		out.print(variableName + " = ");
 		Type t = variables.get(variableName);
 		if (t == null) {
@@ -68,7 +77,7 @@ public class AttrContext {
 		}
 	}
 
-	public Type getExecutableType() {
+	public final Type getExecutableType() {
 		return executableType;
 	}
 

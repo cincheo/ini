@@ -2,6 +2,7 @@ package ini.eval.at;
 
 import ini.eval.IniEval;
 import ini.eval.IniThread;
+import ini.type.AstAttrib;
 
 public class AtEvery extends At {
 
@@ -27,4 +28,10 @@ public class AtEvery extends At {
 		mainThread.start();
 	}
 
+	@Override
+	public void evalType(AstAttrib attrib) {
+		typeInParameters(attrib, true, attrib.parser.types.INT, "time");
+	}
+	
+	
 }

@@ -148,9 +148,16 @@ public class Ini2Pml {
 		switch (node.nodeTypeId()) {
 
 		case AstNode.ARRAY_ACCESS:
-
+			// TODO
 			break;
 
+		case AstNode.IMPORT:
+			// TODO
+			break;
+			
+		case AstNode.BINDING:
+			break;
+			
 		case AstNode.ASSIGNMENT:
 			Assignment a = (Assignment) node;
 			// System.out.println(">>>>>>>>>>>>" + observedVariables +
@@ -251,6 +258,9 @@ public class Ini2Pml {
 			getOrCreateChannelId(((Channel) node).name);
 			break;
 
+		case AstNode.USER_TYPE:
+			break;
+			
 		case AstNode.FUNCTION:
 			break;
 
@@ -288,7 +298,7 @@ public class Ini2Pml {
 					// r.hashCode()).print("(");
 					// TODO Add parameters
 					// print(") {").endLine().startIndent();
-					AstNode channelNode = r.atPredicate.getAnnotationNode("channel");
+					AstNode channelNode = r.atPredicate.getAnnotationNode("channel", "from");
 					int channelId = getChannelId(channelNode.toString());
 					// printLine("START: if\n").startIndent();
 					printLine("CONSUME" + r.hashCode() + ":").endLine();

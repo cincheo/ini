@@ -2,7 +2,7 @@ package ini.ast;
 
 import java.io.PrintStream;
 
-import ini.broker.TypeInfo;
+import ini.eval.data.TypeInfo;
 import ini.parser.IniParser;
 
 public class NumberLiteral extends AstElement implements Expression {

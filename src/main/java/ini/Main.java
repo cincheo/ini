@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -175,17 +174,7 @@ public class Main {
 				converter.generate(statement);
 			}
 			converter.afterGenerate();
-			/*
-			 * Executable mainExecutable = getMainExecutable(parser); if
-			 * (mainExecutable != null) {
-			 * converter.generateObserverdVariabsles(mainExecutable);
-			 * converter.generate(mainExecutable, out); System.out
-			 * .println(converter.variableDeclaration.toString() +
-			 * out.toString() + converter.initPromelaCode); FileUtils.write(new
-			 * File(modelOut), converter.variableDeclaration.toString() +
-			 * out.toString() + converter.initPromelaCode, "UTF-8"); }
-			 */
-			System.out.println(converter.getOutput());
+			//System.out.println(converter.getOutput());
 			FileUtils.write(new File(modelOut), converter.getOutput(), "UTF-8");
 		}
 		IniEval eval = mainEval(parser, false, null, null,

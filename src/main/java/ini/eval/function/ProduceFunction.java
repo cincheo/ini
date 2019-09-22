@@ -32,8 +32,9 @@ public class ProduceFunction extends BuiltInExecutable {
 
 	@Override
 	public Type getFunctionalType(AstAttrib attrib) {
-		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID, attrib.parser.types.STRING,
-				attrib.parser.types.ANY);
+		Type t = parser.types.createType();
+		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID,
+				attrib.parser.types.getDependentType("Channel", t), t);
 	}
 
 }

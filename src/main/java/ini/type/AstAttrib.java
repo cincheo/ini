@@ -2,7 +2,9 @@ package ini.type;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
 
@@ -10,6 +12,7 @@ import ini.Main;
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
 import ini.ast.AstNode;
+import ini.ast.AtPredicate;
 import ini.ast.BinaryOperator;
 import ini.ast.Binding;
 import ini.ast.CaseStatement;
@@ -39,6 +42,8 @@ import ini.ast.TypeVariable;
 import ini.ast.UnaryOperator;
 import ini.ast.UserType;
 import ini.ast.Variable;
+import ini.ast.VariableAccess;
+import ini.eval.at.At;
 import ini.eval.function.BoundJavaFunction;
 import ini.parser.IniParser;
 import ini.type.TypingConstraint.Kind;
@@ -173,6 +178,28 @@ public class AstAttrib {
 			eval(rule);
 		}
 
+		Map<Rule, At> atMap = new HashMap<Rule, At>();
+		// TODO: construct the atMap for each process only once!
+		for (Rule rule : process.atRules) {
+			Class<? extends At> c = At.atPredicates.get(rule.atPredicate.name);
+			At at = null;
+			try {
+				at = c.newInstance();
+				at.setRule(rule);
+				at.setAtPredicate(rule.atPredicate);
+				if (rule.atPredicate.identifier != null) {
+					invocationStack.peek().bind(rule.atPredicate.identifier, parser.types.THREAD);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if (at == null) {
+				throw new RuntimeException("unknown @ predicate '" + rule.atPredicate.name + "'");
+			}
+			atMap.put(rule, at);
+			at.evalType(this);
+		}
+
 		for (Rule rule : process.atRules) {
 			eval(rule);
 		}
@@ -231,21 +258,19 @@ public class AstAttrib {
 		Type t1 = null;
 		Type t2 = null;
 		Type typeVar = null;
+		Type t;
 		Constructor c = null;
 
 		evaluationStack.push(node);
 
-		if (node == null) {
-			System.out.println("");
-		}
-
 		switch (node.nodeTypeId()) {
 
 		case AstNode.AT_PREDICATE:
-			
-			
+			for (Expression e : ((AtPredicate) node).outParameters) {
+				eval(e);
+			}
 			break;
-		
+
 		case AstNode.IMPORT:
 			IniParser localParser = ((Import) node).importParser;
 			if (localParser == null) {
@@ -349,7 +374,7 @@ public class AstAttrib {
 				// case of a type dependency declaration
 				if (binding.typeParameters != null) {
 					for (TypeVariable v : binding.typeParameters) {
-						Type t = parser.types.getSimpleType(v.name);
+						t = parser.types.getSimpleType(v.name);
 						if (v.superType != null) {
 							Type st = parser.types.getSimpleType(v.superType.name);
 							if (t.superType != null && t.superType != st) {
@@ -378,14 +403,19 @@ public class AstAttrib {
 			break;
 
 		case AstNode.CHANNEL:
-			result = parser.types.getDependentType("Channel", eval(((Channel) node).type));
-			;
+			result = parser.types.getDependentType("Channel", eval(((Channel) node).typeVariable));
+			if (((Channel) node).indexed) {
+				result = parser.types.createArrayType(result);
+			}
 			getRootContext().bind(((Channel) node).name, result);
 			break;
 
 		case AstNode.ARRAY_ACCESS:
 			t1 = eval(((ArrayAccess) node).variableAccess);
 			t2 = eval(((ArrayAccess) node).indexExpression);
+			if (t1 == null || t2 == null) {
+				break;
+			}
 			if (!t1.isVariable() && !t1.isMap()) {
 				addError(new TypingError(node, "invalid type for map access"));
 				result = parser.types.createType();
@@ -406,9 +436,14 @@ public class AstAttrib {
 				addTypingConstraint(TypingConstraint.Kind.EQ, t1, map, ((ArrayAccess) node).variableAccess, node);
 				result = val;
 				break;
+			} else if (t1.isMap()) {
+				addTypingConstraint(TypingConstraint.Kind.EQ, t1.getTypeParameters().get(0), t2,
+						((ArrayAccess) node).variableAccess, node);
+				result = t1.getTypeParameters().get(1);
+				break;
 			}
-			throw new RuntimeException("Should not happen");
-			// break;
+			addError(new TypingError(node, "incompatible type for map access"));
+			break;
 
 		case AstNode.ASSIGNMENT:
 			t1 = eval(((Assignment) node).assignee);
@@ -544,6 +579,10 @@ public class AstAttrib {
 
 			t1 = eval(((FieldAccess) node).variableAccess);
 
+			if (t1 == null) {
+				System.out.println();
+			}
+
 			if (t1.hasFields()) {
 				t2 = t1.fields.get(((FieldAccess) node).fieldName);
 			}
@@ -580,8 +619,14 @@ public class AstAttrib {
 		case AstNode.INVOCATION:
 			Invocation invocation = (Invocation) node;
 
+			// regexp is some kind of built-in macro... better way?
 			if (invocation.name.equals("regexp")) {
 				for (Expression e : invocation.arguments) {
+					for (int i = 1; i < invocation.arguments.size(); i++) {
+						if (invocation.arguments.get(i) instanceof VariableAccess) {
+							((VariableAccess) invocation.arguments.get(i)).setDeclaration(true);
+						}
+					}
 					result = eval(e);
 					addTypingConstraint(TypingConstraint.Kind.EQ, result, parser.types.STRING, e, e);
 				}
@@ -669,9 +714,9 @@ public class AstAttrib {
 				// TODO: build cross equality constraints
 				result = parser.types.createType();
 			} else {
-				for (Type t : types) {
-					if (t.isVariable()) {
-						addTypingConstraint(TypingConstraint.Kind.EQ, t1, t, node, node);
+				for (Type type : types) {
+					if (type.isVariable()) {
+						addTypingConstraint(TypingConstraint.Kind.EQ, t1, type, node, node);
 					}
 				}
 				result = parser.types.getDependentType("Map", parser.types.INT, t1);
@@ -781,27 +826,36 @@ public class AstAttrib {
 		case AstNode.SET_EXPRESSION:
 			Expression set = ((SetExpression) node).set;
 
-			Type t = parser.types.createType("Map");
-			t.addTypeParameter(parser.types.INT);
-			if (set instanceof Variable && invocationStack.peek().get(((Variable) set).name) == null) {
-				if ((typeVar = parser.types.types.get(((Variable) set).name)) != null) {
-					t.addTypeParameter(typeVar);
-				} else {
-					addError(new TypingError(set, "undefined set variable or type"));
-					break;
+			if (set instanceof TypeVariable) {
+				t1 = eval(set);
+				for (Variable v : ((SetExpression) node).variables) {
+					t2 = eval(v);
+					addTypingConstraint(TypingConstraint.Kind.EQ, t2, t1, v, v);
 				}
 			} else {
-				t.addTypeParameter(parser.types.createType());
-			}
-			t1 = eval(set);
+				t = parser.types.createType("Map");
+				t.addTypeParameter(parser.types.INT);
+				if (set instanceof Variable && invocationStack.peek().get(((Variable) set).name) == null) {
+					if ((typeVar = parser.types.types.get(((Variable) set).name)) != null) {
+						t.addTypeParameter(typeVar);
+					} else {
+						addError(new TypingError(set, "undefined set variable or type"));
+						break;
+					}
+				} else {
+					t.addTypeParameter(parser.types.createType());
+				}
+				t1 = eval(set);
 
-			addTypingConstraint(TypingConstraint.Kind.EQ, t1, t, ((SetExpression) node).set,
-					((SetExpression) node).set);
-			for (Variable v : ((SetExpression) node).variables) {
-				t2 = eval(v);
-				addTypingConstraint(TypingConstraint.Kind.EQ, t2, t.getTypeParameters().get(1), v, v);
+				addTypingConstraint(TypingConstraint.Kind.EQ, t1, t, ((SetExpression) node).set,
+						((SetExpression) node).set);
+				for (Variable v : ((SetExpression) node).variables) {
+					t2 = eval(v);
+					addTypingConstraint(TypingConstraint.Kind.EQ, t2, t.getTypeParameters().get(1), v, v);
+				}
 			}
 			eval(((SetExpression) node).expression);
+
 			result = parser.types.BOOLEAN;
 			break;
 
@@ -854,13 +908,31 @@ public class AstAttrib {
 					addError(new TypingError(node, "undeclared field or variable"));
 				}
 			} else {
-				// if (!invocationStack.peek().hasBinding(((Variable)
-				// node).name) && getRootContext().hasBinding(((Variable)
-				// node).name)) {
-				// result = getRootContext().get(((Variable) node).name);
-				// } else {
-				result = invocationStack.peek().getOrCreate((Variable) node);
-				// }
+				if (((Variable) node).isDeclaration()) {
+					result = invocationStack.peek().getOrCreate((Variable) node);
+				} else {
+					if (!invocationStack.peek().hasBinding(((Variable) node).name)
+							&& getRootContext().hasGlobalDeclarationBinding(((Variable) node).name)) {
+						// only global declarations (channels & functions) can
+						// be
+						// looked up in the root context
+						result = getRootContext().get(((Variable) node).name);
+					} else {
+						result = invocationStack.peek().get(((Variable) node).name);
+						// result =
+						// invocationStack.peek().getOrCreate((Variable) node);
+					}
+				}
+				if (result == null) {
+					addError(new TypingError(node, "undeclared field or variable"));
+				}
+			}
+			break;
+
+		case AstNode.TYPE_VARIABLE:
+			result = ((TypeVariable) node).getType();
+			if (!parser.types.isRegistered(((TypeVariable) node).name)) {
+				addError(new TypingError(node, "unknown type"));
 			}
 			break;
 
@@ -922,7 +994,7 @@ public class AstAttrib {
 	}
 
 	public AstAttrib unify() {
-		// printConstraints("", System.err);
+		//printConstraints("", System.err);
 
 		// remove wrong constraints
 		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -965,8 +1037,8 @@ public class AstAttrib {
 				}
 			}
 		}
-		// System.err.println("==================");
-		// printConstraints("", System.err);
+		//System.err.println("==================");
+		//printConstraints("", System.err);
 		return this;
 
 	}
@@ -1024,7 +1096,7 @@ public class AstAttrib {
 	}
 
 	@SuppressWarnings("unchecked")
-	<T> T getFirstEnclosingNode(Class<T> nodeType) {
+	public final <T> T getFirstEnclosingNode(Class<T> nodeType) {
 		for (int i = evaluationStack.size() - 1; i >= 0; i--) {
 			if (nodeType.isAssignableFrom(evaluationStack.get(i).getClass())) {
 				return (T) evaluationStack.get(i);
@@ -1033,7 +1105,11 @@ public class AstAttrib {
 		return null;
 	}
 
-	private void addError(TypingError error) {
+	public final AstNode getEnclosingNode() {
+		return evaluationStack.get(evaluationStack.size() - 2);
+	}
+
+	public final void addError(TypingError error) {
 		// System.err.println(error);
 		// new Exception().printStackTrace();
 		for (TypingError e : errors) {

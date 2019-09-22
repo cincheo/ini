@@ -14,6 +14,9 @@ public class SetExpression extends AstElement implements Expression {
 	public SetExpression(IniParser parser, Token token, List<Variable> variables, Expression set, Expression expression) {
 		super(parser, token);
 		this.variables = variables;
+		for(Variable v : variables) {
+			v.setDeclaration(true);
+		}
 		this.set = set;
 		this.expression = expression;
 		this.nodeTypeId=AstNode.SET_EXPRESSION;
@@ -22,7 +25,7 @@ public class SetExpression extends AstElement implements Expression {
 	@Override
 	public void prettyPrint(PrintStream out) {
 		prettyPrintList(out, variables, ",");
-		out.print(" in "+set+" | ");
+		out.print(" of "+set+" | ");
 		expression.prettyPrint(out);
 	}
 

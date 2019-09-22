@@ -14,7 +14,7 @@ public class TestFields extends IniTestCase {
 
 	public void testWrongFieldAccessInMatchRule() {
 		parseAndAttribCode("type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n" //
-				+ "function f() {"
+				+ "function f(n) {"
 				+ "  case n ~ Node[value==2,!left,!right] {" //
 				+ "    n.let = Leaf[value=1]\n" //
 				+ "    n.right = Leaf[value=1]\n" //
@@ -30,7 +30,7 @@ public class TestFields extends IniTestCase {
 
 	public void testWrongFieldAccessInMatchExpression() {
 		parseAndAttribCode("type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n" //
-				+ "function f() {"
+				+ "function f(n) {"
 				+ "  case n ~ Node[value==2,!let,!right] {\n" //
 				+ "    n.left = Leaf[value=1]\n" //
 				+ "    n.right = Leaf[value=1]\n" //
@@ -46,7 +46,7 @@ public class TestFields extends IniTestCase {
 
 	public void testWrongFieldAccessTypeInMatchExpression() {
 		parseAndAttribCode("type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n" //
-				+ "process f() {" //
+				+ "process f(n) {" //
 				+ "  n ~ Node[value==2.0,!left,!right] {" //
 				+ "    n.left = Leaf[value=1]\n" //
 				+ "    n.right = Leaf[value=1]\n" //

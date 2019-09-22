@@ -49,6 +49,7 @@ import ini.eval.data.Data;
 import ini.eval.data.DataReference;
 import ini.eval.data.FutureData;
 import ini.eval.data.RawData;
+import ini.eval.data.TypeInfo;
 import ini.eval.function.BoundJavaFunction;
 import ini.parser.IniParser;
 
@@ -133,8 +134,18 @@ public class IniEval {
 				break;
 
 			case AstNode.ARRAY_ACCESS:
-				result = eval(((ArrayAccess) node).variableAccess)
-						.get(eval(((ArrayAccess) node).indexExpression).getValue());
+				result = eval(((ArrayAccess) node).variableAccess);
+				if (result.getTypeInfo() == TypeInfo.CHANNEL) {
+					if (((Channel) result.getValue()).indexed) {
+						result = new RawData(((Channel) result.getValue())
+								.getComponent((int) eval(((ArrayAccess) node).indexExpression).getValue()));
+					} else {
+						throw new EvalException(this, "cannot access indexed channel on regular channel");
+					}
+				} else {
+					result = eval(((ArrayAccess) node).variableAccess)
+							.get(eval(((ArrayAccess) node).indexExpression).getValue());
+				}
 				break;
 
 			case AstNode.ASSIGNMENT:
@@ -164,7 +175,7 @@ public class IniEval {
 			case AstNode.CHANNEL:
 				getRootContext().bind(((Channel) node).name, new RawData((Channel) node));
 				break;
-				
+
 			case AstNode.AT_BINDING:
 				getRootContext().bind(((AtBinding) node).name, new RawData(node));
 				try {
@@ -524,6 +535,7 @@ public class IniEval {
 				break;
 
 			case AstNode.VARIABLE:
+			case AstNode.TYPE_VARIABLE:
 				name = ((Variable) node).name;
 				Assignment a = getParentNode(Assignment.class);
 				if (a != null && a.assignee == node) {

@@ -1,4 +1,4 @@
-package ini.broker;
+package ini.eval.data;
 
 public class TypeInfo {
 
@@ -10,6 +10,8 @@ public class TypeInfo {
 	public static final int STRING = 5;
 	public static final int BOOLEAN = 6;
 	public static final int FUNCTION = 7;
+	public static final int PROCESS = 8;
+	public static final int CHANNEL = 9;
 	
 	public static int getTypeInfoForInstance(Object object) {
 		if(object == null) {
@@ -35,6 +37,10 @@ public class TypeInfo {
 			return BOOLEAN;
 		case "ini.ast.Function":
 			return FUNCTION;
+		case "ini.ast.Process":
+			return PROCESS;
+		case "ini.ast.Channel":
+			return CHANNEL;
 		default:
 			return NULL;
 			//throw new RuntimeException("unknown type "+clazz);

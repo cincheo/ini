@@ -9,7 +9,10 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ini.ast.Assignment;
+import ini.ast.AstNode;
 import ini.ast.AtPredicate;
 import ini.ast.Expression;
 import ini.ast.Rule;
@@ -17,6 +20,10 @@ import ini.ast.Variable;
 import ini.eval.IniEval;
 import ini.eval.IniThread;
 import ini.eval.data.Data;
+import ini.type.AstAttrib;
+import ini.type.Type;
+import ini.type.TypingConstraint.Kind;
+import ini.type.TypingError;
 
 public abstract class At {
 	protected boolean terminated = false;
@@ -210,5 +217,18 @@ public abstract class At {
 	public void setAtPredicate(AtPredicate atPredicate) {
 		this.atPredicate = atPredicate;
 	}
-	
+
+	protected final void typeInParameters(AstAttrib attrib, boolean mandatory, Type type, String... parameters) {
+		AstNode target = getAtPredicate().getAnnotationNode(parameters);
+		if (mandatory && target == null) {
+			attrib.addError(new TypingError(attrib.getEnclosingNode(),
+					"cannot find mandatory annotation: " + StringUtils.join(parameters, " or ")));
+		}
+		if (target != null) {
+			attrib.addTypingConstraint(Kind.EQ, attrib.eval(target), type, target, target);
+		}
+	}
+
+	public abstract void evalType(AstAttrib attrib);
+
 }

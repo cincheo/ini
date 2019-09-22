@@ -1,7 +1,6 @@
 package ini.eval.data;
 
 import ini.ast.Constructor;
-import ini.broker.TypeInfo;
 
 import java.io.PrintStream;
 import java.util.List;

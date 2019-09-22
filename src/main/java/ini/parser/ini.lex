@@ -204,6 +204,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   {LineTerminator} / "type"         { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
   {LineTerminator} / "function"     { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
   {LineTerminator} / "process"      { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
+  {LineTerminator} / "declare"      { Symbol s = symbol(sym.END); yybegin(YYINITIAL); yypushback(yylength()); return s; }
   <<EOF>>               { yybegin(YYINITIAL); return symbol(sym.END); }
   {LineTerminator}                  { return symbol(sym.LF); }
 }

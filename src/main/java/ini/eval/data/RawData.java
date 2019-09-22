@@ -23,7 +23,6 @@ import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
 import ini.ast.StringLiteral;
 import ini.ast.Variable;
-import ini.broker.TypeInfo;
 import ini.eval.EvalException;
 import ini.parser.IniParser;
 import ini.type.Type;
@@ -441,7 +440,7 @@ public class RawData implements Data {
 
 	synchronized private void explodeString() {
 		if (value instanceof String) {
-			// System.out.println("<<< Exploding string "+value+" >>>");
+			//System.out.println("<<< Exploding string "+value+" >>>");
 			String s = (String) value;
 			for (int i = 0; i < s.length(); i++) {
 				Integer key = (int) i;
@@ -468,7 +467,7 @@ public class RawData implements Data {
 		if (explodedString) {
 			value = getImplodedString();
 			references.clear();
-			// System.out.println("<<< Imploded string "+value+" >>>");
+			//System.out.println("<<< Imploded string "+value+" >>>");
 			explodedString = false;
 		}
 	}
@@ -491,7 +490,7 @@ public class RawData implements Data {
 		Data oldData = new RawData(this.value);
 		this.value = data.getValue();
 		this.typeInfo = data.getTypeInfo();
-		this.explodedString = false; // because getData implodes the string
+		this.explodedString = false; // because getValue implodes the string
 		this.kind = data.getKind();
 		this.constructor = data.getConstructor();
 		if (data.getReferences() != null) {

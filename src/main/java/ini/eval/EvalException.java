@@ -10,6 +10,7 @@ public class EvalException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	private Stack<Context> invocationStack;
 	private Stack<AstNode> evaluationStack;
+	private IniEval eval;
 
 	/*
 	 * public EvalException(Stack<Context> invocationStack, Stack<AstNode>
@@ -25,6 +26,7 @@ public class EvalException extends RuntimeException {
 	@SuppressWarnings("unchecked")
 	public EvalException(IniEval eval, String message, Throwable cause) {
 		super(message, cause);
+		this.eval = eval;
 		this.invocationStack = (Stack<Context>) eval.invocationStack.clone();
 		this.evaluationStack = (Stack<AstNode>) eval.evaluationStack.clone();
 	}
@@ -32,6 +34,7 @@ public class EvalException extends RuntimeException {
 	@SuppressWarnings("unchecked")
 	public EvalException(IniEval eval, String message) {
 		super(message);
+		this.eval = eval;
 		this.invocationStack = (Stack<Context>) eval.invocationStack.clone();
 		this.evaluationStack = (Stack<AstNode>) eval.evaluationStack.clone();
 	}
@@ -54,6 +57,25 @@ public class EvalException extends RuntimeException {
 
 	public void printEvaluationStackTrace(PrintStream out) {
 		IniEval.printEvaluationStackTrace(evaluationStack, out);
+	}
+
+	public void printError(PrintStream out, boolean thread) {
+		out.println("Error: " + this.getMessage());
+		out.println("Evaluation stack:");
+		printEvaluationStackTrace(out);
+		out.println("Context:");
+		invocationStack.peek().prettyPrint(out);
+		if (!thread) {
+			if (invocationStack.peek() != eval.getRootContext()) {
+				out.println("Root context:");
+				eval.getRootContext().prettyPrint(out);
+			}
+		}
+		/*
+		 * int i = 1; for (IniEval eval : eval.forkedEvals) { out.println(
+		 * "==== THREAD #" + i + " ===="); eval.printError(out, e, true); i++; }
+		 */
+
 	}
 
 }

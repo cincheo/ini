@@ -13,6 +13,7 @@ import ini.eval.IniEval;
 import ini.eval.IniThread;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
+import ini.type.AstAttrib;
 
 public class AtReadKeyboard extends At {
 
@@ -33,6 +34,11 @@ public class AtReadKeyboard extends At {
 		}
 		return keyboardThread;
 	}
+	
+	@Override
+	public void evalType(AstAttrib attrib) {
+	}
+	
 }
 
 class KeyboardThread extends Thread {

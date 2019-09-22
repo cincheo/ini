@@ -37,7 +37,7 @@ public class TestChannels extends IniTestCase {
 	}
 
 	public void testProcessCommunication() {
-		testFile("ini/test/channels/process_communication.ini", (p, out) -> assertEquals("processes started\nc1: 1\nc2: 2\nend of pipeline: 3\n", out));
+		testFile("ini/test/channels/process_communication.ini", (p, out) -> assertEquals("processes started\nchannel c1(Int): 1\nchannel c2(Int): 2\nend of pipeline: 3\n", out));
 	}
 
 	public void testFacDistributed() {

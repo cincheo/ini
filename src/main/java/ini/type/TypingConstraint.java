@@ -149,8 +149,9 @@ public class TypingConstraint {
 					}
 				}
 			} else {
-				if (left.getName() != null && right.getName() != null && !left.getName().startsWith("_")
-						&& !right.getName().startsWith("_")) {
+				if (left.getName() != null && right.getName() != null
+						&& !(left == types.ANY || left.getName().startsWith("_"))
+						&& !(right == types.ANY || right.getName().startsWith("_"))) {
 					errors.add(new TypingError(leftOrigin,
 							"type mismatch: '" + left + "' is not compatible with '" + right + "'"));
 					if (leftOrigin != rightOrigin) {

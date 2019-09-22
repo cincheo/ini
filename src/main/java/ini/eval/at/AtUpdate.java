@@ -10,6 +10,7 @@ import ini.eval.data.Data;
 import ini.eval.data.DataObserver;
 import ini.eval.data.DataReference;
 import ini.eval.data.RawData;
+import ini.type.AstAttrib;
 
 public class AtUpdate extends At {
 
@@ -85,6 +86,12 @@ public class AtUpdate extends At {
 		// System.out.println("update :" + (getThreadExecutor().getActiveCount()
 		// == 0));
 		return getThreadExecutor().getActiveCount() == 0;
+	}
+
+	@Override
+	public void evalType(AstAttrib attrib) {
+		typeInParameters(attrib, true, attrib.parser.types.ANY, "variable");
+		typeInParameters(attrib, false, attrib.parser.types.STRING, "mode");
 	}
 
 }

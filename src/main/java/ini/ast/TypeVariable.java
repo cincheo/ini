@@ -10,21 +10,25 @@ public class TypeVariable extends Variable {
 
 	public TypeVariable component;
 	public TypeVariable superType;
+	public List<TypeVariable> context;
 	public List<TypeVariable> typeParameters;
 	private boolean parameter = false;
 
 	public TypeVariable(IniParser parser, Token token, String name) {
 		super(parser, token, name);
+		nodeTypeId = TYPE_VARIABLE;
 	}
 
 	public TypeVariable(IniParser parser, Token token, String name, boolean parameter) {
 		super(parser, token, name);
 		this.parameter = parameter;
+		nodeTypeId = TYPE_VARIABLE;
 	}
 
 	public TypeVariable(IniParser parser, Token token, TypeVariable component) {
 		super(parser, token, null);
 		this.component = component;
+		nodeTypeId = TYPE_VARIABLE;
 	}
 
 	public boolean isList() {
@@ -41,11 +45,11 @@ public class TypeVariable extends Variable {
 		}
 	}
 
-	private Type lookupTypeParameter(String name) {
-		if (typeParameters == null) {
+	private Type lookupTypeVariable(String name) {
+		if (context == null) {
 			return null;
 		}
-		for (TypeVariable v : typeParameters) {
+		for (TypeVariable v : context) {
 			if (name.equals(v.name)) {
 				return v.getType();
 			}
@@ -66,11 +70,16 @@ public class TypeVariable extends Variable {
 			if (isList()) {
 				type = parser.types.getListOf(component.getType());
 			} else {
-				Type t = lookupTypeParameter(name);
+				Type t = lookupTypeVariable(name);
 				if (t == null) {
 					type = parser.types.getSimpleType(name);
 				} else {
 					type = t;
+				}
+			}
+			if (typeParameters != null) {
+				for (TypeVariable v : typeParameters) {
+					type.addTypeParameter(v.getType());
 				}
 			}
 		}

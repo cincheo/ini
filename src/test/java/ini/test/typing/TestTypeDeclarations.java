@@ -102,7 +102,7 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testUseUndeclaredConstructorInMatchExpression() {
-		parseAndAttribCode("function f() {" //
+		parseAndAttribCode("function f(n) {" //
 				+ "  case n ~ C[value==2] {" //
 				+ "    println(n)" //
 				+ "  }" //

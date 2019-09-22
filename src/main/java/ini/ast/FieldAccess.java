@@ -8,18 +8,28 @@ public class FieldAccess extends AstElement implements VariableAccess {
 
 	public VariableAccess variableAccess;
 	public String fieldName;
-	
+
 	public FieldAccess(IniParser parser, Token token, VariableAccess variableAccess, String fieldName) {
 		super(parser, token);
 		this.variableAccess = variableAccess;
 		this.fieldName = fieldName;
-		this.nodeTypeId=AstNode.FIELD_ACCESS;
+		this.nodeTypeId = AstNode.FIELD_ACCESS;
 	}
-	
+
 	@Override
 	public void prettyPrint(PrintStream out) {
 		variableAccess.prettyPrint(out);
-		out.print("."+fieldName);
+		out.print("." + fieldName);
 	}
-	
+
+	@Override
+	public boolean isDeclaration() {
+		return variableAccess.isDeclaration();
+	}
+
+	@Override
+	public void setDeclaration(boolean declaration) {
+		variableAccess.setDeclaration(declaration);
+	}
+
 }

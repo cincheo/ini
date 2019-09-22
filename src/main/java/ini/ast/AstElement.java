@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import ini.parser.IniParser;
 import ini.type.Type;
 
@@ -18,13 +20,13 @@ public abstract class AstElement implements AstNode {
 	public List<Expression> annotations;
 
 	@Override
-	public String getAnnotationValue(String key) {
+	public String getAnnotationValue(String... keys) {
 		if (annotations != null && !annotations.isEmpty()) {
 			for (Expression e : annotations) {
 				if (e instanceof Assignment) {
 					Assignment a = (Assignment) e;
 					String name = a.assignee.toString();
-					if (key.equals(name)) {
+					if (ArrayUtils.contains(keys, name)) {
 						if (a.assignment instanceof StringLiteral) {
 							return ((StringLiteral) a.assignment).value;
 						}
@@ -36,13 +38,13 @@ public abstract class AstElement implements AstNode {
 	}
 
 	@Override
-	public AstNode getAnnotationNode(String key) {
+	public AstNode getAnnotationNode(String... keys) {
 		if (annotations != null && !annotations.isEmpty()) {
 			for (Expression e : annotations) {
 				if (e instanceof Assignment) {
 					Assignment a = (Assignment) e;
 					String name = a.assignee.toString();
-					if (key.equals(name)) {
+					if (ArrayUtils.contains(keys, name)) {
 						return a.assignment;
 					}
 				}
