@@ -186,33 +186,39 @@ The basics of process communication is provided by *channels* (similarly to Pi c
 In the following program, the ``main`` process creates two sub-processes by calling ``p``. Each sub-process consumes a data from an ``in`` channel and produces the incremented result to an ``out`` channel. Thus, it creates a pipeline that ultimately sends back the data incremented twice to the main process.
 
 ```javascript
+declare channel c0(Int)
+declare channel c1(Int)
+declare channel c2(Int)
+
 process main() {
-  @init() {
-    p("c1", "c2")
-    p("c2", "c")
-    println("processes started")
-    produce("c1", 1)
-  }
-  @consume(v) [channel="c"] {
-    println("end of pipeline: "+v)
-  }
+	@init() {
+		p(c1, c2)
+		p(c2, c0)
+		println("processes started")
+		c1.produce(1)
+	}
+	@consume(v) [from=c0] {
+		println("end of pipeline: "+v)
+	}
 }
 
 process p(in, out) {
-  @consume(v) [channel=in] {
-    println(in+": "+v)
-    produce(out, v+1)
-  }
+	@consume(v) [from=in] {
+		println("{in}: "+v)
+		out.produce(v+1)
+	}
 }
 ```
 
 The above program behaves as depicted here:
 
-- ``main`` creates two sub-processes ``p("c1", "c2")`` and ``p("c2", "c")``,
-- ``main`` sends the data ``1`` to the ``"c1"`` channel (``produce("c1", 1)``),
-- ``1`` is consumed from ``"c1"`` by ``p("c1", "c2")``, and ``2`` is produced to ``"c2"``,
-- ``2`` is consumed from ``"c2"`` by ``p("c2", "c")``, and ``3`` is produced to ``"c"``,
-- finally, ``3`` is consumed from ``"c"`` by ``main``, and the pipeline stops there.
+- ``main`` creates two sub-processes ``p(c1, c2)`` and ``p(c2, c0)``,
+- ``main`` sends the data ``1`` to the ``c1`` channel (``c1.produce(1)``),
+- ``1`` is consumed from ``c1`` by ``p(c1, c2)``, and ``2`` is produced to ``c2``,
+- ``2`` is consumed from ``c2`` by ``p(c2, c0)``, and ``3`` is produced to ``c0``,
+- finally, ``3`` is consumed from ``c0`` by ``main``, and the pipeline stops there.
+
+Note the channel declarations at the beginning of the program. They ensure that the used channels are sound and well-typed. Channels  are global and can be accessed from anywhere in the program.
 
 # Distributed mode
 
@@ -251,19 +257,15 @@ By default processes or functions are started on the current node (as given by t
 Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the ``node`` annotation when starting the processes. Additionally, we also need to prefix the names of the channels with ``+``. By default, channels remain local to the current process and this prefix is required so that the channels become visible by all nodes (through the Kafka broker).
 
 ```javascript
+declare channel +c0(Int)
+declare channel +c1(Int)
+declare channel +c2(Int)
+
 process main() {
   @init() {
-    p("+c1", "+c2") [node="n1"]
-    p("+c2", "+c")  [node="n1"]
-    println("processes started")
-    produce("+c1", 1)
-  }
-  @consume(v) [channel="+c"] {
-    println("end of pipeline: "+v)
-  }
-}
-
-process p(in, out) ... // unchanged
+    p(c1, c2) [node="n1"]
+    p(c2, c0)  [node="n1"]
+    ... // the rest of the program is unchanged
 ```
 
 In that case, the program of the ``main`` node acts like a coordinator for all the other processes in the distributed program.
@@ -287,7 +289,7 @@ Note that the binding of ``hello``, also defines the functional type ``(String) 
 
 # Type Safety and Model Checking
 
-One of the most difficult point when building distributed applications (such as complex data pipelines and distributed computations), is  to ensure that they behave as expected. Since debugging them can be quite a complicated task, it is better to eliminate programming mistakes as much as possible. To that purpose, INI provides two well-known mechanisms: strong typing through *Type Inference*, and formal validation through *Model Checking*.
+One of the most difficult point when building distributed applications (such as complex data pipelines and distributed computations), is  to ensure that they behave as expected. Since debugging them can be quite a complicated task, it is crucial to eliminate programming mistakes up-front as much as possible. To that purpose, INI provides two well-known mechanisms: strong typing through *Type Inference*, and formal validation through *Model Checking*.
 
 ## Type Inference
 
@@ -295,7 +297,7 @@ INI type system is formally defined in the [INI language specifications](https:/
 
 ## Model Checking
 
-Model checking is a robust technology that is used to prove properties when developing critical systems. Formal validation of INI programs is facilitated since the asynchronous part of the language is inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF)). Derivating from Dijkstra's work, the Promela language and the Spin model checker have been widely used in the past to prove the correctness of distributed/asynchronous programs. 
+Model checking is a robust technology that is used to prove properties when developing critical systems. Formal validation of INI programs is facilitated since the asynchronous part of the language is inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF)). Derivating from Dijkstra's work, the Promela language and the Spin model checker have been widely used in the context of critical software development to prove the correctness of distributed/asynchronous programs. 
 
 To ensure formal validation with model checking, INI provides an option to generate Promela code out of an INI program, which is basically an abstraction of how the processes behave. One can then use the SPIN type checker to ensure program properties, through the use of *Temporal Logic* (TL) formulae.
 
@@ -305,7 +307,7 @@ For instance, referring to the pipeline example given above, we can generate the
 $ bin/ini --model-out model.pml pipeline.ini
 ```
 
-The generated ``model.pml`` file.
+Generated ``model.pml`` file:
 
 ```javascript
 chan channels[3]=[10] of {byte}
@@ -333,9 +335,11 @@ proctype p(byte in, byte out) {
 }
 ```
 
-It is possible to write a TL formula to ensure that the pipeline will terminate, i.e., that at some point in the process execution flow, the ``main``'s ``@consume`` event will be triggered on channel ``c``. 
+It is possible to write a TL formula to ensure that the pipeline will terminate, i.e., that at some point in the process execution flow, the ``main``'s ``@consume`` event will be triggered on channel ``c0``. 
+
+Note that this is still work in progress and is not ready for production yet.
 
 # License & contributing
 
-Currently, INI is licensed under the GPL, but this license may evolve to another Open Source license in the future.
+Currently, INI is licensed under the GPL, but may evolve to another Open Source license in the future.
 INI is authored by Renaud Pawlak.
