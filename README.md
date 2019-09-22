@@ -191,22 +191,22 @@ declare channel c1(Int)
 declare channel c2(Int)
 
 process main() {
-	@init() {
-		p(c1, c2)
-		p(c2, c0)
-		println("processes started")
-		c1.produce(1)
-	}
-	@consume(v) [from=c0] {
-		println("end of pipeline: "+v)
-	}
+  @init() {
+    p(c1, c2)
+    p(c2, c0)
+    println("processes started")
+    c1.produce(1)
+  }
+  @consume(v) [from=c0] {
+    println("end of pipeline: "+v)
+  }
 }
 
 process p(in, out) {
-	@consume(v) [from=in] {
-		println("{in}: "+v)
-		out.produce(v+1)
-	}
+  @consume(v) [from=in] {
+    println("{in}: "+v)
+    out.produce(v+1)
+  }
 }
 ```
 
