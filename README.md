@@ -333,6 +333,8 @@ process p(in, out) {
 }
 ```
 
+Then, we can generate the corresponding Promela code:
+
 ```console
 $ bin/ini --model-out model.pml pipeline.ini
 ```
@@ -375,7 +377,7 @@ proctype p(chan in; chan out) {
 }
 ```
 
-It is possible to write a TL formula to ensure that the pipeline will terminate, i.e., that at some point in the process execution flow, the ``main``'s ``@consume`` event will be triggered on channel ``c0``. 
+It is possible to write an LTL formula to ensure that the pipeline will terminate, i.e., that at some point in the process execution flow, the ``main``'s ``@consume`` event will be triggered on channel ``c0``. 
 
 Note that this is still work in progress and is not ready for production yet.
 
