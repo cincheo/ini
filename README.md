@@ -171,13 +171,13 @@ process main() {
   @init() {
     i = 1
   }
-  @every() [time=1000] {
+  @every() : [time=1000] {
     println("tick "+(i++))
   }
 }
 ```
 
-Note the ``[time=1000]`` construct, which configures the ``@every`` event rule to be fired every second. This construct will be commonly used in INI programs and is called an *annotation*.
+Note the ``: [time=1000]`` construct, which configures the ``@every`` event rule to be fired every second. This construct will be commonly used in INI programs and is called an *annotation*.
 
 ## A simple 3-process data pipeline
 
@@ -197,13 +197,13 @@ process main() {
     println("processes started")
     c1.produce(1)
   }
-  @consume(v) [from=c0] {
+  @consume(v) : [from=c0] {
     println("end of pipeline: "+v)
   }
 }
 
 process p(in, out) {
-  @consume(v) [from=in] {
+  @consume(v) : [from=in] {
     println("{in}: "+v)
     out.produce(v+1)
   }
@@ -263,8 +263,8 @@ declare channel +c2(Int)
 
 process main() {
   @init() {
-    p(c1, c2) [node="n1"]
-    p(c2, c0)  [node="n1"]
+    p(c1, c2) : [node="n1"]
+    p(c2, c0) : [node="n1"]
     ... // the rest of the program is unchanged
 ```
 
@@ -278,7 +278,7 @@ In other cases, a given node may want to evaluate a function or a process that h
 
 ```javascript
 // this is a binding to a function declared on a remote server
-declare hello(String)=>String [node="server"]
+declare hello(String)=>String : [node="server"]
 
 function main() {
   println(hello("Renaud"))
@@ -301,7 +301,37 @@ Model checking is a robust technology that is used to prove properties when deve
 
 To ensure formal validation with model checking, INI provides an option to generate Promela code out of an INI program, which is basically an abstraction of how the processes behave. One can then use the SPIN type checker to ensure program properties, through the use of *Temporal Logic* (TL) formulae.
 
-For instance, referring to the pipeline example given above, we can generate the corresponding abstract Promela code with the ``model-out`` option.
+For instance, taking again the pipeline example given above, we can generate the corresponding abstract Promela code with the ``model-out`` option.
+
+First, we need to add a couple annotations to the program:
+
+```javascript
+declare channel +c0(Int)
+declare channel +c1(Int)
+declare channel +c2(Int)
+//declare predicate p1 "(<> end)"
+
+process main() {
+	@init() {
+		p(c1, c2) : [node="n1"]
+		p(c2, c0) : [node="n2"]
+		println("processes started")
+		c1.produce(1) : [checkpoint="start"]
+	}
+	c = @consume(v) : [channel=c0] {
+		println("end of pipeline: {v}")
+		stop(c)	: [checkpoint="end"]
+	}
+}
+
+process p(in, out) {
+	c = @consume(v) : [channel=in] {
+		println("{in}: {v}")
+		out.produce(v+1)
+		stop(c)
+	}
+}
+```
 
 ```console
 $ bin/ini --model-out model.pml pipeline.ini
@@ -310,6 +340,8 @@ $ bin/ini --model-out model.pml pipeline.ini
 Generated ``model.pml`` file:
 
 ```javascript
+int _step_count = 0
+int _step_max = 1000
 bool start=false
 bool end=false
 chan c0=[10] of {byte}
@@ -321,22 +353,24 @@ active proctype main() {
   start = true
   c1!1
   byte v
-  CONSUME344560770: if
+  do
     :: c0?v ->
+      _step_count++
       end = true
-      goto END
-  fi
-  goto CONSUME344560770
+      break
+    :: _step_count > _step_max -> break
+  od
   END:
 }
 proctype p(chan in; chan out) {
   byte v
-  CONSUME991505714: if
+  do
     :: in?v ->
+      _step_count++
       out!v+1
-      goto END
-  fi
-  goto CONSUME991505714
+      break
+    :: _step_count > _step_max -> break
+  od
   END:
 }
 ```

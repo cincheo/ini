@@ -1,36 +1,33 @@
 int _step_count = 0
 int _step_max = 1000
+bool start=false
+bool end=false
+chan c0=[10] of {byte}
+chan c1=[10] of {byte}
+chan c2=[10] of {byte}
 active proctype main() {
-f=8;
-fib=  run fib(f)
-;
-f=5;
-fibtree1=  run fibtree1(f)
-;
-fibtree=  run fibtree2(f)
-;
-fibtree=;
-fibtree=;
-fibtree=;
+  run p(c1, c2)
+  run p(c2, c0)
+  start = true
+  c1!1
+  byte v
+  do
+    :: c0?v ->
+      _step_count++
+      end = true
+      break
+    :: _step_count > _step_max -> break
+  od
   END:
 }
-proctype fib(byte n) {
-fib_n_2=0;
-fib_n_1=1;
-fib=1;
-i=1;
-  END:
-}
-proctype fibtree_flat(byte n) {
-=n;
-range=;
-  END:
-}
-proctype fibtree1(byte v) {
-root=;
-  END:
-}
-proctype fibtree2(byte v) {
-root=;
+proctype p(chan in; chan out) {
+  byte v
+  do
+    :: in?v ->
+      _step_count++
+      out!v+1
+      break
+    :: _step_count > _step_max -> break
+  od
   END:
 }
