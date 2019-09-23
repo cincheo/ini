@@ -168,13 +168,13 @@ public class Main {
 
 		String modelOut = commandLineConfig.getString("model-out");
 		if (modelOut != null) {
-			Ini2Pml converter = new Ini2Pml(parser);
+			Ini2Pml converter = new Ini2Pml(parser, attrib);
 			converter.beforeGenerate();
 			for (AstNode statement : parser.topLevels) {
 				converter.generate(statement);
 			}
 			converter.afterGenerate();
-			//System.out.println(converter.getOutput());
+			System.out.println(converter.getOutput());
 			FileUtils.write(new File(modelOut), converter.getOutput(), "UTF-8");
 		}
 		IniEval eval = mainEval(parser, false, null, null,

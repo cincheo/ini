@@ -412,7 +412,7 @@ public class AstAttrib {
 			break;
 
 		case AstNode.ARRAY_ACCESS:
-			t1 = eval(((ArrayAccess) node).variableAccess);
+			t1 = eval(((ArrayAccess) node).targetExpression);
 			t2 = eval(((ArrayAccess) node).indexExpression);
 			if (t1 == null || t2 == null) {
 				break;
@@ -434,12 +434,12 @@ public class AstAttrib {
 				map.addTypeParameter(t2);
 				Type val = parser.types.createType();
 				map.addTypeParameter(val);
-				addTypingConstraint(TypingConstraint.Kind.EQ, t1, map, ((ArrayAccess) node).variableAccess, node);
+				addTypingConstraint(TypingConstraint.Kind.EQ, t1, map, ((ArrayAccess) node).targetExpression, node);
 				result = val;
 				break;
 			} else if (t1.isMap()) {
 				addTypingConstraint(TypingConstraint.Kind.EQ, t1.getTypeParameters().get(0), t2,
-						((ArrayAccess) node).variableAccess, node);
+						((ArrayAccess) node).targetExpression, node);
 				result = t1.getTypeParameters().get(1);
 				break;
 			}
@@ -578,7 +578,7 @@ public class AstAttrib {
 
 		case AstNode.FIELD_ACCESS:
 
-			t1 = eval(((FieldAccess) node).variableAccess);
+			t1 = eval(((FieldAccess) node).targetExpression);
 
 			if (t1.hasFields()) {
 				t2 = t1.fields.get(((FieldAccess) node).fieldName);
@@ -659,11 +659,7 @@ public class AstAttrib {
 
 					for (int i = 0; i < typeVar.getTypeParameters().size(); i++) {
 						if (i < invocation.arguments.size()) {
-							addTypingConstraint(
-									/*
-									 * (executable instanceof BoundJavaFunction)
-									 * ? TypingConstraint.Kind.GTE :
-									 */TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
+							addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
 									eval(invocation.arguments.get(i)), invocation, invocation);
 						} else {
 							if (executable.parameters.get(i).defaultValue != null) {
@@ -674,6 +670,7 @@ public class AstAttrib {
 								break;
 							}
 						}
+						executable.parameters.get(i).setType(typeVar.getTypeParameters().get(i));
 					}
 
 					if (executable != null && !evaluationStack.contains(executable)) {
@@ -867,7 +864,7 @@ public class AstAttrib {
 			t2 = eval(((SubArrayAccess) node).maxExpression);
 			addTypingConstraint(TypingConstraint.Kind.EQ, t2, parser.types.INT, ((SubArrayAccess) node).maxExpression,
 					((SubArrayAccess) node).maxExpression);
-			t = eval(((SubArrayAccess) node).variableAccess);
+			t = eval(((SubArrayAccess) node).targetExpression);
 			result = parser.types.createType("Map");
 			result.addTypeParameter(parser.types.INT);
 			result.addTypeParameter(parser.types.createType());
@@ -931,7 +928,7 @@ public class AstAttrib {
 
 		case AstNode.TYPE_VARIABLE:
 			result = ((TypeVariable) node).getType();
-			if (!((TypeVariable)node).isTypeRegistered(this)) {
+			if (!((TypeVariable) node).isTypeRegistered(this)) {
 				addError(new TypingError(node, "unknown type"));
 			}
 			break;
@@ -994,7 +991,7 @@ public class AstAttrib {
 	}
 
 	public AstAttrib unify() {
-		// printConstraints("", System.err);
+		printConstraints("", System.err);
 
 		// remove wrong constraints
 		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1037,8 +1034,8 @@ public class AstAttrib {
 				}
 			}
 		}
-		// System.err.println("==================");
-		// printConstraints("", System.err);
+		System.err.println("==================");
+		printConstraints("", System.err);
 		return this;
 
 	}
@@ -1269,6 +1266,19 @@ public class AstAttrib {
 		}
 		return this;
 
+	}
+
+	public Type getResolvedType(Type type) {
+		if (type.variable) {
+			for (TypingConstraint c : constraints) {
+				if (type.equals(c.left)) {
+					return c.right;
+				}
+			}
+			return null;
+		} else {
+			return type;
+		}
 	}
 
 }

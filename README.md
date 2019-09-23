@@ -310,28 +310,34 @@ $ bin/ini --model-out model.pml pipeline.ini
 Generated ``model.pml`` file:
 
 ```javascript
-chan channels[3]=[10] of {byte}
-boolean start=false
-boolean end=false
+bool start=false
+bool end=false
+chan c0=[10] of {byte}
+chan c1=[10] of {byte}
+chan c2=[10] of {byte}
 active proctype main() {
-  RUN p(channels[1], channels[2])
-  RUN p(channels[2], channels[0])
-  c1!1
+  run p(c1, c2)
+  run p(c2, c0)
   start = true
-  START: if
-    CONSUME1802598046:
-    :: channels[0]?v ->
+  c1!1
+  byte v
+  CONSUME344560770: if
+    :: c0?v ->
       end = true
+      goto END
   fi
-  goto START
+  goto CONSUME344560770
+  END:
 }
-proctype p(byte in, byte out) {
-  START: if
-    CONSUME659748578:
-    :: channels[in]?v ->
+proctype p(chan in; chan out) {
+  byte v
+  CONSUME991505714: if
+    :: in?v ->
       out!v+1
+      goto END
   fi
-  goto START
+  goto CONSUME991505714
+  END:
 }
 ```
 

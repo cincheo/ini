@@ -134,7 +134,7 @@ public class IniEval {
 				break;
 
 			case AstNode.ARRAY_ACCESS:
-				result = eval(((ArrayAccess) node).variableAccess);
+				result = eval(((ArrayAccess) node).targetExpression);
 				if (result.getTypeInfo() == TypeInfo.CHANNEL) {
 					if (((Channel) result.getValue()).indexed) {
 						result = new RawData(((Channel) result.getValue())
@@ -143,7 +143,7 @@ public class IniEval {
 						throw new EvalException(this, "cannot access indexed channel on regular channel");
 					}
 				} else {
-					result = eval(((ArrayAccess) node).variableAccess)
+					result = eval(((ArrayAccess) node).targetExpression)
 							.get(eval(((ArrayAccess) node).indexExpression).getValue());
 				}
 				break;
@@ -286,7 +286,7 @@ public class IniEval {
 				break;
 
 			case AstNode.FIELD_ACCESS:
-				result = eval(((FieldAccess) node).variableAccess).get(((FieldAccess) node).fieldName);
+				result = eval(((FieldAccess) node).targetExpression).get(((FieldAccess) node).fieldName);
 				break;
 
 			case AstNode.FUNCTION:
@@ -492,7 +492,7 @@ public class IniEval {
 
 			case AstNode.SUB_ARRAY_ACCESS:
 				SubArrayAccess sub = (SubArrayAccess) node;
-				d = eval(sub.variableAccess);
+				d = eval(sub.targetExpression);
 				result = d.subArray((Integer) eval(sub.minExpression).getValue(),
 						(Integer) eval(sub.maxExpression).getValue());
 				break;

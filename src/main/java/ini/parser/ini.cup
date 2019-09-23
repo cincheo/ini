@@ -161,7 +161,7 @@ precedence left ASSIGN;
 precedence left OROR;
 precedence left ANDAND;
 precedence left MATCHES;
-precedence left NOT;
+precedence left NOT, QUESTION;
 precedence left EQUALS, GT, GTE, LT, LTE, NOTEQUALS;
 precedence left PLUS, MINUS;
 precedence left MULT, DIV;
@@ -169,8 +169,10 @@ precedence left PLUSPLUS, MINUSMINUS;
 precedence left TUBE;
 precedence left LF;
 precedence left END;
+precedence left LSPAREN, RSPAREN;
 precedence left DOT, INVDOT;
 precedence left LAMBDA;
+precedence left COL;
 
 start with ini_program;
 
@@ -438,9 +440,9 @@ boolean_literal ::= TRUE:e {: RESULT=new BooleanLiteral(parser,(Token)e,true); :
 ;
 
 var_access ::= IDENTIFIER:v {: RESULT = new Variable(parser,(Token)v,v.toString()); :}
-	| var_access:v LSPAREN:t expr:e RSPAREN {: RESULT = new ArrayAccess(parser,(Token)t,(VariableAccess)v,(Expression)e); :}
-	| var_access:v LSPAREN:t expr:min DOTDOT expr:max RSPAREN {: RESULT = new SubArrayAccess(parser,(Token)t,(VariableAccess)v,(Expression)min,(Expression)max); :}
-	| var_access:v DOT:t IDENTIFIER:i {: RESULT = new FieldAccess(parser,(Token)t,(VariableAccess)v,i.toString()); :}
+	| expr:v LSPAREN:t expr:e RSPAREN {: RESULT = new ArrayAccess(parser,(Token)t,(Expression)v,(Expression)e); :}
+	| expr:v LSPAREN:t expr:min DOTDOT expr:max RSPAREN {: RESULT = new SubArrayAccess(parser,(Token)t,(Expression)v,(Expression)min,(Expression)max); :}
+	| expr:v DOT:t IDENTIFIER:i {: RESULT = new FieldAccess(parser,(Token)t,(Expression)v,i.toString()); :}
 ;
 
 string_expr ::= single_string:s {: RESULT=s; :}
@@ -472,10 +474,11 @@ constructor_expr ::= TIDENTIFIER:s LSPAREN lf_opt assignment_list:l lf_opt RSPAR
 constructor_match_expr ::= TIDENTIFIER:s LSPAREN field_match_expr_list_opt:l RSPAREN 
 	{:
 		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),(List)l);	
-	:} | TIDENTIFIER:s 
+	:}/* | TIDENTIFIER:s 
 	{:
 		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),null);	
-	:};
+	:}*/
+;
 
 assignment_list ::= assignment_list:l COMMA lf_opt IDENTIFIER:f ASSIGN:a expr:e 
 	{:
@@ -607,7 +610,7 @@ field_match_expr_list ::= field_match_expr_list:l COMMA expr:f
 	:}
 ;
 
-annotations_opt ::= LSPAREN identifier_assignment_list:l RSPAREN
+annotations_opt ::= COL LSPAREN identifier_assignment_list:l RSPAREN
 {:
 	RESULT = (List)l;
 :}
@@ -617,7 +620,7 @@ annotations_opt ::= LSPAREN identifier_assignment_list:l RSPAREN
 :}
 ;
 
-at_expr ::= IDENTIFIER:id COL AT:at IDENTIFIER:name LPAREN arg_list_opt:rp RPAREN annotations_opt:a
+at_expr ::= IDENTIFIER:id ASSIGN AT:at IDENTIFIER:name LPAREN arg_list_opt:rp RPAREN annotations_opt:a
 {: 
 	RESULT = new AtPredicate(parser,(Token)at,name.toString(),(List)a,(List)rp, id.toString());
 :}

@@ -6,19 +6,19 @@ import java.io.PrintStream;
 
 public class ArrayAccess extends AstElement implements VariableAccess {
 
-	public VariableAccess variableAccess;
+	public Expression targetExpression;
 	public Expression indexExpression;
 
-	public ArrayAccess(IniParser parser, Token token, VariableAccess variableAccess, Expression indexExpression) {
+	public ArrayAccess(IniParser parser, Token token, Expression targetExpression, Expression indexExpression) {
 		super(parser, token);
-		this.variableAccess = variableAccess;
+		this.targetExpression = targetExpression;
 		this.indexExpression = indexExpression;
 		this.nodeTypeId = AstNode.ARRAY_ACCESS;
 	}
 
 	@Override
 	public void prettyPrint(PrintStream out) {
-		variableAccess.prettyPrint(out);
+		targetExpression.prettyPrint(out);
 		out.print("[");
 		indexExpression.prettyPrint(out);
 		out.print("]");
@@ -26,12 +26,20 @@ public class ArrayAccess extends AstElement implements VariableAccess {
 
 	@Override
 	public boolean isDeclaration() {
-		return variableAccess.isDeclaration();
+		if (targetExpression instanceof VariableAccess) {
+			return ((VariableAccess) targetExpression).isDeclaration();
+		} else {
+			return false;
+		}
 	}
 
 	@Override
 	public void setDeclaration(boolean declaration) {
-		variableAccess.setDeclaration(declaration);
+		if (targetExpression instanceof VariableAccess) {
+			((VariableAccess) targetExpression).setDeclaration(declaration);
+		} else {
+			// ignore
+		}
 	}
 
 }

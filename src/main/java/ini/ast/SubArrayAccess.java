@@ -4,16 +4,16 @@ import ini.parser.IniParser;
 
 import java.io.PrintStream;
 
-public class SubArrayAccess extends AstElement implements VariableAccess {
+public class SubArrayAccess extends AstElement {
 
-	public VariableAccess variableAccess;
+	public Expression targetExpression;
 	public Expression minExpression;
 	public Expression maxExpression;
 
-	public SubArrayAccess(IniParser parser, Token token, VariableAccess variableAccess, Expression minExpression,
+	public SubArrayAccess(IniParser parser, Token token, Expression targetExpression, Expression minExpression,
 			Expression maxExpression) {
 		super(parser, token);
-		this.variableAccess = variableAccess;
+		this.targetExpression = targetExpression;
 		this.minExpression = minExpression;
 		this.maxExpression = maxExpression;
 		this.nodeTypeId = AstNode.SUB_ARRAY_ACCESS;
@@ -21,7 +21,7 @@ public class SubArrayAccess extends AstElement implements VariableAccess {
 
 	@Override
 	public void prettyPrint(PrintStream out) {
-		variableAccess.prettyPrint(out);
+		targetExpression.prettyPrint(out);
 		out.print("[");
 		minExpression.prettyPrint(out);
 		out.print("..");
@@ -29,13 +29,4 @@ public class SubArrayAccess extends AstElement implements VariableAccess {
 		out.print("]");
 	}
 
-	@Override
-	public boolean isDeclaration() {
-		return false;
-	}
-
-	@Override
-	public void setDeclaration(boolean declaration) {
-		throw new RuntimeException("invalid operation");
-	}
 }

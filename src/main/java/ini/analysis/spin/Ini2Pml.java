@@ -10,13 +10,11 @@ import java.util.Stack;
 import ini.ast.Assignment;
 import ini.ast.AstNode;
 import ini.ast.AtPredicate;
-import ini.ast.AtPredicate.Kind;
 import ini.ast.BinaryOperator;
 import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
 import ini.ast.Channel;
 import ini.ast.CharLiteral;
-import ini.ast.Executable;
 import ini.ast.Expression;
 import ini.ast.Invocation;
 import ini.ast.Parameter;
@@ -29,12 +27,14 @@ import ini.ast.UnaryOperator;
 import ini.ast.Variable;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.AttrContext;
 import ini.type.Type;
 
 public class Ini2Pml {
 
 	public IniParser parser;
+	public AstAttrib attrib;
 	public Stack<AttrContext> invocationStack = new Stack<AttrContext>();
 	public Stack<AstNode> evaluationStack = new Stack<AstNode>();
 	public Map<String, Data> variables = new HashMap<String, Data>();
@@ -123,8 +123,9 @@ public class Ini2Pml {
 		return header.toString() + body.toString();
 	}
 
-	public Ini2Pml(IniParser parser) {
+	public Ini2Pml(IniParser parser, AstAttrib attrib) {
 		this.parser = parser;
+		this.attrib = attrib;
 	}
 
 	public Ini2Pml beforeGenerate() {
@@ -133,12 +134,30 @@ public class Ini2Pml {
 
 	public Ini2Pml afterGenerate() {
 		selectHeader();
-		printLine("chan channels[" + channels.size() + "]=[10] of {byte}").endLine();
+		// printLine("chan channels[" + channels.size() + "]=[10] of
+		// {byte}").endLine();
+		printLine("int _step_count = 0").endLine();
+		printLine("int _step_max = 1000").endLine();
 		for (String checkpoint : checkpoints) {
-			printLine("boolean " + checkpoint + "=false").endLine();
+			printLine("bool " + checkpoint + "=false").endLine();
 		}
 		selectBody();
 		return this;
+	}
+
+	private String toPmlType(Type type) {
+		if (type == null) {
+			return "byte";
+		}
+		type = attrib.getResolvedType(type);
+		if (type == null) {
+			return "byte";
+		}
+		if (type.isChannel()) {
+			return "chan";
+		} else {
+			return "byte";
+		}
 	}
 
 	public Ini2Pml generate(AstNode node) {
@@ -154,10 +173,10 @@ public class Ini2Pml {
 		case AstNode.IMPORT:
 			// TODO
 			break;
-			
+
 		case AstNode.BINDING:
 			break;
-			
+
 		case AstNode.ASSIGNMENT:
 			Assignment a = (Assignment) node;
 			// System.out.println(">>>>>>>>>>>>" + observedVariables +
@@ -255,12 +274,13 @@ public class Ini2Pml {
 			break;
 
 		case AstNode.CHANNEL:
-			getOrCreateChannelId(((Channel) node).name);
+			// getOrCreateChannelId(((Channel) node).name);
+			printLine("chan " + ((Channel) node).name + "=[10] of {byte}").endLine();
 			break;
 
 		case AstNode.USER_TYPE:
 			break;
-			
+
 		case AstNode.FUNCTION:
 			break;
 
@@ -271,7 +291,7 @@ public class Ini2Pml {
 			}
 			print(process.name.equals("main") ? "active " : "").printLine("proctype ").print(process.name).print("(");
 			for (Parameter p : process.parameters) {
-				print("byte " + p.name + ", ");
+				print(toPmlType(p.getType()) + " " + p.name + "; ");
 			}
 			if (!process.parameters.isEmpty()) {
 				remove(2);
@@ -288,7 +308,7 @@ public class Ini2Pml {
 				}
 			}
 			// endIndent().indent().print("od").endIndent().endLine();
-			printLine("START: if\n").startIndent();
+			// printLine("START: if\n").startIndent();
 
 			for (Rule r : process.atRules) {
 				switch (r.atPredicate.kind) {
@@ -298,22 +318,33 @@ public class Ini2Pml {
 					// r.hashCode()).print("(");
 					// TODO Add parameters
 					// print(") {").endLine().startIndent();
+					printLine(toPmlType(r.atPredicate.outParameters.get(0).getType()) + " "
+							+ r.atPredicate.outParameters.get(0).toString()).endLine();
 					AstNode channelNode = r.atPredicate.getAnnotationNode("channel", "from");
-					int channelId = getChannelId(channelNode.toString());
-					// printLine("START: if\n").startIndent();
-					printLine("CONSUME" + r.hashCode() + ":").endLine();
-					if (channelId >= 0) {
-						printLine(":: channels[" + channelId + "]?" + r.atPredicate.outParameters.get(0).toString()
-								+ " ->").endLine().startIndent();
-					} else {
-						printLine(":: channels[" + channelNode.toString() + "]?"
-								+ r.atPredicate.outParameters.get(0).toString() + " ->").endLine().startIndent();
-					}
+					// int channelId = getChannelId(channelNode.toString());
+					//printLine("CONSUME" + r.hashCode() + ": ");
+					printLine("do").endLine().startIndent();
+
+					printLine(":: ").generate(channelNode)
+							.print("?" + r.atPredicate.outParameters.get(0).toString() + " ->").endLine().startIndent();
+					// if (channelId >= 0) {
+					// printLine(":: channels[" + channelId + "]?" +
+					// r.atPredicate.outParameters.get(0).toString()
+					// + " ->").endLine().startIndent();
+					// } else {
+					// printLine(":: channels[" + channelNode.toString() + "]?"
+					// + r.atPredicate.outParameters.get(0).toString() + "
+					// ->").endLine().startIndent();
+					// }
 					// print(":: " + channel + "?" +
 					// r.atPredicate.outParameters.get(0).toString() + "
 					// ->").endLine()
 					// .startIndent();
+					printLine("_step_count++").endLine();
 					generateStatements(r.statements).endIndent();
+					printLine(":: _step_count > _step_max -> break").endLine().endIndent();
+					printLine("od").endLine();
+					//printLine("goto CONSUME" + r.hashCode()).endLine();
 					// endIndent().printLine("}").endLine();
 					break;
 
@@ -361,8 +392,9 @@ public class Ini2Pml {
 				}
 			}
 
-			endIndent().printLine("fi").endLine();
-			printLine("goto START").endLine();
+			// endIndent().printLine("fi").endLine();
+			// printLine("goto START").endLine();
+			printLine("END:").endLine();
 			endIndent().printLine("}").endLine();
 
 			/*
@@ -397,12 +429,21 @@ public class Ini2Pml {
 			break;
 
 		case AstNode.INVOCATION:
+			String checkpoint = node.getAnnotationValue("checkpoint");
+			if (checkpoint != null) {
+				printLine(checkpoint + " = true").endLine();
+				if (!checkpoints.contains(checkpoint)) {
+					checkpoints.add(checkpoint);
+				}
+			}
 			if ("produce".equals(((Invocation) node).name)) {
 				printLine(((Invocation) node).arguments.get(0) + "!" + ((Invocation) node).arguments.get(1)).endLine();
+			} else if ("stop".equals(((Invocation) node).name)) {
+				printLine("break").endLine();
 			} else {
 				for (AstNode n : parser.topLevels) {
 					if (n instanceof Process && ((Process) n).name.equals(((Invocation) node).name)) {
-						printLine("RUN " + ((Invocation) node).name + "(");
+						printLine("run " + ((Invocation) node).name + "(");
 						for (Expression e : ((Invocation) node).arguments) {
 							generate(e);
 							print(", ");
@@ -412,13 +453,6 @@ public class Ini2Pml {
 						}
 						print(")").endLine();
 					}
-				}
-			}
-			String checkpoint = node.getAnnotationValue("checkpoint");
-			if (checkpoint != null) {
-				printLine(checkpoint + " = true").endLine();
-				if (!checkpoints.contains(checkpoint)) {
-					checkpoints.add(checkpoint);
 				}
 			}
 			break;

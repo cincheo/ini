@@ -88,7 +88,7 @@ public class TestFunctions extends IniTestCase {
 	}
 
 	public void testBindingInvocationParameterType() {
-		parseAndAttribCode("declare f1(Int)=>Void [class=\"any\", member=\"any\"]\n" //
+		parseAndAttribCode("declare f1(Int)=>Void : [class=\"any\", member=\"any\"]\n" //
 				+ "process f2() { @init() { f1(2.1) } }", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
@@ -100,7 +100,7 @@ public class TestFunctions extends IniTestCase {
 	}
 
 	public void testBindingInvocationResultType() {
-		parseAndAttribCode("declare f1(Int)=>Int [class=\"any\", method=\"any\"]\n" //
+		parseAndAttribCode("declare f1(Int)=>Int : [class=\"any\", method=\"any\"]\n" //
 				+ "process f2() { @init() && f1(2)==1.2 {} }", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
