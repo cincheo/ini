@@ -96,7 +96,7 @@ function fac(n) {
 
 // prints out the result of the function
 function main(args) {
-  println(fac(to_int(args[0]))
+  println(fac(to_int(args[0])))
 }
 ```
 
@@ -127,7 +127,7 @@ process fac(n) {
 
 // prints out the result of the function
 function main(args) {
-  println(fac(to_int(args[0]))
+  println(fac(to_int(args[0])))
 }
 ```
 
