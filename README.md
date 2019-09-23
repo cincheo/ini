@@ -312,24 +312,24 @@ declare channel +c2(Int)
 //declare predicate p1 "(<> end)"
 
 process main() {
-	@init() {
-		p(c1, c2) : [node="n1"]
-		p(c2, c0) : [node="n2"]
-		println("processes started")
-		c1.produce(1) : [checkpoint="start"]
-	}
-	c = @consume(v) : [channel=c0] {
-		println("end of pipeline: {v}")
-		stop(c)	: [checkpoint="end"]
-	}
+  @init() {
+    p(c1, c2) : [node="n1"]
+    p(c2, c0) : [node="n2"]
+    println("processes started")
+    c1.produce(1) : [checkpoint="start"]
+  }
+  c = @consume(v) : [channel=c0] {
+    println("end of pipeline: {v}")
+    stop(c) : [checkpoint="end"]
+  }
 }
 
 process p(in, out) {
-	c = @consume(v) : [channel=in] {
-		println("{in}: {v}")
-		out.produce(v+1)
-		stop(c)
-	}
+  c = @consume(v) : [channel=in] {
+    println("{in}: {v}")
+    out.produce(v+1)
+    stop(c)
+  }
 }
 ```
 
