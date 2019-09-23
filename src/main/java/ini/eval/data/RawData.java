@@ -14,8 +14,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+
 import ini.ast.Assignment;
 import ini.ast.BooleanLiteral;
+import ini.ast.Channel;
 import ini.ast.Constructor;
 import ini.ast.Executable;
 import ini.ast.Expression;
@@ -187,8 +191,17 @@ public class RawData implements Data {
 				return new NumberLiteral(parser, null, (Number) value);
 			} else if (value instanceof Boolean) {
 				return new BooleanLiteral(parser, null, (Boolean) value);
+			} else if (value instanceof Channel) {
+				Channel c = (Channel) value;
+				Variable v = new Variable(parser, null, c.name);
+				v.channelLiteral = c;
+				return v;
 			} else {
-				throw new RuntimeException("unhandled data");
+				if (value != null) {
+					throw new RuntimeException("unhandled data: " + value + " - " + value.getClass());
+				} else {
+					throw new RuntimeException("unhandled data: " + value);
+				}
 			}
 		} else {
 			if (data.isIndexedSet() && ((Integer) data.minIndex()) > 0) {
@@ -369,6 +382,9 @@ public class RawData implements Data {
 			break;
 		case TypeInfo.BOOLEAN:
 			break;
+		case TypeInfo.CHANNEL:
+			value = new Gson().fromJson(new Gson().toJson(value), Channel.class);
+			break;
 		default:
 			System.out.println("NO CONVERSION: " + typeInfo + " / " + value + " / " + value.getClass());
 		}
@@ -440,7 +456,7 @@ public class RawData implements Data {
 
 	synchronized private void explodeString() {
 		if (value instanceof String) {
-			//System.out.println("<<< Exploding string "+value+" >>>");
+			// System.out.println("<<< Exploding string "+value+" >>>");
 			String s = (String) value;
 			for (int i = 0; i < s.length(); i++) {
 				Integer key = (int) i;
@@ -467,7 +483,7 @@ public class RawData implements Data {
 		if (explodedString) {
 			value = getImplodedString();
 			references.clear();
-			//System.out.println("<<< Imploded string "+value+" >>>");
+			// System.out.println("<<< Imploded string "+value+" >>>");
 			explodedString = false;
 		}
 	}

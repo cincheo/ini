@@ -8,6 +8,13 @@ public class Variable extends NamedElement implements VariableAccess {
 
 	private boolean declaration = false;
 
+	/**
+	 * If this variable is an access to a global channel declaration, it will
+	 * return the channel after the attribution phase (null otherwise or before
+	 * the attribution phase).
+	 */
+	public Channel channelLiteral;
+
 	public Variable(IniParser parser, Token token, String name) {
 		super(parser, token, name);
 		this.nodeTypeId = AstNode.VARIABLE;

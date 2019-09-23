@@ -150,9 +150,6 @@ public class IniEval {
 
 			case AstNode.ASSIGNMENT:
 				d = eval(((Assignment) node).assignee);
-				if ("s".equals(d.toString())) {
-					System.out.println();
-				}
 				if (d instanceof DataReference) {
 					Data d2 = eval(((Assignment) node).assignment);
 					if (d2.isPrimitive()) {
@@ -537,6 +534,10 @@ public class IniEval {
 			case AstNode.VARIABLE:
 			case AstNode.TYPE_VARIABLE:
 				name = ((Variable) node).name;
+				if(((Variable) node).channelLiteral!=null) {
+					result = new RawData(((Variable) node).channelLiteral);
+					break;
+				}
 				Assignment a = getParentNode(Assignment.class);
 				if (a != null && a.assignee == node) {
 					result = invocationStack.peek().getOrCreate(name);

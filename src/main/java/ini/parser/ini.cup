@@ -33,7 +33,6 @@ parser code {:
 		return Arrays.asList( //
 			new AnyFunction(this), //
 			new ClearFunction(this), //
-			new ChannelFunction(this), //
 			new CopyFunction(this), //
 			new ErrorFunction(this), //
 			new FirstFunction(this), //
@@ -241,8 +240,8 @@ predicate_decl ::= PREDICATE:d IDENTIFIER:name STRING:expression annotations_opt
 	:}
 ;
 
-visibility ::= PLUS:v {: RESULT=Channel.Visibility.PRIVATE; :} 
-	| MINUS:v {: RESULT=Channel.Visibility.GLOBAL; :}
+visibility ::= PLUS:v {: RESULT=Channel.Visibility.GLOBAL; :} 
+	| MINUS:v {: RESULT=Channel.Visibility.PRIVATE; :}
 	|
 };
 	

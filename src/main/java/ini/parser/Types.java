@@ -161,16 +161,20 @@ public class Types {
 		return t;
 	}
 
-	public Type createMapType(Type keyType, Type valueType) {
-		String fullName = "Map(" + keyType.getFullName() + "," + valueType.getFullName() + ")";
-		Type t = types.get(fullName);
-		if (t == null) {
-			t = new Type(this, "Map");
-			t.variable = false;
-			t.addTypeParameter(keyType);
-			t.addTypeParameter(valueType);
-			types.put(fullName, t);
+	public Type createDependentType(String name, Type... typeParameters) {
+		Type t = new Type(this, name);
+		t.variable = false;
+		for (Type p : typeParameters) {
+			t.addTypeParameter(p);
 		}
+		return t;
+	}
+
+	public Type createMapType(Type keyType, Type valueType) {
+		Type t = new Type(this, "Map");
+		t.variable = false;
+		t.addTypeParameter(keyType);
+		t.addTypeParameter(valueType);
 		return t;
 	}
 

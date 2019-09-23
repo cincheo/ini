@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
 
 public class TypeVariable extends Variable {
@@ -84,6 +85,14 @@ public class TypeVariable extends Variable {
 			}
 		}
 		return type;
+	}
+
+	public boolean isTypeRegistered(AstAttrib attrib) {
+		if (component != null) {
+			return component.isTypeRegistered(attrib);
+		} else {
+			return attrib.parser.types.isRegistered(name);
+		}
 	}
 
 	public boolean isParameter() {

@@ -403,10 +403,11 @@ public class AstAttrib {
 			break;
 
 		case AstNode.CHANNEL:
-			result = parser.types.getDependentType("Channel", eval(((Channel) node).typeVariable));
+			result = parser.types.createDependentType("Channel", eval(((Channel) node).typeVariable));
 			if (((Channel) node).indexed) {
 				result = parser.types.createArrayType(result);
 			}
+			result.channel = (Channel) node;
 			getRootContext().bind(((Channel) node).name, result);
 			break;
 
@@ -578,10 +579,6 @@ public class AstAttrib {
 		case AstNode.FIELD_ACCESS:
 
 			t1 = eval(((FieldAccess) node).variableAccess);
-
-			if (t1 == null) {
-				System.out.println();
-			}
 
 			if (t1.hasFields()) {
 				t2 = t1.fields.get(((FieldAccess) node).fieldName);
@@ -917,6 +914,9 @@ public class AstAttrib {
 						// be
 						// looked up in the root context
 						result = getRootContext().get(((Variable) node).name);
+						if (result.channel != null) {
+							((Variable) node).channelLiteral = result.channel;
+						}
 					} else {
 						result = invocationStack.peek().get(((Variable) node).name);
 						// result =
@@ -931,7 +931,7 @@ public class AstAttrib {
 
 		case AstNode.TYPE_VARIABLE:
 			result = ((TypeVariable) node).getType();
-			if (!parser.types.isRegistered(((TypeVariable) node).name)) {
+			if (!((TypeVariable)node).isTypeRegistered(this)) {
 				addError(new TypingError(node, "unknown type"));
 			}
 			break;
@@ -994,7 +994,7 @@ public class AstAttrib {
 	}
 
 	public AstAttrib unify() {
-		//printConstraints("", System.err);
+		// printConstraints("", System.err);
 
 		// remove wrong constraints
 		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1037,8 +1037,8 @@ public class AstAttrib {
 				}
 			}
 		}
-		//System.err.println("==================");
-		//printConstraints("", System.err);
+		// System.err.println("==================");
+		// printConstraints("", System.err);
 		return this;
 
 	}

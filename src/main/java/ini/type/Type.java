@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import ini.ast.Channel;
 import ini.ast.Executable;
 import ini.ast.UserType;
 import ini.parser.Types;
@@ -15,6 +16,7 @@ public final class Type {
 
 	public boolean constructorType = false;
 	public Executable executable = null;
+	public Channel channel = null;
 
 	public final boolean isLTE(Type type) {
 		if (type == this) {
