@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -174,8 +175,28 @@ public class Main {
 				converter.generate(statement);
 			}
 			converter.afterGenerate();
-			System.out.println(converter.getOutput());
+			// System.out.println(converter.getOutput());
 			FileUtils.write(new File(modelOut), converter.getOutput(), "UTF-8");
+			Runtime rt = Runtime.getRuntime();
+			Process pr = rt.exec("bin/spin -search " + modelOut);
+			File outFile = new File(modelOut + ".out");
+			FileUtils.write(outFile, "", "UTF-8", false);
+			boolean hasError = false;
+			for (String line : IOUtils.readLines(pr.getInputStream(), "UTF-8")) {
+				if (line.contains("assertion violated")) {
+					System.err.println("model checking error: " + line);
+					hasError = true;
+				}
+				if (line.contains("Search not completed")) {
+					System.err.println("model checking error: " + line);
+					hasError = true;
+				}
+				FileUtils.write(outFile, line + "\n", "UTF-8", true);
+			}
+			if (hasError) {
+				System.err.println("dumped Spin output to '" + modelOut + ".out'");
+				return;
+			}
 		}
 		IniEval eval = mainEval(parser, false, null, null,
 				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("arg")));

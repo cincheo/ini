@@ -18,6 +18,7 @@ import ini.ast.CharLiteral;
 import ini.ast.Expression;
 import ini.ast.Invocation;
 import ini.ast.Parameter;
+import ini.ast.Predicate;
 import ini.ast.Process;
 import ini.ast.Rule;
 import ini.ast.Sequence;
@@ -49,6 +50,7 @@ public class Ini2Pml {
 
 	private StringBuilder header = new StringBuilder();
 	private StringBuilder body = new StringBuilder();
+	private StringBuilder footer = new StringBuilder();
 
 	private StringBuilder out = body;
 	private int indent = 0;
@@ -119,8 +121,13 @@ public class Ini2Pml {
 		return this;
 	}
 
+	private final Ini2Pml selectFooter() {
+		out = footer;
+		return this;
+	}
+
 	public String getOutput() {
-		return header.toString() + body.toString();
+		return header.toString() + body.toString() + footer.toString();
 	}
 
 	public Ini2Pml(IniParser parser, AstAttrib attrib) {
@@ -322,7 +329,7 @@ public class Ini2Pml {
 							+ r.atPredicate.outParameters.get(0).toString()).endLine();
 					AstNode channelNode = r.atPredicate.getAnnotationNode("channel", "from");
 					// int channelId = getChannelId(channelNode.toString());
-					//printLine("CONSUME" + r.hashCode() + ": ");
+					// printLine("CONSUME" + r.hashCode() + ": ");
 					printLine("do").endLine().startIndent();
 
 					printLine(":: ").generate(channelNode)
@@ -344,7 +351,7 @@ public class Ini2Pml {
 					generateStatements(r.statements).endIndent();
 					printLine(":: _step_count > _step_max -> break").endLine().endIndent();
 					printLine("od").endLine();
-					//printLine("goto CONSUME" + r.hashCode()).endLine();
+					// printLine("goto CONSUME" + r.hashCode()).endLine();
 					// endIndent().printLine("}").endLine();
 					break;
 
@@ -394,7 +401,7 @@ public class Ini2Pml {
 
 			// endIndent().printLine("fi").endLine();
 			// printLine("goto START").endLine();
-			printLine("END:").endLine();
+			//printLine("END:").endLine();
 			endIndent().printLine("}").endLine();
 
 			/*
@@ -431,6 +438,7 @@ public class Ini2Pml {
 		case AstNode.INVOCATION:
 			String checkpoint = node.getAnnotationValue("checkpoint");
 			if (checkpoint != null) {
+				//checkpoint = "_checkpoint_" + checkpoint;
 				printLine(checkpoint + " = true").endLine();
 				if (!checkpoints.contains(checkpoint)) {
 					checkpoints.add(checkpoint);
@@ -530,6 +538,12 @@ public class Ini2Pml {
 			} else {
 				out.append(v.name);
 			}
+			break;
+
+		case AstNode.PREDICATE:
+			selectFooter();
+			printLine("ltl " + ((Predicate) node).name + " { ").print(((Predicate) node).expression + " } ");
+			selectBody();
 			break;
 
 		default:

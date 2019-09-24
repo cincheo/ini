@@ -111,6 +111,10 @@ public class IniEval {
 
 			switch (node.nodeTypeId()) {
 
+			case AstNode.PREDICATE:
+				// ignore
+				break;
+			
 			case AstNode.IMPORT:
 				try {
 					IniParser localParser = ((Import) node).importParser;

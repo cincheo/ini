@@ -18,7 +18,6 @@ active proctype main() {
       break
     :: _step_count > _step_max -> break
   od
-  END:
 }
 proctype p(chan in; chan out) {
   byte v
@@ -29,5 +28,5 @@ proctype p(chan in; chan out) {
       break
     :: _step_count > _step_max -> break
   od
-  END:
 }
+ltl p1 { (<> end) } 

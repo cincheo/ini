@@ -303,13 +303,13 @@ To ensure formal validation with model checking, INI provides an option to gener
 
 For instance, taking again the pipeline example given above, we can generate the corresponding abstract Promela code with the ``model-out`` option.
 
-First, we need to add a couple annotations to the program:
+First, we need to add a couple checkpoint annotations to the program. A checkpoint becomes true when the target expression is evaluated. It then can be used in a Linear Temporal Logic (LTL) predicate to be verified by the Spin mode checker. For instance, here we check against the LTL predicate "<> start -> <> end", i.e. if my program starts, it eventually ends.  
 
 ```javascript
 declare channel +c0(Int)
 declare channel +c1(Int)
 declare channel +c2(Int)
-//declare predicate p1 "(<> end)"
+declare predicate p1 "(<> start -> <> end)"
 
 process main() {
   @init() {
