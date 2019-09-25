@@ -165,6 +165,9 @@ public class CoreBrokerClient {
 			final JsonPrimitive prim = (JsonPrimitive) jsonObject.get("nodeTypeId");
 			final int nodeTypeId = prim.getAsInt();
 			final Class<?> clazz = AstNode.getClass(nodeTypeId);
+			if (clazz == null) {
+				throw new JsonParseException("target class is null for nodeTypeId=" + nodeTypeId);
+			}
 			return deserializationContext.deserialize(jsonObject, clazz);
 		}
 

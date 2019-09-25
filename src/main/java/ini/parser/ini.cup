@@ -575,7 +575,7 @@ logical_expr ::= boolean_literal:e {: RESULT=e; :}
 	| expr:e1 MATCHES:op constructor_match_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MATCHES,(Expression)e1,(ConstructorMatchExpression)e2); :}
 ;
 
-case_expr ::= CASE:c LCPAREN basic_rule_list_opt:l DEFAULT LCPAREN statement_list_opt:s RCPAREN RCPAREN 
+case_expr ::= CASE:c LCPAREN basic_rule_list_opt:l DEFAULT LCPAREN statement_list_opt:s RCPAREN lf_opt RCPAREN 
 	{:
 		RESULT = new CaseStatement(parser,(Token)c, (List)l,(Sequence)s); 
 	:}

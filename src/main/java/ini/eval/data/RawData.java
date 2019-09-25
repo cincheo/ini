@@ -15,12 +15,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 
 import ini.ast.Assignment;
 import ini.ast.BooleanLiteral;
 import ini.ast.Channel;
-import ini.ast.Constructor;
 import ini.ast.Executable;
 import ini.ast.Expression;
 import ini.ast.ListExpression;
@@ -55,7 +53,7 @@ public class RawData implements Data {
 
 	private transient List<DataObserver> dataObservers;
 
-	private Constructor constructor;
+	private RuntimeConstructor constructor;
 
 	@Override
 	public boolean isExecutable() {
@@ -68,12 +66,12 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public Constructor getConstructor() {
+	public RuntimeConstructor getConstructor() {
 		return constructor;
 	}
 
 	@Override
-	public void setConstructor(Constructor constructor) {
+	public void setConstructor(RuntimeConstructor constructor) {
 		this.constructor = constructor;
 	}
 

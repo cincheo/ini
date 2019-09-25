@@ -1,7 +1,5 @@
 package ini.eval.data;
 
-import ini.ast.Constructor;
-
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
@@ -67,9 +65,9 @@ public interface Data {
 
 	void setKind(Kind kind);
 
-	Constructor getConstructor();
-	
-	void setConstructor(Constructor constructor);
+	RuntimeConstructor getConstructor();
+	 
+	void setConstructor(RuntimeConstructor constructor);
 	
 	void addDataObserver(DataObserver observer);
 

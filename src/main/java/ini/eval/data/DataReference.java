@@ -1,7 +1,5 @@
 package ini.eval.data;
 
-import ini.ast.Constructor;
-
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
@@ -215,13 +213,13 @@ public class DataReference implements Data {
 		referencedData.setKind(kind);
 	}
 
-	public Constructor getConstructor() {
+	public RuntimeConstructor getConstructor() {
 		if (isPending())
 			return null;
 		return referencedData.getConstructor();
 	}
 
-	public void setConstructor(Constructor constructor) {
+	public void setConstructor(RuntimeConstructor constructor) {
 		if (isPending())
 			throw new RuntimeException("Data reference is pending");
 		referencedData.setConstructor(constructor);

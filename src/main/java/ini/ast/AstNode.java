@@ -82,6 +82,8 @@ public interface AstNode {
 			return BooleanLiteral.class;
 		case AstNode.CASE_STATEMENT:
 			return CaseStatement.class;
+		case AstNode.CHANNEL:
+			return Channel.class;
 		case AstNode.CHAR_LITERAL:
 			return CharLiteral.class;
 		case AstNode.CONSTRUCTOR:
@@ -120,6 +122,8 @@ public interface AstNode {
 			return SubArrayAccess.class;
 		case AstNode.THIS_LITERAL:
 			return ThisLiteral.class;
+		case AstNode.TYPE_VARIABLE:
+			return TypeVariable.class;
 		case AstNode.UNARY_OPERATOR:
 			return UnaryOperator.class;
 		case AstNode.USER_TYPE:

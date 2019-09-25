@@ -34,6 +34,7 @@ import ini.broker.DeployRequest;
 import ini.eval.Context;
 import ini.eval.IniDebug;
 import ini.eval.IniEval;
+import ini.eval.data.FutureData;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
@@ -215,7 +216,11 @@ public class Main {
 					eval.result = null;
 					eval.evalCode(line + "\n");
 					if (eval.result != null) {
-						terminal.writer().println(eval.result.toPrettyString());
+						if(eval.result instanceof FutureData) {
+							terminal.writer().println("<future>");
+						} else {
+							terminal.writer().println(eval.result.toPrettyString());
+						}
 					}
 					terminal.flush();
 				} catch (EndOfFileException e) {

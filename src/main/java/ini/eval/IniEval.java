@@ -19,11 +19,9 @@ import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
 import ini.ast.Channel;
 import ini.ast.CharLiteral;
-import ini.ast.Constructor;
 import ini.ast.ConstructorMatchExpression;
 import ini.ast.Executable;
 import ini.ast.Expression;
-import ini.ast.Field;
 import ini.ast.FieldAccess;
 import ini.ast.Import;
 import ini.ast.Invocation;
@@ -49,6 +47,7 @@ import ini.eval.data.Data;
 import ini.eval.data.DataReference;
 import ini.eval.data.FutureData;
 import ini.eval.data.RawData;
+import ini.eval.data.RuntimeConstructor;
 import ini.eval.data.TypeInfo;
 import ini.eval.function.BoundJavaFunction;
 import ini.parser.IniParser;
@@ -281,12 +280,12 @@ public class IniEval {
 
 			case AstNode.BOOLEAN_LITERAL:
 				result = new RawData(((BooleanLiteral) node).value);
-				result.setConstructor(parser.types.getOrCreatePrimitiveConstructor("Boolean"));
+				result.setConstructor(RuntimeConstructor.BOOLEAN);
 				break;
 
 			case AstNode.CHAR_LITERAL:
 				result = new RawData(((CharLiteral) node).value);
-				result.setConstructor(parser.types.getOrCreatePrimitiveConstructor("Char"));
+				result.setConstructor(RuntimeConstructor.CHAR);
 				break;
 
 			case AstNode.FIELD_ACCESS:
@@ -374,15 +373,15 @@ public class IniEval {
 			case AstNode.NUMBER_LITERAL:
 				result = new RawData(((NumberLiteral) node).value);
 				if (((NumberLiteral) node).value instanceof Integer) {
-					result.setConstructor(parser.types.getOrCreatePrimitiveConstructor("Int"));
+					result.setConstructor(RuntimeConstructor.INT);
 				} else if (((NumberLiteral) node).value instanceof Float) {
-					result.setConstructor(parser.types.getOrCreatePrimitiveConstructor("Float"));
+					result.setConstructor(RuntimeConstructor.FLOAT);
 				} else if (((NumberLiteral) node).value instanceof Double) {
-					result.setConstructor(parser.types.getOrCreatePrimitiveConstructor("Float"));
+					result.setConstructor(RuntimeConstructor.DOUBLE);
 				} else if (((NumberLiteral) node).value instanceof Byte) {
-					result.setConstructor(parser.types.getOrCreatePrimitiveConstructor("Byte"));
+					result.setConstructor(RuntimeConstructor.BYTE);
 				} else if (((NumberLiteral) node).value instanceof Long) {
-					result.setConstructor(parser.types.getOrCreatePrimitiveConstructor("Long"));
+					result.setConstructor(RuntimeConstructor.LONG);
 				}
 				break;
 
@@ -436,13 +435,16 @@ public class IniEval {
 			case AstNode.SET_CONSTRUCTOR:
 				String constructorName = ((SetConstructor) node).name;
 				d = new RawData(null);
+				RuntimeConstructor c = new RuntimeConstructor(constructorName, new ArrayList<>());
 				for (Assignment a : ((SetConstructor) node).fieldAssignments) {
 					d.set(((Variable) a.assignee).name, eval(a.assignment));
+					c.fields.add(((Variable) a.assignee).name);
 				}
+				d.setConstructor(c);
 				if (constructorName != null) {
 					Data set = invocationStack.peek().getOrCreate(constructorName);
-					d.setConstructor(parser.types.getFirstLevelConstructor(constructorName));
 					set.set(d, d);
+					//set.copyData(d);
 				}
 				result = d;
 				break;
@@ -491,7 +493,7 @@ public class IniEval {
 				d = new RawData(((StringLiteral) node).value);
 				d.setKind(Data.Kind.INT_SET);
 				result = d;
-				result.setConstructor(parser.types.getOrCreatePrimitiveConstructor("String"));
+				result.setConstructor(RuntimeConstructor.STRING);
 				break;
 
 			case AstNode.SUB_ARRAY_ACCESS:
@@ -678,32 +680,37 @@ public class IniEval {
 			}
 		} else if (matchExpression instanceof ConstructorMatchExpression) {
 			ConstructorMatchExpression e = (ConstructorMatchExpression) matchExpression;
-			Constructor toMatch = dataToMatch.getConstructor();
-			Constructor constructor = null;
-			if (e.name != null) {
-				constructor = parser.types.getFirstLevelConstructor(e.name);
-			}
+			RuntimeConstructor toMatch = dataToMatch.getConstructor();
+			//Constructor constructor = null;
+			//if (e.name != null) {
+			//	constructor = parser.types.getFirstLevelConstructor(e.name);
+			//}
+			//System.out.println("1: "+dataToMatch);
 			if (toMatch == null) {
 				result = new RawData(false);
 				return;
 			}
-			if (constructor == null) {
-				throw new RuntimeException("type '" + e.name + "' does not exist");
-			}
-			if (toMatch != null && constructor != null && constructor != toMatch) {
-				result = new RawData(false);
+			//if (constructor == null) {
+			//	throw new RuntimeException("type '" + e.name + "' does not exist");
+			//}
+			//if (toMatch != null && constructor != null && constructor != toMatch) {
+			//	result = new RawData(false);
+			//	return;
+			//}
+			result = new RawData(false);
+			if(!toMatch.name.equals(e.name)) {
 				return;
 			}
-			result = new RawData(false);
 			Context c = new Context(invocationStack.peek());
-			if (toMatch.fields != null) {
-				for (Field f : toMatch.fields) {
-					c.bind(f.name, dataToMatch.get(f.name));
+			if (!dataToMatch.isArray() && dataToMatch.getReferences()!=null) {
+				for (Object field : dataToMatch.getReferences().keySet()) {
+					c.bind((String)field, dataToMatch.get(field));
 				}
 				invocationStack.push(c);
 				result.setValue(true);
 				for (Expression fe : e.fieldMatchExpressions) {
 					if (!eval(fe).isTrueOrDefined()) {
+						//System.out.println("2: "+fe);
 						result.setValue(false);
 						break;
 					}

@@ -1,32 +1,15 @@
 int _step_count = 0
 int _step_max = 1000
-bool start=false
-bool end=false
-chan c0=[10] of {byte}
-chan c1=[10] of {byte}
-chan c2=[10] of {byte}
-active proctype main() {
-  run p(c1, c2)
-  run p(c2, c0)
-  start = true
-  c1!1
-  byte v
+chan test_channel=[10] of {byte}
+proctype p() {
+  byte p
   do
-    :: c0?v ->
+    :: test_channel?p ->
       _step_count++
-      end = true
-      break
+do
+:: (p of Person | !p.name||!p.firstName||!p.age) -> accept488970385: progress488970385:
+:: (p~Person[name,firstName,age]) -> accept1209271652: progress1209271652:
+od;
     :: _step_count > _step_max -> break
   od
 }
-proctype p(chan in; chan out) {
-  byte v
-  do
-    :: in?v ->
-      _step_count++
-      out!v+1
-      break
-    :: _step_count > _step_max -> break
-  od
-}
-ltl p1 { (<> end) } 

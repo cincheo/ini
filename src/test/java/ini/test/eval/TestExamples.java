@@ -47,7 +47,7 @@ public class TestExamples extends IniTestCase {
 	public void testPrettyPrinter() {
 		testFile("ini/examples/pretty_printer.ini",
 				(p, out) -> assertEquals(
-						"<html>\n    <head>\n    </head>\n    <body bgcolor=\"white\" width=\"100%\">\nthis is a body text example \n        <b>\nthis is a strong text\n        </b>\n    </body>\n</html>\n{name:\"html\",content:[{name:\"head\"},{name:\"body\",attr:[{name:\"bgcolor\",value:\"white\"},{name:\"width\",value:\"100%\"}],content:[{name:\"false\",text:\"this is a body text example \"},{name:\"b\",content:[{name:\"false\",text:\"this is a strong text\"}]}]}]}\n",
+						"<html>\n    <head>\n    </head>\n    <body bgcolor=\"white\" width=\"100%\">\nthis is a body text example \n        <b>\nthis is a strong text\n        </b>\n    </body>\n</html>\n{name:\"html\",content:[{name:\"head\"},{name:\"body\",attr:[{name:\"bgcolor\",value:\"white\"},{name:\"width\",value:\"100%\"}],content:[{text:\"this is a body text example \"},{name:\"b\",content:[{text:\"this is a strong text\"}]}]}]}\n",
 						out));
 	}
 
@@ -118,11 +118,11 @@ public class TestExamples extends IniTestCase {
 								+ "Fibtree(5).left.left.value = 3\n" + "Fibtree(5).left.right.value = 2\n"
 								+ "Fibtree(5).right.left.value = 2\n" + "Fibtree(5).right.right.value = 1\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
-								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[left=null,right=null,value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[left=null,right=null,value=1],value=3],value=5]\n"
+								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[value=1],value=3],value=5]\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
-								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[left=null,right=null,value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[left=null,right=null,value=1],value=3],value=5]\n"
+								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Node[value=1],value=3],value=5]\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
-								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1]],right=Node[left=null,right=null,value=1]],right=Node[left=Leaf[value=1],right=Leaf[value=1]]],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1]],right=Node[left=null,right=null,value=1]]]\n"
+								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1]],right=Node[value=1]],right=Node[left=Leaf[value=1],right=Leaf[value=1]]],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1]],right=Node[value=1]]]\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
 								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Leaf[value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Leaf[value=1],value=3],value=5]\n",
 						out));

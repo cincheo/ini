@@ -1,5 +1,6 @@
 package ini.ast;
 
+import ini.eval.data.RuntimeConstructor;
 import ini.parser.IniParser;
 
 import java.io.PrintStream;
@@ -11,6 +12,7 @@ public class SetConstructor extends NamedElement implements Expression {
 	
 	public SetConstructor(IniParser parser, Token token, String name, List<Assignment> fieldAssignments) {
 		super(parser, token, name);
+		
 		this.fieldAssignments=fieldAssignments;
 		this.nodeTypeId=AstNode.SET_CONSTRUCTOR;
 	}
