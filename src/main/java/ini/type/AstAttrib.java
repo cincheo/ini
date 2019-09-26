@@ -29,6 +29,7 @@ import ini.ast.Invocation;
 import ini.ast.ListExpression;
 import ini.ast.NamedElement;
 import ini.ast.NumberLiteral;
+import ini.ast.Parameter;
 import ini.ast.Process;
 import ini.ast.ReturnStatement;
 import ini.ast.Rule;
@@ -59,6 +60,7 @@ public class AstAttrib {
 	List<Function> attributedFunctions = new ArrayList<Function>();
 
 	private List<TypingConstraint> constraints = new ArrayList<>();
+	private List<TypingConstraint> constraintsBackup = new ArrayList<>();
 	public List<TypingError> errors = new ArrayList<TypingError>();
 
 	public AstAttrib(IniParser parser) {
@@ -610,6 +612,12 @@ public class AstAttrib {
 			result.executable = (Executable) node;
 			if (((NamedElement) node).name != null) {
 				getRootContext().bind(((NamedElement) node).name, result);
+				t = parser.types.createFunctionalType(parser.types.ANY);
+				for (int i = 0; i < result.executable.parameters.size(); i++) {
+					t.addTypeParameter(parser.types.ANY);
+				}
+				addTypingConstraint(Kind.EQ, result, t, node, null);
+
 			}
 			break;
 
@@ -993,8 +1001,13 @@ public class AstAttrib {
 		out.print("'" + node + "'" + (node != null && node.token() != null ? " at " + node.token().getLocation() : ""));
 	}
 
+	public void rollback() {
+		this.constraints = this.constraintsBackup;
+		this.errors.clear();
+	}
+
 	public AstAttrib unify() {
-		// printConstraints("", System.err);
+		//printConstraints("", System.err);
 
 		// remove wrong constraints
 		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1037,8 +1050,16 @@ public class AstAttrib {
 				}
 			}
 		}
-		// System.err.println("==================");
-		// printConstraints("", System.err);
+		if(!hasErrors()) {
+			constraintsBackup = new ArrayList<>();
+			for (TypingConstraint c : constraints) {
+				constraintsBackup.add(
+						new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(), c.leftOrigin, c.rightOrigin));
+			}
+
+		}
+		//System.err.println("==================");
+		//printConstraints("", System.err);
 		return this;
 
 	}

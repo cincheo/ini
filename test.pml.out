@@ -1,5 +1,5 @@
 spin: test.pml:5, Error: syntax error	saw 'process name'
 spin: test.pml:10, Error: syntax error	saw 'keyword: of' near 'of'
 spin: test.pml:11, Error: syntax error	saw 'token: ::'
-spin: test.pml:12, Error: syntax error	saw 'keyword: od' near 'od'
+spin: test.pml:12, Error: syntax error	saw 'token: ::'
 spin: test.pml:16, Error: aborting (ana_stmnt)

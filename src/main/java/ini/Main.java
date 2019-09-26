@@ -214,7 +214,7 @@ public class Main {
 					line = reader.readLine("> ");
 					line = line.trim();
 					eval.result = null;
-					eval.evalCode(line + "\n");
+					eval.evalCode(attrib, line + "\n");
 					if (eval.result != null) {
 						if(eval.result instanceof FutureData) {
 							terminal.writer().println("<future>");

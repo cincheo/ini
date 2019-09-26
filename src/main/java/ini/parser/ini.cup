@@ -494,11 +494,12 @@ assignment_list ::= assignment_list:l COMMA lf_opt IDENTIFIER:f ASSIGN:a expr:e
 	:}
 ;
 
-top_level_statement ::= pre_post_op:e {: RESULT = e; :}
+top_level_statement ::= case_expr:e {: RESULT = e; :}
+//    | pre_post_op:e {: RESULT = e; :}
 	| assignment_expr:e {: RESULT = e; :} 
-	| invocation:e {: RESULT = e; :}
-	| dot_invocation:e {: RESULT = e; :}
-	| case_expr:e {: RESULT = e; :}
+	| expr:e {: RESULT = e; :} 
+//	| invocation:e {: RESULT = e; :}
+//	| dot_invocation:e {: RESULT = e; :}
 ;
 
 statement ::= top_level_statement:e {: RESULT = e; :}

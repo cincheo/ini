@@ -208,6 +208,9 @@ public final class Type {
 	}
 
 	public final Type deepCopy() {
+		if (types == null) {
+			return this;
+		}
 		if (types.isPrimitive(this)) {
 			return this;
 		} else {

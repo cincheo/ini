@@ -51,6 +51,7 @@ import ini.eval.data.RuntimeConstructor;
 import ini.eval.data.TypeInfo;
 import ini.eval.function.BoundJavaFunction;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 
 public class IniEval {
 
@@ -113,7 +114,7 @@ public class IniEval {
 			case AstNode.PREDICATE:
 				// ignore
 				break;
-			
+
 			case AstNode.IMPORT:
 				try {
 					IniParser localParser = ((Import) node).importParser;
@@ -444,7 +445,7 @@ public class IniEval {
 				if (constructorName != null) {
 					Data set = invocationStack.peek().getOrCreate(constructorName);
 					set.set(d, d);
-					//set.copyData(d);
+					// set.copyData(d);
 				}
 				result = d;
 				break;
@@ -540,7 +541,7 @@ public class IniEval {
 			case AstNode.VARIABLE:
 			case AstNode.TYPE_VARIABLE:
 				name = ((Variable) node).name;
-				if(((Variable) node).channelLiteral!=null) {
+				if (((Variable) node).channelLiteral != null) {
 					result = new RawData(((Variable) node).channelLiteral);
 					break;
 				}
@@ -607,7 +608,8 @@ public class IniEval {
 
 	@SuppressWarnings("unchecked")
 	<T> T getParentNode(Class<T> nodeType) {
-		if (nodeType.isAssignableFrom(evaluationStack.get(evaluationStack.size() - 2).getClass())) {
+		if (evaluationStack.size() > 1
+				&& nodeType.isAssignableFrom(evaluationStack.get(evaluationStack.size() - 2).getClass())) {
 			return (T) evaluationStack.get(evaluationStack.size() - 2);
 		}
 		return null;
@@ -681,36 +683,38 @@ public class IniEval {
 		} else if (matchExpression instanceof ConstructorMatchExpression) {
 			ConstructorMatchExpression e = (ConstructorMatchExpression) matchExpression;
 			RuntimeConstructor toMatch = dataToMatch.getConstructor();
-			//Constructor constructor = null;
-			//if (e.name != null) {
-			//	constructor = parser.types.getFirstLevelConstructor(e.name);
-			//}
-			//System.out.println("1: "+dataToMatch);
+			// Constructor constructor = null;
+			// if (e.name != null) {
+			// constructor = parser.types.getFirstLevelConstructor(e.name);
+			// }
+			// System.out.println("1: "+dataToMatch);
 			if (toMatch == null) {
 				result = new RawData(false);
 				return;
 			}
-			//if (constructor == null) {
-			//	throw new RuntimeException("type '" + e.name + "' does not exist");
-			//}
-			//if (toMatch != null && constructor != null && constructor != toMatch) {
-			//	result = new RawData(false);
-			//	return;
-			//}
+			// if (constructor == null) {
+			// throw new RuntimeException("type '" + e.name + "' does not
+			// exist");
+			// }
+			// if (toMatch != null && constructor != null && constructor !=
+			// toMatch) {
+			// result = new RawData(false);
+			// return;
+			// }
 			result = new RawData(false);
-			if(!toMatch.name.equals(e.name)) {
+			if (!toMatch.name.equals(e.name)) {
 				return;
 			}
 			Context c = new Context(invocationStack.peek());
-			if (!dataToMatch.isArray() && dataToMatch.getReferences()!=null) {
+			if (!dataToMatch.isArray() && dataToMatch.getReferences() != null) {
 				for (Object field : dataToMatch.getReferences().keySet()) {
-					c.bind((String)field, dataToMatch.get(field));
+					c.bind((String) field, dataToMatch.get(field));
 				}
 				invocationStack.push(c);
 				result.setValue(true);
 				for (Expression fe : e.fieldMatchExpressions) {
 					if (!eval(fe).isTrueOrDefined()) {
-						//System.out.println("2: "+fe);
+						// System.out.println("2: "+fe);
 						result.setValue(false);
 						break;
 					}
@@ -917,7 +921,7 @@ public class IniEval {
 				new SpawnRequest(parser.env.node, executable.name, arguments));
 	}
 
-	public void evalCode(String code) throws Exception {
+	public void evalCode(AstAttrib attrib, String code) throws Exception {
 		IniParser parser = IniParser.createParserForCode(this.parser.env, this.parser, code);
 		try {
 			parser.parse();
@@ -927,6 +931,24 @@ public class IniEval {
 				return;
 			}
 		}
+
+		try {
+			attrib.attrib(parser);
+			attrib.unify();
+		} catch (Exception e) {
+			if (attrib != null)
+				attrib.printError(System.err, e);
+			System.err.println("Java stack:");
+			e.printStackTrace(System.err);
+			return;
+		} finally {
+			if (attrib != null && attrib.hasErrors()) {
+				attrib.printErrors(System.err);
+				attrib.rollback();
+				return;
+			}
+		}
+
 		for (AstNode node : parser.topLevels) {
 			eval(node);
 		}

@@ -50,7 +50,7 @@ public class StartWebServiceFunction extends BuiltInExecutable {
 	@Override
 	public Type getFunctionalType(AstAttrib attrib) {
 		return parser.types.createFunctionalType(parser.types.VOID, parser.types.INT,
-				parser.types.createFunctionalType(parser.types.VOID, parser.types.STRING, parser.types.ANY));
+				parser.types.createFunctionalType(parser.types.ANY, parser.types.STRING, parser.types.ANY));
 	}
 
 	public class Handler extends AbstractHandler {
