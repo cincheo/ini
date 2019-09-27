@@ -1002,11 +1002,13 @@ public class AstAttrib {
 	}
 
 	public void rollback() {
+		//System.err.println("rollbacking errors");
 		this.constraints = this.constraintsBackup;
 		this.errors.clear();
 	}
 
 	public AstAttrib unify() {
+		//System.err.println("has errors: " + hasErrors());
 		//printConstraints("", System.err);
 
 		// remove wrong constraints
@@ -1050,16 +1052,20 @@ public class AstAttrib {
 				}
 			}
 		}
-		if(!hasErrors()) {
+
+		//System.err.println("==================");
+		//System.err.println("has errors: " + hasErrors());
+		//printConstraints("", System.err);
+		
+		if (!hasErrors()) {
 			constraintsBackup = new ArrayList<>();
 			for (TypingConstraint c : constraints) {
-				constraintsBackup.add(
-						new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(), c.leftOrigin, c.rightOrigin));
+				c.used = false;
+				constraintsBackup.add(new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(), c.leftOrigin,
+						c.rightOrigin));
 			}
-
 		}
-		//System.err.println("==================");
-		//printConstraints("", System.err);
+		
 		return this;
 
 	}
