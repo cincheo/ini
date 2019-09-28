@@ -933,6 +933,7 @@ public class IniEval {
 		}
 
 		try {
+			attrib.rollback();
 			attrib.attrib(parser);
 			attrib.unify();
 		} catch (Exception e) {
@@ -944,7 +945,6 @@ public class IniEval {
 		} finally {
 			if (attrib != null && attrib.hasErrors()) {
 				attrib.printErrors(System.err);
-				attrib.rollback();
 				return;
 			}
 		}

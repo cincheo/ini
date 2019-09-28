@@ -2,16 +2,22 @@ package ini;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jline.reader.Candidate;
+import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.ParsedLine;
 import org.jline.reader.UserInterruptException;
+import org.jline.reader.impl.history.DefaultHistory;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.slf4j.Logger;
@@ -205,9 +211,63 @@ public class Main {
 		if (commandLineConfig.getBoolean("shell")) {
 
 			Terminal terminal = TerminalBuilder.terminal();
-			LineReader reader = LineReaderBuilder.builder().terminal(terminal)
+			LineReader reader = LineReaderBuilder.builder().terminal(terminal).history(new DefaultHistory())
+					.completer(new Completer() {
+
+						@Override
+						public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+							String[] toCompleteSplitted = line.line().split("[^a-zA-Z0-9_]");
+							// System.out.print(Arrays.asList(toCompleteSplitted));
+							String toComplete = toCompleteSplitted[toCompleteSplitted.length - 1];
+							// System.out.print("*"+toComplete+"*");
+							List<String> found = new ArrayList<String>();
+							for (String s : eval.invocationStack.peek().getVariables().keySet()) {
+								if (s.startsWith(toComplete) && !found.contains(s)) {
+									found.add(s);
+								}
+							}
+							for (String s : eval.getRootContext().getVariables().keySet()) {
+								if (s.startsWith(toComplete) && !found.contains(s)) {
+									found.add(s);
+								}
+							}
+							found.sort((s1, s2) -> s1.compareTo(s2));
+							if (found.size() == 1) {
+								reader.getBuffer().write(found.get(0).substring(toComplete.length()));
+							} else {
+								terminal.writer().println();
+								int max = 0;
+								for (String s : found) {
+									if (s.length() > max) {
+										max = s.length();
+									}
+								}
+								int cols = 0;
+								for (String s : found) {
+									if (cols == 4) {
+										cols = 0;
+										terminal.writer().println();
+									}
+									terminal.writer().print(s);
+									for (int i = 0; i <= max - s.length(); i++) {
+										terminal.writer().print(" ");
+									}
+									cols++;
+								}
+								terminal.writer().println();
+								terminal.writer().print("> " + line.line());
+							}
+						}
+					}).variable(LineReader.HISTORY_FILE, ".ini.history")
 					.variable(LineReader.SECONDARY_PROMPT_PATTERN, "%M%P > ").build();
 
+			reader.unsetOpt(LineReader.Option.GROUP);
+			reader.unsetOpt(LineReader.Option.AUTO_GROUP);
+			reader.unsetOpt(LineReader.Option.AUTO_LIST);
+			reader.unsetOpt(LineReader.Option.AUTO_MENU);
+			reader.unsetOpt(LineReader.Option.AUTO_PARAM_SLASH);
+			reader.unsetOpt(LineReader.Option.AUTO_REMOVE_SLASH);
+			
 			while (true) {
 				String line = null;
 				try {
@@ -216,7 +276,7 @@ public class Main {
 					eval.result = null;
 					eval.evalCode(attrib, line + "\n");
 					if (eval.result != null) {
-						if(eval.result instanceof FutureData) {
+						if (eval.result instanceof FutureData) {
 							terminal.writer().println("<future>");
 						} else {
 							terminal.writer().println(eval.result.toPrettyString());

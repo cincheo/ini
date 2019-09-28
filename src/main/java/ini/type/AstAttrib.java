@@ -1002,71 +1002,76 @@ public class AstAttrib {
 	}
 
 	public void rollback() {
-		//System.err.println("rollbacking errors");
-		this.constraints = this.constraintsBackup;
-		this.errors.clear();
+		// System.err.println("rollbacking errors");
+		if (hasErrors()) {
+			this.constraints = this.constraintsBackup;
+			this.errors.clear();
+		}
 	}
 
 	public AstAttrib unify() {
-		//System.err.println("has errors: " + hasErrors());
-		//printConstraints("", System.err);
 
-		// remove wrong constraints
-		for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
-			if (c.left == null || c.right == null) {
-				constraints.remove(c);
-			}
-		}
+		try {
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
-		// do substitution
-		boolean allUsed = false;
-		while (!allUsed) {
-			allUsed = true;
-			for (TypingConstraint substitution : constraints) {
-				substitution.normalize();
-				if (substitution.kind != TypingConstraint.Kind.EQ) {
-					continue;
-				}
-				if ((!substitution.left.isVariable() && !substitution.right.isVariable()) || substitution.used) {
-					continue;
-				}
-				for (TypingConstraint current : constraints) {
-					current.substitute(substitution);
-				}
-				allUsed = false;
-				substitution.used = true;
-			}
-			// System.out.println("===> after substitution");
-			// printConstraints(System.out);
-			simplify();
-			// System.out.println("===> after simplification");
-			// printConstraints(System.out);
-		}
-		for (TypingConstraint c : constraints) {
-			if (!c.left.isVariable() && !c.right.isVariable() && !c.left.equals(c.right)) {
-				addError(new TypingError(c.leftOrigin,
-						"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
-				if (c.leftOrigin != c.rightOrigin) {
-					addError(new TypingError(c.rightOrigin,
-							"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
+			// remove wrong constraints
+			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
+				if (c.left == null || c.right == null) {
+					constraints.remove(c);
 				}
 			}
-		}
 
-		//System.err.println("==================");
-		//System.err.println("has errors: " + hasErrors());
-		//printConstraints("", System.err);
-		
-		if (!hasErrors()) {
-			constraintsBackup = new ArrayList<>();
+			// do substitution
+			boolean allUsed = false;
+			while (!allUsed) {
+				allUsed = true;
+				for (TypingConstraint substitution : constraints) {
+					substitution.normalize();
+					if (substitution.kind != TypingConstraint.Kind.EQ) {
+						continue;
+					}
+					if ((!substitution.left.isVariable() && !substitution.right.isVariable()) || substitution.used) {
+						continue;
+					}
+					for (TypingConstraint current : constraints) {
+						current.substitute(substitution);
+					}
+					allUsed = false;
+					substitution.used = true;
+				}
+				// System.out.println("===> after substitution");
+				// printConstraints(System.out);
+				simplify();
+				// System.out.println("===> after simplification");
+				// printConstraints(System.out);
+			}
 			for (TypingConstraint c : constraints) {
-				c.used = false;
-				constraintsBackup.add(new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(), c.leftOrigin,
-						c.rightOrigin));
+				if (!c.left.isVariable() && !c.right.isVariable() && !c.left.equals(c.right)) {
+					addError(new TypingError(c.leftOrigin,
+							"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
+					if (c.leftOrigin != c.rightOrigin) {
+						addError(new TypingError(c.rightOrigin,
+								"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
+					}
+				}
+			}
+
+			// System.err.println("==================");
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
+
+			return this;
+		} finally {
+			if (!hasErrors()) {
+				constraintsBackup = new ArrayList<>();
+				for (TypingConstraint c : constraints) {
+					c.used = false;
+					constraintsBackup.add(new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(),
+							c.leftOrigin, c.rightOrigin));
+				}
 			}
 		}
-		
-		return this;
 
 	}
 
