@@ -208,6 +208,13 @@ public final class Type {
 	}
 
 	public final Type deepCopy() {
+		return deepCopy(new ArrayList<>(), new ArrayList<>());
+	}
+
+	private final Type deepCopy(List<Type> org, List<Type> dest) {
+		if (org.indexOf(this) != -1) {
+			return dest.get(org.indexOf(this));
+		}
 		if (types == null) {
 			return this;
 		}
@@ -215,10 +222,12 @@ public final class Type {
 			return this;
 		} else {
 			Type copy = new Type(this.types, this.name);
+			org.add(this);
+			dest.add(copy);
 			if (this.typeParameters != null) {
 				copy.typeParameters = new ArrayList<>();
 				for (Type t : this.typeParameters) {
-					copy.typeParameters.add(t.deepCopy());
+					copy.typeParameters.add(t.deepCopy(org, dest));
 				}
 			}
 			copy.constructorType = this.constructorType;
@@ -226,11 +235,11 @@ public final class Type {
 			if (this.fields != null) {
 				copy.fields = new HashMap<>();
 				for (Entry<String, Type> e : this.fields.entrySet()) {
-					copy.fields.put(e.getKey(), e.getValue().deepCopy());
+					copy.fields.put(e.getKey(), e.getValue().deepCopy(org, dest));
 				}
 			}
 			if (this.returnType != null) {
-				copy.returnType = this.returnType.deepCopy();
+				copy.returnType = this.returnType.deepCopy(org, dest);
 			}
 			copy.subTypes = subTypes;
 			copy.superType = superType;
