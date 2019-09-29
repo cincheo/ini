@@ -16,7 +16,7 @@ public class TestFunctions extends IniTestCase {
 	}
 
 	public void testWrongReturnTypeInRecursiveFunction() {
-		parseAndAttribCode("type Tree = Leaf[value:Int]" //
+		parseAndAttribCode("declare type Tree = Leaf[value:Int]" //
 				+ "| Node[value:Int,left:Tree,right:Tree]\n" //
 				+ "process fibtree3(n) {" //
 				+ "	n ~	Node[value>2,!left,!right] {" //

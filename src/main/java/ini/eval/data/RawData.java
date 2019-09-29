@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -428,7 +429,7 @@ public class RawData implements Data {
 			explodedString = false;
 		}
 		Object oldValue = this.value;
-		if (value != null && (value instanceof Iterable || value.getClass().isArray())) {
+		if (value != null && (value instanceof Collection || value.getClass().isArray())) {
 			this.value = null;
 			this.typeInfo = 0;
 			this.kind = Kind.INT_SET;
@@ -438,7 +439,7 @@ public class RawData implements Data {
 					set(i++, new RawData(o));
 				}
 			} else {
-				for (Object o : ((Iterable<Object>) value)) {
+				for (Object o : ((Collection<Object>) value)) {
 					set(i++, new RawData(o));
 				}
 			}

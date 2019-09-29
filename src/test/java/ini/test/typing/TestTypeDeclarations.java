@@ -13,7 +13,7 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testRightTypeDeclaration() {
-		parseAndAttribCode("type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n\n", parser -> {
+		parseAndAttribCode("declare type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n\n", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 errors: " + attrib.errors, 0, attrib.errors.size());
@@ -21,7 +21,7 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void _testUnallowedEmptyConstructorDeclaration() {
-		parseAndAttribCode("type Tree = Leaf | Node[value:Int,left:Tree,right:Tree]\n", parser -> {
+		parseAndAttribCode("declare type Tree = Leaf | Node[value:Int,left:Tree,right:Tree]\n", parser -> {
 			assertEquals("expected 1 errors: " + parser.errors, 1, parser.errors.size());
 			assertEquals("wrong type of error: " + parser.errors, "'|' is not expected", parser.errors.get(0).message);
 		}, attrib -> {
@@ -29,7 +29,7 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testUnallowedConstructorReference() {
-		parseAndAttribCode("type Tree = Leaf[value:Int] | Node[value:Int,left:Node,right:Tree]\n", parser -> {
+		parseAndAttribCode("declare type Tree = Leaf[value:Int] | Node[value:Int,left:Node,right:Tree]\n", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
@@ -50,8 +50,8 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testIllegalDuplicateTypeDeclaration() {
-		parseAndAttribCode("type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n" //
-				+ "type Tree = Text[value:Int]\n", parser -> {
+		parseAndAttribCode("declare type Tree = Leaf[value:Int] | Node[value:Int,left:Tree,right:Tree]\n" //
+				+ "declare type Tree = Text[value:Int]\n", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
 					assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
@@ -61,8 +61,8 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testIllegalSameNameForTypeAndExternalConstructor() {
-		parseAndAttribCode("type Tree1 = Leaf[value:Int] | Node[value:Int,left:Tree1,right:Tree1]\n" //
-				+ "type Tree2 = Tree1[value:Int]\n", parser -> {
+		parseAndAttribCode("declare type Tree1 = Leaf[value:Int] | Node[value:Int,left:Tree1,right:Tree1]\n" //
+				+ "declare type Tree2 = Tree1[value:Int]\n", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
 					assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
@@ -72,7 +72,7 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testIllegalSameNameForTypeAndInternalConstructor() {
-		parseAndAttribCode("type Tree = Leaf[value:Int] | Tree[value:Int,left:Tree,right:Tree]", parser -> {
+		parseAndAttribCode("declare type Tree = Leaf[value:Int] | Tree[value:Int,left:Tree,right:Tree]", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
@@ -82,7 +82,7 @@ public class TestTypeDeclarations extends IniTestCase {
 	}
 
 	public void testUseOfAnonymousConstructor1() {
-		parseAndAttribCode("type Tree = [value:Int,left:Tree,right:Tree]\n" //
+		parseAndAttribCode("declare type Tree = [value:Int,left:Tree,right:Tree]\n" //
 				+ "process main() {" + "  @init() { t = Tree[value = 1] }" //
 				+ "}", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
@@ -93,7 +93,7 @@ public class TestTypeDeclarations extends IniTestCase {
 
 	public void testUseOfAnonymousConstructor2() {
 		parseAndAttribCode(
-				"type Point = [x:Int,y:Int]\n" + "process main() {" + "  @init() { p = Point[x = 1, y = 1] }" + "}",
+				"declare type Point = [x:Int,y:Int]\n" + "process main() {" + "  @init() { p = Point[x = 1, y = 1] }" + "}",
 				parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {

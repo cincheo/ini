@@ -195,5 +195,10 @@
 			<artifactId>jline</artifactId>
 			<version>3.12.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>3.11.0</version>
+		</dependency>
 	</dependencies>
 </project>

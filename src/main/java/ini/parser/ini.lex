@@ -96,7 +96,6 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "return"		        { return symbol(sym.RETURN); }
   "true"		        { return symbol(sym.TRUE); }
   "false"		        { return symbol(sym.FALSE); }
-  "type"		        { yybegin(USERTYPE); return symbol(sym.TYPE); }
   "this"		        { return symbol(sym.THIS); }
   "case"		        { return symbol(sym.CASE); }
   "default"		        { return symbol(sym.DEFAULT); }
@@ -104,6 +103,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "declare"		        { return symbol(sym.DECLARE); }
   "declare" {WhiteSpaceChar}* "channel"	    { return symbol(sym.CHANNEL); }
   "declare" {WhiteSpaceChar}* "predicate"	{ return symbol(sym.PREDICATE); }
+  "declare" {WhiteSpaceChar}* "type"		{ yybegin(USERTYPE); return symbol(sym.TYPE); }
 
   {DecIntegerLiteral}   { return symbol(sym.INT); }
   {DecFloatLiteral}		{ return symbol(sym.NUM); }

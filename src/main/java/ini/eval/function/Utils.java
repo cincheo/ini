@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.bson.Document;
+
+import com.mongodb.MongoClient;
+
 public class Utils {
 
 	public static Number mod(Number x, Number y) {
@@ -24,4 +28,14 @@ public class Utils {
 
 	}
 
+	public static void main(String[] args) {
+		System.out.println("start test");
+		MongoClient c = new MongoClient("localhost:27017");
+		System.out.println("connected");
+		c.getDatabase("test").getCollection("test").insertOne(Document.parse("{key1:\"value\"}"));
+		System.out.println("wrote document");
+		System.out.println("===>"+c.getDatabase("test").getCollection("test").find().first().toJson());
+		c.close();
+	}
+	
 }
