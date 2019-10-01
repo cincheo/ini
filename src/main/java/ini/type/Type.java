@@ -113,7 +113,7 @@ public final class Type {
 		} else if (name != null && "function".equals(name)) {
 			return "(" + typeParametersString(typeParameters) + ")->" + returnType;
 		} else {
-			return name;
+			return name /*+ (superType != null ? "<" + superType.name : "")*/;
 		}
 	}
 

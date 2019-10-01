@@ -1,6 +1,7 @@
 package ini.ast;
 
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 import ini.type.Type;
 
 import java.io.PrintStream;
@@ -30,7 +31,7 @@ public class Binding extends NamedElement {
 			for (TypeVariable v : parameterTypes) {
 				v.context = typeParameters;
 			}
-			if(returnType!=null) {
+			if (returnType != null) {
 				returnType.context = typeParameters;
 			}
 		}
@@ -67,16 +68,29 @@ public class Binding extends NamedElement {
 		return memberName;
 	}
 
-	public Type getFunctionalType() {
-		if (type == null) {
-			type = new Type(parser.types, "function");
-			type.setReturnType(returnType.getType());
-			if (parameterTypes != null) {
-				for (TypeVariable v : parameterTypes) {
-					type.addTypeParameter(v.getType());
+	public Type getFunctionalType(AstAttrib attrib) {
+		// clear context to get fresh type variables and create constraints
+		if (typeParameters != null) {
+			for (TypeVariable tv : typeParameters) {
+				tv.type = null;
+				if (tv.superType != null) {
+					attrib.addTypingConstraint(ini.type.TypingConstraint.Kind.LTE, tv.getType(), tv.superType.getType(),
+							this, null);
 				}
 			}
 		}
+		Type type = new Type(parser.types, "function");
+		type.setReturnType(returnType.lookupTypeVariable(returnType.name) != null
+				? returnType.lookupTypeVariable(returnType.name) : returnType.getType());
+		if (parameterTypes != null) {
+			for (TypeVariable v : parameterTypes) {
+				// System.out.println(" - "+v+" -
+				// "+v.lookupTypeVariable(v.name));
+				type.addTypeParameter(
+						v.lookupTypeVariable(v.name) != null ? v.lookupTypeVariable(v.name) : v.getType());
+			}
+		}
+		//System.out.println("FUNCTIONAL TYPE FOR " + this + " : " + type);
 		return type;
 	}
 

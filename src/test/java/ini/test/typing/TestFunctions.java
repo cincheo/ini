@@ -134,7 +134,6 @@ public class TestFunctions extends IniTestCase {
 				+ "}", parser -> {
 					assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 				}, attrib -> {
-
 					assertEquals("expected 2 error: " + attrib.errors, 2, attrib.errors.size());
 					assertEquals("wrong type of error: " + attrib.errors,
 							"type mismatch: 'Int' is not compatible with 'Double'", attrib.errors.get(0).message);
@@ -249,11 +248,15 @@ public class TestFunctions extends IniTestCase {
 		parseAndAttribFile("ini/test/typing/functions/wrong_bindings.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
-			assertEquals("expected 2 errors: " + attrib.errors, 2, attrib.errors.size());
+			assertEquals("expected 4 errors: " + attrib.errors, 4, attrib.errors.size());
 			assertEquals("wrong type of error: " + attrib.errors,
-					"type mismatch: 'Int' is not compatible with 'Double'", attrib.errors.get(0).message);
+					"type mismatch: 'Double' is not compatible with 'Int'", attrib.errors.get(2).message);
 			assertEquals("wrong type of error: " + attrib.errors,
-					"type mismatch: 'Int' is not compatible with 'Double'", attrib.errors.get(1).message);
+					"type mismatch: 'Double' is not compatible with 'Int'", attrib.errors.get(3).message);
+			assertEquals("wrong type of error: " + attrib.errors,
+					"type mismatch: 'String' is not compatible with 'Double'", attrib.errors.get(0).message);
+			assertEquals("wrong type of error: " + attrib.errors,
+					"type mismatch: 'String' is not compatible with 'Double'", attrib.errors.get(1).message);
 		});
 	}
 	

@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -22,11 +23,13 @@ import ini.ast.BooleanLiteral;
 import ini.ast.Channel;
 import ini.ast.Executable;
 import ini.ast.Expression;
+import ini.ast.Function;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
 import ini.ast.StringLiteral;
 import ini.ast.Variable;
 import ini.eval.EvalException;
+import ini.eval.IniEval;
 import ini.parser.IniParser;
 import ini.type.Type;
 
@@ -145,7 +148,7 @@ public class RawData implements Data {
 		}
 		if (object instanceof Data) {
 			return (Data) object;
-		} else if (object instanceof List) {
+		} else if (object instanceof List && object.getClass().getName().startsWith("java.")) {
 			List<?> l = (List<?>) object;
 			Data d = new RawData(null);
 			d.setReferences(new HashMap<Object, Data>());
@@ -153,7 +156,7 @@ public class RawData implements Data {
 				d.set(i, objectToData(l.get(i)));
 			}
 			return d;
-		} else if (object instanceof Set) {
+		} else if (object instanceof Set && object.getClass().getName().startsWith("java.")) {
 			Set<?> s = (Set<?>) object;
 			Data d = new RawData(null);
 			d.setReferences(new HashMap<Object, Data>());
@@ -162,7 +165,7 @@ public class RawData implements Data {
 				d.set(dd, dd);
 			}
 			return d;
-		} else if (object instanceof Map) {
+		} else if (object instanceof Map && object.getClass().getName().startsWith("java.")) {
 			Map<?, ?> m = (Map<?, ?>) object;
 			Data d = new RawData(null);
 			d.setReferences(new HashMap<Object, Data>());
@@ -227,7 +230,7 @@ public class RawData implements Data {
 
 	}
 
-	public static Object dataToObject(Type type, Data data) {
+	public static Object dataToObject(IniEval eval, Type type, Data data) {
 		if (data.isArray() && type != null && type.getName().equals("Map")) {
 			try {
 				Object array = Array.newInstance(type.getTypeParameters().get(1).toJavaType(), data.getSize());
@@ -235,7 +238,7 @@ public class RawData implements Data {
 					for (int i = 0; i < (Integer) data.maxIndex(); i++) {
 						Data d = data.getReferences().get(i);
 						if (d != null) {
-							Array.set(array, i, dataToObject(null, d));
+							Array.set(array, i, dataToObject(eval, null, d));
 						}
 					}
 				}
@@ -246,6 +249,14 @@ public class RawData implements Data {
 		}
 		Object value = data.getValue();
 		if (data.getReferences() == null || data.getReferences().isEmpty()) {
+			if(value instanceof Function) {
+				// TODO: deal with all kind of functions
+				return new Consumer<Object>() {
+					public void accept(Object t) {
+						eval.invoke((Function)value, new Object[] {t});
+					}
+				};
+			}
 			return value;
 		} else {
 			if (data.isIndexedSet() && ((Integer) data.minIndex()) > 0) {
@@ -254,14 +265,14 @@ public class RawData implements Data {
 					if (i < (Integer) data.minIndex()) {
 						l.add(null);
 					} else {
-						l.add(dataToObject(null, data.getReferences().get(i)));
+						l.add(dataToObject(eval, null, data.getReferences().get(i)));
 					}
 				}
 				return l;
 			} else {
 				Map<Object, Object> m = new HashMap<Object, Object>();
 				for (Entry<Object, Data> e : data.getReferences().entrySet()) {
-					m.put(e.getKey(), dataToObject(null, e.getValue()));
+					m.put(e.getKey(), dataToObject(eval, null, e.getValue()));
 				}
 				return m;
 			}
@@ -429,7 +440,8 @@ public class RawData implements Data {
 			explodedString = false;
 		}
 		Object oldValue = this.value;
-		if (value != null && (value instanceof Collection || value.getClass().isArray())) {
+		if (value != null && ((value instanceof Collection && value.getClass().getName().startsWith("java."))
+				|| value.getClass().isArray())) {
 			this.value = null;
 			this.typeInfo = 0;
 			this.kind = Kind.INT_SET;

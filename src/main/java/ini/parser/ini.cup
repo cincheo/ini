@@ -219,11 +219,6 @@ binding ::= DECLARE:d IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLI
 		Binding b = new Binding(parser, (Token)d, name.toString(), (List)typedecls, (List)types, (TypeVariable)rtype, (List)a);
 		RESULT = b;
 	:}
-	| DECLARE:d type_decl_list_opt:typedecls
-	{:
-		Binding b = new Binding(parser, (Token)d, (String)null, (List)typedecls, (List)null, (TypeVariable)null, (List)null);
-		RESULT = b;
-	:}
 ;
 
 channel_decl ::= CHANNEL:d visibility:v IDENTIFIER:name LPAREN type:t RPAREN annotations_opt:a
@@ -392,6 +387,20 @@ type ::= TIDENTIFIER:i {: RESULT = new TypeVariable(parser,(Token)i,i.toString()
 		RESULT = tv;
 	:}
 	| type:t MULT {: RESULT = new TypeVariable(parser,((TypeVariable)t).token,(TypeVariable)t); :}
+	| LPAREN type_list:types RPAREN IMPLIES:token type:t {: 
+		TypeVariable ft = new TypeVariable(parser,(Token)token,"function");
+		ft.typeParameters = new ArrayList(); 
+		ft.typeParameters.add((TypeVariable)t);
+		ft.typeParameters.addAll((List)types);
+		RESULT = ft;
+	:}
+	| type:type IMPLIES:token type:t {: 
+		TypeVariable ft = new TypeVariable(parser,(Token)token,"function");
+		ft.typeParameters = new ArrayList(); 
+		ft.typeParameters.add((TypeVariable)t);
+		ft.typeParameters.add((TypeVariable)type);
+		RESULT = ft;
+	:}
 ;
 
 type_decl_list_opt ::= type_decl_list:l {: RESULT = l; :} | ;
@@ -400,19 +409,21 @@ type_decl_list ::= type_decl_list:l COMMA type_decl:t
 	{:
 		List list=(List)l;
 		list.add(t);
+		((TypeVariable)t).parameter=true;
 		RESULT=list;
 	:}
 		| type_decl:t
 	{:
 		List l=new ArrayList();
 		l.add(t);
+		((TypeVariable)t).parameter=true;
 		RESULT=l;
 	:}
 ;
 
-type_decl ::= TIDENTIFIER:i {: RESULT = new TypeVariable(parser,(Token)i,i.toString(), true); :}
+type_decl ::= TIDENTIFIER:i {: RESULT = new TypeVariable(parser,(Token)i,i.toString()); :}
 	| TIDENTIFIER:i LT TIDENTIFIER:s {: 
-		TypeVariable tv = new TypeVariable(parser,(Token)i,i.toString(), true);
+		TypeVariable tv = new TypeVariable(parser,(Token)i,i.toString());
 		TypeVariable sv = new TypeVariable(parser,(Token)s,s.toString());
 		tv.superType = sv;
 		RESULT = tv;
@@ -736,6 +747,11 @@ usertype ::= TYPE:t TIDENTIFIER:i ASSIGN constructor_list:l lf_opt END
 		UserType type = new UserType(parser,(Token)t,i.toString(),(List)l);
 		// parser.parsedTypes.add(type);
 		RESULT = type;
+	:}
+	| TYPE:t type_decl_list_opt:typedecls END
+	{:
+		Binding b = new Binding(parser, (Token)t, (String)null, (List)typedecls, (List)null, (TypeVariable)null, (List)null);
+		RESULT = b;
 	:}
 ;
 

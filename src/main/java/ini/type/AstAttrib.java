@@ -3,9 +3,11 @@ package ini.type;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 
 import ini.Main;
@@ -29,7 +31,6 @@ import ini.ast.Invocation;
 import ini.ast.ListExpression;
 import ini.ast.NamedElement;
 import ini.ast.NumberLiteral;
-import ini.ast.Parameter;
 import ini.ast.Process;
 import ini.ast.ReturnStatement;
 import ini.ast.Rule;
@@ -62,6 +63,7 @@ public class AstAttrib {
 	private List<TypingConstraint> constraints = new ArrayList<>();
 	private List<TypingConstraint> constraintsBackup = new ArrayList<>();
 	public List<TypingError> errors = new ArrayList<TypingError>();
+	public Set<String> importedFiles = new HashSet<>();
 
 	public AstAttrib(IniParser parser) {
 		this.parser = parser;
@@ -274,6 +276,11 @@ public class AstAttrib {
 			break;
 
 		case AstNode.IMPORT:
+			if (importedFiles.contains(((Import) node).filePath.toString())) {
+				// import files only once
+				Main.LOGGER.debug("already imported file '" + ((Import) node).filePath + "'");
+				break;
+			}
 			IniParser localParser = ((Import) node).importParser;
 			if (localParser == null) {
 				try {
@@ -291,9 +298,17 @@ public class AstAttrib {
 			break;
 
 		case AstNode.USER_TYPE:
-			// TODO: should register and constructs types in parser.types
-			// (instead of implicit registration)
-			// IGNORE FOR NOW
+			/* if (((UserType) node).simpleType != null) {
+				if (parser.types.types.containsKey(((UserType) node).name)) {
+					addError(
+							new TypingError(((UserType) node), "duplicate type name '" + ((UserType) node).name + "'"));
+				} else {
+					// note that getType() auto-registers the type... maybe should be done explicitly
+					((UserType) node).type = ((UserType) node).simpleType.getType();
+					//parser.types.register(((UserType) node).name, ((UserType) node).type);
+				}
+				break;
+			}*/
 			t1 = new Type((UserType) node);
 			if (parser.types.types.containsKey(((UserType) node).name)) {
 				addError(new TypingError(((UserType) node), "duplicate type name '" + ((UserType) node).name + "'"));
@@ -389,17 +404,17 @@ public class AstAttrib {
 					}
 				}
 			} else {
-				result = binding.getFunctionalType();
+				result = binding.getFunctionalType(this);
 				result.executable = new BoundJavaFunction(binding);
 				// TODO: change
-				if (binding.typeParameters != null) {
+				/*if (binding.typeParameters != null) {
 					for (TypeVariable tv : binding.typeParameters) {
 						if (tv.superType != null) {
 							// add constraints for supertypes
 							addTypingConstraint(Kind.LTE, tv.getType(), tv.getType().superType, tv, tv.superType);
 						}
 					}
-				}
+				}*/
 				getRootContext().bind(binding.name, result);
 			}
 			break;
@@ -667,6 +682,9 @@ public class AstAttrib {
 
 					for (int i = 0; i < typeVar.getTypeParameters().size(); i++) {
 						if (i < invocation.arguments.size()) {
+							//System.out.println(invocation+":"+typeVar.getTypeParameters().get(i)+" - "+typeVar.getTypeParameters().get(i).variable);
+							//addTypingConstraint(typeVar.getTypeParameters().get(i).variable?TypingConstraint.Kind.LTE:TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
+							//		eval(invocation.arguments.get(i)), invocation, invocation);
 							addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
 									eval(invocation.arguments.get(i)), invocation, invocation);
 						} else {
@@ -1012,8 +1030,8 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
-			// System.err.println("has errors: " + hasErrors());
-			// printConstraints("", System.err);
+			System.err.println("has errors: " + hasErrors());
+			printConstraints("", System.err);
 
 			// remove wrong constraints
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1057,9 +1075,9 @@ public class AstAttrib {
 				}
 			}
 
-			// System.err.println("==================");
-			// System.err.println("has errors: " + hasErrors());
-			// printConstraints("", System.err);
+			System.err.println("==================");
+			System.err.println("has errors: " + hasErrors());
+			printConstraints("", System.err);
 
 			return this;
 		} finally {

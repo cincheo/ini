@@ -42,22 +42,22 @@ public class BoundJavaFunction extends Executable {
 		Object result = null;
 		try {
 			Object[] args = new Object[parameters.size()];
-			List<Type> ts = binding.getFunctionalType().getTypeParameters();
+			List<TypeVariable> ts = binding.parameterTypes;
 			for (int i = 0; i < parameters.size(); i++) {
 				// System.out.println("-- constructing param "+e+" -
 				// "+binding.getFunctionalType());
 				Data d = getArgument(eval, i);
 				Object o = null;
 				if (ts == null) {
-					o = RawData.dataToObject(null, d);
+					o = RawData.dataToObject(eval, null, d);
 				} else {
-					o = RawData.dataToObject(ts.get(i), d);
+					o = RawData.dataToObject(eval, ts.get(i).getType(), d);
 				}
 				// System.out.println("-- "+o);
 				// TODO: handle data structure (at least collections)
 				args[i] = o;
 			}
-			Class<?> c = Class.forName(binding.className);
+			Class<?> c = "this".equals(binding.className)?args[0].getClass():Class.forName(binding.className);
 			boolean invoked = false;
 			Exception cause = null;
 
@@ -164,7 +164,7 @@ public class BoundJavaFunction extends Executable {
 
 	@Override
 	public Type getFunctionalType(AstAttrib attrib) {
-		return binding.getFunctionalType();
+		return binding.getFunctionalType(attrib);
 	}
 
 }

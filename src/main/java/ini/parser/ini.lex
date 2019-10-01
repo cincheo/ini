@@ -195,6 +195,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "*"                   { return symbol(sym.MULT); }
   "|"                   { return symbol(sym.TUBE); }
   ":"                   { return symbol(sym.COL); }
+  "<"                   { return symbol(sym.LT); }
   {Identifier}          { return symbol(sym.IDENTIFIER); }
   {TypeIdentifier}      { return symbol(sym.TIDENTIFIER); }
   {Comment}             { /* ignore */ }

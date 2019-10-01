@@ -13,7 +13,7 @@ public class TypeVariable extends Variable {
 	public TypeVariable superType;
 	public List<TypeVariable> context;
 	public List<TypeVariable> typeParameters;
-	private boolean parameter = false;
+	public boolean parameter = false;
 
 	public TypeVariable(IniParser parser, Token token, String name) {
 		super(parser, token, name);
@@ -46,7 +46,7 @@ public class TypeVariable extends Variable {
 		}
 	}
 
-	private Type lookupTypeVariable(String name) {
+	public Type lookupTypeVariable(String name) {
 		if (context == null) {
 			return null;
 		}
@@ -74,6 +74,9 @@ public class TypeVariable extends Variable {
 				Type t = lookupTypeVariable(name);
 				if (t == null) {
 					type = parser.types.getSimpleType(name);
+					if (this.superType != null) {
+						type.superType = this.superType.getType();
+					}
 				} else {
 					type = t;
 				}
