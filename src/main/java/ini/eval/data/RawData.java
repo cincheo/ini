@@ -13,8 +13,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.google.gson.Gson;
 
@@ -249,13 +252,52 @@ public class RawData implements Data {
 		}
 		Object value = data.getValue();
 		if (data.getReferences() == null || data.getReferences().isEmpty()) {
-			if(value instanceof Function) {
-				// TODO: deal with all kind of functions
-				return new Consumer<Object>() {
-					public void accept(Object t) {
-						eval.invoke((Function)value, new Object[] {t});
-					}
-				};
+			if (value instanceof Function) {
+				Type t = eval.attrib.getResolvedType(((Function) value).getType());
+				if (t.getTypeParameters().size() == 2 && t.getTypeParameters().get(0).equals(eval.parser.types.VOID)) {
+					return new Consumer<Object>() {
+						public void accept(Object t) {
+							eval.invoke((Function) value, new Object[] { t });
+						}
+					};
+				} else if (t.getTypeParameters().size() == 2
+						&& !t.getTypeParameters().get(0).equals(eval.parser.types.VOID)) {
+					return new java.util.function.Function<Object, Object>() {
+						public Object apply(Object t) {
+							return eval.invoke((Function) value, new Object[] { t });
+						}
+					};
+				} else if (t.getTypeParameters().size() == 1
+						&& !t.getTypeParameters().get(0).equals(eval.parser.types.VOID)) {
+					return new Supplier<Object>() {
+						public Object get() {
+							return eval.invoke((Function) value, new Object[] {});
+						}
+					};
+				} else if (t.getTypeParameters().size() == 0
+						&& !t.getTypeParameters().get(0).equals(eval.parser.types.VOID)) {
+					return new Runnable() {
+						public void run() {
+							eval.invoke((Function) value, new Object[] {});
+						}
+					};
+				} else if (t.getTypeParameters().size() == 3
+						&& t.getTypeParameters().get(0).equals(eval.parser.types.VOID)) {
+					return new BiConsumer<Object, Object>() {
+						public void accept(Object t1, Object t2) {
+							eval.invoke((Function) value, new Object[] { t1, t2 });
+						}
+					};
+				} else if (t.getTypeParameters().size() == 3
+						&& !t.getTypeParameters().get(0).equals(eval.parser.types.VOID)) {
+					return new BiFunction<Object, Object, Object>() {
+						public Object apply(Object t1, Object t2) {
+							return eval.invoke((Function) value, new Object[] { t1, t2 });
+						}
+					};
+				} else {
+					throw new EvalException(eval, "Unsupported lambda type convertion: " + t);
+				}
 			}
 			return value;
 		} else {

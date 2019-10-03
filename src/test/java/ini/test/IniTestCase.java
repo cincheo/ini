@@ -99,7 +99,7 @@ public abstract class IniTestCase extends TestCase {
 			attrib.attrib(parser);
 			attrib.unify();
 			assertEquals("expected 0 errors: " + attrib.errors, 0, attrib.errors.size());
-			Main.mainEval(parser, null);
+			Main.mainEval(parser, attrib, null);
 			if (sleepTime > 0) {
 				Thread.sleep(sleepTime);
 			}

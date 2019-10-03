@@ -74,7 +74,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator} | "#" {InputCharacter
 DocumentationComment = "/**" {CommentContent} "*/"
 CommentContent = ( [^*] | \*+ [^/*] )*
 
-Identifier = [a-z][A-Za-z0-9_]*
+Identifier = [a-z_][A-Za-z0-9_]*
 
 TypeIdentifier = [A-Z][A-Za-z0-9_]*
 

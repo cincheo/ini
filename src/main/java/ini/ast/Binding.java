@@ -16,6 +16,10 @@ public class Binding extends NamedElement {
 	public List<TypeVariable> typeParameters;
 	public TypeVariable returnType;
 
+	public boolean isLocal() {
+		return member != null;
+	}
+
 	public enum Kind {
 		FIELD, METHOD, CONSTRUCTOR
 	}
@@ -68,6 +72,12 @@ public class Binding extends NamedElement {
 		return memberName;
 	}
 
+	public boolean match(AstAttrib attrib, Invocation invocation) {
+		// TODO: also check types ;)
+		return (invocation.arguments == null ? 0 : invocation.arguments.size()) == (parameterTypes == null ? 0
+				: parameterTypes.size());
+	}
+
 	public Type getFunctionalType(AstAttrib attrib) {
 		// clear context to get fresh type variables and create constraints
 		if (typeParameters != null) {
@@ -90,7 +100,7 @@ public class Binding extends NamedElement {
 						v.lookupTypeVariable(v.name) != null ? v.lookupTypeVariable(v.name) : v.getType());
 			}
 		}
-		//System.out.println("FUNCTIONAL TYPE FOR " + this + " : " + type);
+		// System.out.println("FUNCTIONAL TYPE FOR " + this + " : " + type);
 		return type;
 	}
 

@@ -12,6 +12,7 @@ import java.util.List;
 import ini.Main;
 import ini.ast.Binding;
 import ini.ast.Executable;
+import ini.ast.Invocation;
 import ini.ast.Parameter;
 import ini.ast.TypeVariable;
 import ini.eval.IniEval;
@@ -23,6 +24,38 @@ import ini.type.Type;
 public class BoundJavaFunction extends Executable {
 
 	public Binding binding;
+
+	private List<Binding> overloads;
+
+	public void addOverload(Binding binding) {
+		if (overloads == null) {
+			overloads = new ArrayList<>();
+		}
+		overloads.add(binding);
+	}
+
+	/**
+	 * Since bindings may be overloaded, this method finds and returns the
+	 * appropriate overload for the given invocation.
+	 * 
+	 * @param attrib
+	 *            used to resolve the types
+	 * @param invocation
+	 *            the invocation to find the overload for
+	 * @return a bound function that matches the invocation (can be the same one
+	 *         or an overload)
+	 */
+	public BoundJavaFunction resolveOverload(AstAttrib attrib, Invocation invocation) {
+		if (overloads == null || binding.match(attrib, invocation)) {
+			return this;
+		}
+		for (Binding b : overloads) {
+			if (b.match(attrib, invocation)) {
+				return new BoundJavaFunction(b);
+			}
+		}
+		throw new RuntimeException("cannot find matching binding overload for invocation " + invocation);
+	}
 
 	public BoundJavaFunction(Binding binding) {
 		super(binding.parser, binding.token, binding.name, new ArrayList<>());
@@ -57,7 +90,8 @@ public class BoundJavaFunction extends Executable {
 				// TODO: handle data structure (at least collections)
 				args[i] = o;
 			}
-			Class<?> c = "this".equals(binding.className)?args[0].getClass():Class.forName(binding.className);
+			Class<?> c = (binding.className == null || "this".equals(binding.className)) ? args[0].getClass()
+					: Class.forName(binding.className);
 			boolean invoked = false;
 			Exception cause = null;
 
@@ -97,6 +131,7 @@ public class BoundJavaFunction extends Executable {
 								}
 								Main.LOGGER.debug("invoking " + binding.getMemberName() + " on " + args[0]
 										+ " from thread " + Thread.currentThread().getName());
+								m.setAccessible(true);
 								result = m.invoke(args[0], Arrays.copyOfRange(args, 1, args.length));
 								invoked = true;
 								break;

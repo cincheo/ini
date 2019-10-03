@@ -12,6 +12,7 @@ import ini.ast.Function;
 import ini.ast.Rule;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
+import ini.type.AstAttrib;
 
 public class IniDebug extends IniEval {
 
@@ -19,8 +20,8 @@ public class IniDebug extends IniEval {
 	List<String> breakpoints;
 	List<String> watchedVariables;
 
-	public IniDebug(IniParser parser, Context context, List<String> breakpoints, List<String> watchedVariables) {
-		super(parser, context);
+	public IniDebug(IniParser parser, AstAttrib attrib, Context context, List<String> breakpoints, List<String> watchedVariables) {
+		super(parser, attrib, context);
 		System.out.println("[INI] Entering debug mode...");
 		step = true;
 		this.breakpoints = new ArrayList<>();

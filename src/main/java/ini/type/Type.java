@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import ini.ast.Binding;
 import ini.ast.Channel;
 import ini.ast.Executable;
 import ini.ast.UserType;
@@ -16,7 +17,31 @@ public final class Type {
 
 	public boolean constructorType = false;
 	public Executable executable = null;
+	private List<Binding> bindings = null;
 	public Channel channel = null;
+
+	public final void addBinding(Binding binding) {
+		if (bindings == null) {
+			this.bindings = new ArrayList<>();
+		}
+		bindings.add(binding);
+	}
+
+	public final boolean hasOneBinding() {
+		return bindings != null && bindings.size() == 1;
+	}
+
+	public final boolean hasBindings() {
+		return bindings != null && bindings.size() > 0;
+	}
+
+	public final List<Binding> getBindings() {
+		return bindings;
+	}
+	
+	public final void setBindings(List<Binding> bindings) {
+		this.bindings = bindings;
+	}
 
 	public final boolean isLTE(Type type) {
 		if (type == this) {
@@ -113,7 +138,7 @@ public final class Type {
 		} else if (name != null && "function".equals(name)) {
 			return "(" + typeParametersString(typeParameters) + ")->" + returnType;
 		} else {
-			return name /*+ (superType != null ? "<" + superType.name : "")*/;
+			return name /* + (superType != null ? "<" + superType.name : "") */;
 		}
 	}
 
@@ -313,7 +338,7 @@ public final class Type {
 	}
 
 	public final boolean isFunctional() {
-		return name != null && name.equals("function") || executable != null;
+		return name != null && name.equals("function") || executable != null || bindings !=null;
 	}
 
 	public final boolean isChannel() {

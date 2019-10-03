@@ -56,6 +56,7 @@ import ini.type.AstAttrib;
 public class IniEval {
 
 	public IniParser parser;
+	public AstAttrib attrib;
 	public Stack<Context> invocationStack = new Stack<Context>();
 	public Stack<AstNode> evaluationStack = new Stack<AstNode>();
 	public Data result;
@@ -65,8 +66,9 @@ public class IniEval {
 	public boolean kill = false;
 	public static final String PROCESS_RESULT = "__process_result";
 
-	public IniEval(IniParser parser, Context rootContext) {
+	public IniEval(IniParser parser, AstAttrib attrib, Context rootContext) {
 		this.parser = parser;
+		this.attrib = attrib;
 		if (rootContext == null) {
 			throw new RuntimeException("root context cannot be null");
 		}
@@ -169,7 +171,17 @@ public class IniEval {
 
 			case AstNode.BINDING:
 				if (((Binding) node).name != null) {
-					getRootContext().bind(((Binding) node).name, new RawData(new BoundJavaFunction(((Binding) node))));
+					d = getRootContext().get(((Binding) node).name);
+					if (d != null) {
+						if (d.getValue() instanceof BoundJavaFunction) {
+							((BoundJavaFunction) d.getValue()).addOverload((Binding) node);
+						} else if (d.getValue() instanceof Executable) {
+							throw new EvalException(this, "binding cannot overload/override  executable");
+						}
+					} else {
+						getRootContext().bind(((Binding) node).name,
+								new RawData(new BoundJavaFunction(((Binding) node))));
+					}
 				}
 				break;
 
@@ -298,6 +310,10 @@ public class IniEval {
 				f = (Executable) node;
 				result = new RawData(f);
 				if (f.name != null) {
+					if (getRootContext().hasBinding(f.name)) {
+						throw new EvalException(this,
+								"cannot override existing binding " + getRootContext().get(f.name));
+					}
 					getRootContext().bind(f.name, result);
 				}
 				break;
@@ -648,7 +664,7 @@ public class IniEval {
 	}
 
 	public IniEval fork() {
-		IniEval forkedEval = new IniEval(this.parser, getRootContext());
+		IniEval forkedEval = new IniEval(this.parser, this.attrib, getRootContext());
 		forkedEval.invocationStack.push(new Context(invocationStack.peek()));
 		forkedEvals.add(forkedEval);
 		return forkedEval;
@@ -771,30 +787,33 @@ public class IniEval {
 
 	private Executable lookupExecutable(Invocation invocation) {
 		Data d = invocationStack.peek().get(invocation.name);
-		if (d != null && d.isExecutable()) {
-			return d.getValue();
-		} else {
-			String targetNode = null;
-			Executable e = null;
+		if (d == null || !d.isExecutable()) {
 			d = getRootContext().get(invocation.name);
-			if (d != null && d.isExecutable()) {
-				e = d.getValue();
-				if (e instanceof BoundJavaFunction && ((BoundJavaFunction) e).binding.className == null) {
+		}
+		String targetNode = null;
+		Executable e = null;
+		if (d != null && d.isExecutable()) {
+			e = d.getValue();
+			if (e instanceof BoundJavaFunction) {
+				e = ((BoundJavaFunction) e).resolveOverload(attrib, invocation);
+				if (!((BoundJavaFunction) e).binding.isLocal()) {
 					targetNode = getTargetNode(((BoundJavaFunction) e).binding);
 				} else {
-					return d.getValue();
+					return e;
 				}
+			} else {
+				return e;
 			}
-			if (targetNode == null) {
-				if (!parser.env.node.equals(invocation.owner)) {
-					targetNode = invocation.owner;
-				}
-			}
-			if (targetNode != null) {
-				e = fetchExectuable(targetNode, invocation.name);
-			}
-			return e;
 		}
+		if (targetNode == null) {
+			if (!parser.env.node.equals(invocation.owner)) {
+				targetNode = invocation.owner;
+			}
+		}
+		if (targetNode != null) {
+			e = fetchExectuable(targetNode, invocation.name);
+		}
+		return e;
 	}
 
 	private void executeProcessOrFunction(Executable executable) {

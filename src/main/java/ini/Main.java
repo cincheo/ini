@@ -3,7 +3,6 @@ package ini;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -205,7 +204,7 @@ public class Main {
 				return;
 			}
 		}
-		IniEval eval = mainEval(parser, false, null, null,
+		IniEval eval = mainEval(parser, attrib, false, null, null,
 				ArrayUtils.toStringArray(commandLineConfig.getObjectArray("arg")));
 
 		if (commandLineConfig.getBoolean("shell")) {
@@ -315,11 +314,11 @@ public class Main {
 		}
 	}
 
-	public static IniEval mainEval(IniParser parser, String[] args) {
-		return mainEval(parser, false, null, null, args);
+	public static IniEval mainEval(IniParser parser, AstAttrib attrib, String[] args) {
+		return mainEval(parser, attrib, false, null, null, args);
 	}
 
-	public static IniEval mainEval(IniParser parser, boolean debug, List<String> breakpoints,
+	public static IniEval mainEval(IniParser parser, AstAttrib attrib, boolean debug, List<String> breakpoints,
 			List<String> watchedVariables, String[] args) {
 		IniEval returnedEval;
 
@@ -330,9 +329,9 @@ public class Main {
 		Context context = new Context((Executable) null, null);
 		IniEval eval;
 		if (debug) {
-			eval = new IniDebug(parser, context, breakpoints, watchedVariables);
+			eval = new IniDebug(parser, attrib, context, breakpoints, watchedVariables);
 		} else {
-			eval = new IniEval(parser, context);
+			eval = new IniEval(parser, attrib, context);
 		}
 		returnedEval = eval;
 		try {

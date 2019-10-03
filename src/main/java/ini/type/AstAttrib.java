@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import ini.Main;
 import ini.ast.ArrayAccess;
@@ -115,7 +116,7 @@ public class AstAttrib {
 
 		if (invocationStack.peek().hasBinding(element.name)) {
 			Type t = invocationStack.peek().get(element.name);
-			if (t.executable != null) {
+			if (t.executable != null || t.hasBindings()) {
 				return t;
 			}
 		}
@@ -298,17 +299,16 @@ public class AstAttrib {
 			break;
 
 		case AstNode.USER_TYPE:
-			/* if (((UserType) node).simpleType != null) {
-				if (parser.types.types.containsKey(((UserType) node).name)) {
-					addError(
-							new TypingError(((UserType) node), "duplicate type name '" + ((UserType) node).name + "'"));
-				} else {
-					// note that getType() auto-registers the type... maybe should be done explicitly
-					((UserType) node).type = ((UserType) node).simpleType.getType();
-					//parser.types.register(((UserType) node).name, ((UserType) node).type);
-				}
-				break;
-			}*/
+			/*
+			 * if (((UserType) node).simpleType != null) { if
+			 * (parser.types.types.containsKey(((UserType) node).name)) {
+			 * addError( new TypingError(((UserType) node),
+			 * "duplicate type name '" + ((UserType) node).name + "'")); } else
+			 * { // note that getType() auto-registers the type... maybe should
+			 * be done explicitly ((UserType) node).type = ((UserType)
+			 * node).simpleType.getType(); //parser.types.register(((UserType)
+			 * node).name, ((UserType) node).type); } break; }
+			 */
 			t1 = new Type((UserType) node);
 			if (parser.types.types.containsKey(((UserType) node).name)) {
 				addError(new TypingError(((UserType) node), "duplicate type name '" + ((UserType) node).name + "'"));
@@ -404,17 +404,26 @@ public class AstAttrib {
 					}
 				}
 			} else {
-				result = binding.getFunctionalType(this);
-				result.executable = new BoundJavaFunction(binding);
-				// TODO: change
-				/*if (binding.typeParameters != null) {
-					for (TypeVariable tv : binding.typeParameters) {
-						if (tv.superType != null) {
-							// add constraints for supertypes
-							addTypingConstraint(Kind.LTE, tv.getType(), tv.getType().superType, tv, tv.superType);
-						}
+				result = getRootContext().get(binding.name);
+				if (result == null) {
+					result = parser.types.createType();
+				} else {
+					if (!result.hasBindings()) {
+						addError(new TypingError(binding, "name is not available for a binging"));
+						break;
 					}
-				}*/
+				}
+				result.addBinding(binding);
+				// result = binding.getFunctionalType(this);
+				// result.executable = new BoundJavaFunction(binding);
+				// TODO: change
+				/*
+				 * if (binding.typeParameters != null) { for (TypeVariable tv :
+				 * binding.typeParameters) { if (tv.superType != null) { // add
+				 * constraints for supertypes addTypingConstraint(Kind.LTE,
+				 * tv.getType(), tv.getType().superType, tv, tv.superType); } }
+				 * }
+				 */
 				getRootContext().bind(binding.name, result);
 			}
 			break;
@@ -658,6 +667,19 @@ public class AstAttrib {
 			if (typeVar != null) {
 
 				executable = typeVar.executable;
+				if (executable == null && typeVar.hasBindings()) {
+					List<Binding> bindings = typeVar.getBindings().stream().filter(e -> e.match(this, invocation))
+							.collect(Collectors.toList());
+					if (bindings.isEmpty()) {
+						addError(new TypingError(invocation, "cannot fing matching binging"));
+					} else if (bindings.size() > 1) {
+						Main.LOGGER
+								.warn("cannot ensure type safety on function binding overloads with same number of parameters at "
+										+ invocation.token().getLocation());
+					} else {
+						executable = new BoundJavaFunction(bindings.get(0));
+					}
+				}
 
 				if (executable != null) {
 					if (!evaluationStack.contains(executable)) {
@@ -682,9 +704,12 @@ public class AstAttrib {
 
 					for (int i = 0; i < typeVar.getTypeParameters().size(); i++) {
 						if (i < invocation.arguments.size()) {
-							//System.out.println(invocation+":"+typeVar.getTypeParameters().get(i)+" - "+typeVar.getTypeParameters().get(i).variable);
-							//addTypingConstraint(typeVar.getTypeParameters().get(i).variable?TypingConstraint.Kind.LTE:TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
-							//		eval(invocation.arguments.get(i)), invocation, invocation);
+							// System.out.println(invocation+":"+typeVar.getTypeParameters().get(i)+"
+							// - "+typeVar.getTypeParameters().get(i).variable);
+							// addTypingConstraint(typeVar.getTypeParameters().get(i).variable?TypingConstraint.Kind.LTE:TypingConstraint.Kind.EQ,
+							// typeVar.getTypeParameters().get(i),
+							// eval(invocation.arguments.get(i)), invocation,
+							// invocation);
 							addTypingConstraint(TypingConstraint.Kind.EQ, typeVar.getTypeParameters().get(i),
 									eval(invocation.arguments.get(i)), invocation, invocation);
 						} else {

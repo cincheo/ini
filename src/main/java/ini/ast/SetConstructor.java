@@ -1,10 +1,9 @@
 package ini.ast;
 
-import ini.eval.data.RuntimeConstructor;
-import ini.parser.IniParser;
-
 import java.io.PrintStream;
 import java.util.List;
+
+import ini.parser.IniParser;
 
 public class SetConstructor extends NamedElement implements Expression {
 
