@@ -409,8 +409,11 @@ public class AstAttrib {
 					result = parser.types.createType();
 				} else {
 					if (!result.hasBindings()) {
-						addError(new TypingError(binding, "name is not available for a binging"));
+						addError(new TypingError(binding, "cannot overload an existing function or variable"));
 						break;
+					}
+					if (!result.getBindings().get(0).isLocal()) {
+						addError(new TypingError(binding, "cannot overload a remote binding"));
 					}
 				}
 				result.addBinding(binding);
@@ -635,6 +638,9 @@ public class AstAttrib {
 			result = parser.types.createType();
 			result.executable = (Executable) node;
 			if (((NamedElement) node).name != null) {
+				if(getRootContext().hasBinding(((NamedElement) node).name)) {
+					addError(new TypingError(node, "name is already used"));
+				}
 				getRootContext().bind(((NamedElement) node).name, result);
 				t = parser.types.createFunctionalType(parser.types.ANY);
 				for (int i = 0; i < result.executable.parameters.size(); i++) {

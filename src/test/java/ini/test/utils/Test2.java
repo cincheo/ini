@@ -1,4 +1,4 @@
-package ini;
+package ini.test.utils;
 
 public class Test2 {
 
