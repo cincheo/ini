@@ -20,6 +20,7 @@ import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.type.AstAttrib;
 import ini.type.Type;
+import ini.type.UnionType;
 
 public class BoundJavaFunction extends Executable {
 
@@ -199,7 +200,17 @@ public class BoundJavaFunction extends Executable {
 
 	@Override
 	public Type getFunctionalType(AstAttrib attrib) {
-		return binding.getFunctionalType(attrib);
+		Type result = binding.getFunctionalType(attrib);
+		if (overloads != null) {
+			for (Binding b : overloads) {
+				Type t = b.getFunctionalType(attrib);
+				for (int i = 0; i < result.getTypeParameters().size(); i++) {
+					result.getTypeParameters().set(i,
+							UnionType.create(result.getTypeParameters().get(i), t.getTypeParameters().get(i)));
+				}
+			}
+		}
+		return result;
 	}
 
 }

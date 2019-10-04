@@ -13,7 +13,7 @@ import ini.ast.Executable;
 import ini.ast.UserType;
 import ini.parser.Types;
 
-public final class Type {
+public class Type {
 
 	public boolean constructorType = false;
 	public Executable executable = null;
@@ -43,7 +43,7 @@ public final class Type {
 		this.bindings = bindings;
 	}
 
-	public final boolean isLTE(Type type) {
+	public boolean isLTE(Type type) {
 		if (type == this) {
 			return true;
 		} else if (this.superType == null) {
@@ -53,7 +53,7 @@ public final class Type {
 		}
 	}
 
-	public final boolean isGTE(Type type) {
+	public boolean isGTE(Type type) {
 		return type.isLTE(this);
 	}
 
@@ -126,7 +126,7 @@ public final class Type {
 		this.fields = new HashMap<String, Type>();
 	}
 
-	public final String getFullName() {
+	public String getFullName() {
 		if (hasTypeParameters()) {
 			return name + "(" + typeParametersString(typeParameters) + ")";
 		} else if (hasFields()) {
@@ -146,11 +146,11 @@ public final class Type {
 		return name;
 	}
 
-	public final boolean isVariable() {
+	public boolean isVariable() {
 		return variable;
 	}
 
-	public final String toString() {
+	public String toString() {
 		if (isList()) {
 			if (typeParameters.get(1) == types.CHAR) {
 				return "String";
@@ -221,7 +221,7 @@ public final class Type {
 	}
 
 	@Override
-	public final boolean equals(Object o) {
+	public boolean equals(Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -236,7 +236,7 @@ public final class Type {
 		return deepCopy(new ArrayList<>(), new ArrayList<>());
 	}
 
-	private final Type deepCopy(List<Type> org, List<Type> dest) {
+	protected Type deepCopy(List<Type> org, List<Type> dest) {
 		if (org.indexOf(this) != -1) {
 			return dest.get(org.indexOf(this));
 		}
@@ -274,7 +274,7 @@ public final class Type {
 		}
 	}
 
-	public final Type substitute(List<Type> parameters, List<Type> arguments, List<Type> freeVariables) {
+	public Type substitute(List<Type> parameters, List<Type> arguments, List<Type> freeVariables) {
 		int index = parameters.indexOf(this);
 		if (index >= 0) {
 			return arguments.get(index);
@@ -292,7 +292,7 @@ public final class Type {
 		}
 	}
 
-	public final void substitute(TypingConstraint substitution) {
+	public void substitute(TypingConstraint substitution) {
 		if (hasTypeParameters()) {
 			for (int i = 0; i < typeParameters.size(); i++) {
 				if (typeParameters.get(i).isVariable()) {
@@ -357,7 +357,7 @@ public final class Type {
 		return typeParameters != null && !typeParameters.isEmpty();
 	}
 
-	public final boolean hasVariablePart() {
+	public boolean hasVariablePart() {
 		if (variable) {
 			return true;
 		} else {

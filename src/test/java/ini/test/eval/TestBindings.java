@@ -73,8 +73,7 @@ public class TestBindings extends IniTestCase {
 				});
 	}
 	
-	// TODO: support union types to handle type checking of overloads
-	public void _testOverloadWrongInvocation2() {
+	public void testOverloadWrongInvocation2() {
 		parseAndAttribFile("ini/test/bindings/overloadWrongInvocation2.ini", //
 				parser -> {
 					assertFalse(parser.hasErrors());

@@ -638,7 +638,7 @@ public class AstAttrib {
 			result = parser.types.createType();
 			result.executable = (Executable) node;
 			if (((NamedElement) node).name != null) {
-				if(getRootContext().hasBinding(((NamedElement) node).name)) {
+				if (getRootContext().hasBinding(((NamedElement) node).name)) {
 					addError(new TypingError(node, "name is already used"));
 				}
 				getRootContext().bind(((NamedElement) node).name, result);
@@ -678,12 +678,11 @@ public class AstAttrib {
 							.collect(Collectors.toList());
 					if (bindings.isEmpty()) {
 						addError(new TypingError(invocation, "cannot fing matching binging"));
-					} else if (bindings.size() > 1) {
-						Main.LOGGER
-								.warn("cannot ensure type safety on function binding overloads with same number of parameters at "
-										+ invocation.token().getLocation());
 					} else {
 						executable = new BoundJavaFunction(bindings.get(0));
+						for (int i = 1; i < bindings.size(); i++) {
+							((BoundJavaFunction) executable).addOverload(bindings.get(i));
+						}
 					}
 				}
 
@@ -1130,7 +1129,7 @@ public class AstAttrib {
 			simplified = false;
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
 				// remove tautologies
-				if (c.left == c.right) {
+				if (c.left.equals(c.right)) {
 					constraints.remove(c);
 					simplified = true;
 					continue;
