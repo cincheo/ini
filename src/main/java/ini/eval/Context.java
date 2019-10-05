@@ -3,6 +3,7 @@ package ini.eval;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import ini.ast.Executable;
 import ini.ast.Invocation;
@@ -71,15 +72,25 @@ public class Context {
 		return variables.get(name);
 	}
 
+	public void merge(Context context) {
+		if (context != null) {
+			for (Entry<String, Data> e : context.getVariables().entrySet()) {
+				if (!hasBinding(e.getKey())) {
+					bind(e.getKey(), e.getValue());
+				}
+			}
+		}
+	}
+
 	@Override
 	public String toString() {
-		return (invocation == null ? "<root>"
-				: invocation.name + " at " + invocation.token.getLocation()) + " - " + variables.toString();
+		return (invocation == null ? "<root>" : invocation.name + " at " + invocation.token.getLocation()) + " - "
+				+ variables.toString();
 	}
 
 	public void prettyPrint(PrintStream out) {
 		for (String v : variables.keySet()) {
-			if(v.equals(IniEval.PROCESS_RESULT)) {
+			if (v.equals(IniEval.PROCESS_RESULT)) {
 				continue;
 			}
 			out.print("   ");

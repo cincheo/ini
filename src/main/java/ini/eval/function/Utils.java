@@ -3,9 +3,11 @@ package ini.eval.function;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import org.bson.Document;
 
+import com.google.common.collect.Lists;
 import com.mongodb.MongoClient;
 
 public class Utils {
@@ -27,6 +29,11 @@ public class Utils {
 		return null;
 
 	}
+	
+	public static <T> List<T> toList(Iterable<T> iterable) {
+		return Lists.newArrayList(iterable);
+	}
+	
 
 	public static void main(String[] args) {
 		System.out.println("start test");

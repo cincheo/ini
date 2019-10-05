@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import ini.eval.Context;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
@@ -15,6 +16,8 @@ public abstract class Executable extends NamedElement implements Expression {
 
 	public List<Parameter> parameters;
 
+	public Context accessibleContext;
+	
 	public Executable(IniParser parser, Token token, String name, List<Parameter> parameters) {
 		super(parser, token, name);
 		this.parameters = parameters;

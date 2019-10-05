@@ -163,9 +163,9 @@ public class RawData implements Data {
 			Set<?> s = (Set<?>) object;
 			Data d = new RawData(null);
 			d.setReferences(new HashMap<Object, Data>());
+			int i = 0;
 			for (Object o : s) {
-				Data dd = objectToData(o);
-				d.set(dd, dd);
+				d.set(i++, objectToData(o));
 			}
 			return d;
 		} else if (object instanceof Map && object.getClass().getName().startsWith("java.")) {

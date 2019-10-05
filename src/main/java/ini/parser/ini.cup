@@ -146,7 +146,7 @@ non terminal ret_statement;
 non terminal invocation, dot_invocation, pre_post_op, arg_list_opt, arg_list, list_expr;
 non terminal rule_list_opt, rule_list, rule, basic_rule_list_opt, basic_rule_list, basic_rule, event_rule, guard;
 non terminal boolean_expr_opt, logical_expr, algebraic_expr, set_logical_expr, boolean_literal;
-non terminal constructor_expr, assignment_list;
+non terminal constructor_expr, assignment_list_opt, assignment_list;
 non terminal at_expr, at_binding, annotations_opt;
 non terminal usertype, constructor_list, constructor, list_constructor, constructor_or_type;
 non terminal field_list_opt, field_list, field;
@@ -472,7 +472,7 @@ list_expr ::= LSPAREN:l expr:lb DOTDOT expr:ub RSPAREN:r {:
 	:}
 ;
 
-constructor_expr ::= TIDENTIFIER:s LSPAREN lf_opt assignment_list:l lf_opt RSPAREN
+constructor_expr ::= TIDENTIFIER:s LSPAREN lf_opt assignment_list_opt:l lf_opt RSPAREN
 	{:
 		RESULT = new SetConstructor(parser,(Token)s,s.toString(),(List)l);
 	:}/*
@@ -490,6 +490,8 @@ constructor_match_expr ::= TIDENTIFIER:s LSPAREN field_match_expr_list_opt:l RSP
 		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),null);	
 	:}*/
 ;
+
+assignment_list_opt ::= assignment_list:l {: RESULT = l; :} | {: RESULT = new ArrayList(); :};
 
 assignment_list ::= assignment_list:l COMMA lf_opt IDENTIFIER:f ASSIGN:a expr:e 
 	{:

@@ -95,7 +95,7 @@ public class BoundJavaFunction extends Executable {
 					: Class.forName(binding.className);
 			boolean invoked = false;
 			Exception cause = null;
-
+			
 			switch (binding.getKind()) {
 			case CONSTRUCTOR:
 				// TODO: MOVE IN BINDING'S CONSTRUCTOR

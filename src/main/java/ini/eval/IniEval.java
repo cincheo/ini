@@ -315,6 +315,8 @@ public class IniEval {
 								"cannot override existing binding " + getRootContext().get(f.name));
 					}
 					getRootContext().bind(f.name, result);
+				} else {
+					f.accessibleContext = invocationStack.peek();
 				}
 				break;
 
@@ -352,6 +354,8 @@ public class IniEval {
 								ctx.bind(f.parameters.get(i).name, eval(invocation.arguments.get(i)));
 							}
 						}
+
+						ctx.merge(f.accessibleContext);
 
 						invocationStack.push(ctx);
 						try {

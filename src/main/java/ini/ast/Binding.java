@@ -90,6 +90,7 @@ public class Binding extends NamedElement {
 			}
 		}
 		Type type = new Type(parser.types, "function");
+		// TODO: recursive type params substitution
 		type.setReturnType(returnType.lookupTypeVariable(returnType.name) != null
 				? returnType.lookupTypeVariable(returnType.name) : returnType.getType());
 		if (parameterTypes != null) {
@@ -97,10 +98,11 @@ public class Binding extends NamedElement {
 				// System.out.println(" - "+v+" -
 				// "+v.lookupTypeVariable(v.name));
 				type.addTypeParameter(
+						// TODO: recursive type params substitution
 						v.lookupTypeVariable(v.name) != null ? v.lookupTypeVariable(v.name) : v.getType());
 			}
 		}
-		// System.out.println("FUNCTIONAL TYPE FOR " + this + " : " + type);
+		//System.out.println("FUNCTIONAL TYPE FOR " + this + " : " + type);
 		return type;
 	}
 

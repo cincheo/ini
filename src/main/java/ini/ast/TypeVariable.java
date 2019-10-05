@@ -47,10 +47,13 @@ public class TypeVariable extends Variable {
 	}
 
 	public Type lookupTypeVariable(String name) {
-		if (context == null) {
+		if (context == null || name == null) {
 			return null;
 		}
 		for (TypeVariable v : context) {
+			if(name==null || v==null) {
+				System.out.println();
+			}
 			if (name.equals(v.name)) {
 				return v.getType();
 			}

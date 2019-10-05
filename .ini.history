@@ -38,3 +38,12 @@
 1569650297803:person = 12
 1569650300619:p
 1569650302459:person
+1570267294113:it.toList()
+1570267315707:client
+1570267500810:collection
+1570267510883:collection.drop()
+1570267586893:collection
+1570267611554:collection.insertOne(Person[name="tutu"])
+1570267705793:collection.find()
+1570267718498:collection.find().toList()
+1570267756164:collection.find().tolist()
