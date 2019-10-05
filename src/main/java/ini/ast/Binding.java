@@ -40,7 +40,7 @@ public class Binding extends NamedElement {
 			}
 		}
 		this.className = getAnnotationValue("class");
-		this.member = getAnnotationValue("member");
+		this.member = getAnnotationValue("target");
 		if (member != null) {
 			this.memberName = this.member.split("\\(")[0];
 		}

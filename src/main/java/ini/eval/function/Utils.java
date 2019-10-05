@@ -3,12 +3,18 @@ package ini.eval.function;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
-import org.bson.Document;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.PrettyXmlSerializer;
+import org.htmlcleaner.TagNode;
 
 import com.google.common.collect.Lists;
-import com.mongodb.MongoClient;
 
 public class Utils {
 
@@ -34,15 +40,40 @@ public class Utils {
 		return Lists.newArrayList(iterable);
 	}
 	
+	
+	
 
-	public static void main(String[] args) {
-		System.out.println("start test");
-		MongoClient c = new MongoClient("localhost:27017");
-		System.out.println("connected");
-		c.getDatabase("test").getCollection("test").insertOne(Document.parse("{key1:\"value\"}"));
-		System.out.println("wrote document");
-		System.out.println("===>"+c.getDatabase("test").getCollection("test").find().first().toJson());
-		c.close();
-	}
+	public static void main(String[] args) throws MalformedURLException, IOException {
+		CleanerProperties props = new CleanerProperties();
+		 
+		// set some properties to non-default values
+		props.setTranslateSpecialEntities(true);
+		props.setTransResCharsToNCR(true);
+		props.setOmitComments(true);
+		 
+		// do parsing
+		TagNode tagNode = new HtmlCleaner(props).clean(
+			new URL("https://en.wikipedia.org/wiki/Jacques_Chirac")
+		);
+
+		//System.out.println(tagNode.toString());
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		// serialize to xml file
+		new PrettyXmlSerializer(props).writeToStream(
+		    tagNode, out
+		);
+		System.out.println(out.toString("UTF8"));
+		
+		/*new PrettyXmlSerializer(props).writeToFile(
+			    tagNode, "chinadaily.xml", "utf-8"
+			);*/		
+		 
+		/*try {
+			System.out.println(IOUtils.toString(new URL("https://en.wikipedia.org/wiki/Jacques_Chirac"), "UTF8"));
+		} catch(Exception e) {
+			e.printStackTrace();
+		}*/
+ 	}
+		
 	
 }
