@@ -289,7 +289,7 @@ public class AstAttrib {
 							((Import) node).filePath.toString());
 					localParser.parse();
 				} catch (Exception e) {
-					if (localParser.hasErrors()) {
+					if (localParser!=null && localParser.hasErrors()) {
 						localParser.printErrors(parser.err);
 					}
 					addError(new TypingError(node, "Cannot import file '" + ((Import) node).filePath + "'"));

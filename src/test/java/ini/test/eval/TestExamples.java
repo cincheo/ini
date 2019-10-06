@@ -16,43 +16,43 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testAlgebraicExpressions() {
-		testFile("ini/examples/algebraic_expressions.ini",
+		testFile("ini/examples/data_structures/algebraic_expressions.ini",
 				(p, out) -> assertEquals("The value of -(((3.0*2.0)+1.0)) is -7.0\n", out));
 	}
 
 	public void testLCSS() {
-		testFile("ini/examples/lcss.ini", (p, out) -> assertEquals("2.0\n", out));
+		testFile("ini/examples/calculus/lcss.ini", (p, out) -> assertEquals("2.0\n", out));
 	}
 
 	public void testComparator() {
-		testFile("ini/examples/comparator.ini",
+		testFile("ini/examples/data_structures/comparator.ini",
 				(p, out) -> assertEquals("result:    aginoorrssttt\nresult:    aginoorrssttt\n", out));
 	}
 
 	public void testLambdas() {
-		testFile("ini/examples/lambdas.ini", (p, out) -> assertEquals("234567246", out));
+		testFile("ini/examples/calculus/lambdas.ini", (p, out) -> assertEquals("234567246", out));
 	}
 
 	public void testCountOccurences() {
-		testFile("ini/examples/count_occurences.ini",
+		testFile("ini/examples/calculus/count_occurences.ini",
 				(p, out) -> assertEquals(
 						"Counting 'This is the string we will count'\nNumber of e(s): 2\nNumber of a(s): null\nNumber of s(s): 3\nNumber of i(s): 4\nNumber of spaces: 6\nCounting '[1,2,1,7](0..3)'\nNumber of 1: 2\nNumber of 7: 1\nNumber of 3: null\n",
 						out));
 	}
 
 	public void testFac() {
-		testFile("ini/examples/fac.ini", (p, out) -> assertEquals("fac1(10)=3628800\nfac2(10)=3628800\n", out));
+		testFile("ini/examples/calculus/fac.ini", (p, out) -> assertEquals("fac1(10)=3628800\nfac2(10)=3628800\n", out));
 	}
 
 	public void testPrettyPrinter() {
-		testFile("ini/examples/pretty_printer.ini",
+		testFile("ini/examples/data_structures/pretty_printer.ini",
 				(p, out) -> assertEquals(
 						"<html>\n    <head>\n    </head>\n    <body bgcolor=\"white\" width=\"100%\">\nthis is a body text example \n        <b>\nthis is a strong text\n        </b>\n    </body>\n</html>\n{name:\"html\",content:[{name:\"head\"},{name:\"body\",attr:[{name:\"bgcolor\",value:\"white\"},{name:\"width\",value:\"100%\"}],content:[{text:\"this is a body text example \"},{name:\"b\",content:[{text:\"this is a strong text\"}]}]}]}\n",
 						out));
 	}
 
 	public void _testProcessCommunication() {
-		testFile("ini/examples/process_communication.ini",
+		testFile("ini/examples/io/process_communication.ini",
 				(p, out) -> assertEquals("processes started\nc1: 1\nc2: 2.0\nend of pipeline: 3.0\n", out));
 	}
 
@@ -108,7 +108,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testFibonacci() {
-		testFile("ini/examples/fibonacci.ini",
+		testFile("ini/examples/data_structures/fibonacci.ini",
 				(p, out) -> assertEquals(
 						"Fib(8)=34\n" + "Here is a flat Fibonacci tree for 5:\n"
 								+ "[5,4,3,3,2,2,1,2,1,1,1,1,1,null,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null](1..32)\n"
@@ -128,4 +128,12 @@ public class TestExamples extends IniTestCase {
 						out));
 	}
 
+	public void testFibonacciFunction() {
+		testFile("ini/examples/calculus/fibonacci.ini", (p, out) -> assertEquals("Fib(8)=21\n", out));
+	}
+
+	public void testFibonacciProcess() {
+		testFile("ini/examples/processes/fibonacci.ini", (p, out) -> assertEquals("Fib(8)=21\n", out));
+	}
+	
 }

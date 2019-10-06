@@ -47,3 +47,14 @@
 1570267705793:collection.find()
 1570267718498:collection.find().toList()
 1570267756164:collection.find().tolist()
+1570300462009:println("test")
+1570339124002:exit
+1570339130474:exit()
+1570341204729:import "ini/examples/calculus/fibonacci.ini"
+1570341355234:println("tutu")
+1570341376175:import "ini/examples/calculus/fibonacci.ini"
+1570341380971:println("tutu")
+1570341512339:import "ini/examples/calculus/fibonacci.ini"
+1570342774759:import "ini/examples/process/fibonacci.ini"
+1570342918883:import "ini/examples/processes/fibonacci.ini"
+1570343445117:import "ini/examples/queens/queens_2.ini"

@@ -13,7 +13,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testAlgebraicExpressions() {
-		parseAndAttribFile("ini/examples/algebraic_expressions.ini", parser -> {
+		parseAndAttribFile("ini/examples/data_structures/algebraic_expressions.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -21,7 +21,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testComparator() {
-		parseAndAttribFile("ini/examples/comparator.ini", parser -> {
+		parseAndAttribFile("ini/examples/data_structures/comparator.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -29,7 +29,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testCountOccurences() {
-		parseAndAttribFile("ini/examples/count_occurences.ini", parser -> {
+		parseAndAttribFile("ini/examples/calculus/count_occurences.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -37,7 +37,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testFac() {
-		parseAndAttribFile("ini/examples/fac.ini", parser -> {
+		parseAndAttribFile("ini/examples/calculus/fac.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -45,7 +45,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testFibonacci() {
-		parseAndAttribFile("ini/examples/fibonacci.ini", parser -> {
+		parseAndAttribFile("ini/examples/data_structures/fibonacci.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -53,7 +53,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testSort() {
-		parseAndAttribFile("ini/examples/sort.ini", parser -> {
+		parseAndAttribFile("ini/examples/data_structures/sort.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -61,7 +61,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testPrettyPrinter() {
-		parseAndAttribFile("ini/examples/pretty_printer.ini", parser -> {
+		parseAndAttribFile("ini/examples/data_structures/pretty_printer.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -101,7 +101,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testLCSS() {
-		parseAndAttribFile("ini/examples/lcss.ini", parser -> {
+		parseAndAttribFile("ini/examples/calculus/lcss.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
