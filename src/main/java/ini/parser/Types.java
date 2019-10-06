@@ -55,6 +55,29 @@ public class Types {
 		primitiveTypes.add(STRING);
 	}
 
+	public static class State {
+		public Map<String, Type> types;
+		public List<UserType> userTypes;
+		public Map<String, UserType> userTypeMap;
+		public Map<String, Constructor> constructors;
+	}
+
+	public State saveState() {
+		State state = new State();
+		state.types = new HashMap<>(types);
+		state.userTypes = new ArrayList<>(userTypes);
+		state.userTypeMap = new HashMap<>(userTypeMap);
+		state.constructors = new HashMap<>(constructors);
+		return state;
+	}
+
+	public void restoreState(State state) {
+		this.types = state.types;
+		this.userTypes = state.userTypes;
+		this.userTypeMap = state.userTypeMap;
+		this.constructors = state.constructors;
+	}
+
 	public List<UserType> userTypes = new ArrayList<UserType>();
 	public Map<String, UserType> userTypeMap = new HashMap<String, UserType>();
 

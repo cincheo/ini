@@ -35,6 +35,7 @@ parser code {:
 			new ClearFunction(this), //
 			new CopyFunction(this), //
 			new ErrorFunction(this), //
+			new ExitFunction(this), //
 			new FirstFunction(this), //
 			new KeyFunction(this), //
 			new KillAt(this), //

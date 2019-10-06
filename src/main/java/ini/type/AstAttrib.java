@@ -49,6 +49,7 @@ import ini.ast.VariableAccess;
 import ini.eval.at.At;
 import ini.eval.function.BoundJavaFunction;
 import ini.parser.IniParser;
+import ini.parser.Types;
 import ini.type.TypingConstraint.Kind;
 
 public class AstAttrib {
@@ -65,7 +66,9 @@ public class AstAttrib {
 	private List<TypingConstraint> constraintsBackup = new ArrayList<>();
 	public List<TypingError> errors = new ArrayList<TypingError>();
 	public Set<String> importedFiles = new HashSet<>();
-
+	private AttrContext rootContextBackup;
+	private Types.State typesBackup;
+	
 	public AstAttrib(IniParser parser) {
 		this.parser = parser;
 		AttrContext rootContext = new AttrContext(parser.types, (Type) null);
@@ -74,7 +77,9 @@ public class AstAttrib {
 			t.executable = e;
 			rootContext.bind(e.name, t);
 		}
-		invocationStack.push(rootContext);
+		this.typesBackup = this.parser.types.saveState();
+		this.rootContextBackup = new AttrContext(rootContext); 
+		this.invocationStack.push(rootContext);
 	}
 
 	public void addTypingConstraint(TypingConstraint.Kind kind, Type leftType, Type rightType, AstNode leftOrigin,
@@ -1050,10 +1055,27 @@ public class AstAttrib {
 	}
 
 	public void rollback() {
-		// System.err.println("rollbacking errors");
 		if (hasErrors()) {
+			//System.err.println("rollbacking errors");
+			//System.err.println("root context: "+this.invocationStack.get(0));
+			//System.err.println("root context backup: "+this.rootContextBackup);
 			this.constraints = this.constraintsBackup;
+			this.parser.types.restoreState(typesBackup);
+			this.invocationStack.set(0, this.rootContextBackup);
 			this.errors.clear();
+			commit();
+		}
+	}
+	
+	public void commit() {
+		//System.err.println("BACKUP!!!!!!");
+		rootContextBackup = new AttrContext(this.getRootContext());
+		typesBackup = parser.types.saveState();
+		constraintsBackup = new ArrayList<>();
+		for (TypingConstraint c : constraints) {
+			c.used = false;
+			constraintsBackup.add(new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(),
+					c.leftOrigin, c.rightOrigin));
 		}
 	}
 
@@ -1112,12 +1134,7 @@ public class AstAttrib {
 			return this;
 		} finally {
 			if (!hasErrors()) {
-				constraintsBackup = new ArrayList<>();
-				for (TypingConstraint c : constraints) {
-					c.used = false;
-					constraintsBackup.add(new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(),
-							c.leftOrigin, c.rightOrigin));
-				}
+				commit();
 			}
 		}
 

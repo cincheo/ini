@@ -58,3 +58,18 @@
 1570342774759:import "ini/examples/process/fibonacci.ini"
 1570342918883:import "ini/examples/processes/fibonacci.ini"
 1570343445117:import "ini/examples/queens/queens_2.ini"
+1570350049443:import "ini/examples/processes/fibonacci.ini"
+1570352226658:fib(12)
+1570352237170:wat
+1570352245899:wait(fib(12))
+1570352366770:fib(3)
+1570352379347:b = fib(3)
+1570352395555:wait(fib(2))
+1570358139005:a = 2
+1570358142308:a = 3
+1570358148932:a = "test"
+1570358190919:exit()
+1570358199480:a = "test"
+1570358203944:a = 2
+1570358207888:a + 1
+1570358403991:exit()
