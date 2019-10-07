@@ -266,7 +266,7 @@ public class Main {
 			reader.unsetOpt(LineReader.Option.AUTO_MENU);
 			reader.unsetOpt(LineReader.Option.AUTO_PARAM_SLASH);
 			reader.unsetOpt(LineReader.Option.AUTO_REMOVE_SLASH);
-			
+
 			while (true) {
 				String line = null;
 				try {
@@ -278,7 +278,9 @@ public class Main {
 						if (eval.result instanceof FutureData) {
 							terminal.writer().println("<future>");
 						} else {
-							terminal.writer().println(eval.result.toPrettyString());
+							if (eval.result.getValue() != null) {
+								terminal.writer().println(eval.result.toPrettyString());
+							}
 						}
 					}
 					terminal.flush();

@@ -73,3 +73,16 @@
 1570358203944:a = 2
 1570358207888:a + 1
 1570358403991:exit()
+1570474735378:dump_person_db()
+1570474847948:clear_person_db()
+1570474858068:fill_person_db()
+1570474867612:dump_person_db()
+1570477571322:clear_person_db()
+1570477577473:dump_person_db()
+1570477588161:fill_person_db()
+1570477590481:dump_person_db()
+1570477805410:clear_person_db()
+1570477810194:dump_person_db()
+1570477814146:fill_person_db()
+1570477816154:dump_person_db()
+1570477820699:exit()

@@ -274,8 +274,8 @@ public class RawData implements Data {
 							return eval.invoke((Function) value, new Object[] {});
 						}
 					};
-				} else if (t.getTypeParameters().size() == 0
-						&& !t.getTypeParameters().get(0).equals(eval.parser.types.VOID)) {
+				} else if (t.getTypeParameters().size() == 1
+						&& t.getTypeParameters().get(0).equals(eval.parser.types.VOID)) {
 					return new Runnable() {
 						public void run() {
 							eval.invoke((Function) value, new Object[] {});

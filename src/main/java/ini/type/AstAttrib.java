@@ -300,6 +300,7 @@ public class AstAttrib {
 					addError(new TypingError(node, "Cannot import file '" + ((Import) node).filePath + "'"));
 				}
 			}
+			importedFiles.add(((Import) node).filePath.toString());
 			attrib(localParser);
 			break;
 
@@ -419,6 +420,7 @@ public class AstAttrib {
 					}
 					if (!result.getBindings().get(0).isLocal()) {
 						addError(new TypingError(binding, "cannot overload a remote binding"));
+						break;
 					}
 				}
 				result.addBinding(binding);
@@ -1176,8 +1178,11 @@ public class AstAttrib {
 				// skip
 				if (((c.left.getFields() == null || c.left.getFields().isEmpty())
 						&& (c.right.getFields() == null || c.right.getFields().isEmpty()))
-						&& (c.left.isVariable() && c.left.getName().startsWith("_")
-								|| c.left.isVariable() && c.left.getName().startsWith("_"))) {
+						&& (c.left.isVariable() && c.left.getName() != null && c.left.getName().startsWith("_")
+						/*
+						 * || c.left.isVariable() &&
+						 * c.left.getName().startsWith("_")
+						 */)) {
 					continue;
 				}
 				List<TypingError> errors = new ArrayList<TypingError>();

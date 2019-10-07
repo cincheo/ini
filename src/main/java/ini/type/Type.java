@@ -24,7 +24,9 @@ public class Type {
 		if (bindings == null) {
 			this.bindings = new ArrayList<>();
 		}
-		bindings.add(binding);
+		if (!bindings.contains(binding)) {
+			bindings.add(binding);
+		}
 	}
 
 	public final boolean hasOneBinding() {
@@ -38,7 +40,7 @@ public class Type {
 	public final List<Binding> getBindings() {
 		return bindings;
 	}
-	
+
 	public final void setBindings(List<Binding> bindings) {
 		this.bindings = bindings;
 	}
@@ -338,7 +340,7 @@ public class Type {
 	}
 
 	public final boolean isFunctional() {
-		return name != null && name.equals("function") || executable != null || bindings !=null;
+		return name != null && name.equals("function") || executable != null || bindings != null;
 	}
 
 	public final boolean isChannel() {

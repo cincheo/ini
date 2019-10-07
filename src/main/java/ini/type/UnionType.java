@@ -27,7 +27,7 @@ public class UnionType extends Type {
 		}
 	}
 
-	public UnionType() {
+	private UnionType() {
 		super(null, null);
 	}
 
