@@ -310,9 +310,9 @@ public class IniEval {
 				f = (Executable) node;
 				result = new RawData(f);
 				if (f.name != null) {
-					if (getRootContext().hasBinding(f.name)) {
-						throw new EvalException(this,
-								"cannot override existing binding " + getRootContext().get(f.name));
+					if (getRootContext().hasBinding(f.name)
+							&& (getRootContext().get(f.name).getValue() instanceof BoundJavaFunction)) {
+						throw new EvalException(this, "cannot override existing binding");
 					}
 					getRootContext().bind(f.name, result);
 				} else {

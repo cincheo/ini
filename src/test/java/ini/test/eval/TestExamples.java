@@ -52,12 +52,12 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void _testProcessCommunication() {
-		testFile("ini/examples/io/process_communication.ini",
+		testFile("ini/examples/io/simple_pipeline.ini",
 				(p, out) -> assertEquals("processes started\nc1: 1\nc2: 2.0\nend of pipeline: 3.0\n", out));
 	}
 
 	public void testHttpServer() {
-		testFile("ini/examples/unpublished/http_server.ini", null);
+		testFile("ini/examples/io/http_server.ini", null);
 		try {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			Thread.sleep(50);
@@ -91,7 +91,7 @@ public class TestExamples extends IniTestCase {
 		new Thread() {
 			@Override
 			public void run() {
-				testFile("ini/examples/unpublished/web_service.ini", null);
+				testFile("ini/examples/io/web_service.ini", null);
 			}
 		}.start();
 		try {

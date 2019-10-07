@@ -69,7 +69,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testHttpServer() {
-		parseAndAttribFile("ini/examples/unpublished/http_server.ini", parser -> {
+		parseAndAttribFile("ini/examples/io/http_server.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -77,7 +77,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testUpdate() {
-		parseAndAttribFile("ini/examples/unpublished/update.ini", parser -> {
+		parseAndAttribFile("ini/examples/processes/update.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -85,7 +85,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testWebService() {
-		parseAndAttribFile("ini/examples/unpublished/web_service.ini", parser -> {
+		parseAndAttribFile("ini/examples/io/web_service.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());
@@ -93,7 +93,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testIO() {
-		parseAndAttribFile("ini/examples/unpublished/io.ini", parser -> {
+		parseAndAttribFile("ini/examples/io/io.ini", parser -> {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 0 error: " + attrib.errors, 0, attrib.errors.size());

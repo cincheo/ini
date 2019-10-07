@@ -68,7 +68,7 @@ public class AstAttrib {
 	public Set<String> importedFiles = new HashSet<>();
 	private AttrContext rootContextBackup;
 	private Types.State typesBackup;
-	
+
 	public AstAttrib(IniParser parser) {
 		this.parser = parser;
 		AttrContext rootContext = new AttrContext(parser.types, (Type) null);
@@ -78,7 +78,7 @@ public class AstAttrib {
 			rootContext.bind(e.name, t);
 		}
 		this.typesBackup = this.parser.types.saveState();
-		this.rootContextBackup = new AttrContext(rootContext); 
+		this.rootContextBackup = new AttrContext(rootContext);
 		this.invocationStack.push(rootContext);
 	}
 
@@ -294,7 +294,7 @@ public class AstAttrib {
 							((Import) node).filePath.toString());
 					localParser.parse();
 				} catch (Exception e) {
-					if (localParser!=null && localParser.hasErrors()) {
+					if (localParser != null && localParser.hasErrors()) {
 						localParser.printErrors(parser.err);
 					}
 					addError(new TypingError(node, "Cannot import file '" + ((Import) node).filePath + "'"));
@@ -643,8 +643,10 @@ public class AstAttrib {
 			result = parser.types.createType();
 			result.executable = (Executable) node;
 			if (((NamedElement) node).name != null) {
-				if (getRootContext().hasBinding(((NamedElement) node).name)) {
-					addError(new TypingError(node, "name is already used"));
+				if (getRootContext().hasBinding(((NamedElement) node).name)
+						&& getRootContext().get(((NamedElement) node).name).hasBindings()) {
+					addError(new TypingError(node, "cannot override existing binding"));
+					break;
 				}
 				getRootContext().bind(((NamedElement) node).name, result);
 				t = parser.types.createFunctionalType(parser.types.ANY);
@@ -1056,9 +1058,10 @@ public class AstAttrib {
 
 	public void rollback() {
 		if (hasErrors()) {
-			//System.err.println("rollbacking errors");
-			//System.err.println("root context: "+this.invocationStack.get(0));
-			//System.err.println("root context backup: "+this.rootContextBackup);
+			// System.err.println("rollbacking errors");
+			// System.err.println("root context: "+this.invocationStack.get(0));
+			// System.err.println("root context backup:
+			// "+this.rootContextBackup);
 			this.constraints = this.constraintsBackup;
 			this.parser.types.restoreState(typesBackup);
 			this.invocationStack.set(0, this.rootContextBackup);
@@ -1066,24 +1069,24 @@ public class AstAttrib {
 			commit();
 		}
 	}
-	
+
 	public void commit() {
-		//System.err.println("BACKUP!!!!!!");
+		// System.err.println("BACKUP!!!!!!");
 		rootContextBackup = new AttrContext(this.getRootContext());
 		typesBackup = parser.types.saveState();
 		constraintsBackup = new ArrayList<>();
 		for (TypingConstraint c : constraints) {
 			c.used = false;
-			constraintsBackup.add(new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(),
-					c.leftOrigin, c.rightOrigin));
+			constraintsBackup.add(
+					new TypingConstraint(c.kind, c.left.deepCopy(), c.right.deepCopy(), c.leftOrigin, c.rightOrigin));
 		}
 	}
 
 	public AstAttrib unify() {
 
 		try {
-			//System.err.println("has errors: " + hasErrors());
-			//printConstraints("", System.err);
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
 			// remove wrong constraints
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1127,9 +1130,9 @@ public class AstAttrib {
 				}
 			}
 
-			//System.err.println("==================");
-			//System.err.println("has errors: " + hasErrors());
-			//printConstraints("", System.err);
+			// System.err.println("==================");
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
 			return this;
 		} finally {
