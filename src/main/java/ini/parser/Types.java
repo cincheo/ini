@@ -14,6 +14,8 @@ import ini.type.Type;
 
 public class Types {
 
+	public static final String DICT_TYPE_NAME = "Map";
+
 	IniParser parser;
 	private int index = 1;
 
@@ -40,7 +42,7 @@ public class Types {
 		BYTE = getSimpleType("Byte", INT);
 		BOOLEAN = getSimpleType("Boolean");
 		THREAD = getSimpleType("Thread");
-		STRING = getDependentType("Map", INT, CHAR);
+		STRING = getDependentType(DICT_TYPE_NAME, INT, CHAR);
 		aliases.put("String", STRING);
 		aliases.put("Number", DOUBLE);
 		primitiveTypes.add(VOID);
@@ -99,7 +101,7 @@ public class Types {
 	}
 
 	public Type getListOf(Type type) {
-		Type t = new Type(this, "Map");
+		Type t = new Type(this, DICT_TYPE_NAME);
 		t.addTypeParameter(parser.types.INT);
 		t.addTypeParameter(type);
 		return t;
@@ -128,7 +130,8 @@ public class Types {
 	public Map<String, Type> aliases = new HashMap<String, Type>();
 
 	public boolean isRegistered(String name) {
-		return types.containsKey(name) || aliases.containsKey(name) || constructors.containsKey(name);
+		return DICT_TYPE_NAME.equals(name) || types.containsKey(name) || aliases.containsKey(name)
+				|| constructors.containsKey(name);
 	}
 
 	public final Type ANY;
@@ -194,7 +197,7 @@ public class Types {
 	}
 
 	public Type createMapType(Type keyType, Type valueType) {
-		Type t = new Type(this, "Map");
+		Type t = new Type(this, DICT_TYPE_NAME);
 		t.variable = false;
 		t.addTypeParameter(keyType);
 		t.addTypeParameter(valueType);

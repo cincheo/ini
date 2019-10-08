@@ -51,7 +51,7 @@ public class TypeVariable extends Variable {
 			return null;
 		}
 		for (TypeVariable v : context) {
-			if(name==null || v==null) {
+			if (name == null || v == null) {
 				System.out.println();
 			}
 			if (name.equals(v.name)) {
@@ -76,7 +76,12 @@ public class TypeVariable extends Variable {
 			} else {
 				Type t = lookupTypeVariable(name);
 				if (t == null) {
-					type = parser.types.getSimpleType(name);
+					if (typeParameters == null || typeParameters.isEmpty()) {
+						type = parser.types.getSimpleType(name);
+					} else {
+						type = parser.types.createType(name);
+						type.variable = false;
+					}
 					if (this.superType != null) {
 						type.superType = this.superType.getType();
 					}

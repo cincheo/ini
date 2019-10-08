@@ -1087,8 +1087,8 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
-			// System.err.println("has errors: " + hasErrors());
-			// printConstraints("", System.err);
+			//System.err.println("has errors: " + hasErrors());
+			//printConstraints("", System.err);
 
 			// remove wrong constraints
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1132,9 +1132,9 @@ public class AstAttrib {
 				}
 			}
 
-			// System.err.println("==================");
-			// System.err.println("has errors: " + hasErrors());
-			// printConstraints("", System.err);
+			//System.err.println("==================");
+			//System.err.println("has errors: " + hasErrors());
+			//printConstraints("", System.err);
 
 			return this;
 		} finally {

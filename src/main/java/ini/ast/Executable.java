@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang3.StringUtils;
 
 import ini.eval.Context;
 import ini.eval.IniEval;
@@ -17,7 +18,7 @@ public abstract class Executable extends NamedElement implements Expression {
 	public List<Parameter> parameters;
 
 	public Context accessibleContext;
-	
+
 	public Executable(IniParser parser, Token token, String name, List<Parameter> parameters) {
 		super(parser, token, name);
 		this.parameters = parameters;
@@ -48,12 +49,10 @@ public abstract class Executable extends NamedElement implements Expression {
 
 	@Override
 	public String toString() {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintStream out = new PrintStream(baos);
-		out.print((name == null ? "<lambda>" : name) + "(");
-		prettyPrintList(out, parameters, ",");
-		out.print(")");
-		try {
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream out = new PrintStream(baos);) {
+			out.print((name == null ? "<lambda>" : name) + "(");
+			out.print(StringUtils.join(parameters, ","));
+			out.print(")");
 			return baos.toString("UTF-8");
 		} catch (Exception e) {
 			throw new RuntimeException(e);

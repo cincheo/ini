@@ -95,7 +95,7 @@ public class BoundJavaFunction extends Executable {
 					: Class.forName(binding.className);
 			boolean invoked = false;
 			Exception cause = null;
-			
+
 			switch (binding.getKind()) {
 			case CONSTRUCTOR:
 				// TODO: MOVE IN BINDING'S CONSTRUCTOR
@@ -205,8 +205,10 @@ public class BoundJavaFunction extends Executable {
 			for (Binding b : overloads) {
 				Type t = b.getFunctionalType(attrib);
 				for (int i = 0; i < result.getTypeParameters().size(); i++) {
-					result.getTypeParameters().set(i,
-							UnionType.create(result.getTypeParameters().get(i), t.getTypeParameters().get(i)));
+					if (!result.getTypeParameters().get(i).equals(t.getTypeParameters().get(i))) {
+						result.getTypeParameters().set(i,
+								UnionType.create(result.getTypeParameters().get(i), t.getTypeParameters().get(i)));
+					}
 				}
 			}
 		}
