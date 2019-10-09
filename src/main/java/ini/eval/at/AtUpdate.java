@@ -18,7 +18,7 @@ public class AtUpdate extends At {
 
 	@Override
 	public void eval(final IniEval eval) {
-
+		IniThread thread = new IniThread(eval, AtUpdate.this, getRule(), null);
 		DataObserver o = new DataObserver() {
 			@Override
 			public void dataCopied(Data data, Data oldData) {
@@ -51,7 +51,7 @@ public class AtUpdate extends At {
 					Map<String, Data> variables = new HashMap<String, Data>();
 					variables.put(getAtPredicate().outParameters.get(0).toString(), oldData);
 					variables.put(getAtPredicate().outParameters.get(1).toString(), data);
-					execute(new IniThread(eval, AtUpdate.this, getRule()).setVariables(variables));
+					execute(thread.fork(variables));
 					break;
 				default:
 					Context ctx = new Context(eval.invocationStack.peek());

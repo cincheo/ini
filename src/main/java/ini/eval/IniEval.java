@@ -445,11 +445,13 @@ public class IniEval {
 			case AstNode.RULE:
 				if (((Rule) node).guard == null || eval(((Rule) node).guard).isTrueOrDefined()) {
 					invocationStack.peek().noRulesApplied = false;
+					//invocationStack.push(new Context(invocationStack.peek()));
 					Sequence<Statement> s = ((Rule) node).statements;
 					while (s != null) {
 						eval(s.get());
 						s = s.next();
 					}
+					//invocationStack.pop();
 				}
 				break;
 

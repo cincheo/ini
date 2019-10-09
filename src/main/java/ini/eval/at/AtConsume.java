@@ -22,7 +22,7 @@ public class AtConsume extends At {
 
 	@Override
 	public void eval(final IniEval eval) {
-		ruleThread = new IniThread(eval, this, getRule());
+		ruleThread = new IniThread(eval, this, getRule(), null);
 		mainThread = new Thread() {
 			@Override
 			public void run() {
@@ -35,7 +35,8 @@ public class AtConsume extends At {
 						brokerClient.consume(channel.mappedName, value -> {
 							Map<String, Data> variables = new HashMap<String, Data>();
 							variables.put(getAtPredicate().outParameters.get(0).toString(), value);
-							execute(ruleThread.setVariables(variables));
+							//System.err.println(">>> "+getAtPredicate().outParameters.get(0).toString()+": "+value);
+							execute(ruleThread.fork(variables));
 						});
 					} catch (InterruptException e) {
 						break;
@@ -57,8 +58,8 @@ public class AtConsume extends At {
 
 	@Override
 	public void evalType(AstAttrib attrib) {
-		typeInParameters(attrib, true, attrib.parser.types.getDependentType("Channel", attrib.parser.types.createType()),
-				"from", "channel");
+		typeInParameters(attrib, true,
+				attrib.parser.types.getDependentType("Channel", attrib.parser.types.createType()), "from", "channel");
 	}
 
 }

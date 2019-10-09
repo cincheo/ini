@@ -16,7 +16,7 @@ public class AtCron extends At {
 		// final Data d = eval.eval(getAtPredicate().inParameters.get(0));
 		String pattern = getInContext().get("pattern").getValue();
 		Scheduler s = new Scheduler();
-		s.schedule(pattern, new IniThread(eval, this, getRule()));
+		s.schedule(pattern, new IniThread(eval, this, getRule(), null));
 		s.start();
 	}
 

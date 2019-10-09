@@ -16,33 +16,36 @@ public class IniThread extends Thread {
 	public String atName;
 	static int threadCount = 1;
 	private At at;
+	private Map<String, Data> variables;
 
-	public IniThread(IniEval parent, At at, AstNode toEval) {
+	public IniThread(IniEval parent, At at, AstNode toEval, Map<String, Data> variables) {
 		this.parent = parent;
 		this.toEval = toEval;
 		this.at = at;
 		if ((toEval instanceof Rule) && ((Rule) toEval).atPredicate != null) {
 			this.setName(((Rule) toEval).atPredicate.toString() + ":" + threadCount++);
 		}
+		this.variables = variables;
 		child = parent.fork();
 	}
 
-	public IniThread setVariables(Map<String, Data> variables) {
-		if (variables != null) {
-			for (String variable : variables.keySet()) {
-				child.invocationStack.peek().bind(variable, variables.get(variable));
-			}
-		}
-		return this;
+	public IniThread fork(Map<String, Data> variables) {
+		IniThread forked = new IniThread(parent, at, toEval, variables);
+		forked.child = child.fork();
+		return forked;
 	}
-
+	
 	@Override
 	public void run() {
 		if (at != null) {
 			at.safelyEnter();
 		}
-
 		try {
+			if (variables != null) {
+				for (String variable : variables.keySet()) {
+					child.invocationStack.peek().bind(variable, variables.get(variable));
+				}
+			}
 			child.eval(toEval);
 		} catch (KilledException e) {
 			// swallow

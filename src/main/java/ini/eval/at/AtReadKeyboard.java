@@ -85,7 +85,7 @@ class AtContext {
 	}
 
 	public void eval() {
-		at.execute(new IniThread(eval, at, at.getRule()).setVariables(variables));
+		at.execute(new IniThread(eval, at, at.getRule(), variables));
 	}
 
 	@Override

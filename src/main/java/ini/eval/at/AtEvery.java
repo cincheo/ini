@@ -11,7 +11,7 @@ public class AtEvery extends At {
 
 	@Override
 	public void eval(final IniEval eval) {
-		ruleThread = new IniThread(eval, this, getRule());
+		ruleThread = new IniThread(eval, this, getRule(), null);
 		mainThread = new Thread() {
 			@Override
 			public void run() {
