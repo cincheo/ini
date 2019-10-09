@@ -17,6 +17,7 @@ import ini.ast.AtPredicate;
 import ini.ast.Expression;
 import ini.ast.Rule;
 import ini.ast.Variable;
+import ini.ast.Process;
 import ini.eval.IniEval;
 import ini.eval.IniThread;
 import ini.eval.data.Data;
@@ -34,6 +35,7 @@ public abstract class At {
 	private Map<String, Data> inContext = new HashMap<String, Data>();
 	private Rule rule;
 	private AtPredicate atPredicate;
+	public Process process;
 
 	public static boolean checkAllTerminated(List<At> ats) {
 		if (ats == null)

@@ -1064,6 +1064,7 @@ public class AstAttrib {
 			// System.err.println("root context: "+this.invocationStack.get(0));
 			// System.err.println("root context backup:
 			// "+this.rootContextBackup);
+			Main.LOGGER.debug("rollback attrib state");
 			this.constraints = this.constraintsBackup;
 			this.parser.types.restoreState(typesBackup);
 			this.invocationStack.set(0, this.rootContextBackup);
@@ -1074,6 +1075,7 @@ public class AstAttrib {
 
 	public void commit() {
 		// System.err.println("BACKUP!!!!!!");
+		Main.LOGGER.debug("commit attrib state");
 		rootContextBackup = new AttrContext(this.getRootContext());
 		typesBackup = parser.types.saveState();
 		constraintsBackup = new ArrayList<>();

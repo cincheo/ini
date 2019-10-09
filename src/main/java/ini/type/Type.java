@@ -245,7 +245,7 @@ public class Type {
 		if (types == null) {
 			return this;
 		}
-		if (types.isPrimitive(this)) {
+		if (types.isPrimitive(this) || this == types.ANY) {
 			return this;
 		} else {
 			Type copy = new Type(this.types, this.name);

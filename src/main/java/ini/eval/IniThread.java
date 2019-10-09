@@ -34,7 +34,7 @@ public class IniThread extends Thread {
 		forked.child = child.fork();
 		return forked;
 	}
-	
+
 	@Override
 	public void run() {
 		if (at != null) {
@@ -50,9 +50,13 @@ public class IniThread extends Thread {
 		} catch (KilledException e) {
 			// swallow
 		} catch (EvalException e) {
-			e.printError(child.parser.out, true);
-			child.parser.out.println("Java stack:");
-			e.printStackTrace(child.parser.out);
+			try {
+				at.process.handleException(child, e);
+			} catch (RuntimeException re) {
+				e.printError(child.parser.out, true);
+				child.parser.out.println("Java stack:");
+				e.printStackTrace(child.parser.out);
+			}
 		} finally {
 			if (at != null) {
 				// System.out.println("------pop: " + at);

@@ -101,6 +101,7 @@ public class Process extends Executable {
 				try {
 					at = c.newInstance();
 					at.setRule(rule);
+					at.process = this;
 					at.setAtPredicate(rule.atPredicate);
 					ats.add(at);
 					if (rule.atPredicate.identifier != null) {
@@ -152,31 +153,36 @@ public class Process extends Executable {
 		} catch (ReturnException e) {
 			// swallow
 		} catch (RuntimeException e) {
-			boolean caught = false;
-			for (Rule rule : this.errorRules) {
-				if (rule.guard == null || eval.eval(rule.guard).isTrueOrDefined()) {
-					eval.invocationStack.peek().bind(((Variable) rule.atPredicate.outParameters.get(0)).name,
-							new RawData(e));
-					Sequence<Statement> s = rule.statements;
-					while (s != null) {
-						eval.eval(s.get());
-						s = s.next();
-					}
-					caught = true;
+			handleException(eval, e);
+		} /*
+			 * finally { //At.destroyAll(ats); }
+			 */
+
+	}
+
+	public void handleException(IniEval eval, RuntimeException e) throws RuntimeException {
+		boolean caught = false;
+		for (Rule rule : this.errorRules) {
+			if (rule.guard == null || eval.eval(rule.guard).isTrueOrDefined()) {
+				eval.invocationStack.peek().bind(((Variable) rule.atPredicate.outParameters.get(0)).name,
+						new RawData(e));
+				Sequence<Statement> s = rule.statements;
+				while (s != null) {
+					eval.eval(s.get());
+					s = s.next();
 				}
+				caught = true;
 			}
+		}
+		if (!caught) {
 			// unlocks waiting invokers
 			Context ctx = eval.invocationStack.peek();
 			Data r = ctx.get(IniEval.PROCESS_RESULT);
 			if (r != null) {
 				r.copyData(new RawData());
 			}
-			if (!caught) {
-				throw e;
-			}
-		} /*finally {
-			//At.destroyAll(ats);
-		}*/
+			throw e;
+		}
 
 	}
 
