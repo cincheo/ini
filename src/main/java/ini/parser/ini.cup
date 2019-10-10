@@ -670,7 +670,7 @@ dot_invocation ::= expr:target INVDOT IDENTIFIER:i LPAREN arg_list_opt:l RPAREN 
 arg_list_opt ::= arg_list:l {: RESULT=l; :} | {: RESULT=new ArrayList(); :}
 ;
 
-arg_list ::= arg_list:l COMMA expr:e
+arg_list ::= arg_list:l COMMA lf_opt expr:e
 	{:
 		List list=(List)l;
 		list.add(e);

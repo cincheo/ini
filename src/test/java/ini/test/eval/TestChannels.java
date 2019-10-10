@@ -37,11 +37,62 @@ public class TestChannels extends IniTestCase {
 	}
 
 	public void testProcessCommunication() {
-		testFile("ini/test/channels/process_communication.ini", (p, out) -> assertEquals("processes started\nchannel c1(Int): 1\nchannel c2(Int): 2\nend of pipeline: 3\n", out));
+		testFile("ini/test/channels/process_communication.ini", (p, out) -> assertEquals(
+				"processes started\nchannel c1(Int): 1\nchannel c2(Int): 2\nend of pipeline: 3\n", out));
 	}
 
 	public void testFacDistributed() {
-		testFile("ini/test/channels/fac_distributed.ini", (p, out) -> assertEquals("p(1) started\np(2) started\np(3) started\np(4) started\np(5) started\nfac(5)=120\n", out));
+		testFile("ini/test/channels/fac_distributed.ini", (p, out) -> assertEquals(
+				"p(1) started\np(2) started\np(3) started\np(4) started\np(5) started\nfac(5)=120\n", out));
+	}
+
+	public void testPersonSyncPipeline() {
+		testFile("ini/test/channels/person_sync_pipeline.ini", 300,
+				(p, out) -> assertEquals("Sending person Person[firstName=Jacques,lastName=Chirac] for enrichment\n"
+						+ "Sending person Person[firstName=Barack,lastName=Obama] for enrichment\n"
+						+ "Sending person Person[firstName=Albert,lastName=Einstein] for enrichment\n"
+						+ "Skipping wrong person Person[firstName=Titi]\n"
+						+ "Sending person Person[firstName=Unknown,lastName=Person] for enrichment\n"
+						+ "Sending person Person[firstName=Edsger,lastName=Dijkstra,middleName=W.] for enrichment\n"
+						+ "Wikipedia Enrichment for Jacques Chirac\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Jacques_Chirac\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Jacques_Chirac\n"
+						+ "Wikipedia Enrichment for Barack Obama\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Barack_Obama\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Barack_Obama\n"
+						+ "Wikipedia Enrichment for Edsger Dijkstra\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
+						+ "Wikipedia Enrichment for Unknown Person\n"
+						+ "ERROR: https://en.wikipedia.org/wiki/Unknown_Person\n"
+						+ "Wikipedia Enrichment for Albert Einstein\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Albert_Einstein\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Albert_Einstein\n", out));
+	}
+
+	public void testPersonBackPressurePipeline() {
+		testFile("ini/test/channels/person_back_pressure_pipeline.ini", 200,
+				(p, out) -> assertEquals("Sending person Person[firstName=Jacques,lastName=Chirac] for enrichment\n"
+						+ "Wikipedia Enrichment for Jacques Chirac\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Jacques_Chirac\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Jacques_Chirac\n"
+						+ "Sending person Person[firstName=Barack,lastName=Obama] for enrichment\n"
+						+ "Wikipedia Enrichment for Barack Obama\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Barack_Obama\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Barack_Obama\n"
+						+ "Sending person Person[firstName=Albert,lastName=Einstein] for enrichment\n"
+						+ "Wikipedia Enrichment for Albert Einstein\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Albert_Einstein\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Albert_Einstein\n"
+						+ "Skipping wrong person Person[firstName=Titi]\n"
+						+ "Sending person Person[firstName=Unknown,lastName=Person] for enrichment\n"
+						+ "Wikipedia Enrichment for Unknown Person\n"
+						+ "ERROR: https://en.wikipedia.org/wiki/Unknown_Person\n"
+						+ "Sending person Person[firstName=Edsger,lastName=Dijkstra,middleName=W.] for enrichment\n"
+						+ "Wikipedia Enrichment for Edsger Dijkstra\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
+						+ "Sent all persons\n", out));
 	}
 
 }
