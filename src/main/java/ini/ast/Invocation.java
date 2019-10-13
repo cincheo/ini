@@ -29,4 +29,9 @@ public class Invocation extends NamedElement implements Statement, Expression {
 		out.print(")");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitInvocation(this);
+	}
+	
 }

@@ -24,4 +24,9 @@ public class Assignment extends AstElement implements Statement, Expression {
 		assignment.prettyPrint(out);
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitAssignment(this);
+	}
+	
 }

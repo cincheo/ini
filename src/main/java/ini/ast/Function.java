@@ -48,5 +48,10 @@ public class Function extends Executable {
 			// swallow
 		}
 	}
+	
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitFunction(this);
+	}
 
 }

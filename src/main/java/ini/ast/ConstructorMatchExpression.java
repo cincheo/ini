@@ -25,4 +25,9 @@ public class ConstructorMatchExpression extends NamedElement implements Expressi
 		}
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitConstructorMatchExpression(this);
+	}
+	
 }

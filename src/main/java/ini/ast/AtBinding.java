@@ -25,4 +25,9 @@ public class AtBinding extends NamedElement {
 		out.print(name + " => " + "\"" + className + "\"");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitAtBinding(this);
+	}
+	
 }

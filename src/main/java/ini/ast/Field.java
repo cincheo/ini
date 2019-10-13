@@ -19,4 +19,9 @@ public class Field extends NamedElement {
 		constructor.prettyPrint(out);
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitField(this);
+	}
+	
 }

@@ -24,4 +24,9 @@ public class Import extends AstElement implements Comparable<Import> {
 	public int compareTo(Import o) {
 		return filePath.compareTo(o.filePath);
 	}
+	
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitImport(this);
+	}
 }

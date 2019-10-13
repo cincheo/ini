@@ -1,5 +1,6 @@
 package ini.eval.function;
 
+import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
@@ -17,7 +18,7 @@ public class WaitFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		Type t = attrib.parser.types.createType();
 		return attrib.parser.types.createFunctionalType(t, t);
 	}

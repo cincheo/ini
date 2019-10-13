@@ -34,8 +34,12 @@ public class AtConsume extends At {
 								channel.visibility == Visibility.GLOBAL);
 						brokerClient.consume(channel.mappedName, value -> {
 							Map<String, Data> variables = new HashMap<String, Data>();
-							variables.put(getAtPredicate().outParameters.get(0).toString(), value);
-							//System.err.println(">>> "+getAtPredicate().outParameters.get(0).toString()+": "+value);
+							if (!getAtPredicate().outParameters.isEmpty()) {
+								variables.put(getAtPredicate().outParameters.get(0).toString(), value);
+							}
+							// System.err.println(">>>
+							// "+getAtPredicate().outParameters.get(0).toString()+":
+							// "+value);
 							execute(ruleThread.fork(variables));
 						});
 					} catch (InterruptException e) {

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
@@ -28,7 +29,7 @@ public class ReadKeyboardFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		return parser.types.createFunctionalType(parser.types.STRING);
 	}
 	

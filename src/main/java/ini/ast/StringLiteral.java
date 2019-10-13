@@ -23,4 +23,9 @@ public class StringLiteral extends AstElement implements Expression {
 	public void prettyPrint(PrintStream out) {
 		out.print("\"" + value + "\"");
 	}
+	
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitStringLiteral(this);
+	}
 }

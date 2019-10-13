@@ -55,4 +55,9 @@ public class UnaryOperator extends AstElement implements Expression, Statement {
 		}
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitUnaryOperator(this);
+	}
+	
 }

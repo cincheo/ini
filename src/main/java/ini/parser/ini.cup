@@ -137,7 +137,7 @@ non terminal lf, lf_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
 non terminal function, param_list_opt, param_list, param;
 non terminal import_decl;
-non terminal binding, type_list_opt, type_list, type, type_decl_list_opt, type_decl_list, type_decl, at_binding_conf_type;
+non terminal binding, type_list_opt, type_list, type_opt, type, type_decl_list_opt, type_decl_list, type_decl, at_binding_conf_type;
 non terminal channel_decl, visibility, predicate_decl;
 non terminal var_list;
 non terminal statement_list_opt, statement_list, top_level_statement, statement, expr;
@@ -222,11 +222,11 @@ binding ::= DECLARE:d IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLI
 	:}
 ;
 
-channel_decl ::= CHANNEL:d visibility:v IDENTIFIER:name LPAREN type:t RPAREN annotations_opt:a
+channel_decl ::= CHANNEL:d visibility:v IDENTIFIER:name LPAREN type_opt:t RPAREN annotations_opt:a
 	{:
 		RESULT = new Channel(parser, (Token)d, name.toString(), (TypeVariable)t, (Channel.Visibility)v, false, (List)a);
 	:}
-	| CHANNEL:d visibility:v IDENTIFIER:name LSPAREN RSPAREN LPAREN type:t RPAREN annotations_opt:a
+	| CHANNEL:d visibility:v IDENTIFIER:name LSPAREN RSPAREN LPAREN type_opt:t RPAREN annotations_opt:a
 	{:
 		RESULT = new Channel(parser, (Token)d, name.toString(), (TypeVariable)t, (Channel.Visibility)v, true, (List)a);
 	:}
@@ -380,6 +380,8 @@ type_list ::= type_list:l COMMA type:t
 		RESULT=l;
 	:}
 ;
+
+type_opt ::= type:t {: RESULT = t; :} | ; 
 
 type ::= TIDENTIFIER:i {: RESULT = new TypeVariable(parser,(Token)i,i.toString()); :}
 	| TIDENTIFIER:i LPAREN type_list:types RPAREN {:

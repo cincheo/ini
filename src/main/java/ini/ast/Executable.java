@@ -24,12 +24,26 @@ public abstract class Executable extends NamedElement implements Expression {
 		this.parameters = parameters;
 	}
 
+	protected final void setDefaultValue(int parameterIndex, Expression expression) {
+		parameters.get(parameterIndex).defaultValue = expression;
+	}
+	
 	protected final Data getArgument(IniEval eval, int index) {
 		return eval.invocationStack.peek().get(parameters.get(index).name);
 	}
 
+	protected final Data getArgument(IniEval eval, int index, Data defaultValue) {
+		Data d = getArgument(eval, index);
+		return d == null ? defaultValue : d;
+	}
+
 	protected final Data getArgument(IniEval eval, String name) {
 		return eval.invocationStack.peek().get(name);
+	}
+
+	protected final Data getArgument(IniEval eval, String name, Data defaultValue) {
+		Data d = getArgument(eval, name);
+		return d == null ? defaultValue : d;
 	}
 
 	protected final Type getParameterType(int index) {
@@ -71,7 +85,7 @@ public abstract class Executable extends NamedElement implements Expression {
 		return this.type;
 	}
 
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		Type functionalType = new Type(parser.types, "function");
 		if (name != null && name.equals("main")) {
 			if (parameters != null && parameters.size() == 1) {

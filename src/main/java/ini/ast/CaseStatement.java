@@ -38,4 +38,9 @@ public class CaseStatement extends AstElement implements Statement {
 		out.println("    }");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitCaseStatement(this);
+	}
+	
 }

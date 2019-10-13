@@ -20,4 +20,9 @@ public class CharLiteral extends AstElement implements Expression {
 		out.print("'" + value + "'");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitCharLiteral(this);
+	}
+	
 }

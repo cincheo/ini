@@ -1,5 +1,6 @@
 package ini.ast;
 
+import ini.eval.function.BoundExecutable;
 import ini.type.Type;
 
 import java.io.PrintStream;
@@ -23,7 +24,8 @@ public interface AstNode {
 	int BINARY_OPERATOR = AT_PREDICATE + 1;
 	int BINDING = BINARY_OPERATOR + 1;
 	int BOOLEAN_LITERAL = BINDING + 1;
-	int CASE_STATEMENT = BOOLEAN_LITERAL + 1;
+	int BOUND_EXECUTABLE = BOOLEAN_LITERAL + 1;
+	int CASE_STATEMENT = BOUND_EXECUTABLE + 1;
 	int CHANNEL = CASE_STATEMENT + 1;
 	int CHAR_LITERAL = CHANNEL + 1;
 	int CONSTRUCTOR = CHAR_LITERAL + 1;
@@ -50,6 +52,8 @@ public interface AstNode {
 	int USER_TYPE = UNARY_OPERATOR + 1;
 	int VARIABLE = USER_TYPE + 1;
 
+	void accept(Visitor visitor);
+	
 	void prettyPrint(PrintStream out);
 
 	int nodeTypeId();
@@ -80,6 +84,8 @@ public interface AstNode {
 			return Binding.class;
 		case AstNode.BOOLEAN_LITERAL:
 			return BooleanLiteral.class;
+		case AstNode.BOUND_EXECUTABLE:
+			return BoundExecutable.class;
 		case AstNode.CASE_STATEMENT:
 			return CaseStatement.class;
 		case AstNode.CHANNEL:

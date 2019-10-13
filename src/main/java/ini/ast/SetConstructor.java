@@ -23,4 +23,8 @@ public class SetConstructor extends NamedElement implements Expression {
 		out.print("]");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitSetConstructor(this);
+	}
 }

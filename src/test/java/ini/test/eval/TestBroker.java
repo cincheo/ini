@@ -31,15 +31,34 @@ public class TestBroker extends IniTestCase {
 		if(skipTestsUsingBroker) {
 			return;
 		}
+		StringBuffer result = new StringBuffer();
 		new Thread() {
 			@Override
 			public void run() {
-				testFile("ini/test/broker/broker_server.ini", 4000, "main", null);
+				testFile("ini/test/broker/broker_server.ini", "main", null);
 			}
 		}.start();
-		testFile("ini/test/broker/broker_client.ini", 4000, "client", (p, out) -> {
-			assertEquals("%test%\n%test2%\n%test3%\n", out);
+		testFile("ini/test/broker/broker_client.ini", "client", (p, out) -> {
+			result.append(out);
 		});
+		assertEquals("%test%\n%test2%\n%test3%\n", result.toString());
+	}
+
+	public void testRemoteBinding() {
+		if(skipTestsUsingBroker) {
+			return;
+		}
+		StringBuffer result = new StringBuffer();
+		new Thread() {
+			@Override
+			public void run() {
+				testFile(null, 3000, "n1", null);
+			}
+		}.start();
+		testFile("ini/test/broker/remote_binding.ini", "main", (p, out) -> {
+			result.append(out);
+		});
+		assertEquals("2.0\nstopped\n", result.toString());
 	}
 	
 }

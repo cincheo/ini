@@ -1,6 +1,7 @@
 package ini.eval.function;
 
 import ini.ast.Channel;
+import ini.ast.Invocation;
 import ini.ast.Channel.Visibility;
 import ini.eval.IniEval;
 import ini.eval.data.RawData;
@@ -27,7 +28,7 @@ public class ChannelFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		return attrib.parser.types.createFunctionalType(
 				attrib.parser.types.getDependentType("Channel", parser.types.ANY), parser.types.STRING);
 	}

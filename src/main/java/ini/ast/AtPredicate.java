@@ -69,4 +69,9 @@ public class AtPredicate extends NamedElement {
 		out.print(")");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitAtPredicate(this);
+	}
+	
 }

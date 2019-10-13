@@ -126,7 +126,7 @@ public class CoreBrokerClient {
 		new Thread() {
 			public void run() {
 				getSpawnRequestBrokerClient().consume(env.node + SPAWN_REQUEST_SUFFIX, request -> {
-					Main.LOGGER.info("" + request);
+					Main.LOGGER.debug("" + request);
 					handler.accept(request);
 				});
 			}
@@ -141,7 +141,7 @@ public class CoreBrokerClient {
 		new Thread() {
 			public void run() {
 				getFetchRequestBrokerClient().consume(env.node + FETCH_REQUEST_SUFFIX, request -> {
-					Main.LOGGER.info("" + request);
+					Main.LOGGER.debug("" + request);
 					handler.accept(request);
 				});
 			}
@@ -149,7 +149,7 @@ public class CoreBrokerClient {
 	}
 
 	public void sendFetchRequest(String targetNode, FetchRequest request) {
-		Main.LOGGER.info("send " + request + " to " + targetNode);
+		Main.LOGGER.debug("send " + request + " to " + targetNode);
 		getFetchRequestBrokerClient().produce(targetNode + FETCH_REQUEST_SUFFIX, request);
 	}
 
@@ -181,7 +181,7 @@ public class CoreBrokerClient {
 		new Thread() {
 			public void run() {
 				getDeployRequestBrokerClient().consume(env.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
-					Main.LOGGER.info("" + deployRequest);
+					Main.LOGGER.debug("" + deployRequest);
 					handler.accept(deployRequest);
 				});
 			}

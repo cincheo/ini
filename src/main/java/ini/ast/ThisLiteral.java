@@ -17,4 +17,9 @@ public class ThisLiteral extends AstElement implements Expression {
 		out.print("this");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitThisLiteral(this);
+	}
+	
 }

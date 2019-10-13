@@ -1,5 +1,6 @@
 package ini.eval.function;
 
+import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
@@ -21,7 +22,7 @@ public class SleepFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID, attrib.parser.types.INT);
 	}
 

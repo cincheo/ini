@@ -29,4 +29,9 @@ public class SetExpression extends AstElement implements Expression {
 		expression.prettyPrint(out);
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitSetExpression(this);
+	}
+	
 }

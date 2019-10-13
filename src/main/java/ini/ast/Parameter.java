@@ -27,4 +27,9 @@ public class Parameter extends NamedElement {
 		}
 	}
 	
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitParameter(this);
+	}
+	
 }

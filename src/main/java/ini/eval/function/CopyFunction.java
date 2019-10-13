@@ -1,5 +1,6 @@
 package ini.eval.function;
 
+import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
@@ -21,7 +22,7 @@ public class CopyFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		Type functionType = new Type(attrib.parser.types,"function");
 		Type t = new Type(attrib.parser.types);
 		functionType.setReturnType(t);

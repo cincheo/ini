@@ -1,5 +1,6 @@
 package ini.eval.function;
 
+import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
@@ -18,7 +19,7 @@ public class KeyFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		Type mkv = new Type(attrib.parser.types, "Map");
 		Type k = new Type(attrib.parser.types);
 		Type v = new Type(attrib.parser.types);

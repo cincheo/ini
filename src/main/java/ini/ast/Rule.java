@@ -56,4 +56,9 @@ public class Rule extends AstElement {
 		throw new RuntimeException("illegal AST node");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitRule(this);
+	}
+	
 }

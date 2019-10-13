@@ -22,7 +22,11 @@ public class Channel extends NamedElement {
 	public Channel(IniParser parser, Token token, String name, TypeVariable typeVariable, Visibility visibility,
 			boolean indexed, List<Expression> annotations) {
 		super(parser, token, name);
-		this.typeVariable = typeVariable;
+		if(typeVariable == null) {
+			this.typeVariable = new TypeVariable(parser, token, "Any");
+		} else {
+			this.typeVariable = typeVariable;
+		}
 		this.visibility = visibility == null ? Visibility.PRIVATE : visibility;
 		this.indexed = indexed;
 		this.annotations = annotations;
@@ -36,7 +40,9 @@ public class Channel extends NamedElement {
 	@Override
 	public void prettyPrint(PrintStream out) {
 		out.print("channel " + name + "(");
-		typeVariable.prettyPrint(out);
+		if(typeVariable!=null) {
+			typeVariable.prettyPrint(out);
+		}
 		out.print(")");
 		if (annotations != null) {
 			out.print(" " + annotations);
@@ -56,4 +62,9 @@ public class Channel extends NamedElement {
 		return components.get(i);
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitChannel(this);
+	}
+	
 }

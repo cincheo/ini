@@ -22,4 +22,9 @@ public class Predicate extends NamedElement {
 		}
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitPredicate(this);
+	}
+	
 }

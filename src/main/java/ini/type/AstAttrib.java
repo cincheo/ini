@@ -47,7 +47,7 @@ import ini.ast.UserType;
 import ini.ast.Variable;
 import ini.ast.VariableAccess;
 import ini.eval.at.At;
-import ini.eval.function.BoundJavaFunction;
+import ini.eval.function.BoundExecutable;
 import ini.parser.IniParser;
 import ini.parser.Types;
 import ini.type.TypingConstraint.Kind;
@@ -688,9 +688,9 @@ public class AstAttrib {
 					if (bindings.isEmpty()) {
 						addError(new TypingError(invocation, "cannot fing matching binging"));
 					} else {
-						executable = new BoundJavaFunction(bindings.get(0));
+						executable = new BoundExecutable(bindings.get(0));
 						for (int i = 1; i < bindings.size(); i++) {
-							((BoundJavaFunction) executable).addOverload(bindings.get(i));
+							((BoundExecutable) executable).addOverload(bindings.get(i));
 						}
 					}
 				}
@@ -699,7 +699,7 @@ public class AstAttrib {
 					if (!evaluationStack.contains(executable)) {
 						// create a new type for each invocation to handle
 						// polymorphic functions
-						typeVar = executable.getFunctionalType(this);
+						typeVar = executable.getFunctionalType(this, invocation);
 						typeVar.executable = executable;
 					} else {
 						// in case of recursion, we use the type calculated in
@@ -1089,8 +1089,8 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
-			//System.err.println("has errors: " + hasErrors());
-			//printConstraints("", System.err);
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
 			// remove wrong constraints
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1134,9 +1134,9 @@ public class AstAttrib {
 				}
 			}
 
-			//System.err.println("==================");
-			//System.err.println("has errors: " + hasErrors());
-			//printConstraints("", System.err);
+			// System.err.println("==================");
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
 			return this;
 		} finally {
@@ -1362,6 +1362,19 @@ public class AstAttrib {
 		}
 	}
 
+	public AstAttrib attrib(AstNode node) {
+		// this.createTypes(parser);
+
+		if (!this.hasErrors()) {
+			this.eval(node);
+			if (node instanceof Executable) {
+				this.invoke((Executable) node, ((Executable) node).getFunctionalType(this, null));
+			}
+		}
+		return this;
+
+	}
+
 	public AstAttrib attrib(IniParser parser) {
 		// this.createTypes(parser);
 
@@ -1369,7 +1382,7 @@ public class AstAttrib {
 			parser.topLevels.forEach(node -> this.eval(node));
 			parser.topLevels.forEach(node -> {
 				if (node instanceof Executable) {
-					this.invoke((Executable) node, ((Executable) node).getFunctionalType(this));
+					this.invoke((Executable) node, ((Executable) node).getFunctionalType(this, null));
 				}
 			});
 

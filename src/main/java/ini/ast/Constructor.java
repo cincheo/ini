@@ -58,4 +58,9 @@ public class Constructor extends NamedElement {
 		}
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitConstructor(this);
+	}
+	
 }

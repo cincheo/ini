@@ -73,4 +73,9 @@ public class BinaryOperator extends AstElement implements Expression {
 		right.prettyPrint(out);
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitBinaryOperator(this);
+	}
+	
 }

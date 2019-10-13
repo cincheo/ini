@@ -23,4 +23,9 @@ public class ReturnStatement extends AstElement implements Statement {
 		}
 	}
 	
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitReturnStatement(this);
+	}
+	
 }

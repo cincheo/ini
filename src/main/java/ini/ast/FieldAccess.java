@@ -40,4 +40,9 @@ public class FieldAccess extends AstElement implements VariableAccess {
 		}
 	}
 	
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitFieldAccess(this);
+	}
+	
 }

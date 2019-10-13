@@ -186,4 +186,9 @@ public class Process extends Executable {
 
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitProcess(this);
+	}
+	
 }

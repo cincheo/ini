@@ -28,5 +28,10 @@ public class SubArrayAccess extends AstElement {
 		maxExpression.prettyPrint(out);
 		out.print("]");
 	}
+	
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitSubArrayAccess(this);
+	}
 
 }

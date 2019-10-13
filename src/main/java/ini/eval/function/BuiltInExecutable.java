@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import ini.ast.Executable;
 import ini.ast.Parameter;
+import ini.ast.Visitor;
 import ini.parser.IniParser;
 
 public abstract class BuiltInExecutable extends Executable {
@@ -14,6 +15,11 @@ public abstract class BuiltInExecutable extends Executable {
 		for (String parameterName : parameterNames) {
 			parameters.add(new Parameter(null, null, parameterName));
 		}
+	}
+	
+	@Override
+	public void accept(Visitor visitor) {
+		// ignore
 	}
 	
 }

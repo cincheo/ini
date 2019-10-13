@@ -1,5 +1,6 @@
 package ini.eval.function;
 
+import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
@@ -24,7 +25,7 @@ public class PrintFunction extends BuiltInExecutable {
 	}
 	
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID, attrib.parser.types.ANY);
 	}
 	

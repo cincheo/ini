@@ -25,4 +25,9 @@ public class SetDeclaration extends AstElement implements Expression {
 		out.print("]");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitSetDeclaration(this);
+	}
+	
 }

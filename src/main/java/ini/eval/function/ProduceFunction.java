@@ -1,6 +1,8 @@
 package ini.eval.function;
 
 import ini.ast.Channel;
+import ini.ast.Invocation;
+import ini.ast.StringLiteral;
 import ini.ast.Channel.Visibility;
 import ini.broker.BrokerClient;
 import ini.eval.IniEval;
@@ -14,6 +16,7 @@ public class ProduceFunction extends BuiltInExecutable {
 
 	public ProduceFunction(IniParser parser) {
 		super(parser, "produce", "channel", "data");
+		setDefaultValue(1, new StringLiteral(parser, token, "VOID"));
 	}
 
 	@Override
@@ -31,10 +34,15 @@ public class ProduceFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
-		Type t = parser.types.createType();
-		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID,
-				attrib.parser.types.getDependentType("Channel", t), t);
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
+//		if (invocation != null && invocation.arguments.size() == 1) {
+//			return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID,
+//					attrib.parser.types.getSimpleType("Channel"));
+//		} else {
+			Type t = parser.types.createType();
+			return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID,
+					attrib.parser.types.getDependentType("Channel", t), t);
+//		}
 	}
 
 }

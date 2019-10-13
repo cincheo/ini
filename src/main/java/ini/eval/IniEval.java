@@ -49,7 +49,7 @@ import ini.eval.data.FutureData;
 import ini.eval.data.RawData;
 import ini.eval.data.RuntimeConstructor;
 import ini.eval.data.TypeInfo;
-import ini.eval.function.BoundJavaFunction;
+import ini.eval.function.BoundExecutable;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 
@@ -169,18 +169,22 @@ public class IniEval {
 				result = d;
 				break;
 
+			case AstNode.BOUND_EXECUTABLE:
+				getRootContext().bind(((BoundExecutable) node).name, new RawData(node));
+				break;
+
 			case AstNode.BINDING:
 				if (((Binding) node).name != null) {
 					d = getRootContext().get(((Binding) node).name);
 					if (d != null) {
-						if (d.getValue() instanceof BoundJavaFunction) {
-							((BoundJavaFunction) d.getValue()).addOverload((Binding) node);
+						if (d.getValue() instanceof BoundExecutable) {
+							((BoundExecutable) d.getValue()).addOverload((Binding) node);
 						} else if (d.getValue() instanceof Executable) {
 							throw new EvalException(this, "binding cannot overload/override  executable");
 						}
 					} else {
 						getRootContext().bind(((Binding) node).name,
-								new RawData(new BoundJavaFunction(((Binding) node))));
+								new RawData(new BoundExecutable(((Binding) node))));
 					}
 				}
 				break;
@@ -311,7 +315,8 @@ public class IniEval {
 				result = new RawData(f);
 				if (f.name != null) {
 					if (getRootContext().hasBinding(f.name)
-							&& (getRootContext().get(f.name).getValue() instanceof BoundJavaFunction)) {
+							&& (getRootContext().get(f.name).getValue() instanceof BoundExecutable)
+							&& ((BoundExecutable) getRootContext().get(f.name).getValue()).binding.isLocal()) {
 						throw new EvalException(this, "cannot override existing binding");
 					}
 					getRootContext().bind(f.name, result);
@@ -445,13 +450,14 @@ public class IniEval {
 			case AstNode.RULE:
 				if (((Rule) node).guard == null || eval(((Rule) node).guard).isTrueOrDefined()) {
 					invocationStack.peek().noRulesApplied = false;
-					//invocationStack.push(new Context(invocationStack.peek()));
+					// invocationStack.push(new
+					// Context(invocationStack.peek()));
 					Sequence<Statement> s = ((Rule) node).statements;
 					while (s != null) {
 						eval(s.get());
 						s = s.next();
 					}
-					//invocationStack.pop();
+					// invocationStack.pop();
 				}
 				break;
 
@@ -800,10 +806,10 @@ public class IniEval {
 		Executable e = null;
 		if (d != null && d.isExecutable()) {
 			e = d.getValue();
-			if (e instanceof BoundJavaFunction) {
-				e = ((BoundJavaFunction) e).resolveOverload(attrib, invocation);
-				if (!((BoundJavaFunction) e).binding.isLocal()) {
-					targetNode = getTargetNode(((BoundJavaFunction) e).binding);
+			if (e instanceof BoundExecutable) {
+				e = ((BoundExecutable) e).resolveOverload(attrib, invocation);
+				if (!((BoundExecutable) e).binding.isLocal()) {
+					targetNode = getTargetNode(((BoundExecutable) e).binding);
 				} else {
 					return e;
 				}
@@ -916,8 +922,9 @@ public class IniEval {
 			}
 			result = getRootContext().get(executableName) == null ? null
 					: getRootContext().get(executableName).getValue();
-		} while (result == null || (result instanceof BoundJavaFunction));
-		Main.LOGGER.info("fetched: " + result);
+		} while (result == null
+				|| (result instanceof BoundExecutable && !((BoundExecutable) result).binding.isLocal()));
+		Main.LOGGER.debug("fetched: " + result);
 		return result;
 	}
 
@@ -941,14 +948,15 @@ public class IniEval {
 		if (!(executable instanceof Process)) {
 			throw new RuntimeException("cannot spawn a function... please only spawn processes");
 		}
-		Main.LOGGER.info("spawn request to " + targetNode + " / " + executable.name + " - " + arguments);
+		Main.LOGGER.debug("spawn request to " + targetNode + " / " + executable.name + " - " + arguments);
 		parser.env.coreBrokerClient.sendSpawnRequest(targetNode,
 				new SpawnRequest(parser.env.node, executable.name, arguments));
 	}
 
-	public void evalCode(AstAttrib attrib, String code) throws Exception {
-		IniParser parser = IniParser.createParserForCode(this.parser.env, this.parser, code);
+	public void evalCode(AstAttrib attrib, String code) {
+		IniParser parser = null;
 		try {
+			parser = IniParser.createParserForCode(this.parser.env, this.parser, code);
 			parser.parse();
 		} catch (Exception e) {
 			if (parser.hasErrors()) {
@@ -978,5 +986,47 @@ public class IniEval {
 			eval(node);
 		}
 	}
+
+	public void evalCode(AstAttrib attrib, AstNode node) {
+		try {
+			attrib.rollback();
+			attrib.attrib(node);
+			attrib.unify();
+		} catch (Exception e) {
+			if (attrib != null)
+				attrib.printError(System.err, e);
+			System.err.println("Java stack:");
+			e.printStackTrace(System.err);
+			return;
+		} finally {
+			if (attrib != null && attrib.hasErrors()) {
+				attrib.printErrors(System.err);
+				return;
+			}
+		}
+
+		eval(node);
+	}
+
+	/*
+	 * public void evalNode2(AstAttrib attrib, AstNode node) throws Exception {
+	 * IniParser parser = new IniParser(); parser.env = this.parser.env;
+	 * parser.types = this.parser.types; parser.builtInExecutables =
+	 * this.parser.builtInExecutables; parser.topLevels.add(node);
+	 * evalParsedCode(attrib, parser); }
+	 * 
+	 * public void evalParsedCode2(AstAttrib attrib, IniParser
+	 * parserContainingCode) throws Exception { if
+	 * (parserContainingCode.hasErrors()) {
+	 * parserContainingCode.printErrors(System.err); return; }
+	 * 
+	 * try { attrib.rollback(); attrib.attrib(parserContainingCode);
+	 * attrib.unify(); } catch (Exception e) { if (attrib != null)
+	 * attrib.printError(System.err, e); System.err.println("Java stack:");
+	 * e.printStackTrace(System.err); return; } finally { if (attrib != null &&
+	 * attrib.hasErrors()) { attrib.printErrors(System.err); return; } }
+	 * 
+	 * for (AstNode node : parserContainingCode.topLevels) { eval(node); } }
+	 */
 
 }

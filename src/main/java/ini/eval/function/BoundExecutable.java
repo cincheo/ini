@@ -10,11 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import ini.Main;
+import ini.ast.AstNode;
 import ini.ast.Binding;
 import ini.ast.Executable;
 import ini.ast.Invocation;
 import ini.ast.Parameter;
 import ini.ast.TypeVariable;
+import ini.ast.Visitor;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
@@ -22,11 +24,11 @@ import ini.type.AstAttrib;
 import ini.type.Type;
 import ini.type.UnionType;
 
-public class BoundJavaFunction extends Executable {
+public class BoundExecutable extends Executable {
 
 	public Binding binding;
 
-	private List<Binding> overloads;
+	public List<Binding> overloads;
 
 	public void addOverload(Binding binding) {
 		if (overloads == null) {
@@ -46,20 +48,21 @@ public class BoundJavaFunction extends Executable {
 	 * @return a bound function that matches the invocation (can be the same one
 	 *         or an overload)
 	 */
-	public BoundJavaFunction resolveOverload(AstAttrib attrib, Invocation invocation) {
+	public BoundExecutable resolveOverload(AstAttrib attrib, Invocation invocation) {
 		if (overloads == null || binding.match(attrib, invocation)) {
 			return this;
 		}
 		for (Binding b : overloads) {
 			if (b.match(attrib, invocation)) {
-				return new BoundJavaFunction(b);
+				return new BoundExecutable(b);
 			}
 		}
 		throw new RuntimeException("cannot find matching binding overload for invocation " + invocation);
 	}
 
-	public BoundJavaFunction(Binding binding) {
+	public BoundExecutable(Binding binding) {
 		super(binding.parser, binding.token, binding.name, new ArrayList<>());
+		this.nodeTypeId = AstNode.BOUND_EXECUTABLE;
 		this.binding = binding;
 		int i = 0;
 		if (binding.parameterTypes != null) {
@@ -199,7 +202,7 @@ public class BoundJavaFunction extends Executable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		Type result = binding.getFunctionalType(attrib);
 		if (overloads != null) {
 			for (Binding b : overloads) {
@@ -215,4 +218,9 @@ public class BoundJavaFunction extends Executable {
 		return result;
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitBoundExecutable(this);
+	}
+	
 }

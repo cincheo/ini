@@ -31,9 +31,12 @@ import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
 
 import ini.analysis.spin.Ini2Pml;
+import ini.ast.AstElement;
 import ini.ast.AstNode;
 import ini.ast.Executable;
 import ini.ast.Invocation;
+import ini.ast.Scanner;
+import ini.ast.Token;
 import ini.broker.CoreBrokerClient;
 import ini.broker.DeployRequest;
 import ini.eval.Context;
@@ -92,7 +95,7 @@ public class Main {
 			printUsage(System.out, jsap);
 			System.exit(0);
 		}
-		LOGGER.info("INI version " + VERSION);
+		LOGGER.debug("INI version " + VERSION);
 		if (commandLineConfig.getBoolean("version")) {
 			System.exit(0);
 		}
@@ -341,26 +344,35 @@ public class Main {
 				LOGGER.info("Starting INI deamon...");
 				parser.env.coreBrokerClient = new CoreBrokerClient(parser.env);
 				parser.env.coreBrokerClient.startSpawnRequestConsumer(request -> {
-					LOGGER.info("processing " + request);
+					LOGGER.debug("processing " + request);
 					Invocation invocation = new Invocation(parser, null, request.spawnedProcessName, request.parameters
 							.stream().map(data -> RawData.dataToExpression(parser, data)).collect(Collectors.toList()));
 					invocation.owner = request.sourceNode;
+					invocation.token = new Token(-1, null, null, -1, -1, -1);
 					new Thread() {
 						public void run() {
+							//eval.evalCode(attrib, invocation);
 							eval.eval(invocation);
 						}
 					}.start();
 				});
 
 				parser.env.coreBrokerClient.startFetchRequestConsumer(request -> {
-					LOGGER.info("processing " + request);
+					LOGGER.debug("processing " + request);
 					parser.env.coreBrokerClient.sendDeployRequest(request.sourceNode, new DeployRequest(parser.env.node,
 							eval.getRootContext().getExecutable(request.fetchedName)));
 				});
 
 				parser.env.coreBrokerClient.startDeployRequestConsumer(request -> {
+					new Scanner() {
+						public void visitAstElement(AstElement element) {
+							super.visitAstElement(element);
+							element.parser = parser;
+						}
+					}.scan(request.executable);
+					//eval.evalCode(attrib, request.executable);
 					eval.eval(request.executable);
-					Main.LOGGER.info("deployed function " + request.executable.name);
+					Main.LOGGER.debug("deployed function " + request.executable.name);
 				});
 			}
 

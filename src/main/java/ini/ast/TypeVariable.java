@@ -51,9 +51,6 @@ public class TypeVariable extends Variable {
 			return null;
 		}
 		for (TypeVariable v : context) {
-			if (name == null || v == null) {
-				System.out.println();
-			}
 			if (name.equals(v.name)) {
 				return v.getType();
 			}
@@ -110,4 +107,8 @@ public class TypeVariable extends Variable {
 		return parameter;
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitTypeVariable(this);;
+	}
 }

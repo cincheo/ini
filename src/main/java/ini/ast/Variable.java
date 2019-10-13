@@ -33,4 +33,9 @@ public class Variable extends NamedElement implements VariableAccess {
 		out.print(name);
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitVariable(this);
+	}
+	
 }

@@ -106,4 +106,9 @@ public class Binding extends NamedElement {
 		return type;
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitBinding(this);
+	}
+	
 }

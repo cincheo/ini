@@ -2,6 +2,7 @@ package ini.eval.function;
 
 import org.eclipse.jetty.server.Server;
 
+import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
@@ -25,7 +26,7 @@ public class StopWebServiceFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		return parser.types.createFunctionalType(parser.types.VOID, parser.types.INT);
 	}
 	

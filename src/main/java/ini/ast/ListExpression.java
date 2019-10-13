@@ -27,4 +27,9 @@ public class ListExpression extends AstElement implements Expression {
 		out.print("]");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitListExpression(this);
+	}
+	
 }

@@ -42,4 +42,8 @@ public class ArrayAccess extends AstElement implements VariableAccess {
 		}
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitArrayAccess(this);
+	}
 }

@@ -2,6 +2,7 @@ package ini.eval.function;
 
 import java.util.Map;
 
+import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
@@ -30,7 +31,7 @@ public class SwapFunction extends BuiltInExecutable {
 	}
 
 	@Override
-	public Type getFunctionalType(AstAttrib attrib) {
+	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		Type t = new Type(parser.types);
 		return parser.types.createFunctionalType(parser.types.VOID, t, t);
 	}

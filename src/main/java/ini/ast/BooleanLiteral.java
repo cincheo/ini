@@ -20,4 +20,9 @@ public class BooleanLiteral extends AstElement implements Expression {
 		out.print(value?"true":"false");
 	}
 
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitBooleanLiteral(this);
+	}
+	
 }

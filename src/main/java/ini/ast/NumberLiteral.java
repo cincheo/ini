@@ -58,4 +58,9 @@ public class NumberLiteral extends AstElement implements Expression {
 		return this;
 	}
 	
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visitNumberLiteral(this);
+	}
+	
 }
