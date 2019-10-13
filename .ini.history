@@ -115,3 +115,16 @@
 1570601732290:exit()
 1570689055662:enrich() : [node="n1"]
 1570689253134:send_person_db()
+1570948260569:dump_person_db()
+1570948776480:enrich() : [node="n1"]
+1570948788889:send_person_db()
+1570948994667:process read_enriched() { @consume(p) : [from=wikipedia_out] { println(p); } }
+1570949021996:read_enriched()
+1570949035581:send_person_db()
+1570949334435:dump_person_db()
+1570949360684:wikipedia_in.send("hello")
+1570949373461:wikipeo("hello")
+1570949397766:wikipedia_in.produce("hello")
+1570949445432:wikipedia_in.produce(Perso[fistName="test"])
+1570949451769:wikipedia_in.produce(Person[fistName="test"])
+1570949458665:wikipedia_in.produce(Person[firstName="test"])

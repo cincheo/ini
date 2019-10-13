@@ -236,6 +236,20 @@ public class Main {
 							found.sort((s1, s2) -> s1.compareTo(s2));
 							if (found.size() == 1) {
 								reader.getBuffer().write(found.get(0).substring(toComplete.length()));
+								Executable executable = null;
+								if (eval.invocationStack.peek().get(found.get(0)) != null
+										&& eval.invocationStack.peek().get(found.get(0)).isExecutable()) {
+									executable = eval.invocationStack.peek().get(found.get(0)).getValue();
+								} else if (eval.getRootContext().get(found.get(0)) != null
+										&& eval.getRootContext().get(found.get(0)).isExecutable()) {
+									executable = eval.getRootContext().get(found.get(0)).getValue();
+								}
+								if (executable != null) {
+									reader.getBuffer().write("(");
+									if (executable.parameters.isEmpty()) {
+										reader.getBuffer().write(")");
+									}
+								}
 							} else {
 								terminal.writer().println();
 								int max = 0;
@@ -351,7 +365,7 @@ public class Main {
 					invocation.token = new Token(-1, null, null, -1, -1, -1);
 					new Thread() {
 						public void run() {
-							//eval.evalCode(attrib, invocation);
+							// eval.evalCode(attrib, invocation);
 							eval.eval(invocation);
 						}
 					}.start();
@@ -370,7 +384,7 @@ public class Main {
 							element.parser = parser;
 						}
 					}.scan(request.executable);
-					//eval.evalCode(attrib, request.executable);
+					// eval.evalCode(attrib, request.executable);
 					eval.eval(request.executable);
 					Main.LOGGER.debug("deployed function " + request.executable.name);
 				});
