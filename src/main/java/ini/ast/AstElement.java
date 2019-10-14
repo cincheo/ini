@@ -38,14 +38,16 @@ public abstract class AstElement implements AstNode {
 	}
 
 	@Override
-	public AstNode getAnnotationNode(String... keys) {
+	public <T extends AstNode> T getAnnotationNode(String... keys) {
 		if (annotations != null && !annotations.isEmpty()) {
 			for (Expression e : annotations) {
 				if (e instanceof Assignment) {
 					Assignment a = (Assignment) e;
 					String name = a.assignee.toString();
 					if (ArrayUtils.contains(keys, name)) {
-						return a.assignment;
+						@SuppressWarnings("unchecked")
+						T assignment = (T) a.assignment;
+						return assignment;
 					}
 				}
 			}

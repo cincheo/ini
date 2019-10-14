@@ -48,7 +48,7 @@ public interface Visitor {
 
 	void visitParameter(Parameter parameter);
 
-	void visitPredicate(Predicate predicate);
+	void visitLTLPredicate(LTLPredicate predicate);
 
 	void visitProcess(Process process);
 

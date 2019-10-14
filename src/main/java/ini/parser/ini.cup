@@ -131,7 +131,8 @@ terminal IDENTIFIER, TIDENTIFIER;
 terminal QUESTION, DOLLAR;
 terminal LF, END;
 // keywords
-terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT, ELSE, DECLARE, CHANNEL, PREDICATE;
+terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT, ELSE, DECLARE, CHANNEL;
+terminal PREDICATE, ALWAYS, EVENTUALLY;
 
 non terminal lf, lf_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
@@ -154,6 +155,7 @@ non terminal field_list_opt, field_list, field;
 non terminal constructor_match_expr;
 non terminal field_match_expr_list_opt, field_match_expr_list;
 non terminal list_concat_expr;
+non terminal ltl_expr;
 
 precedence left DOLLAR;
 precedence left IMPLIES;
@@ -167,6 +169,7 @@ precedence left EQUALS, GT, GTE, LT, LTE, NOTEQUALS;
 precedence left PLUS, MINUS;
 precedence left MULT, DIV;
 precedence left PLUSPLUS, MINUSMINUS;
+precedence left ALWAYS, EVENTUALLY;
 precedence left TUBE;
 precedence left LF;
 precedence left END;
@@ -232,9 +235,9 @@ channel_decl ::= CHANNEL:d visibility:v IDENTIFIER:name LPAREN type_opt:t RPAREN
 	:}
 ;
 
-predicate_decl ::= PREDICATE:d IDENTIFIER:name STRING:expression annotations_opt:a
+predicate_decl ::= PREDICATE:d IDENTIFIER:name ltl_expr:expression END
 	{:
-		RESULT = new Predicate(parser, (Token)d, name.toString(), expression.toString());
+		RESULT = new LTLPredicate(parser, (Token)d, name.toString(), (AstNode)expression);
 	:}
 ;
 
@@ -478,11 +481,11 @@ list_expr ::= LSPAREN:l expr:lb DOTDOT expr:ub RSPAREN:r {:
 constructor_expr ::= TIDENTIFIER:s LSPAREN lf_opt assignment_list_opt:l lf_opt RSPAREN
 	{:
 		RESULT = new SetConstructor(parser,(Token)s,s.toString(),(List)l);
-	:}/*
+	:}
 	| LSPAREN:c assignment_list:l RSPAREN
 	{:
 		RESULT = new SetConstructor(parser,(Token)c,null,(List)l);
-	:}*/
+	:}
 ;
 
 constructor_match_expr ::= TIDENTIFIER:s LSPAREN field_match_expr_list_opt:l RSPAREN 
@@ -590,6 +593,30 @@ logical_expr ::= boolean_literal:e {: RESULT=e; :}
 	| expr:e1 GTE:op expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.GTE,(Expression)e1,(Expression)e2); :}
 	| expr:e1 MATCHES:op invocation:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MATCHES,(Expression)e1,(Expression)e2); :}
 	| expr:e1 MATCHES:op constructor_match_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MATCHES,(Expression)e1,(ConstructorMatchExpression)e2); :}
+;
+
+ltl_expr ::= IDENTIFIER:e {: RESULT = new Variable(parser,(Token)e,e.toString()); :}
+    | boolean_literal:e {: RESULT=e; :}
+	| ltl_expr:e1 ANDAND:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.AND,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 OROR:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.OR,(Expression)e1,(Expression)e2); :}
+	| NOT:op ltl_expr:e {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.NOT,(Expression)e); :}
+	| ltl_expr:e1 EQUALS:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.EQUALS,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 NOTEQUALS:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.NOTEQUALS,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 LT:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.LT,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 LTE:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.LTE,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 GT:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.GT,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 GTE:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.GTE,(Expression)e1,(Expression)e2); :}
+	| NUM:e {: RESULT=new NumberLiteral(parser,(Token)e,Double.parseDouble(e.toString())); :}
+	| INT:e {: RESULT=new NumberLiteral(parser,(Token)e,Integer.parseInt(e.toString())); :} 
+	| ltl_expr:e1 PLUS:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.PLUS,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 MINUS:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MINUS,(Expression)e1,(Expression)e2); :}
+	| MINUS:op ltl_expr:e {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.MINUS,(Expression)e); :}
+	| ltl_expr:e1 MULT:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.MULT,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 DIV:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.DIV,(Expression)e1,(Expression)e2); :}
+	| ltl_expr:e1 IMPLIES:op ltl_expr:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.IMPLIES,(Expression)e1,(Expression)e2); :}
+	| ALWAYS:op ltl_expr:e {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.ALWAYS,(Expression)e); :}
+	| EVENTUALLY:op ltl_expr:e {: RESULT=new UnaryOperator(parser,(Token)op,UnaryOperator.Kind.EVENTUALLY,(Expression)e); :}
+	| LPAREN ltl_expr:e RPAREN {: RESULT=e; :}
 ;
 
 case_expr ::= CASE:c LCPAREN basic_rule_list_opt:l DEFAULT LCPAREN statement_list_opt:s RCPAREN lf_opt RCPAREN 

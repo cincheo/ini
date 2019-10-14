@@ -66,7 +66,7 @@ public interface AstNode {
 	
 	String getAnnotationValue(String... keys);
 	
-	AstNode getAnnotationNode(String... keys);
+	<T extends AstNode> T getAnnotationNode(String... keys);
 
 	public static Class<?> getClass(int nodeTypeId) {
 		switch (nodeTypeId) {

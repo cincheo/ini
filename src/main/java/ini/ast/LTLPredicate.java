@@ -4,11 +4,11 @@ import java.io.PrintStream;
 
 import ini.parser.IniParser;
 
-public class Predicate extends NamedElement {
+public class LTLPredicate extends NamedElement {
 
-	public String expression;
+	public AstNode expression;
 
-	public Predicate(IniParser parser, Token token, String name, String expression) {
+	public LTLPredicate(IniParser parser, Token token, String name, AstNode expression) {
 		super(parser, token, name);
 		this.expression = expression;
 		this.nodeTypeId = AstNode.PREDICATE;
@@ -24,7 +24,7 @@ public class Predicate extends NamedElement {
 
 	@Override
 	public void accept(Visitor visitor) {
-		visitor.visitPredicate(this);
+		visitor.visitLTLPredicate(this);
 	}
 	
 }

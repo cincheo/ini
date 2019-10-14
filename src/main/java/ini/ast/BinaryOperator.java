@@ -7,7 +7,7 @@ import java.io.PrintStream;
 public class BinaryOperator extends AstElement implements Expression {
 
 	public enum Kind {
-		PLUS, MINUS, MULT, DIV, EQUALS, NOTEQUALS, LT, LTE, GT, GTE, AND, OR, MATCHES, CONCAT
+		PLUS, MINUS, MULT, DIV, EQUALS, NOTEQUALS, LT, LTE, GT, GTE, AND, OR, MATCHES, CONCAT, IMPLIES
 	}
 
 	public Kind kind;
@@ -68,6 +68,9 @@ public class BinaryOperator extends AstElement implements Expression {
 			break;
 		case CONCAT:
 			out.print("&");
+			break;
+		case IMPLIES:
+			out.print("=>");
 			break;
 		}
 		right.prettyPrint(out);

@@ -6,25 +6,28 @@ import ini.eval.function.BoundExecutable;
 
 public class Scanner implements Visitor {
 
-	public void scan(AstNode node) {
+	public Scanner scan(AstNode node) {
 		if (node != null) {
 			node.accept(this);
 		}
+		return this;
 	}
 
-	public <T extends AstNode> void scan(List<T> list) {
+	public <T extends AstNode> Scanner scan(List<T> list) {
 		if (list != null) {
 			for (T node : list) {
 				scan(node);
 			}
 		}
+		return this;
 	}
 
-	public <T extends AstNode> void scan(Sequence<T> sequence) {
+	public <T extends AstNode> Scanner scan(Sequence<T> sequence) {
 		while (sequence != null) {
 			scan(sequence.get());
 			sequence = sequence.next();
 		}
+		return this;
 	}
 
 	public void visitAstElement(AstElement element) {
@@ -142,7 +145,7 @@ public class Scanner implements Visitor {
 		scan(parameter.defaultValue);
 	}
 
-	public void visitPredicate(Predicate predicate) {
+	public void visitLTLPredicate(LTLPredicate predicate) {
 		visitAstElement(predicate);
 	}
 

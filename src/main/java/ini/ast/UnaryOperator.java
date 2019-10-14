@@ -7,7 +7,7 @@ import java.io.PrintStream;
 public class UnaryOperator extends AstElement implements Expression, Statement {
 
 	public enum Kind {
-		MINUS, NOT, OPT, PRE_INC, POST_INC, PRE_DEC, POST_DEC
+		MINUS, NOT, OPT, PRE_INC, POST_INC, PRE_DEC, POST_DEC, ALWAYS, EVENTUALLY
 	}
 
 	public Kind kind;
@@ -38,6 +38,12 @@ public class UnaryOperator extends AstElement implements Expression, Statement {
 			break;
 		case PRE_INC:
 			out.print("++");
+			break;
+		case ALWAYS:
+			out.print("[]");
+			break;
+		case EVENTUALLY:
+			out.print("<>");
 			break;
 		default:
 		}

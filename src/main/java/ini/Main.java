@@ -186,6 +186,7 @@ public class Main {
 			converter.afterGenerate();
 			// System.out.println(converter.getOutput());
 			FileUtils.write(new File(modelOut), converter.getOutput(), "UTF-8");
+			LOGGER.info("abstract (Promela) model generated in " + modelOut);
 			Runtime rt = Runtime.getRuntime();
 			Process pr = rt.exec("bin/spin -search " + modelOut);
 			File outFile = new File(modelOut + ".out");
@@ -193,18 +194,21 @@ public class Main {
 			boolean hasError = false;
 			for (String line : IOUtils.readLines(pr.getInputStream(), "UTF-8")) {
 				if (line.contains("assertion violated")) {
-					System.err.println("model checking error: " + line);
+					LOGGER.error("model checking error: " + line);
 					hasError = true;
 				}
 				if (line.contains("Search not completed")) {
-					System.err.println("model checking error: " + line);
+					LOGGER.error("model checking error: " + line);
 					hasError = true;
 				}
 				FileUtils.write(outFile, line + "\n", "UTF-8", true);
 			}
 			if (hasError) {
-				System.err.println("dumped Spin output to '" + modelOut + ".out'");
+				LOGGER.error("dumped Spin output to '" + modelOut + ".out'");
+				System.err.println("model checking failed: will not proceed to evaluation");
 				return;
+			} else {
+				LOGGER.info("model checking successfully performed with Spin model checker");
 			}
 		}
 		IniEval eval = mainEval(parser, attrib, false, null, null,

@@ -25,6 +25,7 @@ import ini.ast.Token;
 %state LAMBDA
 %state EMBEDED_EXPRESSION1
 %state EMBEDED_EXPRESSION2
+%state PREDICATE
 
 %{
 	StringBuffer string=new StringBuffer();
@@ -102,7 +103,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "else"		        { return symbol(sym.ELSE); }
   "declare"		        { return symbol(sym.DECLARE); }
   "declare" {WhiteSpaceChar}* "channel"	    { return symbol(sym.CHANNEL); }
-  "declare" {WhiteSpaceChar}* "predicate"	{ return symbol(sym.PREDICATE); }
+  "declare" {WhiteSpaceChar}* "predicate"	{ yybegin(PREDICATE); return symbol(sym.PREDICATE); }
   "declare" {WhiteSpaceChar}* "type"		{ yybegin(USERTYPE); return symbol(sym.TYPE); }
 
   {DecIntegerLiteral}   { return symbol(sym.INT); }
@@ -258,4 +259,33 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   "}"					{ Symbol s = symbol(sym.RPAREN); yybegin(EMBEDED_EXPRESSION1); yypushback(yylength());  return s; }
 }
 
-.|\n { System.out.println("unmatched: '"+yytext()+"'"); }
+<PREDICATE> {
+  {Identifier}          { return symbol(sym.IDENTIFIER); }
+  {DecIntegerLiteral}   { return symbol(sym.INT); }
+  {DecFloatLiteral}		{ return symbol(sym.NUM); }
+  "true"		        { return symbol(sym.TRUE); }
+  "false"		        { return symbol(sym.FALSE); }
+  "("                   { return symbol(sym.LPAREN); }
+  ")"                   { return symbol(sym.RPAREN); }
+  "[]"                  { return symbol(sym.ALWAYS); }
+  "<>"                  { return symbol(sym.EVENTUALLY); }
+  "=="                  { return symbol(sym.EQUALS); }
+  "!="                  { return symbol(sym.NOTEQUALS); }
+  "||"                  { return symbol(sym.OROR); }
+  "&&"                  { return symbol(sym.ANDAND); }
+  "=>"                  { return symbol(sym.IMPLIES); }
+  "!"                   { return symbol(sym.NOT); }
+  "+"                   { return symbol(sym.PLUS); }
+  "-"                   { return symbol(sym.MINUS); }
+  "/"                   { return symbol(sym.DIV); }
+  "*"                   { return symbol(sym.MULT); }
+  "<"                   { return symbol(sym.LT); }
+  ">"                   { return symbol(sym.GT); }
+  "<="                  { return symbol(sym.LTE); }
+  ">="                  { return symbol(sym.GTE); }
+  {WhiteSpaceChar}      { /* ignore */ }
+  {LineTerminator}      { yybegin(YYINITIAL); return symbol(sym.END); }
+}
+
+
+.|\n { return symbol(-1, yytext()); }

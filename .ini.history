@@ -128,3 +128,5 @@
 1570949445432:wikipedia_in.produce(Perso[fistName="test"])
 1570949451769:wikipedia_in.produce(Person[fistName="test"])
 1570949458665:wikipedia_in.produce(Person[firstName="test"])
+1570951862916:enrich() : [node="n1"]
+1570951871008:send_person_db()

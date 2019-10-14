@@ -59,7 +59,7 @@ hello world
 [1..4]
 > inc = i => i+1 # defines a lambda that increments an integer
 <lambda>(i)
-> import "ini/lib/collect.ini" # imports the lib to support function about collections
+> import "ini/lib/collect.ini" # imports the lib to support functions about collections
 select(l,function)
 > l.map(inc) # increments all the integers in 'l'
 [2,3,4,5]
@@ -299,24 +299,24 @@ To ensure formal validation with model checking, INI provides an option to gener
 
 For instance, taking again the pipeline example given above, we can generate the corresponding abstract Promela code with the ``model-out`` option.
 
-First, we need to add a couple checkpoint annotations to the program. A checkpoint becomes true when the target expression is evaluated. It then can be used in a Linear Temporal Logic (LTL) predicate to be verified by the Spin mode checker. For instance, here we check against the LTL predicate "<> start -> <> end", i.e. if my program starts, it eventually ends.  
+First, we need to add a couple ``model`` annotations to the program to define checkpoints. A checkpoint becomes true when the target expression is evaluated. It then can be used in a Linear Temporal Logic (LTL) predicate to be verified by the Spin mode checker. For instance, here we check against the LTL predicate ``<> start => <> end``, i.e. if my program starts, it eventually ends.  
 
 ```javascript
 declare channel +c0(Int)
 declare channel +c1(Int)
 declare channel +c2(Int)
-declare predicate p1 "(<> start -> <> end)"
+declare predicate p1 (<> start => <> end)
 
 process main() {
   @init() {
     p(c1, c2) : [node="n1"]
     p(c2, c0) : [node="n2"]
     println("processes started")
-    c1.produce(1) : [checkpoint="start"]
+    c1.produce(1) : [model=[checkpoint=start]]
   }
   c = @consume(v) : [channel=c0] {
     println("end of pipeline: {v}")
-    stop(c) : [checkpoint="end"]
+    stop(c) : [model=[checkpoint=end]]
   }
 }
 
@@ -329,7 +329,7 @@ process p(in, out) {
 }
 ```
 
-Then, we can generate the corresponding Promela code:
+Then, we can generate and check the corresponding Promela code:
 
 ```console
 $ bin/ini --model-out model.pml pipeline.ini
@@ -338,39 +338,38 @@ $ bin/ini --model-out model.pml pipeline.ini
 Generated ``model.pml`` file:
 
 ```javascript
-int _step_count = 0
+int _var_step = 0
 int _step_max = 1000
-bool start=false
-bool end=false
+bool _var_start=false
+bool _var_end=false
 chan c0=[10] of {byte}
 chan c1=[10] of {byte}
 chan c2=[10] of {byte}
 active proctype main() {
   run p(c1, c2)
   run p(c2, c0)
-  start = true
+  _var_start = true
   c1!1
   byte v
   do
     :: c0?v ->
-      _step_count++
-      end = true
+      _var_step++
+      _var_end = true
       break
-    :: _step_count > _step_max -> break
+    :: _var_step > _step_max -> break
   od
-  END:
 }
 proctype p(chan in; chan out) {
   byte v
   do
     :: in?v ->
-      _step_count++
+      _var_step++
       out!v+1
       break
-    :: _step_count > _step_max -> break
+    :: _var_step > _step_max -> break
   od
-  END:
 }
+ltl p1 { (<>(_var_start)-><>(_var_end)) } 
 ```
 
 It is possible to write an LTL formula to ensure that the pipeline will terminate, i.e., that at some point in the process execution flow, the ``main``'s ``@consume`` event will be triggered on channel ``c0``. 

@@ -18,10 +18,11 @@ import ini.ast.CharLiteral;
 import ini.ast.Expression;
 import ini.ast.Invocation;
 import ini.ast.Parameter;
-import ini.ast.Predicate;
+import ini.ast.LTLPredicate;
 import ini.ast.Process;
 import ini.ast.Rule;
 import ini.ast.Sequence;
+import ini.ast.SetConstructor;
 import ini.ast.Statement;
 import ini.ast.StringLiteral;
 import ini.ast.UnaryOperator;
@@ -33,6 +34,10 @@ import ini.type.AttrContext;
 import ini.type.Type;
 
 public class Ini2Pml {
+
+	public static final String VAR_PREFIX = "_var_";
+	public static final String VAR_PREV_SUFFIX = "_prev";
+	public static final String VAR_STEP = VAR_PREFIX + "step";
 
 	public IniParser parser;
 	public AstAttrib attrib;
@@ -56,8 +61,41 @@ public class Ini2Pml {
 	private int indent = 0;
 	private static final String INDENT = "  ";
 	private List<String> checkpoints = new ArrayList<>();
+	private List<String> vars = new ArrayList<>();
 
 	private List<String> channels = new ArrayList<>();
+
+	private void handleModelAnnotation(AstNode node) {
+		SetConstructor model = node.getAnnotationNode("model");
+		if (model == null) {
+			return;
+		}
+		Expression checkpoint = model.getFieldExpression("checkpoint");
+		if (checkpoint != null) {
+			// checkpoint = "_checkpoint_" + checkpoint;
+			printLine(VAR_PREFIX + checkpoint.toString() + " = true").endLine();
+			if (!checkpoints.contains(checkpoint.toString())) {
+				checkpoints.add(checkpoint.toString());
+			}
+		}
+		Expression variable = model.getFieldExpression("variable");
+		if (variable != null) {
+			// checkpoint = "_checkpoint_" + checkpoint;
+			boolean previous = model.hasField("previous")
+					&& "true".equals(model.getFieldExpression("previous").toString());
+			if (previous) {
+				printLine(VAR_PREFIX + variable.toString() + VAR_PREV_SUFFIX + " = " + VAR_PREFIX + variable.toString())
+						.endLine();
+				if (!vars.contains(variable.toString() + VAR_PREV_SUFFIX)) {
+					vars.add(variable.toString() + VAR_PREV_SUFFIX);
+				}
+			}
+			printLine(VAR_PREFIX + variable.toString() + " = " + variable.toString()).endLine();
+			if (!vars.contains(variable.toString())) {
+				vars.add(variable.toString());
+			}
+		}
+	}
 
 	private int getOrCreateChannelId(String name) {
 		int index = channels.indexOf(name);
@@ -143,10 +181,13 @@ public class Ini2Pml {
 		selectHeader();
 		// printLine("chan channels[" + channels.size() + "]=[10] of
 		// {byte}").endLine();
-		printLine("int _step_count = 0").endLine();
+		printLine("int " + VAR_STEP + " = 0").endLine();
 		printLine("int _step_max = 1000").endLine();
 		for (String checkpoint : checkpoints) {
-			printLine("bool " + checkpoint + "=false").endLine();
+			printLine("bool " + VAR_PREFIX + checkpoint + "=false").endLine();
+		}
+		for (String var : vars) {
+			printLine("int " + VAR_PREFIX + var + "=0").endLine();
 		}
 		selectBody();
 		return this;
@@ -347,9 +388,9 @@ public class Ini2Pml {
 					// r.atPredicate.outParameters.get(0).toString() + "
 					// ->").endLine()
 					// .startIndent();
-					printLine("_step_count++").endLine();
+					printLine(VAR_STEP + "++").endLine();
 					generateStatements(r.statements).endIndent();
-					printLine(":: _step_count > _step_max -> break").endLine().endIndent();
+					printLine(":: " + VAR_STEP + " > _step_max -> break").endLine().endIndent();
 					printLine("od").endLine();
 					// printLine("goto CONSUME" + r.hashCode()).endLine();
 					// endIndent().printLine("}").endLine();
@@ -401,7 +442,7 @@ public class Ini2Pml {
 
 			// endIndent().printLine("fi").endLine();
 			// printLine("goto START").endLine();
-			//printLine("END:").endLine();
+			// printLine("END:").endLine();
 			endIndent().printLine("}").endLine();
 
 			/*
@@ -436,14 +477,7 @@ public class Ini2Pml {
 			break;
 
 		case AstNode.INVOCATION:
-			String checkpoint = node.getAnnotationValue("checkpoint");
-			if (checkpoint != null) {
-				//checkpoint = "_checkpoint_" + checkpoint;
-				printLine(checkpoint + " = true").endLine();
-				if (!checkpoints.contains(checkpoint)) {
-					checkpoints.add(checkpoint);
-				}
-			}
+			handleModelAnnotation(node);
 			if ("produce".equals(((Invocation) node).name)) {
 				printLine(((Invocation) node).arguments.get(0) + "!" + ((Invocation) node).arguments.get(1)).endLine();
 			} else if ("stop".equals(((Invocation) node).name)) {
@@ -542,7 +576,8 @@ public class Ini2Pml {
 
 		case AstNode.PREDICATE:
 			selectFooter();
-			printLine("ltl " + ((Predicate) node).name + " { ").print(((Predicate) node).expression + " } ");
+			printLine("ltl " + ((LTLPredicate) node).name + " { ")
+					.print(new LTLPromelaPrinter().scan(((LTLPredicate) node).expression).toString() + " } ");
 			selectBody();
 			break;
 
