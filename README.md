@@ -48,7 +48,7 @@ $ bin/ini --shell
 >
 ```
 
-Type-in INI statement with INI shell:
+Type-in INI statements with INI shell:
 
 ```console
 > s = "hello world" # defines a string variable 's'
