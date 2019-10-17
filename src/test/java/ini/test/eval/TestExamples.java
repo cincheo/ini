@@ -41,7 +41,8 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testFac() {
-		testFile("ini/examples/calculus/fac.ini", (p, out) -> assertEquals("fac1(10)=3628800\nfac2(10)=3628800\n", out));
+		testFile("ini/examples/calculus/fac.ini",
+				(p, out) -> assertEquals("fac1(10)=3628800\nfac2(10)=3628800\n", out));
 	}
 
 	public void testPrettyPrinter() {
@@ -135,5 +136,12 @@ public class TestExamples extends IniTestCase {
 	public void testFibonacciProcess() {
 		testFile("ini/examples/processes/fibonacci.ini", (p, out) -> assertEquals("Fib(8)=21\n", out));
 	}
-	
+
+	public void testOperators() {
+		testFile("ini/examples/channels/operators.ini", 11000, 
+				(p, out) -> assertEquals("e: 0\ne: 0\ne: 1\ne: 2\ne: 2\ne: 4\ne: 3\n"
+						+ "e: 6\ne: 4\ne: 8\ne: 5\ne: 10\ne: 6\ne: 12\ne: 7\n"
+						+ "e: 14\ne: 8\ne: 16\ne: 9\ne: 18\n", out));
+	}
+
 }
