@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ini.eval.data.Data;
+import ini.eval.data.RawData;
 import ini.parser.IniParser;
 
 public class Channel extends NamedElement {
@@ -13,6 +15,9 @@ public class Channel extends NamedElement {
 		PRIVATE, APPLICATION, GLOBAL
 	}
 
+	public static final Data STOP_MESSAGE = new RawData("__STOP__");
+	public static final Data VOID_MESSAGE = new RawData("__VOID__");
+	
 	public TypeVariable typeVariable;
 	public boolean indexed = false;
 	public Visibility visibility;

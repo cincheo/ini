@@ -93,6 +93,21 @@ public class UnionType extends Type {
 		return false;
 	}
 
+	public Type getMatchingType(Type type) {
+		for (Type t : unionedTypes) {
+			if (type instanceof UnionType) {
+				Type result = ((UnionType) type).getMatchingType(t);
+				if (result != null) {
+					return t;
+				}
+			}
+			if (type.name != null && type.name.equals(t.name)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public boolean isVariable() {
 		for (Type t : unionedTypes) {

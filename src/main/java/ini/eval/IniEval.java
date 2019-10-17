@@ -7,6 +7,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import ini.Main;
 import ini.ast.ArrayAccess;
 import ini.ast.Assignment;
@@ -338,7 +340,7 @@ public class IniEval {
 						targetNode = getTargetNode(invocation);
 					}
 
-					if (targetNode != null) {
+					if (!StringUtils.isEmpty(targetNode)) {
 						spawnExecutable(invocation, f, targetNode);
 					} else {
 						if (f.parameters.size() < invocation.arguments.size()) {

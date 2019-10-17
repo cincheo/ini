@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.kafka.common.errors.InterruptException;
 
+import ini.Main;
 import ini.ast.Channel;
 import ini.ast.Channel.Visibility;
 import ini.broker.BrokerClient;
@@ -33,14 +34,19 @@ public class AtConsume extends At {
 						brokerClient = BrokerClient.createDefaultInstance(eval.parser.env,
 								channel.visibility == Visibility.GLOBAL);
 						brokerClient.consume(channel.mappedName, value -> {
-							Map<String, Data> variables = new HashMap<String, Data>();
-							if (!getAtPredicate().outParameters.isEmpty()) {
-								variables.put(getAtPredicate().outParameters.get(0).toString(), value);
+							if (Channel.STOP_MESSAGE.equals(value)) {
+								Main.LOGGER.debug("stopping " + AtConsume.this);
+								AtConsume.this.terminate();
+							} else {
+								Map<String, Data> variables = new HashMap<String, Data>();
+								if (!getAtPredicate().outParameters.isEmpty()) {
+									variables.put(getAtPredicate().outParameters.get(0).toString(), value);
+								}
+								// System.err.println(">>>
+								// "+getAtPredicate().outParameters.get(0).toString()+":
+								// "+value);
+								execute(ruleThread.fork(variables));
 							}
-							// System.err.println(">>>
-							// "+getAtPredicate().outParameters.get(0).toString()+":
-							// "+value);
-							execute(ruleThread.fork(variables));
 						});
 					} catch (InterruptException e) {
 						break;

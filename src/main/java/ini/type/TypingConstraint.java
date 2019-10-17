@@ -102,6 +102,20 @@ public class TypingConstraint {
 
 	public List<TypingConstraint> reduce(Types types, List<TypingError> errors) {
 		List<TypingConstraint> result = new ArrayList<TypingConstraint>();
+		// remove union types if possible
+		if (left instanceof UnionType) {
+			Type t = ((UnionType) left).getMatchingType(right);
+			if (t != null) {
+				left = t;
+			}
+		}
+		if (right instanceof UnionType) {
+			Type t = ((UnionType) right).getMatchingType(left);
+			if (t != null) {
+				right = t;
+			}
+		}
+
 		// remove super type equalities...
 		if (left.superType == right) {
 			result.add(new TypingConstraint(Kind.EQ, left, left, leftOrigin, leftOrigin));

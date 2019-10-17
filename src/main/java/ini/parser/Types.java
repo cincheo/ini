@@ -15,6 +15,7 @@ import ini.type.Type;
 public class Types {
 
 	public static final String DICT_TYPE_NAME = "Map";
+	public static final String CHANNEL_TYPE_NAME = "Channel";
 
 	IniParser parser;
 	private int index = 1;

@@ -1,5 +1,8 @@
+pan:1: assertion violated  !( !(((var_v>=0)&&(var_v>=var_v_prev)))) (at depth 28)
+pan: wrote test.pml.trail
 
 (Spin Version 6.5.0 -- 1 July 2019)
+Warning: Search not completed
 	+ Partial Order Reduction
 
 Full statespace search for:
@@ -8,28 +11,21 @@ Full statespace search for:
 	acceptance   cycles 	+ (fairness disabled)
 	invalid end states	- (disabled by never claim)
 
-State-vector 104 byte, depth reached 32, errors: 0
-       30 states, stored (43 visited)
-       23 states, matched
-       66 transitions (= visited+matched)
+State-vector 112 byte, depth reached 28, errors: 1
+       15 states, stored
+        0 states, matched
+       15 transitions (= stored+matched)
         0 atomic steps
 hash conflicts:         0 (resolved)
 
 Stats on memory usage (in Megabytes):
-    0.004	equivalent memory usage for states (stored*(State-vector + overhead))
-    0.289	actual memory usage for states
+    0.002	equivalent memory usage for states (stored*(State-vector + overhead))
+    0.286	actual memory usage for states
   128.000	memory used for hash table (-w24)
     0.534	memory used for DFS stack (-m10000)
   128.730	total actual memory usage
 
 
-unreached in proctype main
-	(0 of 15 states)
-unreached in proctype p
-	(0 of 10 states)
-unreached in claim p1
-	_spin_nvr.tmp:10, state 13, "-end-"
-	(1 of 13 states)
 
 pan: elapsed time 0 seconds
-ltl p1: (! (<> (_var_start))) || (<> (_var_end))
+ltl p1: ((! (<> (_var_start))) || (<> (_var_end))) && ([] (((_var_v>=0)) && ((_var_v>=_var_v_prev))))

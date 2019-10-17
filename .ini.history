@@ -130,3 +130,55 @@
 1570949458665:wikipedia_in.produce(Person[firstName="test"])
 1570951862916:enrich() : [node="n1"]
 1570951871008:send_person_db()
+1571067233885:dump_person_db()
+1571067272213:enrich() : [node="n1"]
+1571067351256:send_person_db()
+1571210497910:import "ini/examples/calculus/eclidian_gcd.ini"
+1571210509435:import "ini/examples/calculus/euclidian_gcd.ini"
+1571210534781:gcd(23,2)
+1571210545662:println(gcd(23,2))
+1571210571847:println(gcd(27,9))
+1571210925081:import "ini/test.ini"
+1571210939122:clear_person_db()
+1571210943426:fill_person_db()
+1571210950435:dump_person_db()
+1571210985981:enrich() : [node = "n1"]
+1571211009213:send_person_db()
+1571211068200:import "ini/lib/io.ini"
+1571211128739:clear(consume)
+1571211246850:import "ini/lib/io.ini"
+1571211275467:consume(wikipedia_out, v => println(v))
+1571211333766:consume(wikipedia_out, v => println(v.lastName))
+1571211348455:send_person_db()
+1571211364528:consume(wikipedia_out, v => println(v.lastName))
+1571211966136:consume("test", v => v)
+1571211979344:consume(wikipedia_out, v => println(v.lastName))
+1571212706255:import "ini/lib/io.ini"
+1571212722480:c = consume(wikipedia_out, v => println(v.lastName))
+1571214123701:println(1+3)
+1571214140619:l = [1,2,4,5]
+1571214161243:import "ini/lib/collect.ini"
+1571214190438:l.foreach(e=>println(e))
+1571214206990:inc = e => e+1
+1571214223359:l.map(inc)
+1571214231407:println(l.map(inc))
+1571214266095:println(l.map("toto"))
+1571214290204:l.foreach(1)
+1571214595210:import "ini/examples/calculus/euclidian_gcd.ini"
+1571214617692:gcd(9,3)
+1571214634804:println(gcd(9,3))
+1571214640021:println(gcd(19,3))
+1571214960383:import "ini/examples/processes/timer.ini"
+1571214992023:p()
+1571215020934:import "ini/examples/processes/timer.ini"
+1571215026679:pp()
+1571215041302:import "ini/examples/processes/timer.ini"
+1571215044884:pp()
+1571215300897:declare channel c0(Int)\ndeclare channel c1(Int)\ndeclare channel c2(Int)\n\nprocess main() {\n  @init() {\n    p(c1, c2)\n    p(c2, c0)\n    println("processes started")\n    c1.produce(1)\n  }\n  @consume(v) : [from=c0] {\n    println("end of pipeline: "+v)\n  }\n}\n\nprocess p(in, out) {\n  @consume(v) : [from=in] {\n    println("{in}: "+v)\n    out.produce(v+1)\n  }\n}
+1571215323097:main()
+1571216556980:dump_person_db()
+1571216602541:enrich() : [node="n1"]
+1571216626382:send_person_db()
+1571216671072:import "ini/lib/io.ini"
+1571216709619:consume(wikipedia_out, p => p.wikipedia)
+1571216730563:consume(wikipedia_out, p => println(p.wikipedia))
