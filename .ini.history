@@ -182,3 +182,12 @@
 1571216671072:import "ini/lib/io.ini"
 1571216709619:consume(wikipedia_out, p => p.wikipedia)
 1571216730563:consume(wikipedia_out, p => println(p.wikipedia))
+1571341369367:l = []
+1571341381206:l & "test"
+1571341388750:l
+1571341404831:l & ["test"]
+1571341415688:l = l & ["test"]
+1571341431337:l1 = []
+1571341441641:l1 = l1 & ["t"]
+1571341443793:l1
+1571341454250:println(l1)
