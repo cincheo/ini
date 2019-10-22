@@ -19,7 +19,7 @@ public class TestChannels extends IniTestCase {
 	public void testChannel3() {
 		testFile("ini/test/channels/channel3.ini",
 				(p, out) -> assertEquals(
-						"{lastName:\"Pawlak\",firstNames:[\"Renaud\",\"Bruno\",\"Pierre\"],height:184}\nperson value = Person[lastName=Pawlak,firstNames=[Renaud,Bruno,Pierre](0..2),height=184]\n{lastName:\"Pawlak\",firstNames:[\"Renaud\",\"Bruno\",\"Pierre\"],height:184}\n",
+						"{lastName:\"Pawlak\",firstNames:[\"Renaud\",\"Bruno\",\"Pierre\"],height:184}\nperson value = Person[lastName=Pawlak,firstNames=[Renaud,Bruno,Pierre],height=184]\n{lastName:\"Pawlak\",firstNames:[\"Renaud\",\"Bruno\",\"Pierre\"],height:184}\n",
 						out));
 	}
 
@@ -60,14 +60,14 @@ public class TestChannels extends IniTestCase {
 						+ "Wikipedia Enrichment for Barack Obama\n"
 						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Barack_Obama\n"
 						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Barack_Obama\n"
-						+ "Wikipedia Enrichment for Edsger Dijkstra\n"
-						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
-						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
-						+ "Wikipedia Enrichment for Unknown Person\n"
-						+ "ERROR: https://en.wikipedia.org/wiki/Unknown_Person\n"
 						+ "Wikipedia Enrichment for Albert Einstein\n"
 						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Albert_Einstein\n"
-						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Albert_Einstein\n", out));
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Albert_Einstein\n"
+						+ "Wikipedia Enrichment for Unknown Person\n" //
+						+ "ERROR: https://en.wikipedia.org/wiki/Unknown_Person\n"
+						+ "Wikipedia Enrichment for Edsger Dijkstra\n"
+						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
+						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n", out));
 	}
 
 	public void testPersonBackPressurePipeline() {
@@ -93,6 +93,10 @@ public class TestChannels extends IniTestCase {
 						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
 						+ "Sending back enriched person for https://en.wikipedia.org/wiki/Edsger_W._Dijkstra\n"
 						+ "Sent all persons\n", out));
+	}
+
+	public void testImplicitChannel1() {
+		testFile("ini/test/channels/implicitChannel1.ini", (p, out) -> assertEquals("consumed = hello\nend\n", out));
 	}
 
 }

@@ -11,13 +11,19 @@ import ini.parser.IniParser;
 
 public class Channel extends NamedElement {
 
+	private static int index = 0;
+
+	public static synchronized String getNextName() {
+		return "_ANONYMOUS_" + (index++);
+	}
+
 	public enum Visibility {
 		PRIVATE, APPLICATION, GLOBAL
 	}
 
 	public static final Data STOP_MESSAGE = new RawData("__STOP__");
 	public static final Data VOID_MESSAGE = new RawData("__VOID__");
-	
+
 	public TypeVariable typeVariable;
 	public boolean indexed = false;
 	public Visibility visibility;
@@ -27,7 +33,10 @@ public class Channel extends NamedElement {
 	public Channel(IniParser parser, Token token, String name, TypeVariable typeVariable, Visibility visibility,
 			boolean indexed, List<Expression> annotations) {
 		super(parser, token, name);
-		if(typeVariable == null) {
+		if (name == null) {
+			name = getNextName();
+		}
+		if (typeVariable == null) {
 			this.typeVariable = new TypeVariable(parser, token, "Any");
 		} else {
 			this.typeVariable = typeVariable;
@@ -45,7 +54,7 @@ public class Channel extends NamedElement {
 	@Override
 	public void prettyPrint(PrintStream out) {
 		out.print("channel " + name + "(");
-		if(typeVariable!=null) {
+		if (typeVariable != null) {
 			typeVariable.prettyPrint(out);
 		}
 		out.print(")");
@@ -71,5 +80,5 @@ public class Channel extends NamedElement {
 	public void accept(Visitor visitor) {
 		visitor.visitChannel(this);
 	}
-	
+
 }

@@ -18,11 +18,6 @@ public class TestBindings extends IniTestCase {
 				(p, out) -> assertEquals("method of test1\nmethod of test2\nmethod of test2 - suffix\n", out));
 	}
 
-	public void testOverload3() {
-		testFile("ini/test/bindings/overload3.ini",
-				(p, out) -> assertEquals("prefix2\n", out));
-	}
-	
 	public void testIllegalOverload1() {
 		parseAndAttribFile("ini/test/bindings/illegalOverload1.ini", //
 				parser -> {
@@ -53,17 +48,6 @@ public class TestBindings extends IniTestCase {
 				attrib -> {
 					assertTrue(attrib.hasErrors());
 					assertEquals("cannot override existing binding", attrib.errors.get(0).message);
-				});
-	}
-
-	public void testIllegalOverload4() {
-		parseAndAttribFile("ini/test/bindings/illegalOverload4.ini", //
-				parser -> {
-					assertFalse(parser.hasErrors());
-				}, //
-				attrib -> {
-					assertTrue(attrib.hasErrors());
-					assertEquals("wrong number of arguments", attrib.errors.get(0).message);
 				});
 	}
 

@@ -6,6 +6,8 @@ import ini.ast.Invocation;
 import ini.broker.BrokerClient;
 import ini.eval.IniEval;
 import ini.eval.at.At;
+import ini.eval.data.Data;
+import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.parser.Types;
 import ini.type.AstAttrib;
@@ -20,7 +22,8 @@ public class KillAt extends BuiltInExecutable {
 
 	@Override
 	public void eval(IniEval eval) {
-		Object target = getArgument(eval, 0).getValue();
+		Data targetData = getArgument(eval, 0);
+		Object target = targetData.getValue();
 		if (target instanceof At) {
 			((At) target).terminate();
 		} else if (target instanceof Channel) {
@@ -34,14 +37,15 @@ public class KillAt extends BuiltInExecutable {
 		} else {
 			throw new RuntimeException("invalid parameter: " + target);
 		}
-		eval.result = null;
+		eval.result = targetData;
 	}
 
 	@Override
 	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		Type t = parser.types.createType();
-		return parser.types.createFunctionalType(parser.types.VOID,
-				UnionType.create(parser.types.THREAD, parser.types.createDependentType(Types.CHANNEL_TYPE_NAME, t)));
+		Type target = UnionType.create(parser.types.THREAD, parser.types.createDependentType(Types.CHANNEL_TYPE_NAME, t));
+		return parser.types.createFunctionalType(target,
+				target);
 	}
 
 }

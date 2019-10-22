@@ -12,25 +12,20 @@ import ini.type.Type;
 public class ChannelFunction extends BuiltInExecutable {
 
 	public ChannelFunction(IniParser parser) {
-		super(parser, "channel", "name");
+		super(parser, "channel");
 	}
 
 	@Override
 	public void eval(IniEval eval) {
-		String name = getArgument(eval, 0).getValue();
-		Visibility visibility = Visibility.PRIVATE;
-		if (name.startsWith("+")) {
-			visibility = Visibility.GLOBAL;
-			name = name.substring(1);
-		}
-		Channel channel = new Channel(parser, token, name, null, visibility, false, annotations);
+		//String name = getArgument(eval, 0).getValue();
+		Channel channel = new Channel(parser, token, null, null, Visibility.PRIVATE, false, annotations);
 		eval.result = new RawData(channel);
 	}
 
 	@Override
 	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
-		return attrib.parser.types.createFunctionalType(
-				attrib.parser.types.getDependentType("Channel", parser.types.ANY), parser.types.STRING);
+		return attrib.parser.types
+				.createFunctionalType(attrib.parser.types.createDependentType("Channel", parser.types.createType()));
 	}
 
 }

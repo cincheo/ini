@@ -1,6 +1,7 @@
 package ini.ast;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -11,6 +12,7 @@ import ini.eval.IniEval;
 import ini.eval.data.Data;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
+import ini.type.AttrContext;
 import ini.type.Type;
 
 public abstract class Executable extends NamedElement implements Expression {
@@ -18,6 +20,80 @@ public abstract class Executable extends NamedElement implements Expression {
 	public List<Parameter> parameters;
 
 	public Context accessibleContext;
+	public AttrContext accessibleAttrContext;
+
+	public List<Executable> overloads;
+
+	public void addOverload(Executable executable) {
+		if (overloads == null) {
+			overloads = new ArrayList<Executable>();
+		}
+		overloads.add(executable);
+	}
+
+	public int getMandatoryParameterCount() {
+		int i = 0;
+		for (Parameter p : parameters) {
+			if (p.defaultValue == null) {
+				i++;
+			}
+		}
+		return i;
+	}
+
+	public boolean match(AstAttrib attrib, Invocation invocation) {
+		return invocation.arguments.size() >= getMandatoryParameterCount()
+				&& invocation.arguments.size() <= parameters.size();
+	}
+
+	public boolean isAmbiguousWith(AstAttrib attrib, Executable executable) {
+		boolean smaller = this.getMandatoryParameterCount() <= executable.getMandatoryParameterCount();
+		Executable e1 = smaller ? this : executable;
+		Executable e2 = smaller ? executable : this;
+		return e1.parameters.size() >= e2.getMandatoryParameterCount();
+	}
+
+	public List<Executable> findAmbiguousOverloads(AstAttrib attrib, Executable executable) {
+		List<Executable> result = new ArrayList<>();
+		if (isAmbiguousWith(attrib, executable)) {
+			result.add(this);
+		}
+		if (overloads != null) {
+			for (Executable e : overloads) {
+				if (e.isAmbiguousWith(attrib, executable)) {
+					result.add(e);
+				}
+			}
+		}
+		return result;
+	}
+
+	public List<Executable> findMatchingOverloads(AstAttrib attrib, Invocation invocation) {
+		List<Executable> executables = new ArrayList<>();
+		if (this.match(attrib, invocation)) {
+			executables.add(this);
+		} else if (overloads != null) {
+			for (Executable e : overloads) {
+				if (e.match(attrib, invocation)) {
+					executables.add(e);
+				}
+			}
+		}
+		return executables;
+	}
+
+	public Executable resolveOverload(AstAttrib attrib, Invocation invocation) {
+		if (this.match(attrib, invocation)) {
+			return this;
+		} else if (overloads != null) {
+			for (Executable e : overloads) {
+				if (e.match(attrib, invocation)) {
+					return e;
+				}
+			}
+		}
+		throw new RuntimeException("cannot find matching overload for invocation " + invocation);
+	}
 
 	public Executable(IniParser parser, Token token, String name, List<Parameter> parameters) {
 		super(parser, token, name);
@@ -27,7 +103,7 @@ public abstract class Executable extends NamedElement implements Expression {
 	protected final void setDefaultValue(int parameterIndex, Expression expression) {
 		parameters.get(parameterIndex).defaultValue = expression;
 	}
-	
+
 	protected final Data getArgument(IniEval eval, int index) {
 		return eval.invocationStack.peek().get(parameters.get(index).name);
 	}

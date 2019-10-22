@@ -377,12 +377,21 @@ public class RawData implements Data {
 	public boolean isIndexedSet() {
 		if (references == null)
 			return false;
+		int min = Integer.MAX_VALUE;
+		int max = Integer.MIN_VALUE;
 		for (Object o : references.keySet()) {
 			if (!(o instanceof Integer)) {
 				return false;
+			} else {
+				if(((Integer)o).intValue() < min) {
+					min = ((Integer)o).intValue();
+				}
+				if(((Integer)o).intValue() > max) {
+					max = ((Integer)o).intValue();
+				}
 			}
 		}
-		return true;
+		return (max - min + 1) == references.size();
 	}
 
 	/**
@@ -711,7 +720,7 @@ public class RawData implements Data {
 				out.print((Object) getValue());
 			}
 		} else {
-			if (kind == Data.Kind.INT_SET || isIndexedSet()) {
+			if (/*kind == Data.Kind.INT_SET || */isIndexedSet()) {
 				if (references != null && references.containsKey(Data.LOWER_BOUND_KEY)) {
 					int min = ((Number) minIndex()).intValue();
 					int max = ((Number) maxIndex()).intValue();
@@ -726,7 +735,8 @@ public class RawData implements Data {
 							out.print(",");
 						}
 					}
-					out.print("](" + min + ".." + max + ")");
+					out.print("]");
+					//out.print("](" + min + ".." + max + ")");
 				}
 			} else if (getReferences() == null) {
 				out.print("null");

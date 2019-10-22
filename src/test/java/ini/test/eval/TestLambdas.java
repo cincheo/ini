@@ -17,7 +17,7 @@ public class TestLambdas extends IniTestCase {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 1 errors: " + attrib.errors, 1, attrib.errors.size());
-			assertEquals("wrong type of error: " + attrib.errors, "wrong number of arguments",
+			assertEquals("wrong type of error: " + attrib.errors, "wrong number of arguments when invoking f(a)",
 					attrib.errors.get(0).message);
 		});
 	}
@@ -27,7 +27,7 @@ public class TestLambdas extends IniTestCase {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 1 errors: " + attrib.errors, 1, attrib.errors.size());
-			assertEquals("wrong type of error: " + attrib.errors, "wrong number of arguments",
+			assertEquals("wrong type of error: " + attrib.errors, "wrong number of arguments when invoking f(a,b)",
 					attrib.errors.get(0).message);
 		});
 	}
@@ -100,6 +100,10 @@ public class TestLambdas extends IniTestCase {
 		});
 	}
 	
+	public void testAccessibleContext() {
+		testFile("ini/test/lambdas/accessibleContext.ini", (p, out) -> assertEquals("1\n", out));
+	}
+
 	
 	
 }

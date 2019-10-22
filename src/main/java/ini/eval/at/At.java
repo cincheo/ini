@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ini.Main;
 import ini.ast.Assignment;
 import ini.ast.AstNode;
 import ini.ast.AtPredicate;
@@ -80,15 +81,15 @@ public abstract class At {
 		return terminated;
 	}
 
-	public void terminate() {
+	synchronized public void terminate() {
 		terminated = true;
 		// we stop the executor in another thread in case we are in the tread of
 		// a running task that would prevent proper shutdown
 		new Thread() {
 			public void run() {
 				if (threadExecutor != null) {
+					threadExecutor.shutdown();
 					try {
-						threadExecutor.shutdown();
 						while (!threadExecutor.awaitTermination(100, TimeUnit.MILLISECONDS)) {
 						}
 					} catch (InterruptedException e) {
@@ -107,6 +108,8 @@ public abstract class At {
 
 	public void execute(IniThread thread) {
 		// System.out.println(">>>> Excute: " + eval);
+		//Main.LOGGER.debug("execute: " + this + " (active threads=" + currentThreadCount + ")");
+		safelyEnter();
 		getThreadExecutor().execute(thread);
 		// System.out.println(">>>> Excute 2: " + this);
 	}
@@ -147,7 +150,7 @@ public abstract class At {
 		}.start();
 	}
 
-	private void pushThread() {
+	synchronized private void pushThread() {
 		// System.out.println("enter " + this);
 		currentThreadCount++;
 		// System.out.println("push: " + this + "," + currentThreadCount);
@@ -156,37 +159,39 @@ public abstract class At {
 	public synchronized void popThread() {
 		// System.out.println("exit " + this);
 		currentThreadCount--;
+		//Main.LOGGER.debug("ended thread " + this + " (active thread count=" + currentThreadCount + ")");
 		// System.out.println("pop: " + this + "," + currentThreadCount);
 		notifyAll();
 	}
 
-	private synchronized void isEmpty() {
+	protected synchronized void isEmpty() {
 		while (currentThreadCount > 0) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
+				Main.LOGGER.error("interrupted " + this, e);
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void isEmptySynchronizedAts() {
+	synchronized private void isEmptySynchronizedAts() {
 		// System.out.println("all ats: " + synchronizedAts);
 		for (At at : synchronizedAts) {
 			at.isEmpty();
 		}
 	}
 
-	Object monitor = new Object();
+	// Object monitor = new Object();
 
-	public void safelyEnter() {
+	synchronized public void safelyEnter() {
 		// System.out.println("safely enter 1 " + this + " >>>");
-		synchronized (monitor) {
-			// System.out.println("safely enter 2 " + this + " >>>");
-			isEmptySynchronizedAts();
-			pushThread();
-			monitor.notifyAll();
-		}
+		// synchronized (monitor) {
+		// System.out.println("safely enter 2 " + this + " >>>");
+		isEmptySynchronizedAts();
+		pushThread();
+		this.notifyAll();
+		// }
 		// System.out.println("safely enter 3 " + this + " >>>");
 	}
 

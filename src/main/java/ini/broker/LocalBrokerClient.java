@@ -21,7 +21,7 @@ public class LocalBrokerClient<T> implements BrokerClient<T> {
 	}
 
 	@Override
-	public void stopConsumer(String channel) {
+	synchronized public void stopConsumer(String channel) {
 		if (consumers.containsKey(channel)) {
 			Main.LOGGER.debug("stopping consumer for channel " + channel);
 			consumerCloseStates.get(channel).set(true);
@@ -29,7 +29,7 @@ public class LocalBrokerClient<T> implements BrokerClient<T> {
 	}
 
 	@Override
-	public boolean isConsumerRunning(String channel) {
+	synchronized public boolean isConsumerRunning(String channel) {
 		return consumers.containsKey(channel);
 	}
 
@@ -75,18 +75,18 @@ public class LocalBrokerClient<T> implements BrokerClient<T> {
 	}
 
 	@Override
-	public void produce(String channel, T data) {
-		new Thread() {
+	synchronized public void produce(String channel, T data) {
+		/*new Thread() {
 			@Override
-			public void run() {
+			public void run() {*/
 				try {
 					getOrCreateChannel(channel).put(data);
 					Main.LOGGER.debug("produced on channel " + channel + " - data=" + data);
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
-			}
-		}.start();
+/*			}
+		}.start();*/
 	}
 
 }

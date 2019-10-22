@@ -27,13 +27,15 @@ public class FutureData extends RawData {
 	public boolean isAvailable() {
 		return available;
 	}
-	
+
 	private void sync() {
 		if (!available) {
 			try {
 				lock.acquire();
 				lock.release();
 				available = true;
+				/*System.out.println("UNLOCKING FUTURE: " + this);
+				new Exception().printStackTrace(System.out);*/
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
@@ -157,12 +159,26 @@ public class FutureData extends RawData {
 	public void copyData(Data data) {
 		super.copyData(data);
 		lock.release();
+		/*System.out.println("RELEASED1");
+		new Exception().printStackTrace(System.out);
+		System.out.println(this);
+		new Thread() {
+			public void run() {
+				try {
+					sleep(1000);
+				} catch (Exception e) {
+				}
+				System.out.println("=========>" + data);
+			}
+		}.start();*/
 	}
 
 	@Override
 	public void setValue(Object value) {
 		super.setValue(value);
 		lock.release();
+		/*System.out.println("RELEASED2");
+		new Exception().printStackTrace(System.out);*/
 	}
 
 }

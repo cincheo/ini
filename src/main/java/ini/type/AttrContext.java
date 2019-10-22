@@ -3,6 +3,7 @@ package ini.type;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import ini.ast.Variable;
 import ini.parser.Types;
@@ -79,6 +80,16 @@ public final class AttrContext {
 
 	public final Type getExecutableType() {
 		return executableType;
+	}
+
+	public void merge(AttrContext context) {
+		if (context != null) {
+			for (Entry<String, Type> e : context.variables.entrySet()) {
+				if (!hasBinding(e.getKey())) {
+					bind(e.getKey(), e.getValue());
+				}
+			}
+		}
 	}
 
 }

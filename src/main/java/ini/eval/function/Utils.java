@@ -4,15 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.PrettyXmlSerializer;
-import org.htmlcleaner.TagNode;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.SparkSession;
 
 import com.google.common.collect.Lists;
 
@@ -44,35 +39,16 @@ public class Utils {
 	
 
 	public static void main(String[] args) throws MalformedURLException, IOException {
-		CleanerProperties props = new CleanerProperties();
-		 
-		// set some properties to non-default values
-		props.setTranslateSpecialEntities(true);
-		props.setTransResCharsToNCR(true);
-		props.setOmitComments(true);
-		 
-		// do parsing
-		TagNode tagNode = new HtmlCleaner(props).clean(
-			new URL("https://en.wikipedia.org/wiki/Jacques_Chirac")
-		);
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("Read JSON File to DataSet")
+                .master("local[2]")
+                .getOrCreate();
 
-		//System.out.println(tagNode.toString());
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		// serialize to xml file
-		new PrettyXmlSerializer(props).writeToStream(
-		    tagNode, out
-		);
-		System.out.println(out.toString("UTF8"));
-		
-		/*new PrettyXmlSerializer(props).writeToFile(
-			    tagNode, "chinadaily.xml", "utf-8"
-			);*/		
-		 
-		/*try {
-			System.out.println(IOUtils.toString(new URL("https://en.wikipedia.org/wiki/Jacques_Chirac"), "UTF8"));
-		} catch(Exception e) {
-			e.printStackTrace();
-		}*/
+        Dataset<String> ds = spark.read().textFile("README.md");
+        System.out.println(ds.count());
+        ds.show();
+        
  	}
 		
 	

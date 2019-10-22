@@ -2,7 +2,9 @@ package ini.eval;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,6 +69,7 @@ public class IniEval {
 	boolean rulePassed = false;
 	public boolean kill = false;
 	public static final String PROCESS_RESULT = "__process_result";
+	public Set<String> importedFiles = new HashSet<>();
 
 	public IniEval(IniParser parser, AstAttrib attrib, Context rootContext) {
 		this.parser = parser;
@@ -121,6 +124,11 @@ public class IniEval {
 
 			case AstNode.IMPORT:
 				try {
+					if (importedFiles.contains(((Import) node).filePath)) {
+						// import files only once
+						Main.LOGGER.debug("already imported file '" + ((Import) node).filePath + "'");
+						break;
+					}
 					IniParser localParser = ((Import) node).importParser;
 					if (localParser == null) {
 						localParser = IniParser.createParserForFile(parser.env, parser,
@@ -131,6 +139,7 @@ public class IniEval {
 						localParser.printErrors(parser.err);
 						throw new EvalException(this, "Error while importing file '" + ((Import) node).filePath);
 					} else {
+						importedFiles.add(((Import) node).filePath);
 						for (AstNode n : localParser.topLevels) {
 							result = eval(n);
 						}
@@ -160,7 +169,7 @@ public class IniEval {
 				d = eval(((Assignment) node).assignee);
 				if (d instanceof DataReference) {
 					Data d2 = eval(((Assignment) node).assignment);
-					if (d2.isPrimitive()) {
+					if (!(d2 instanceof FutureData) && d2.isPrimitive()) {
 						d.copyData(d2);
 					} else {
 						((DataReference) d).setReferencedData(d2);
@@ -180,7 +189,7 @@ public class IniEval {
 					d = getRootContext().get(((Binding) node).name);
 					if (d != null) {
 						if (d.getValue() instanceof BoundExecutable) {
-							((BoundExecutable) d.getValue()).addOverload((Binding) node);
+							((BoundExecutable) d.getValue()).addBindingOverload((Binding) node);
 						} else if (d.getValue() instanceof Executable) {
 							throw new EvalException(this, "binding cannot overload/override  executable");
 						}
@@ -314,15 +323,28 @@ public class IniEval {
 			case AstNode.FUNCTION:
 			case AstNode.PROCESS:
 				f = (Executable) node;
-				result = new RawData(f);
 				if (f.name != null) {
-					if (getRootContext().hasBinding(f.name)
-							&& (getRootContext().get(f.name).getValue() instanceof BoundExecutable)
-							&& ((BoundExecutable) getRootContext().get(f.name).getValue()).binding.isLocal()) {
-						throw new EvalException(this, "cannot override existing binding");
+					result = getRootContext().get(f.name);
+					if (result != null) {
+						if ((result.getValue() instanceof BoundExecutable)
+								&& ((BoundExecutable) result.getValue()).binding.isLocal()) {
+							throw new EvalException(this, "cannot override existing binding");
+						} else if (result.getValue() instanceof Executable) {
+							if (((Executable) result.getValue()).parameters.size() == f.parameters.size()) {
+								// override case
+								result = new RawData(f);
+								getRootContext().bind(f.name, result);
+							} else {
+								((Executable) result.getValue()).addOverload(f);
+							}
+						}
+					} else {
+						result = new RawData(f);
+						getRootContext().bind(f.name, result);
 					}
-					getRootContext().bind(f.name, result);
 				} else {
+					// lambda
+					result = new RawData(f);
 					f.accessibleContext = invocationStack.peek();
 				}
 				break;
@@ -335,6 +357,7 @@ public class IniEval {
 				if (f == null) {
 					throw new EvalException(this, "cannot find exectuable '" + invocation.name + "'");
 				} else {
+					f = f.resolveOverload(attrib, invocation);
 					String targetNode = null;
 					if (parser.env.deamon) {
 						targetNode = getTargetNode(invocation);

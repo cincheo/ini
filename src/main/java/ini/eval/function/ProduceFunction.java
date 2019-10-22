@@ -21,7 +21,8 @@ public class ProduceFunction extends BuiltInExecutable {
 
 	@Override
 	public void eval(IniEval eval) {
-		Channel channel = getArgument(eval, 0).getValue();
+		Data channelData = getArgument(eval, 0);
+		Channel channel = channelData.getValue();
 		Data data = getArgument(eval, 1);
 		try {
 			BrokerClient.createDefaultInstance(eval.parser.env, channel.visibility == Visibility.GLOBAL)
@@ -30,19 +31,20 @@ public class ProduceFunction extends BuiltInExecutable {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		eval.result = data;
+		eval.result = channelData;
 	}
 
 	@Override
 	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
-//		if (invocation != null && invocation.arguments.size() == 1) {
-//			return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID,
-//					attrib.parser.types.getSimpleType("Channel"));
-//		} else {
-			Type t = parser.types.createType();
-			return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID,
-					attrib.parser.types.getDependentType("Channel", t), t);
-//		}
+		// if (invocation != null && invocation.arguments.size() == 1) {
+		// return
+		// attrib.parser.types.createFunctionalType(attrib.parser.types.VOID,
+		// attrib.parser.types.getSimpleType("Channel"));
+		// } else {
+		Type t = parser.types.createType();
+		Type chanType = attrib.parser.types.getDependentType("Channel", t);
+		return attrib.parser.types.createFunctionalType(chanType, chanType, t);
+		// }
 	}
 
 }

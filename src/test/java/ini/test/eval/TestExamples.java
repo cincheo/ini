@@ -36,7 +36,7 @@ public class TestExamples extends IniTestCase {
 	public void testCountOccurences() {
 		testFile("ini/examples/calculus/count_occurences.ini",
 				(p, out) -> assertEquals(
-						"Counting 'This is the string we will count'\nNumber of e(s): 2\nNumber of a(s): null\nNumber of s(s): 3\nNumber of i(s): 4\nNumber of spaces: 6\nCounting '[1,2,1,7](0..3)'\nNumber of 1: 2\nNumber of 7: 1\nNumber of 3: null\n",
+						"Counting 'This is the string we will count'\nNumber of e(s): 2\nNumber of a(s): null\nNumber of s(s): 3\nNumber of i(s): 4\nNumber of spaces: 6\nCounting '[1,2,1,7]'\nNumber of 1: 2\nNumber of 7: 1\nNumber of 3: null\n",
 						out));
 	}
 
@@ -112,7 +112,7 @@ public class TestExamples extends IniTestCase {
 		testFile("ini/examples/data_structures/fibonacci.ini",
 				(p, out) -> assertEquals(
 						"Fib(8)=34\n" + "Here is a flat Fibonacci tree for 5:\n"
-								+ "[5,4,3,3,2,2,1,2,1,1,1,1,1,null,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null](1..32)\n"
+								+ "[5,4,3,3,2,2,1,2,1,1,1,1,1,null,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
 								+ "Tree1[left=Tree1[left=Tree1[left=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],right=Tree1[value=1],value=3],right=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],value=4],right=Tree1[left=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],right=Tree1[value=1],value=3],value=5]\n"
 								+ "Fibtree(5).left.value = 4\n" + "Fibtree(5).right.value = 3\n"
@@ -144,4 +144,17 @@ public class TestExamples extends IniTestCase {
 						+ "e: 14\ne: 8\ne: 16\ne: 9\ne: 18\n", out));
 	}
 
+	public void testReduce1() {
+		testFile("ini/examples/channels/reduce1.ini", (p, out) -> assertEquals("[ =3,a=1,s=2,t=3,e=1,h=1,x=1,i=2]\n", out));
+	}
+
+	public void testReduce2() {
+		testFile("ini/examples/channels/reduce2.ini", (p, out) -> assertEquals("[ =[ , , ],a=[a],s=[s,s],t=[t,t,t],e=[e],h=[h],x=[x],i=[i,i]]\n", out));
+	}
+	
+	public void testReduce3() {
+		testFile("ini/examples/channels/reduce3.ini", (p, out) -> assertEquals("[6=[Sacha],23=[Renaud,Joris]]\n", out));
+	}
+
+	
 }

@@ -158,7 +158,9 @@ public class AstAttrib {
 		if (executableType.executable == null) {
 			executableType.executable = executable;
 		}
-		invocationStack.push(new AttrContext(parser.types, executableType));
+		AttrContext context = new AttrContext(parser.types, executableType);
+		context.merge(executable.accessibleAttrContext);
+		invocationStack.push(context);
 		evaluationStack.push(executable);
 		evalExecutable(executable, executableType);
 		evaluationStack.pop();
@@ -642,21 +644,59 @@ public class AstAttrib {
 		case AstNode.FUNCTION:
 		case AstNode.PROCESS:
 
-			result = parser.types.createType();
-			result.executable = (Executable) node;
 			if (((NamedElement) node).name != null) {
-				if (getRootContext().hasBinding(((NamedElement) node).name)
-						&& getRootContext().get(((NamedElement) node).name).hasBindings()) {
-					addError(new TypingError(node, "cannot override existing binding"));
-					break;
+				result = getRootContext().get(((NamedElement) node).name);
+				if (result != null) {
+					if (result.hasBindings()) {
+						addError(new TypingError(node, "cannot override existing binding"));
+						break;
+					}
+					if (result.channel != null) {
+						addError(new TypingError(node, "cannot override channel"));
+						break;
+					}
+					if (result.executable != null) {
+						if (result.executable.parameters.size() == ((Executable) node).parameters.size()) {
+							// case of an override!
+							result.executable = ((Executable) node);
+						} else {
+							List<Executable> l = result.executable.findAmbiguousOverloads(this, (Executable) node);
+							if (!l.isEmpty()) {
+								addError(new TypingError(node, "ambiguous overload(s) " + l));
+								break;
+							} else {
+								result.executable.addOverload((Executable) node);
+							}
+						}
+					} else {
+						// should not happen
+						addError(new TypingError(node, "cannot override symbol"));
+						break;
+					}
+				} else {
+					result = parser.types.createType();
+					result.executable = (Executable) node;
+					getRootContext().bind(((NamedElement) node).name, result);
+					// t = parser.types.createFunctionalType(parser.types.ANY);
+					// for (int i = 0; i < result.executable.parameters.size();
+					// i++) {
+					// t.addTypeParameter(parser.types.ANY);
+					// }
+					// addTypingConstraint(Kind.EQ, result, t, node, null);
 				}
-				getRootContext().bind(((NamedElement) node).name, result);
-				t = parser.types.createFunctionalType(parser.types.ANY);
-				for (int i = 0; i < result.executable.parameters.size(); i++) {
-					t.addTypeParameter(parser.types.ANY);
-				}
-				addTypingConstraint(Kind.EQ, result, t, node, null);
+				/*
+				 * getRootContext().bind(((NamedElement) node).name, result); t
+				 * = parser.types.createFunctionalType(parser.types.ANY); for
+				 * (int i = 0; i < result.executable.parameters.size(); i++) {
+				 * t.addTypeParameter(parser.types.ANY); }
+				 */
+				// addTypingConstraint(Kind.EQ, result, t, node, null);
 
+			} else {
+				// lambda case
+				result = parser.types.createType();
+				result.executable = (Executable) node;
+				result.executable.accessibleAttrContext = invocationStack.peek();
 			}
 			break;
 
@@ -690,8 +730,18 @@ public class AstAttrib {
 					} else {
 						executable = new BoundExecutable(bindings.get(0));
 						for (int i = 1; i < bindings.size(); i++) {
-							((BoundExecutable) executable).addOverload(bindings.get(i));
+							((BoundExecutable) executable).addBindingOverload(bindings.get(i));
 						}
+					}
+				} else {
+					if (executable.overloads != null) {
+						List<Executable> overloads = executable.findMatchingOverloads(this, invocation);
+						if (overloads.size() > 1) {
+							addError(new TypingError(invocation,
+									"ambiguous invocation for overloaded executable " + overloads));
+							break;
+						}
+						executable = executable.resolveOverload(this, invocation);
 					}
 				}
 
@@ -709,11 +759,15 @@ public class AstAttrib {
 					}
 
 					// TODO: check number of arguments against default values
-					if (executable.parameters.size() != typeVar.getTypeParameters().size()) {
-						throw new RuntimeException("unconsistent type for executable");
-					}
-					if (invocation.arguments.size() > typeVar.getTypeParameters().size()) {
-						addError(new TypingError(invocation, "wrong number of arguments"));
+					// if (executable.parameters.size() !=
+					// typeVar.getTypeParameters().size()) {
+					// throw new RuntimeException("unconsistent type for
+					// executable");
+					// }
+
+					if (!executable.match(this, invocation)) {
+						addError(new TypingError(invocation, "wrong number of arguments when invoking " + executable));
+						break;
 					}
 
 					for (int i = 0; i < typeVar.getTypeParameters().size(); i++) {
@@ -1089,8 +1143,8 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
-			// System.err.println("has errors: " + hasErrors());
-			// printConstraints("", System.err);
+			//System.err.println("has errors: " + hasErrors());
+			//printConstraints("", System.err);
 
 			// remove wrong constraints
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1134,9 +1188,9 @@ public class AstAttrib {
 				}
 			}
 
-			// System.err.println("==================");
-			// System.err.println("has errors: " + hasErrors());
-			// printConstraints("", System.err);
+			//System.err.println("==================");
+			//System.err.println("has errors: " + hasErrors());
+			//printConstraints("", System.err);
 
 			return this;
 		} finally {

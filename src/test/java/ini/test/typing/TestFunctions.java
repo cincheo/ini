@@ -43,7 +43,7 @@ public class TestFunctions extends IniTestCase {
 			assertEquals("expected 0 errors: " + parser.errors, 0, parser.errors.size());
 		}, attrib -> {
 			assertEquals("expected 1 error: " + attrib.errors, 1, attrib.errors.size());
-			assertEquals("wrong type of error: " + attrib.errors, "wrong number of arguments",
+			assertEquals("wrong type of error: " + attrib.errors, "wrong number of arguments when invoking f()",
 					attrib.errors.get(0).message);
 		});
 	}

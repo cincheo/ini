@@ -76,7 +76,7 @@ public class Scanner implements Visitor {
 	public void visitBoundExecutable(BoundExecutable boundExecutable) {
 		visitAstElement(boundExecutable);
 		scan(boundExecutable.binding);
-		scan(boundExecutable.overloads);
+		scan(boundExecutable.bindingOverloads);
 		for (Parameter parameter : boundExecutable.parameters) {
 			scan(parameter);
 		}

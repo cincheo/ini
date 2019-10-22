@@ -68,6 +68,7 @@ public abstract class IniTestCase extends TestCase {
 			if (parser != null && parser.hasErrors()) {
 				parser.printErrors(System.err);
 			}
+			e.printStackTrace();
 			fail();
 		}
 	}

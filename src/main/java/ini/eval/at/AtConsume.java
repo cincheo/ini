@@ -35,8 +35,11 @@ public class AtConsume extends At {
 								channel.visibility == Visibility.GLOBAL);
 						brokerClient.consume(channel.mappedName, value -> {
 							if (Channel.STOP_MESSAGE.equals(value)) {
+								AtConsume.this.isEmpty();
 								Main.LOGGER.debug("stopping " + AtConsume.this);
+								//AtConsume.this.safelyEnter();
 								AtConsume.this.terminate();
+								Main.LOGGER.debug("stopped " + AtConsume.this);
 							} else {
 								Map<String, Data> variables = new HashMap<String, Data>();
 								if (!getAtPredicate().outParameters.isEmpty()) {
@@ -45,6 +48,7 @@ public class AtConsume extends At {
 								// System.err.println(">>>
 								// "+getAtPredicate().outParameters.get(0).toString()+":
 								// "+value);
+								Main.LOGGER.debug("starting event thread for " + AtConsume.this);
 								execute(ruleThread.fork(variables));
 							}
 						});

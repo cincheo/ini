@@ -28,13 +28,13 @@ public class BoundExecutable extends Executable {
 
 	public Binding binding;
 
-	public List<Binding> overloads;
+	public List<Binding> bindingOverloads;
 
-	public void addOverload(Binding binding) {
-		if (overloads == null) {
-			overloads = new ArrayList<>();
+	public void addBindingOverload(Binding binding) {
+		if (bindingOverloads == null) {
+			bindingOverloads = new ArrayList<>();
 		}
-		overloads.add(binding);
+		bindingOverloads.add(binding);
 	}
 
 	/**
@@ -48,11 +48,11 @@ public class BoundExecutable extends Executable {
 	 * @return a bound function that matches the invocation (can be the same one
 	 *         or an overload)
 	 */
-	public BoundExecutable resolveOverload(AstAttrib attrib, Invocation invocation) {
-		if (overloads == null || binding.match(attrib, invocation)) {
+	public Executable resolveOverload(AstAttrib attrib, Invocation invocation) {
+		if (bindingOverloads == null || binding.match(attrib, invocation)) {
 			return this;
 		}
-		for (Binding b : overloads) {
+		for (Binding b : bindingOverloads) {
 			if (b.match(attrib, invocation)) {
 				return new BoundExecutable(b);
 			}
@@ -204,8 +204,8 @@ public class BoundExecutable extends Executable {
 	@Override
 	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		Type result = binding.getFunctionalType(attrib);
-		if (overloads != null) {
-			for (Binding b : overloads) {
+		if (bindingOverloads != null) {
+			for (Binding b : bindingOverloads) {
 				Type t = b.getFunctionalType(attrib);
 				for (int i = 0; i < result.getTypeParameters().size(); i++) {
 					if (!result.getTypeParameters().get(i).equals(t.getTypeParameters().get(i))) {

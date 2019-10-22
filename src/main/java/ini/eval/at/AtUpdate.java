@@ -48,10 +48,14 @@ public class AtUpdate extends At {
 			void notify(Data data, Data oldData) {
 				switch (mode) {
 				case "async":
-					Map<String, Data> variables = new HashMap<String, Data>();
-					variables.put(getAtPredicate().outParameters.get(0).toString(), oldData);
-					variables.put(getAtPredicate().outParameters.get(1).toString(), data);
-					execute(thread.fork(variables));
+					new Thread() {
+						public void run() {
+							Map<String, Data> variables = new HashMap<String, Data>();
+							variables.put(getAtPredicate().outParameters.get(0).toString(), oldData);
+							variables.put(getAtPredicate().outParameters.get(1).toString(), data);
+							execute(thread.fork(variables));
+						}
+					}.start();
 					break;
 				default:
 					Context ctx = new Context(eval.invocationStack.peek());

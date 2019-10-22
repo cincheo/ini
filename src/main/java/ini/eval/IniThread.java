@@ -37,9 +37,9 @@ public class IniThread extends Thread {
 
 	@Override
 	public void run() {
-		if (at != null) {
-			at.safelyEnter();
-		}
+		//if (at != null) {
+		//	at.safelyEnter();
+		//}
 		try {
 			if (variables != null) {
 				for (String variable : variables.keySet()) {
