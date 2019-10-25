@@ -64,11 +64,16 @@ public class CoreBrokerClient {
 	private synchronized BrokerClient<SpawnRequest> getSpawnRequestBrokerClient() {
 		if (spawnRequestBrokerClient == null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
+			gsonBuilder.registerTypeAdapter(AstNode.class, new AstNodeDeserializer())
+					.registerTypeAdapter(VariableAccess.class, new AstNodeDeserializer())
+					.registerTypeAdapter(Expression.class, new AstNodeDeserializer())
+					.registerTypeAdapter(Executable.class, new AstNodeDeserializer())
+					.registerTypeAdapter(Statement.class, new AstNodeDeserializer());
 			gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo();
+					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo(gsonBuilder);
 				}
 			});
 			spawnRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(),
@@ -91,7 +96,7 @@ public class CoreBrokerClient {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo();
+					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo(gsonBuilder);
 				}
 			});
 

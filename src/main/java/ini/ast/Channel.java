@@ -11,12 +11,6 @@ import ini.parser.IniParser;
 
 public class Channel extends NamedElement {
 
-	private static int index = 0;
-
-	public static synchronized String getNextName() {
-		return "_ANONYMOUS_" + (index++);
-	}
-
 	public enum Visibility {
 		PRIVATE, APPLICATION, GLOBAL
 	}
@@ -34,7 +28,7 @@ public class Channel extends NamedElement {
 			boolean indexed, List<Expression> annotations) {
 		super(parser, token, name);
 		if (name == null) {
-			name = getNextName();
+			throw new RuntimeException("channel name cannot be null");
 		}
 		if (typeVariable == null) {
 			this.typeVariable = new TypeVariable(parser, token, "Any");

@@ -23,6 +23,7 @@ import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
 import ini.ast.Channel;
 import ini.ast.CharLiteral;
+import ini.ast.ConditionalExpression;
 import ini.ast.ConstructorMatchExpression;
 import ini.ast.Executable;
 import ini.ast.Expression;
@@ -178,6 +179,15 @@ public class IniEval {
 					d.copyData(eval(((Assignment) node).assignment));
 				}
 				result = d;
+				break;
+
+			case AstNode.CONDITIONAL:
+				d = eval(((ConditionalExpression) node).condition);
+				if (d.getBoolean()) {
+					result = eval(((ConditionalExpression) node).trueExpression);
+				} else {
+					result = eval(((ConditionalExpression) node).falseExpression);
+				}
 				break;
 
 			case AstNode.BOUND_EXECUTABLE:
@@ -490,9 +500,11 @@ public class IniEval {
 				String constructorName = ((SetConstructor) node).name;
 				d = new RawData(null);
 				RuntimeConstructor c = new RuntimeConstructor(constructorName, new ArrayList<>());
-				for (Assignment a : ((SetConstructor) node).fieldAssignments) {
-					d.set(((Variable) a.assignee).name, eval(a.assignment));
-					c.fields.add(((Variable) a.assignee).name);
+				if (((SetConstructor) node).fieldAssignments != null) {
+					for (Assignment a : ((SetConstructor) node).fieldAssignments) {
+						d.set(((Variable) a.assignee).name, eval(a.assignment));
+						c.fields.add(((Variable) a.assignee).name);
+					}
 				}
 				d.setConstructor(c);
 				if (constructorName != null) {
@@ -754,25 +766,32 @@ public class IniEval {
 			// result = new RawData(false);
 			// return;
 			// }
-			result = new RawData(false);
+			Data d = new RawData(false);
+			result = d;
 			if (!toMatch.name.equals(e.name)) {
 				return;
 			}
 			Context c = new Context(invocationStack.peek());
-			if (!dataToMatch.isArray() && dataToMatch.getReferences() != null) {
-				for (Object field : dataToMatch.getReferences().keySet()) {
-					c.bind((String) field, dataToMatch.get(field));
+			if (!dataToMatch
+					.isArray()/* && dataToMatch.getReferences() != null */) {
+				if (dataToMatch.getReferences() != null) {
+					for (Object field : dataToMatch.getReferences().keySet()) {
+						c.bind((String) field, dataToMatch.get(field));
+					}
 				}
 				invocationStack.push(c);
-				result.setValue(true);
-				for (Expression fe : e.fieldMatchExpressions) {
-					if (!eval(fe).isTrueOrDefined()) {
-						// System.out.println("2: "+fe);
-						result.setValue(false);
-						break;
+				d.setValue(true);
+				if (e.fieldMatchExpressions != null) {
+					for (Expression fe : e.fieldMatchExpressions) {
+						if (!eval(fe).isTrueOrDefined()) {
+							// System.out.println("2: "+fe);
+							d.setValue(false);
+							break;
+						}
 					}
 				}
 				invocationStack.pop();
+				result = d;
 			} else {
 				throw new RuntimeException("constructor '" + e.name + "' does not exist");
 			}

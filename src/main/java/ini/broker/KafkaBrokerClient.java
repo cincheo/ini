@@ -65,7 +65,8 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerConfiguration.getConsumerId());
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-		if (consumerConfiguration.getConsumeStrategy() == ConsumerConfiguration.ConsumeStrategy.EARLIEST) {
+		if (consumerConfiguration.getConsumeStrategy() == ConsumerConfiguration.ConsumeStrategy.EARLIEST
+				|| channel.startsWith("temp.")) {
 			Main.LOGGER.debug("consume strategy is 'earliest'");
 			props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 		}
@@ -176,9 +177,9 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		}// finally {
-		//	producer.flush();
-		//}
+		} // finally {
+			// producer.flush();
+			// }
 	}
 
 }

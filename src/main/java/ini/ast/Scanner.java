@@ -97,6 +97,14 @@ public class Scanner implements Visitor {
 		visitAstElement(charLiteral);
 	}
 
+	@Override
+	public void visitConditionalExpression(ConditionalExpression conditionalExpression) {
+		visitAstElement(conditionalExpression);
+		scan(conditionalExpression.condition);
+		scan(conditionalExpression.trueExpression);
+		scan(conditionalExpression.falseExpression);
+	}
+	
 	public void visitConstructor(Constructor constructor) {
 		visitAstElement(constructor);
 		scan(constructor.fields);

@@ -28,6 +28,8 @@ public interface Visitor {
 	
 	void visitCharLiteral(CharLiteral charLiteral);
 	
+	void visitConditionalExpression(ConditionalExpression conditionalExpression);
+
 	void visitConstructor(Constructor constructor);
 
 	void visitConstructorMatchExpression(ConstructorMatchExpression constructorMatchExpression);

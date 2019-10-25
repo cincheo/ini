@@ -6,9 +6,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.SparkSession;
-
 import com.google.common.collect.Lists;
 
 public class Utils {
@@ -39,7 +36,7 @@ public class Utils {
 	
 
 	public static void main(String[] args) throws MalformedURLException, IOException {
-        SparkSession spark = SparkSession
+        /*SparkSession spark = SparkSession
                 .builder()
                 .appName("Read JSON File to DataSet")
                 .master("local[2]")
@@ -47,7 +44,7 @@ public class Utils {
 
         Dataset<String> ds = spark.read().textFile("README.md");
         System.out.println(ds.count());
-        ds.show();
+        ds.show();*/
         
  	}
 		

@@ -112,7 +112,7 @@ public class TestExamples extends IniTestCase {
 		testFile("ini/examples/data_structures/fibonacci.ini",
 				(p, out) -> assertEquals(
 						"Fib(8)=34\n" + "Here is a flat Fibonacci tree for 5:\n"
-								+ "[5,4,3,3,2,2,1,2,1,1,1,1,1,null,null,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]\n"
+								+ "[1=5,2=4,3=3,4=3,5=2,6=2,7=1,8=2,9=1,10=1,11=1,12=1,13=1,14=null,15=null,16=1,17=1,18=null,19=null,20=null,21=null,22=null,23=null,24=null,25=null,26=null,27=null,28=null,29=null,30=null,31=null,32=null]\n"
 								+ "Here is a non-flat Fibonacci tree for 5:\n"
 								+ "Tree1[left=Tree1[left=Tree1[left=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],right=Tree1[value=1],value=3],right=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],value=4],right=Tree1[left=Tree1[left=Tree1[value=1],right=Tree1[value=1],value=2],right=Tree1[value=1],value=3],value=5]\n"
 								+ "Fibtree(5).left.value = 4\n" + "Fibtree(5).right.value = 3\n"
@@ -128,7 +128,7 @@ public class TestExamples extends IniTestCase {
 								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Leaf[value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Leaf[value=1],value=3],value=5]\n",
 						out));
 	}
-
+	
 	public void testFibonacciFunction() {
 		testFile("ini/examples/calculus/fibonacci.ini", (p, out) -> assertEquals("Fib(8)=21\n", out));
 	}

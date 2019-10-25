@@ -20,6 +20,7 @@ import ini.ast.BinaryOperator;
 import ini.ast.Binding;
 import ini.ast.CaseStatement;
 import ini.ast.Channel;
+import ini.ast.ConditionalExpression;
 import ini.ast.Constructor;
 import ini.ast.ConstructorMatchExpression;
 import ini.ast.Executable;
@@ -589,6 +590,12 @@ public class AstAttrib {
 			result = parser.types.CHAR;
 			break;
 
+		case AstNode.CONDITIONAL:
+			result = eval(((ConditionalExpression) node).trueExpression);
+			addTypingConstraint(TypingConstraint.Kind.EQ, result, eval(((ConditionalExpression) node).falseExpression),
+					((ConditionalExpression) node).trueExpression, ((ConditionalExpression) node).falseExpression);
+			break;
+
 		case AstNode.CONSTRUCTOR_MATCH_EXPRESSION:
 			Constructor constr = parser.types.getConstructor(((ConstructorMatchExpression) node).name);
 			if (constr == null) {
@@ -722,15 +729,17 @@ public class AstAttrib {
 			if (typeVar != null) {
 
 				executable = typeVar.executable;
-				if (executable == null && typeVar.hasBindings()) {
-					List<Binding> bindings = typeVar.getBindings().stream().filter(e -> e.match(this, invocation))
-							.collect(Collectors.toList());
-					if (bindings.isEmpty()) {
-						addError(new TypingError(invocation, "cannot fing matching binging"));
-					} else {
-						executable = new BoundExecutable(bindings.get(0));
-						for (int i = 1; i < bindings.size(); i++) {
-							((BoundExecutable) executable).addBindingOverload(bindings.get(i));
+				if (executable == null) {
+					if (typeVar.hasBindings()) {
+						List<Binding> bindings = typeVar.getBindings().stream().filter(e -> e.match(this, invocation))
+								.collect(Collectors.toList());
+						if (bindings.isEmpty()) {
+							addError(new TypingError(invocation, "cannot fing matching binding"));
+						} else {
+							executable = new BoundExecutable(bindings.get(0));
+							for (int i = 1; i < bindings.size(); i++) {
+								((BoundExecutable) executable).addBindingOverload(bindings.get(i));
+							}
 						}
 					}
 				} else {
@@ -905,14 +914,16 @@ public class AstAttrib {
 					addError(new TypingError(node, "undeclared constructor '" + ((SetConstructor) node).name + "'"));
 					break;
 				}
-				for (Assignment a : ((SetConstructor) node).fieldAssignments) {
-					Variable fieldVariable = ((Variable) a.assignee);
-					if (!c.type.getFields().containsKey(fieldVariable.name)) {
-						addError(new TypingError(a, "undeclared field '" + fieldVariable.name + "'"));
-					} else {
-						t2 = eval(a.assignment);
-						addTypingConstraint(TypingConstraint.Kind.EQ, t2, c.type.getFields().get(fieldVariable.name),
-								a.assignment, fieldVariable);
+				if (((SetConstructor) node).fieldAssignments != null) {
+					for (Assignment a : ((SetConstructor) node).fieldAssignments) {
+						Variable fieldVariable = ((Variable) a.assignee);
+						if (!c.type.getFields().containsKey(fieldVariable.name)) {
+							addError(new TypingError(a, "undeclared field '" + fieldVariable.name + "'"));
+						} else {
+							t2 = eval(a.assignment);
+							addTypingConstraint(TypingConstraint.Kind.EQ, t2,
+									c.type.getFields().get(fieldVariable.name), a.assignment, fieldVariable);
+						}
 					}
 				}
 				result = c.type;
@@ -1143,8 +1154,8 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
-			//System.err.println("has errors: " + hasErrors());
-			//printConstraints("", System.err);
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
 			// remove wrong constraints
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1188,9 +1199,9 @@ public class AstAttrib {
 				}
 			}
 
-			//System.err.println("==================");
-			//System.err.println("has errors: " + hasErrors());
-			//printConstraints("", System.err);
+			// System.err.println("==================");
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
 			return this;
 		} finally {

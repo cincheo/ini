@@ -99,4 +99,9 @@ public class TestChannels extends IniTestCase {
 		testFile("ini/test/channels/implicitChannel1.ini", (p, out) -> assertEquals("consumed = hello\nend\n", out));
 	}
 
+	public void testChannelOverload() {
+		testFile("ini/test/channels/channel_overload.ini", (p, out) -> assertEquals("2.0\nstopped\n", out));
+	}
+	
+	
 }

@@ -20,8 +20,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import ini.Main;
 import ini.ast.Assignment;
+import ini.ast.AstNode;
 import ini.ast.BooleanLiteral;
 import ini.ast.Channel;
 import ini.ast.Executable;
@@ -29,8 +32,10 @@ import ini.ast.Expression;
 import ini.ast.Function;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
+import ini.ast.Statement;
 import ini.ast.StringLiteral;
 import ini.ast.Variable;
+import ini.ast.VariableAccess;
 import ini.eval.EvalException;
 import ini.eval.IniEval;
 import ini.parser.IniParser;
@@ -201,6 +206,8 @@ public class RawData implements Data {
 				Variable v = new Variable(parser, null, c.name);
 				v.channelLiteral = c;
 				return v;
+			} else if (value instanceof Function) {
+				return (Function) value;
 			} else {
 				if (value != null) {
 					throw new RuntimeException("unhandled data: " + value + " - " + value.getClass());
@@ -391,7 +398,7 @@ public class RawData implements Data {
 				}
 			}
 		}
-		return (max - min + 1) == references.size();
+		return (max - min + 1) == references.size() && min == 0;
 	}
 
 	/**
@@ -422,7 +429,7 @@ public class RawData implements Data {
 		return this;
 	}
 
-	public RawData applyTypeInfo() {
+	public RawData applyTypeInfo(GsonBuilder b) {
 		if (value == null || typeInfo == 0) {
 			return this;
 		}
@@ -446,8 +453,14 @@ public class RawData implements Data {
 		case TypeInfo.CHANNEL:
 			value = new Gson().fromJson(new Gson().toJson(value), Channel.class);
 			break;
+		case TypeInfo.FUNCTION:
+			value = b.create().fromJson(new Gson().toJson(value), Function.class);
+			break;
+		case TypeInfo.PROCESS:
+			value = b.create().fromJson(new Gson().toJson(value), Process.class);
+			break;
 		default:
-			System.out.println("NO CONVERSION: " + typeInfo + " / " + value + " / " + value.getClass());
+			Main.LOGGER.error("NO CONVERSION: " + typeInfo + " / " + value + " / " + value.getClass(), new Exception());
 		}
 		return this;
 	}

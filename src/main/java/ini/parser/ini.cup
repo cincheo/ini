@@ -40,6 +40,7 @@ parser code {:
 			new FirstFunction(this), //
 			new KeyFunction(this), //
 			new KillAt(this), //
+			new NodeFunction(this), //
 			new PrintFunction(this), //
 			new PrintlnFunction(this), //
 			new ProduceFunction(this), //
@@ -156,7 +157,7 @@ non terminal field_list_opt, field_list, field;
 non terminal constructor_match_expr;
 non terminal field_match_expr_list_opt, field_match_expr_list;
 non terminal list_concat_expr;
-non terminal ltl_expr;
+non terminal ltl_expr, conditional_expr;
 
 precedence left DOLLAR;
 precedence left IMPLIES;
@@ -164,8 +165,8 @@ precedence left AND;
 precedence left ASSIGN;
 precedence left OROR;
 precedence left ANDAND;
-precedence left MATCHES;
 precedence left NOT, QUESTION;
+precedence left MATCHES;
 precedence left EQUALS, GT, GTE, LT, LTE, NOTEQUALS;
 precedence left PLUS, MINUS;
 precedence left MULT, DIV;
@@ -473,7 +474,7 @@ single_string ::= STRING:s {: RESULT=new StringLiteral(parser,(Token)s,s.toStrin
 list_expr ::= LSPAREN:l expr:lb DOTDOT expr:ub RSPAREN:r {:
 		RESULT = new SetDeclaration(parser,(Token)l,(Expression)lb,(Expression)ub);
 	:}
-	| LSPAREN:open arg_list_opt:l RSPAREN:close
+	| LSPAREN:open arg_list_opt:l lf_opt RSPAREN:close
 	{:
 		RESULT = new ListExpression(parser,(Token)open,(List)l);
 	:}
@@ -483,6 +484,10 @@ constructor_expr ::= TIDENTIFIER:s LSPAREN lf_opt assignment_list_opt:l lf_opt R
 	{:
 		RESULT = new SetConstructor(parser,(Token)s,s.toString(),(List)l);
 	:}
+	| TIDENTIFIER:s
+	{:
+		RESULT = new SetConstructor(parser,(Token)s,s.toString(),null);
+	:}	
 	| LSPAREN:c assignment_list:l RSPAREN
 	{:
 		RESULT = new SetConstructor(parser,(Token)c,null,(List)l);
@@ -492,10 +497,10 @@ constructor_expr ::= TIDENTIFIER:s LSPAREN lf_opt assignment_list_opt:l lf_opt R
 constructor_match_expr ::= TIDENTIFIER:s LSPAREN field_match_expr_list_opt:l RSPAREN 
 	{:
 		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),(List)l);	
-	:}/* | TIDENTIFIER:s 
+	:} | TIDENTIFIER:s 
 	{:
 		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),null);	
-	:}*/
+	:}
 ;
 
 assignment_list_opt ::= assignment_list:l {: RESULT = l; :} | {: RESULT = new ArrayList(); :};
@@ -540,7 +545,13 @@ expr ::= var_access:e {: RESULT=e; :}
 	//| set_var_access:e {: RESULT = e; :}
 	| list_concat_expr:e {: RESULT = e; :}
 	| lambda_expr: e {: RESULT = e; :}
+	| conditional_expr: e {: RESULT = e; :}
 	| LPAREN expr:e RPAREN {: RESULT=e; :}
+;
+
+conditional_expr ::= logical_expr:c QUESTION:q expr:t COL expr:f {:
+		RESULT = new ConditionalExpression(parser, (Token)q, (Expression)c, (Expression)t, (Expression)f);
+	:}
 ;
 
 // TODO: the LAMBDA symbol is produced by the lexer with a look-ahead. The parser should disambiguate itself for better perfs.
@@ -788,13 +799,13 @@ usertype ::= TYPE:t TIDENTIFIER:i ASSIGN constructor_list:l lf_opt END
 	:}
 ;
 
-constructor_list ::= constructor_list:l lf_opt TUBE constructor:c
+constructor_list ::= constructor_list:l lf_opt TUBE constructor_or_type:c
 	{:
 		List list=(List)l;
 		list.add(c);
 		RESULT=list;
 	:}
-	| constructor:c
+	| constructor_or_type:c
 	{:
 		List list=new ArrayList();
 		list.add(c);

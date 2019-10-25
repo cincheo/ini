@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
 import ini.IniEnv;
+import ini.Main;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
 
@@ -24,14 +25,15 @@ public interface BrokerClient<T> {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo();
+					RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo(gsonBuilder);
 					return data;
 				}
 			});
-
+			Main.LOGGER.debug("creating kafka broker client");
 			return new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(), new ConsumerConfiguration<>(
 					env.getEnvironmentConfiguration().consumerGroupId, gsonBuilder, Data.class));
 		} else {
+			Main.LOGGER.debug("creating local broker client");
 			return new LocalBrokerClient<>(new ConsumerConfiguration<>());
 		}
 	}

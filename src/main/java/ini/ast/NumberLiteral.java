@@ -2,6 +2,7 @@ package ini.ast;
 
 import java.io.PrintStream;
 
+import ini.Main;
 import ini.eval.data.TypeInfo;
 import ini.parser.IniParser;
 
@@ -53,7 +54,7 @@ public class NumberLiteral extends AstElement implements Expression {
 		case TypeInfo.BOOLEAN:
 			break;
 		default:
-			System.out.println("NO CONVERSION: " + typeInfo + " / " + value + " / " + value.getClass());
+			Main.LOGGER.error("NO CONVERSION: " + typeInfo + " / " + value + " / " + value.getClass(), new Exception());
 		}
 		return this;
 	}

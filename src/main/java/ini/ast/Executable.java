@@ -19,8 +19,8 @@ public abstract class Executable extends NamedElement implements Expression {
 
 	public List<Parameter> parameters;
 
-	public Context accessibleContext;
-	public AttrContext accessibleAttrContext;
+	public transient Context accessibleContext;
+	public transient AttrContext accessibleAttrContext;
 
 	public List<Executable> overloads;
 
