@@ -79,6 +79,7 @@ parser code {:
 	      parser.builtInExecutables = parser.builtInExecutables;
 	  } else {
 	      parser.types = new Types(parser);
+	      parser.types.createBuiltinUserTypes();
 	      parser.builtInExecutables = parser.createBuiltInExecutables();
 	  }
       return parser;
@@ -97,6 +98,7 @@ parser code {:
 	      parser.builtInExecutables = parser.builtInExecutables;
 	  } else {
 	      parser.types = new Types(parser);
+	      parser.types.createBuiltinUserTypes();
 	      parser.builtInExecutables = parser.createBuiltInExecutables();
 	  }
       return parser;
@@ -244,7 +246,7 @@ predicate_decl ::= PREDICATE:d IDENTIFIER:name ltl_expr:expression END
 ;
 
 visibility ::= PLUS:v {: RESULT=Channel.Visibility.GLOBAL; :} 
-	| MINUS:v {: RESULT=Channel.Visibility.PRIVATE; :}
+	| MINUS:v {: RESULT=Channel.Visibility.LOCAL; :}
 	|
 };
 	
@@ -549,7 +551,7 @@ expr ::= var_access:e {: RESULT=e; :}
 	| LPAREN expr:e RPAREN {: RESULT=e; :}
 ;
 
-conditional_expr ::= logical_expr:c QUESTION:q expr:t COL expr:f {:
+conditional_expr ::= expr:c QUESTION:q expr:t COL expr:f {:
 		RESULT = new ConditionalExpression(parser, (Token)q, (Expression)c, (Expression)t, (Expression)f);
 	:}
 ;

@@ -58,6 +58,31 @@ public class Types {
 		primitiveTypes.add(STRING);
 	}
 
+	public void createBuiltinUserTypes() {
+		// default user types
+		Scope = createEnum("Scope", "Local", "Global");
+	}
+
+	public Type createEnum(String name, String... values) {
+		List<Constructor> constructors = new ArrayList<>();
+		for (String cname : values) {
+			constructors.add(new Constructor(parser, null, cname, null));
+		}
+		UserType userType = new UserType(parser, null, name, constructors);
+		Type t = new Type(userType);
+		register(name, t);
+		userType.type = t;
+		for (Constructor constructor : constructors) {
+			Type constructorType = parser.types.createType(constructor.name);
+			constructorType.superType = constructor.userType.type;
+			constructor.userType.type.addSubType(constructorType);
+			constructorType.variable = false;
+			constructorType.constructorType = true;
+			constructor.type = constructorType;
+		}
+		return t;
+	}
+
 	public static class State {
 		public Map<String, Type> types;
 		public List<UserType> userTypes;
@@ -146,6 +171,8 @@ public class Types {
 	public final Type BOOLEAN;
 	public final Type STRING;
 	public final Type THREAD;
+
+	public Type Scope;
 
 	public Type getSimpleType(String name) {
 		Type t = aliases.get(name);

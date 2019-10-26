@@ -23,7 +23,7 @@ public class TestEvents extends IniTestCase {
 	}
 
 	public void testUpdateAsync() {
-		testFile("ini/test/events/update_async.ini", 50, 
+		testFile("ini/test/events/update_async.ini", 300, 
 				(p, out) -> assertEquals(
 						"end\n***",
 						out));

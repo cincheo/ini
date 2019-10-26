@@ -12,7 +12,7 @@ import ini.parser.IniParser;
 public class Channel extends NamedElement {
 
 	public enum Visibility {
-		PRIVATE, APPLICATION, GLOBAL
+		LOCAL, APPLICATION, GLOBAL
 	}
 
 	public static final Data STOP_MESSAGE = new RawData("__STOP__");
@@ -35,7 +35,7 @@ public class Channel extends NamedElement {
 		} else {
 			this.typeVariable = typeVariable;
 		}
-		this.visibility = visibility == null ? Visibility.PRIVATE : visibility;
+		this.visibility = visibility == null ? Visibility.LOCAL : visibility;
 		this.indexed = indexed;
 		this.annotations = annotations;
 		this.mappedName = getAnnotationValue("name");
