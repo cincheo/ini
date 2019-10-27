@@ -1,7 +1,7 @@
 
 # About INI
 
-*INI* is a scripting (evaluated) language running on the top of a JVM. It aims at providing *a simple way to prototype, implement, and deploy pipelines* and distributed streaming computations.
+*INI* is a scripting (evaluated) language running on the top of a JVM. It aims at providing *a simple, safe and sound way to implement distributed and reactive computations* thanks to functions, processes, events and channels.
 
 By default, INI uses *Kafka* as a broker.
 
@@ -10,7 +10,7 @@ By default, INI uses *Kafka* as a broker.
 INI is built around two first-class entities.
 
 - *Functions*, as in *functional programming*, used for pure and safe calculations.
-- *Processes*, which are asynchronous, multi-threaded, rule-based, and react to their environment through events (as in *reactive programming*). Rules in processes, implying an implicit repetition loop, are inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF))
+- *Processes*, which are asynchronous, multi-threaded, rule-based, communicate through channels, and react to their environment with events (as in *reactive programming*). Rules in processes, implying an implicit repetition loop, are inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF))
 
 INI natively support essential constructs for distributed programming:
 
@@ -21,11 +21,11 @@ INI natively support essential constructs for distributed programming:
 
 It comes with a built-in type inference engine to type check the programs. Also, following Dijkstra's guarded-command paradigm, it is well-suited to formal validation (especially model checking) in order to prove distributed programs correctness (WIP).
 
-## Typical Uses/Applications
+## Targeted Potential Uses/Applications
 
-- Pipelines for Big Data/Machine Learning/Deep Learning
-- IoT/Robotics
 - Distributed Computing
+- IoT/Robotics
+- Pipelines and streaming computing
 - Multi-Agent Systems
 - Critical Systems
 
