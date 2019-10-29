@@ -86,6 +86,9 @@ public abstract class IniTestCase extends TestCase {
 	}
 
 	protected void testFile(String file, long sleepTime, String node, BiConsumer<IniParser, String> assertions) {
+		outputStream = new ByteArrayOutputStream();
+		out = new PrintStream(outputStream);
+		System.setOut(out);
 		IniParser parser = null;
 		try {
 			parser = file == null ? IniParser.createParserForCode(null, null, "process main() {}")

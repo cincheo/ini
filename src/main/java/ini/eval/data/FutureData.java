@@ -1,5 +1,6 @@
 package ini.eval.data;
 
+import java.io.PrintStream;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
@@ -155,6 +156,30 @@ public class FutureData extends RawData {
 		return super.rest();
 	}
 
+	@Override
+	public void prettyPrint(PrintStream out) {
+		sync();
+		super.prettyPrint(out);
+	}
+	
+	@Override
+	public String toJson() {
+		sync();
+		return super.toJson();
+	}
+	
+	@Override
+	public String toPrettyString() {
+		sync();
+		return super.toPrettyString();
+	}
+	
+	@Override
+	public String toString() {
+		sync();
+		return super.toString();
+	}
+	
 	@Override
 	public void copyData(Data data) {
 		super.copyData(data);

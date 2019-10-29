@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,6 @@ import com.google.gson.GsonBuilder;
 
 import ini.Main;
 import ini.ast.Assignment;
-import ini.ast.AstNode;
 import ini.ast.BooleanLiteral;
 import ini.ast.Channel;
 import ini.ast.Executable;
@@ -32,10 +32,8 @@ import ini.ast.Expression;
 import ini.ast.Function;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
-import ini.ast.Statement;
 import ini.ast.StringLiteral;
 import ini.ast.Variable;
-import ini.ast.VariableAccess;
 import ini.eval.EvalException;
 import ini.eval.IniEval;
 import ini.parser.IniParser;
@@ -96,7 +94,7 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public void addDataObservers(List<DataObserver> observers) {
+	synchronized public void addDataObservers(List<DataObserver> observers) {
 		if (dataObservers == null) {
 			dataObservers = new ArrayList<DataObserver>();
 		}
@@ -104,18 +102,18 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public void clearDataObservers() {
+	synchronized public void clearDataObservers() {
 		if (dataObservers != null) {
 			dataObservers.clear();
 		}
 	}
 
 	@Override
-	public List<DataObserver> getDataObservers() {
+	synchronized public List<DataObserver> getDataObservers() {
 		return dataObservers;
 	}
 
-	private void notifyDataObservers(Object oldValue) {
+	synchronized private void notifyDataObservers(Object oldValue) {
 		if (dataObservers == null)
 			return;
 		for (DataObserver dataObserver : dataObservers) {
@@ -123,7 +121,7 @@ public class RawData implements Data {
 		}
 	}
 
-	private void notifyDataObserversForCopy(Data oldData) {
+	synchronized private void notifyDataObserversForCopy(Data oldData) {
 		if (dataObservers == null)
 			return;
 		for (DataObserver dataObserver : dataObservers) {
@@ -131,7 +129,7 @@ public class RawData implements Data {
 		}
 	}
 
-	private void notifyDataObserversForReferences(Map<Object, Data> oldReferences) {
+	synchronized private void notifyDataObserversForReferences(Map<Object, Data> oldReferences) {
 		if (dataObservers == null)
 			return;
 		for (DataObserver dataObserver : dataObservers) {
@@ -139,7 +137,7 @@ public class RawData implements Data {
 		}
 	}
 
-	private void notifyDataObservers(Object key, Data oldData) {
+	synchronized private void notifyDataObservers(Object key, Data oldData) {
 		if (dataObservers == null)
 			return;
 		for (DataObserver dataObserver : dataObservers) {
@@ -159,7 +157,7 @@ public class RawData implements Data {
 		} else if (object instanceof List && object.getClass().getName().startsWith("java.")) {
 			List<?> l = (List<?>) object;
 			Data d = new RawData(null);
-			d.setReferences(new HashMap<Object, Data>());
+			d.setReferences(new Hashtable<Object, Data>());
 			for (int i = 0; i < l.size(); i++) {
 				d.set(i, objectToData(l.get(i)));
 			}
@@ -167,7 +165,7 @@ public class RawData implements Data {
 		} else if (object instanceof Set && object.getClass().getName().startsWith("java.")) {
 			Set<?> s = (Set<?>) object;
 			Data d = new RawData(null);
-			d.setReferences(new HashMap<Object, Data>());
+			d.setReferences(new Hashtable<Object, Data>());
 			int i = 0;
 			for (Object o : s) {
 				d.set(i++, objectToData(o));
@@ -176,7 +174,7 @@ public class RawData implements Data {
 		} else if (object instanceof Map && object.getClass().getName().startsWith("java.")) {
 			Map<?, ?> m = (Map<?, ?>) object;
 			Data d = new RawData(null);
-			d.setReferences(new HashMap<Object, Data>());
+			d.setReferences(new Hashtable<Object, Data>());
 			for (Entry<?, ?> e : m.entrySet()) {
 				d.set(e.getKey(), objectToData(e.getValue()));
 			}
@@ -319,7 +317,7 @@ public class RawData implements Data {
 				}
 				return l;
 			} else {
-				Map<Object, Object> m = new HashMap<Object, Object>();
+				Map<Object, Object> m = new Hashtable<Object, Object>();
 				for (Entry<Object, Data> e : data.getReferences().entrySet()) {
 					m.put(e.getKey(), dataToObject(eval, null, e.getValue()));
 				}
@@ -360,7 +358,7 @@ public class RawData implements Data {
 		setValue(value);
 	}
 
-	public boolean isUndefined() {
+	synchronized public boolean isUndefined() {
 		return (value == null) && references == null;
 	}
 
@@ -369,11 +367,11 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public boolean isNumber() {
+	synchronized public boolean isNumber() {
 		return (value instanceof Number);
 	}
 
-	public boolean isTrueOrDefined() {
+	synchronized public boolean isTrueOrDefined() {
 		if (isBoolean()) {
 			return (Boolean) value;
 		} else {
@@ -381,7 +379,7 @@ public class RawData implements Data {
 		}
 	}
 
-	public boolean isIndexedSet() {
+	synchronized public boolean isIndexedSet() {
 		if (references == null)
 			return false;
 		int min = Integer.MAX_VALUE;
@@ -409,9 +407,9 @@ public class RawData implements Data {
 	 * 
 	 * @return
 	 */
-	public RawData tryNumerizeKeys() {
+	synchronized public RawData tryNumerizeKeys() {
 		if (references != null && kind == Kind.INT_SET) {
-			Map<Object, Data> newRefs = new HashMap<>();
+			Map<Object, Data> newRefs = new Hashtable<>();
 			boolean numerizable = true;
 			for (Entry<Object, Data> entry : references.entrySet()) {
 				try {
@@ -429,7 +427,7 @@ public class RawData implements Data {
 		return this;
 	}
 
-	public RawData applyTypeInfo(GsonBuilder b) {
+	synchronized public RawData applyTypeInfo(GsonBuilder b) {
 		if (value == null || typeInfo == 0) {
 			return this;
 		}
@@ -466,7 +464,7 @@ public class RawData implements Data {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object minIndex() {
+	synchronized public Object minIndex() {
 		if (references == null) {
 			return 0;
 		}
@@ -478,7 +476,7 @@ public class RawData implements Data {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object maxIndex() {
+	synchronized public Object maxIndex() {
 		if (references == null) {
 			return -1;
 		}
@@ -490,7 +488,7 @@ public class RawData implements Data {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getValue() {
+	synchronized public <T> T getValue() {
 		if (explodedString) {
 			implodeString();
 		}
@@ -498,7 +496,7 @@ public class RawData implements Data {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setValue(Object value) {
+	synchronized public void setValue(Object value) {
 		if (explodedString) {
 			references.clear();
 			explodedString = false;
@@ -568,15 +566,15 @@ public class RawData implements Data {
 	 * 
 	 * @see ini.eval.data.Data#getBoolean()
 	 */
-	public Boolean getBoolean() {
+	synchronized public Boolean getBoolean() {
 		return value == null ? false : (Boolean) value;
 	}
 
-	public Number getNumber() {
+	synchronized public Number getNumber() {
 		return value == null ? 0 : (Number) value;
 	}
 
-	public void copyData(Data data) {
+	synchronized public void copyData(Data data) {
 		// System.out.println(this + ":" + data);
 		Data oldData = new RawData(this.value);
 		this.value = data.getValue();
@@ -595,12 +593,12 @@ public class RawData implements Data {
 		notifyDataObserversForCopy(oldData);
 	}
 
-	public void set(Object key, Data value) {
+	synchronized public void set(Object key, Data value) {
 		if (key == null) {
 			throw new RuntimeException("key cannot be null");
 		}
 		if (references == null) {
-			references = new HashMap<Object, Data>();
+			references = new Hashtable<Object, Data>();
 		}
 		// System.out.println("Putting " + key + " (" + key.getClass() + "), "
 		// + value);
@@ -612,7 +610,7 @@ public class RawData implements Data {
 		notifyDataObservers(key, oldData);
 	}
 
-	public Data get(Object key) {
+	synchronized public Data get(Object key) {
 		if (key == null) {
 			throw new RuntimeException("key cannot be null");
 		}
@@ -628,7 +626,7 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public String toString() {
+	synchronized public String toString() {
 		StringBuffer ret = new StringBuffer();
 		ret.append("Data(");
 		if (value != null)
@@ -659,12 +657,12 @@ public class RawData implements Data {
 		return ret.toString();
 	}
 
-	public String toJson() {
+	synchronized public String toJson() {
 		StringBuffer ret = new StringBuffer();
 		boolean array = isIndexedSet() || isArray();
 		if (references != null) {
 			ret.append(array ? "[" : "{");
-			for (Entry<Object, Data> e : references.entrySet()) {
+			for (Entry<Object, Data> e : getOrderedEntries()) {
 				if (e.getKey() != null) {
 					if (array) {
 						ret.append(e.getValue().toJson() + ",");
@@ -696,11 +694,11 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public boolean isAvailable() {
+	synchronized public boolean isAvailable() {
 		return true;
 	}
 
-	public String toPrettyString() {
+	synchronized public String toPrettyString() {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		prettyPrint(new PrintStream(os));
 		String s = os.toString();
@@ -712,7 +710,19 @@ public class RawData implements Data {
 		return s;
 	}
 
-	public void prettyPrint(PrintStream out) {
+	private List<Entry<Object, Data>> getOrderedEntries() {
+		List<Entry<Object, Data>> l = new ArrayList<>(references.entrySet());
+		Collections.sort(l, new Comparator<Entry<Object, Data>>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public int compare(Entry<Object, Data> o1, Entry<Object, Data> o2) {
+				return ((Comparable<Object>)o1.getKey()).compareTo((Comparable<Object>)o2.getKey());
+			}
+		});
+		return l;
+	}
+	
+	synchronized public void prettyPrint(PrintStream out) {
 		if (explodedString) {
 			implodeString();
 		}
@@ -758,7 +768,7 @@ public class RawData implements Data {
 					out.print(constructor.name);
 				}
 				out.print("[");
-				Iterator<Entry<Object, Data>> it = references.entrySet().iterator();
+				Iterator<Entry<Object, Data>> it = getOrderedEntries().iterator();
 				while (it.hasNext()) {
 					Entry<Object, Data> e = it.next();
 					if (e.getKey() != null) {
@@ -779,17 +789,17 @@ public class RawData implements Data {
 
 	}
 
-	public Map<Object, Data> getReferences() {
+	synchronized public Map<Object, Data> getReferences() {
 		return references;
 	}
 
 	@Override
-	public boolean isArray() {
+	synchronized public boolean isArray() {
 		return references != null
 				&& (!references.containsKey(Data.LOWER_BOUND_KEY) && references.containsKey(Data.UPPER_BOUND_KEY));
 	}
 
-	public int getSize() {
+	synchronized public int getSize() {
 		onMapAccess();
 		if (isArray()) {
 			return ((Integer) references.get(Data.UPPER_BOUND_KEY).getNumber()) + 1;
@@ -805,29 +815,29 @@ public class RawData implements Data {
 		}
 	}
 
-	public Kind getKind() {
+	synchronized public Kind getKind() {
 		return kind;
 	}
 
-	public void setKind(Kind type) {
+	synchronized public void setKind(Kind type) {
 		this.kind = type;
 	}
 
 	@Override
-	public boolean isPrimitive() {
+	synchronized public boolean isPrimitive() {
 		return value != null && ((value instanceof Boolean) || (Number.class.isAssignableFrom(value.getClass()))
 				|| (value instanceof Character));
 	}
 
 	@Override
-	public void setReferences(Map<Object, Data> references) {
+	synchronized public void setReferences(Map<Object, Data> references) {
 		Map<Object, Data> oldReferences = this.references;
 		this.references = references;
 		notifyDataObserversForReferences(oldReferences);
 	}
 
 	@Override
-	public boolean equals(Object object) {
+	synchronized public boolean equals(Object object) {
 		Data d = (Data) object;
 		if (getValue() != null && d.getValue() != null) {
 			return getValue().equals(d.getValue());
@@ -848,9 +858,9 @@ public class RawData implements Data {
 		}
 	}
 
-	private void onMapAccess() {
+	synchronized private void onMapAccess() {
 		if (references == null) {
-			references = new HashMap<Object, Data>();
+			references = new Hashtable<Object, Data>();
 		}
 		if (!explodedString && (this.value instanceof String)) {
 			explodeString();
@@ -858,7 +868,7 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public Object keyOf(Data data) {
+	synchronized public Object keyOf(Data data) {
 		onMapAccess();
 		for (Entry<Object, Data> e : getReferences().entrySet()) {
 			if (e.getValue().equals(data)) {
@@ -869,7 +879,7 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public Data subArray(int min, int max) {
+	synchronized public Data subArray(int min, int max) {
 		onMapAccess();
 		Data d = new RawData(null);
 		int key = 0;
@@ -880,7 +890,7 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public Data concat(Data data) {
+	synchronized public Data concat(Data data) {
 		onMapAccess();
 		Data res = new RawData(null);
 		res.copyData(this);
@@ -901,16 +911,16 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public Data first() {
+	synchronized public Data first() {
 		return get(0);
 	}
 
 	@Override
-	public Data rest() {
+	synchronized public Data rest() {
 		return subArray(1, getSize() - 1);
 	}
 
-	public int getTypeInfo() {
+	synchronized public int getTypeInfo() {
 		return typeInfo;
 	}
 

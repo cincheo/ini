@@ -19,7 +19,7 @@ public class TestChannels extends IniTestCase {
 	public void testChannel3() {
 		testFile("ini/test/channels/channel3.ini",
 				(p, out) -> assertEquals(
-						"{lastName:\"Pawlak\",firstNames:[\"Renaud\",\"Bruno\",\"Pierre\"],height:184}\nperson value = Person[lastName=Pawlak,firstNames=[Renaud,Bruno,Pierre],height=184]\n{lastName:\"Pawlak\",firstNames:[\"Renaud\",\"Bruno\",\"Pierre\"],height:184}\n",
+						"{firstNames:[\"Renaud\",\"Bruno\",\"Pierre\"],height:184,lastName:\"Pawlak\"}\nperson value = Person[firstNames=[Renaud,Bruno,Pierre],height=184,lastName=Pawlak]\n{firstNames:[\"Renaud\",\"Bruno\",\"Pierre\"],height:184,lastName:\"Pawlak\"}\n",
 						out));
 	}
 

@@ -48,7 +48,7 @@ public class TestExamples extends IniTestCase {
 	public void testPrettyPrinter() {
 		testFile("ini/examples/data_structures/pretty_printer.ini",
 				(p, out) -> assertEquals(
-						"<html>\n    <head>\n    </head>\n    <body bgcolor=\"white\" width=\"100%\">\nthis is a body text example \n        <b>\nthis is a strong text\n        </b>\n    </body>\n</html>\n{name:\"html\",content:[{name:\"head\"},{name:\"body\",attr:[{name:\"bgcolor\",value:\"white\"},{name:\"width\",value:\"100%\"}],content:[{text:\"this is a body text example \"},{name:\"b\",content:[{text:\"this is a strong text\"}]}]}]}\n",
+						"<html>\n    <head>\n    </head>\n    <body bgcolor=\"white\" width=\"100%\">\nthis is a body text example \n        <b>\nthis is a strong text\n        </b>\n    </body>\n</html>\n{content:[{name:\"head\"},{attr:[{name:\"bgcolor\",value:\"white\"},{name:\"width\",value:\"100%\"}],content:[{text:\"this is a body text example \"},{content:[{text:\"this is a strong text\"}],name:\"b\"}],name:\"body\"}],name:\"html\"}\n",
 						out));
 	}
 
@@ -145,14 +145,18 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testReduce1() {
-		testFile("ini/examples/channels/reduce1.ini", (p, out) -> assertEquals("[ =3,a=1,s=2,t=3,e=1,h=1,x=1,i=2]\n", out));
+		testFile("ini/examples/channels/reduce1.ini", (p, out) -> assertEquals("[ =3,a=1,e=1,h=1,i=2,s=2,t=3,x=1]\n", out));
 	}
 
 	public void testReduce2() {
-		testFile("ini/examples/channels/reduce2.ini", (p, out) -> assertEquals("[ =[ , , ],a=[a],s=[s,s],t=[t,t,t],e=[e],h=[h],x=[x],i=[i,i]]\n", out));
+		for(int i = 0; i<100; i++) {
+			final int it = i;
+			testFile("ini/examples/channels/reduce2.ini", (p, out) -> assertEquals("messed up at "+it,"[ =[ , , ],a=[a],e=[e],h=[h],i=[i,i],s=[s,s],t=[t,t,t],x=[x]]\n", out));
+			//testFile("ini/examples/channels/reduce2.ini", (p, out) -> assertEquals("messed up at "+it,"[ =[ , , ],a=[a],s=[s,s],t=[t,t,t],e=[e],h=[h],x=[x],i=[i,i]]\n", out));
+		}
 	}
 	
-	public void testReduce3() {
+	public void testReduce3() {  
 		testFile("ini/examples/channels/reduce3.ini", (p, out) -> assertEquals("[6=[Sacha],23=[Renaud,Joris]]\n", out));
 	}
 

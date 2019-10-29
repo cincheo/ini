@@ -46,26 +46,10 @@ public class AtUpdate extends At {
 			}
 
 			void notify(Data data, Data oldData) {
-				switch (mode) {
-				case "async":
-					new Thread() {
-						public void run() {
-							Map<String, Data> variables = new HashMap<String, Data>();
-							variables.put(getAtPredicate().outParameters.get(0).toString(), oldData);
-							variables.put(getAtPredicate().outParameters.get(1).toString(), data);
-							execute(thread.fork(variables));
-						}
-					}.start();
-					break;
-				default:
-					Context ctx = new Context(eval.invocationStack.peek());
-					eval.invocationStack.push(ctx);
-					ctx.bind(getAtPredicate().outParameters.get(0).toString(), oldData);
-					ctx.bind(getAtPredicate().outParameters.get(1).toString(), data);
-					eval.eval(getRule());
-					eval.invocationStack.pop();
-					break;
-				}
+				Map<String, Data> variables = new HashMap<String, Data>();
+				variables.put(getAtPredicate().outParameters.get(0).toString(), oldData);
+				variables.put(getAtPredicate().outParameters.get(1).toString(), data);
+				execute(thread.fork(variables));
 			}
 		};
 		Data d = getInContext().get("mode");

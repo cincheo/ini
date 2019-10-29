@@ -1,6 +1,6 @@
 package ini.broker;
 
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -11,12 +11,21 @@ import ini.Main;
 
 public class LocalBrokerClient<T> implements BrokerClient<T> {
 
-	private static Map<String, BlockingQueue<Object>> channels = new HashMap<>();
-	private Map<String, Thread> consumers = new HashMap<>();
-	private Map<String, AtomicBoolean> consumerCloseStates = new HashMap<>();
+	private static LocalBrokerClient<?> instance;
+	private Map<String, BlockingQueue<Object>> channels = new Hashtable<>();
+	private Map<String, Thread> consumers = new Hashtable<>();
+	private Map<String, AtomicBoolean> consumerCloseStates = new Hashtable<>();
 	private ConsumerConfiguration<T> consumerConfiguration;
 
-	public LocalBrokerClient(ConsumerConfiguration<T> consumerConfiguration) {
+	@SuppressWarnings("unchecked")
+	synchronized public static <T> LocalBrokerClient<T> getInstance(ConsumerConfiguration<T> consumerConfiguration) {
+		if (instance == null) {
+			instance = new LocalBrokerClient<>(consumerConfiguration);
+		}
+		return (LocalBrokerClient<T>) instance;
+	}
+
+	private LocalBrokerClient(ConsumerConfiguration<T> consumerConfiguration) {
 		this.consumerConfiguration = consumerConfiguration;
 	}
 
@@ -34,7 +43,7 @@ public class LocalBrokerClient<T> implements BrokerClient<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private BlockingQueue<T> getOrCreateChannel(String channel) {
+	synchronized private BlockingQueue<T> getOrCreateChannel(String channel) {
 		BlockingQueue<Object> channelQueue = channels.get(channel);
 		if (channelQueue == null) {
 			channels.put(channel, channelQueue = new ArrayBlockingQueue<>(1000));
@@ -76,17 +85,12 @@ public class LocalBrokerClient<T> implements BrokerClient<T> {
 
 	@Override
 	synchronized public void produce(String channel, T data) {
-		/*new Thread() {
-			@Override
-			public void run() {*/
-				try {
-					getOrCreateChannel(channel).put(data);
-					Main.LOGGER.debug("produced on channel " + channel + " - data=" + data);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-/*			}
-		}.start();*/
+		try {
+			getOrCreateChannel(channel).put(data);
+			Main.LOGGER.debug("produced on channel " + channel + " - data=" + data);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

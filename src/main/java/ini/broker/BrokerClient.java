@@ -25,7 +25,8 @@ public interface BrokerClient<T> {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo(gsonBuilder);
+					RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
+							.applyTypeInfo(gsonBuilder);
 					return data;
 				}
 			});
@@ -34,7 +35,7 @@ public interface BrokerClient<T> {
 					env.getEnvironmentConfiguration().consumerGroupId, gsonBuilder, Data.class));
 		} else {
 			Main.LOGGER.debug("creating local broker client");
-			return new LocalBrokerClient<>(new ConsumerConfiguration<>());
+			return LocalBrokerClient.getInstance(new ConsumerConfiguration<>());
 		}
 	}
 

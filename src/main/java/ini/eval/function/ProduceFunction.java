@@ -27,7 +27,6 @@ public class ProduceFunction extends BuiltInExecutable {
 		try {
 			BrokerClient.createDefaultInstance(eval.parser.env, channel.visibility == Visibility.GLOBAL)
 					.produce(channel.mappedName, RawData.rawCopy(data));
-			// KafkaClient.runProducer(topic, RawData.rawCopy(message));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

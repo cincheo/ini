@@ -1,5 +1,6 @@
 package ini.eval;
 
+import ini.Main;
 import ini.ast.AstNode;
 import ini.ast.Rule;
 import ini.eval.IniEval.KilledException;
@@ -37,9 +38,9 @@ public class IniThread extends Thread {
 
 	@Override
 	public void run() {
-		//if (at != null) {
-		//	at.safelyEnter();
-		//}
+		if (at != null) {
+			at.safelyEnter();
+		}
 		try {
 			if (variables != null) {
 				for (String variable : variables.keySet()) {
@@ -48,6 +49,7 @@ public class IniThread extends Thread {
 			}
 			child.eval(toEval);
 		} catch (KilledException e) {
+			e.printStackTrace();
 			// swallow
 		} catch (EvalException e) {
 			try {
@@ -59,6 +61,7 @@ public class IniThread extends Thread {
 			}
 		} finally {
 			if (at != null) {
+				Main.LOGGER.debug("end: " + at);
 				// System.out.println("------pop: " + at);
 				at.popThread();
 			}

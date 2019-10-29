@@ -33,10 +33,16 @@ public abstract class At {
 	public List<At> synchronizedAts = new ArrayList<At>();
 	private ThreadPoolExecutor threadExecutor;
 	private int currentThreadCount = 0;
+	private int currentThreadCountInQueue = 0;
 	private Map<String, Data> inContext = new HashMap<String, Data>();
 	private Rule rule;
 	private AtPredicate atPredicate;
 	public Process process;
+	private boolean async = false;
+
+	public boolean isAsync() {
+		return async;
+	}
 
 	public static boolean checkAllTerminated(List<At> ats) {
 		if (ats == null)
@@ -106,11 +112,21 @@ public abstract class At {
 		eval(eval);
 	}
 
+	@Override
+	public String toString() {
+		return this.getClass().getName() + "-" + (async ? "async" : "sync");
+	}
+
 	public void execute(IniThread thread) {
 		// System.out.println(">>>> Excute: " + eval);
-		//Main.LOGGER.debug("execute: " + this + " (active threads=" + currentThreadCount + ")");
-		safelyEnter();
-		getThreadExecutor().execute(thread);
+		Main.LOGGER.debug("execute: " + this + " (active threads=" + currentThreadCount + ")");
+		pushThreadInQueue();
+		//safelyEnter();
+		if (async) {
+			getThreadExecutor().execute(thread);
+		} else {
+			thread.run();
+		}
 		// System.out.println(">>>> Excute 2: " + this);
 	}
 
@@ -156,15 +172,23 @@ public abstract class At {
 		// System.out.println("push: " + this + "," + currentThreadCount);
 	}
 
+	synchronized private void pushThreadInQueue() {
+		// System.out.println("enter " + this);
+		currentThreadCountInQueue++;
+		// System.out.println("push: " + this + "," + currentThreadCount);
+	}
+	
 	public synchronized void popThread() {
 		// System.out.println("exit " + this);
 		currentThreadCount--;
-		//Main.LOGGER.debug("ended thread " + this + " (active thread count=" + currentThreadCount + ")");
+		currentThreadCountInQueue--;
+		// Main.LOGGER.debug("ended thread " + this + " (active thread count=" +
+		// currentThreadCount + ")");
 		// System.out.println("pop: " + this + "," + currentThreadCount);
 		notifyAll();
 	}
 
-	protected synchronized void isEmpty() {
+	private synchronized void isEmpty() {
 		while (currentThreadCount > 0) {
 			try {
 				wait();
@@ -175,6 +199,17 @@ public abstract class At {
 		}
 	}
 
+	protected synchronized void isEmptyQueue() {
+		while (currentThreadCountInQueue > 0) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				Main.LOGGER.error("interrupted " + this, e);
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	synchronized private void isEmptySynchronizedAts() {
 		// System.out.println("all ats: " + synchronizedAts);
 		for (At at : synchronizedAts) {
@@ -190,7 +225,7 @@ public abstract class At {
 		// System.out.println("safely enter 2 " + this + " >>>");
 		isEmptySynchronizedAts();
 		pushThread();
-		this.notifyAll();
+		// this.notifyAll();
 		// }
 		// System.out.println("safely enter 3 " + this + " >>>");
 	}
@@ -222,6 +257,7 @@ public abstract class At {
 	}
 
 	public void setAtPredicate(AtPredicate atPredicate) {
+		this.async = "async".equals(atPredicate.getAnnotationValue("mode"));
 		this.atPredicate = atPredicate;
 	}
 
