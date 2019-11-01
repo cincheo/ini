@@ -79,7 +79,7 @@ public class LocalBrokerClient<T> implements BrokerClient<T> {
 		}
 		Main.LOGGER.debug("consumer '" + channel + "' out of consume loop");
 		consumers.remove(channel);
-		consumerCloseStates.remove(channel);
+		//consumerCloseStates.remove(channel);
 		Main.LOGGER.debug("consumer '" + channel + "' closed");
 	}
 

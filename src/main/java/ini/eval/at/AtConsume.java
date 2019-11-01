@@ -20,6 +20,8 @@ public class AtConsume extends At {
 	Channel channel;
 	BrokerClient<Data> brokerClient;
 	IniThread ruleThread;
+	Integer stop;
+	int stopCount = 0;
 
 	@Override
 	public void eval(final IniEval eval) {
@@ -33,11 +35,15 @@ public class AtConsume extends At {
 								: getInContext().get("channel")).getValue();
 						brokerClient = BrokerClient.createDefaultInstance(eval.parser.env,
 								channel.visibility == Visibility.GLOBAL);
+						stop = getInContext().get("stop")==null?1:getInContext().get("stop").getValue();
 						brokerClient.consume(channel.mappedName, value -> {
 							if (Channel.STOP_MESSAGE.equals(value)) {
-								AtConsume.this.isEmptyQueue();
-								Main.LOGGER.debug("stopping " + AtConsume.this);
-								AtConsume.this.terminate();
+								stopCount++;
+								if(stop != 0 && stopCount >= stop) {
+									AtConsume.this.isEmptyQueue();
+									Main.LOGGER.debug("stopping " + AtConsume.this);
+									AtConsume.this.terminate();
+								}
 							} else {
 								Map<String, Data> variables = new HashMap<String, Data>();
 								if (!getAtPredicate().outParameters.isEmpty()) {

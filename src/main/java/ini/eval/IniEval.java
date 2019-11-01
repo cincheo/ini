@@ -373,7 +373,7 @@ public class IniEval {
 						targetNode = getTargetNode(invocation);
 					}
 
-					if (!StringUtils.isEmpty(targetNode)) {
+					if (!StringUtils.isEmpty(targetNode) && !targetNode.equals(parser.env.node)) {
 						spawnExecutable(invocation, f, targetNode);
 					} else {
 						if (f.parameters.size() < invocation.arguments.size()) {
