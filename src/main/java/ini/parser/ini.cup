@@ -129,7 +129,7 @@ terminal COL, COMMA, DOT, INVDOT, DOTDOT;
 terminal LPAREN, RPAREN, LCPAREN, RCPAREN, LSPAREN, RSPAREN;
 terminal LT, LTE, GTE, GT, ASSIGN, EQUALS, NOTEQUALS, MULT, DIV, MINUS, MINUSMINUS, PLUS, PLUSPLUS;
 terminal OROR, ANDAND, AND, NOT, TUBE, IMPLIES, MATCHES;
-terminal AT, ARROW_RIGHT;
+terminal AT, ARROW_RIGHT, SWING_RIGHT_ARROW;
 terminal INT, NUM, TRUE, FALSE, STRING, CHAR;
 terminal IDENTIFIER, TIDENTIFIER;
 terminal QUESTION, DOLLAR;
@@ -573,6 +573,9 @@ lambda_expr ::= LAMBDA LPAREN param_list_opt:vars RPAREN IMPLIES:def LCPAREN sta
 		f.oneExpressionLambda = true;
 		RESULT = f;
 	:}
+	| LAMBDA LPAREN param_list_opt:vars RPAREN SWING_RIGHT_ARROW:def LCPAREN rule_list_opt:rules RCPAREN {:
+		RESULT = new Process(parser, (Token)def, null, (List)vars, (List)rules);	
+	:} 
 ;
 
 /*list_concat_expr ::= list_concat_expr:e1 AND:op var_access:e2 {: RESULT=new BinaryOperator(parser,(Token)op,BinaryOperator.Kind.CONCAT,(Expression)e1,(Expression)e2); :}

@@ -152,6 +152,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
 
   // THIS LOOK-AHEAD SHOULD BE SOLVED IN THE PARSER FOR BETTER PERFS
   {ParameterList} / {WhiteSpace}* "=>"  { Symbol s = symbol(sym.LAMBDA); yypushback(yylength()); yybegin(LAMBDA); return s; }
+  {ParameterList} / {WhiteSpace}* "~>"  { Symbol s = symbol(sym.LAMBDA); yypushback(yylength()); yybegin(LAMBDA); return s; }
 
   {Identifier}          { return symbol(sym.IDENTIFIER); }
   {TypeIdentifier}      { return symbol(sym.TIDENTIFIER); }
@@ -219,6 +220,7 @@ ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* (","
   {Comment}             { /* ignore */ }
   {WhiteSpaceChar}      { /* ignore */ }
   "=>"                  { yybegin(YYINITIAL); return symbol(sym.IMPLIES); }
+  "~>"                  { yybegin(YYINITIAL); return symbol(sym.SWING_RIGHT_ARROW); }
   "\n"                  { return symbol(sym.LF); }
 }
 

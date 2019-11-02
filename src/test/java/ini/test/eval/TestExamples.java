@@ -128,7 +128,7 @@ public class TestExamples extends IniTestCase {
 								+ "Node[left=Node[left=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Leaf[value=1],value=3],right=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],value=4],right=Node[left=Node[left=Leaf[value=1],right=Leaf[value=1],value=2],right=Leaf[value=1],value=3],value=5]\n",
 						out));
 	}
-	
+
 	public void testFibonacciFunction() {
 		testFile("ini/examples/calculus/fibonacci.ini", (p, out) -> assertEquals("Fib(8)=21\n", out));
 	}
@@ -138,27 +138,37 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testOperators() {
-		testFile("ini/examples/channels/operators.ini", 11000, 
+		testFile("ini/examples/channels/operators.ini", 11000,
 				(p, out) -> assertEquals("e: 0\ne: 0\ne: 1\ne: 2\ne: 2\ne: 4\ne: 3\n"
-						+ "e: 6\ne: 4\ne: 8\ne: 5\ne: 10\ne: 6\ne: 12\ne: 7\n"
-						+ "e: 14\ne: 8\ne: 16\ne: 9\ne: 18\n", out));
+						+ "e: 6\ne: 4\ne: 8\ne: 5\ne: 10\ne: 6\ne: 12\ne: 7\n" + "e: 14\ne: 8\ne: 16\ne: 9\ne: 18\n",
+						out));
 	}
 
 	public void testReduce1() {
-		testFile("ini/examples/channels/reduce1.ini", (p, out) -> assertEquals("[ =3,a=1,e=1,h=1,i=2,s=2,t=3,x=1]\n", out));
+		testFile("ini/examples/channels/reduce1.ini",
+				(p, out) -> assertEquals("[ =3,a=1,e=1,h=1,i=2,s=2,t=3,x=1]\n", out));
 	}
 
 	public void testReduce2() {
-		for(int i = 0; i<100; i++) {
+		for (int i = 0; i < 100; i++) {
 			final int it = i;
-			testFile("ini/examples/channels/reduce2.ini", (p, out) -> assertEquals("messed up at "+it,"[ =[ , , ],a=[a],e=[e],h=[h],i=[i,i],s=[s,s],t=[t,t,t],x=[x]]\n", out));
-			//testFile("ini/examples/channels/reduce2.ini", (p, out) -> assertEquals("messed up at "+it,"[ =[ , , ],a=[a],s=[s,s],t=[t,t,t],e=[e],h=[h],x=[x],i=[i,i]]\n", out));
+			testFile("ini/examples/channels/reduce2.ini", (p, out) -> assertEquals("messed up at " + it,
+					"[ =[ , , ],a=[a],e=[e],h=[h],i=[i,i],s=[s,s],t=[t,t,t],x=[x]]\n", out));
+			// testFile("ini/examples/channels/reduce2.ini", (p, out) ->
+			// assertEquals("messed up at "+it,"[ =[ , ,
+			// ],a=[a],s=[s,s],t=[t,t,t],e=[e],h=[h],x=[x],i=[i,i]]\n", out));
 		}
 	}
-	
-	public void testReduce3() {  
+
+	public void testReduce3() {
 		testFile("ini/examples/channels/reduce3.ini", (p, out) -> assertEquals("[6=[Sacha],23=[Renaud,Joris]]\n", out));
 	}
 
-	
+	public void testMapReduce() {
+		testFile("ini/examples/distributed_computing/map_reduce.ini",
+				(p, out) -> assertEquals(
+						"[20=[Charlène,Fabien,Dany],21=[Sacha,Yann],22=[Yoann,Carlos],23=[Renaud,Joris,Laurentiu,Paul]]\n",
+						out));
+	}
+
 }
