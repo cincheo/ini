@@ -3,7 +3,7 @@
 
 *INI* is a scripting (evaluated) language running on the top of a JVM. It aims at providing *a simple, safe and sound way to implement distributed and reactive computations* thanks to functions, processes, events and channels.
 
-By default, INI uses *Kafka* as a broker.
+By default, INI uses *RabbitMQ* as a broker.
 
 ## Language Design Philosophy
 
@@ -222,13 +222,7 @@ So far, we have shown the INI capabilities without taking into account deploymen
 
 ## Broker configuration
 
-First install and start Apache Kafka:
-
-```console
-$ cd kafka_{version}
-$ bin/zookeeper-server-start.sh config/zookeeper.properties
-$ bin/kafka-server-start.sh config/server.properties
-```
+First install and start RabbitMQ.
 
 Launch an INI node:
 
@@ -237,9 +231,9 @@ $ cd {ini_root_dir}
 $ bin/ini -n {node_name} {ini_file} # alternatively set the INI_NODE environment variable
 ```
 
-For development (JUnit tests), INI uses the ``development`` environment, which defaults to a locally-installed Kafka broker. In order to use another Kafka instance, modify the ``ini_config.json`` configuration file to set the right connection parameters.
+For development (JUnit tests), INI uses the ``development`` environment, which defaults to a locally-installed RabbitMQ broker. In order to use another RabbitMQ instance, modify the ``ini_config.json`` configuration file to set the right connection parameters.
 
-Ultimately, once moving an INI program to production, you should modify the ``production`` environment to connect to the production Kafka broker. Then, select the ``production`` environment by setting the ``INI_ENV`` system environment variable to ``production``, or by using the ``--env`` option when running INI.
+Ultimately, once moving an INI program to production, you should modify the ``production`` environment to connect to the production RabbitMQ broker. Then, select the ``production`` environment by setting the ``INI_ENV`` system environment variable to ``production``, or by using the ``--env`` option when running INI.
 
 ## INI nodes and auto-deployment
 
@@ -250,7 +244,7 @@ By default processes or functions are started on the current node (as given by t
 
 ## Push/spawn a process on a target node
 
-Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the ``node`` annotation when starting the processes. Additionally, we also need to prefix the names of the channels with ``+``. By default, channels remain local to the current process and this prefix is required so that the channels become visible by all nodes (through the Kafka broker).
+Given the pipeline example explained above, to push/spawn the ``p`` processes to nodes ``n1`` and ``n2`` (assuming that these nodes have been properly launched), we just add the ``node`` annotation when starting the processes. Additionally, we also need to prefix the names of the channels with ``+``. By default, channels remain local to the current process and this prefix is required so that the channels become visible by all nodes (through the RabbitMQ broker).
 
 ```javascript
 declare channel +c0(Int)
