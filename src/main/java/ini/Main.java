@@ -47,6 +47,11 @@ import ini.eval.data.RawData;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
 
+/**
+ * The entry point for the INI parser/evaluator.
+ * 
+ * @author Renaud Pawlak
+ */
 public class Main {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("ini");

@@ -34,8 +34,7 @@ public class RabbitMQBrokerClient<T> implements BrokerClient<T> {
 		this.consumerConfiguration = consumerConfiguration;
 		ConnectionFactory factory = new ConnectionFactory();
 		try {
-			factory.setHost("localhost");
-			// factory.setUri(configuration.brokerConnectionString);
+			factory.setUri(this.configuration.brokerConnectionString);
 			this.connection = factory.newConnection();
 		} catch (Exception e) {
 			throw new RuntimeException(e);

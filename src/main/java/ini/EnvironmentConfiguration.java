@@ -1,11 +1,15 @@
 package ini;
 
+/**
+ * An object holding the configuration for a given environment.
+ * 
+ * @author Renaud Pawlak
+ */
 public class EnvironmentConfiguration {
 
-	public String consumerGroupId = "IniConsumer";
-	public String coreConsumerGroupId = "CoreIniConsumer";
-	public String bootstrapBrokerServers;
+	/**
+	 * The connection string (URI) used to connect to the broker.
+	 */
 	public String brokerConnectionString;
-	public String iniTopic = "ini.topic";
-	
+
 }

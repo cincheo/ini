@@ -99,8 +99,7 @@ public class CoreBrokerClient {
 				}
 			});
 			spawnRequestBrokerClient = new RabbitMQBrokerClient<>("spawn", env.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
-							SpawnRequest.class));
+					new ConsumerConfiguration<>(gsonBuilder, SpawnRequest.class));
 		}
 		return spawnRequestBrokerClient;
 	}
@@ -134,8 +133,7 @@ public class CoreBrokerClient {
 			});
 
 			deployRequestBrokerClient = new RabbitMQBrokerClient<>("deploy", env.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
-							DeployRequest.class));
+					new ConsumerConfiguration<>(gsonBuilder, DeployRequest.class));
 		}
 		return deployRequestBrokerClient;
 	}
@@ -144,8 +142,7 @@ public class CoreBrokerClient {
 		if (fetchRequestBrokerClient == null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
 			fetchRequestBrokerClient = new RabbitMQBrokerClient<>("fetch", env.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
-							FetchRequest.class));
+					new ConsumerConfiguration<>(gsonBuilder, FetchRequest.class));
 		}
 		return fetchRequestBrokerClient;
 	}
@@ -218,8 +215,7 @@ public class CoreBrokerClient {
 			}
 		});
 		return (BrokerClient<T>) new RabbitMQBrokerClient<>("default", env.getEnvironmentConfiguration(),
-				new ConsumerConfiguration<>(env.getEnvironmentConfiguration().consumerGroupId, gsonBuilder,
-						Data.class));
+				new ConsumerConfiguration<>(gsonBuilder, Data.class));
 	}
 
 }
