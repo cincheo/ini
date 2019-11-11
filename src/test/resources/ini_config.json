@@ -1,16 +1,19 @@
 {
 	environments: {
 		development: {
+			brokerConnectionString: "localhost",
 			consumerGroupId: "IniConsumer2",
 			coreConsumerGroupId: "CoreIniConsumer2",
 			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
 		},
 		test: {
+			brokerConnectionString: "localhost",
 			consumerGroupId: "IniConsumer2",
 			coreConsumerGroupId: "CoreIniConsumer2",
 			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
 		},
 		production: {
+			brokerConnectionString: "localhost",
 			consumerGroupId: "IniConsumer2",
 			coreConsumerGroupId: "CoreIniConsumer2",
 			bootstrapBrokerServers: "127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"

@@ -25,7 +25,7 @@ public class ProduceFunction extends BuiltInExecutable {
 		Channel channel = channelData.getValue();
 		Data data = getArgument(eval, 1);
 		try {
-			BrokerClient.createDefaultInstance(eval.parser.env, channel.visibility == Visibility.GLOBAL)
+			BrokerClient.getDefaultInstance(eval.parser.env, channel.visibility == Visibility.GLOBAL)
 					.produce(channel.mappedName, RawData.rawCopy(data));
 		} catch (Exception e) {
 			throw new RuntimeException(e);

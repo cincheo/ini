@@ -29,7 +29,7 @@ public class KillAt extends BuiltInExecutable {
 		} else if (target instanceof Channel) {
 			Channel channel = (Channel) target;
 			try {
-				BrokerClient.createDefaultInstance(eval.parser.env, channel.visibility == Visibility.GLOBAL)
+				BrokerClient.getDefaultInstance(eval.parser.env, channel.visibility == Visibility.GLOBAL)
 						.produce(channel.mappedName, Channel.STOP_MESSAGE);
 			} catch (Exception e) {
 				throw new RuntimeException(e);

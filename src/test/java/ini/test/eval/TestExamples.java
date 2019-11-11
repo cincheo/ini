@@ -1,5 +1,7 @@
 package ini.test.eval;
 
+import java.io.ByteArrayOutputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -58,7 +60,8 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testHttpServer() {
-		testFile("ini/examples/io/http_server.ini", null);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		testFile("ini/examples/io/http_server.ini", os, null);
 		try {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			Thread.sleep(50);
@@ -82,7 +85,7 @@ public class TestExamples extends IniTestCase {
 			}
 			assertEquals(
 					"Server started on 8080\nlocalhost connected to server\nGET REQUEST: / - HTTP/1.1\nlocalhost connected to server\nGET REQUEST: /stop - HTTP/1.1\nClosing server\n",
-					getOut());
+					os.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -138,7 +141,7 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testOperators() {
-		testFile("ini/examples/channels/operators.ini", 11000,
+		testFile("ini/examples/channels/operators.ini", 2400,
 				(p, out) -> assertEquals("e: 0\ne: 0\ne: 1\ne: 2\ne: 2\ne: 4\ne: 3\n"
 						+ "e: 6\ne: 4\ne: 8\ne: 5\ne: 10\ne: 6\ne: 12\ne: 7\n" + "e: 14\ne: 8\ne: 16\ne: 9\ne: 18\n",
 						out));

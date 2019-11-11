@@ -31,8 +31,6 @@ public class CoreBrokerClient {
 		this.env = env;
 	}
 
-	private static final boolean VERBOSE = false;
-
 	public static final String SPAWN_REQUEST_SUFFIX = "_spawn_request";
 	public static final String FETCH_REQUEST_SUFFIX = "_fetch_request";
 	public static final String DEPLOY_REQUEST_SUFFIX = "_deploy_request";
@@ -40,6 +38,29 @@ public class CoreBrokerClient {
 	private BrokerClient<SpawnRequest> spawnRequestBrokerClient;
 	private BrokerClient<FetchRequest> fetchRequestBrokerClient;
 	private BrokerClient<DeployRequest> deployRequestBrokerClient;
+	private BrokerClient<Data> defaultRemoteBrokerClient;
+
+	public synchronized BrokerClient<Data> getDefaultRemoteBrokerClient() {
+		if (defaultRemoteBrokerClient == null) {
+			defaultRemoteBrokerClient = createDefaultInstance(env);
+		}
+		return defaultRemoteBrokerClient;
+	}
+
+	public void stop() {
+		if (spawnRequestBrokerClient != null) {
+			spawnRequestBrokerClient.stop();
+		}
+		if (fetchRequestBrokerClient != null) {
+			fetchRequestBrokerClient.stop();
+		}
+		if (deployRequestBrokerClient != null) {
+			deployRequestBrokerClient.stop();
+		}
+		if (defaultRemoteBrokerClient != null) {
+			defaultRemoteBrokerClient.stop();
+		}
+	}
 
 	/*
 	 * public static void clearCoreChannels() { Main.parseConfiguration();
@@ -73,10 +94,11 @@ public class CoreBrokerClient {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo(gsonBuilder);
+					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
+							.applyTypeInfo(gsonBuilder);
 				}
 			});
-			spawnRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(),
+			spawnRequestBrokerClient = new RabbitMQBrokerClient<>("spawn", env.getEnvironmentConfiguration(),
 					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
 							SpawnRequest.class));
 		}
@@ -96,7 +118,8 @@ public class CoreBrokerClient {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys().applyTypeInfo(gsonBuilder);
+					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
+							.applyTypeInfo(gsonBuilder);
 				}
 			});
 
@@ -110,7 +133,7 @@ public class CoreBrokerClient {
 				}
 			});
 
-			deployRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(),
+			deployRequestBrokerClient = new RabbitMQBrokerClient<>("deploy", env.getEnvironmentConfiguration(),
 					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
 							DeployRequest.class));
 		}
@@ -120,7 +143,7 @@ public class CoreBrokerClient {
 	private synchronized BrokerClient<FetchRequest> getFetchRequestBrokerClient() {
 		if (fetchRequestBrokerClient == null) {
 			GsonBuilder gsonBuilder = new GsonBuilder();
-			fetchRequestBrokerClient = new KafkaBrokerClient<>(VERBOSE, env.getEnvironmentConfiguration(),
+			fetchRequestBrokerClient = new RabbitMQBrokerClient<>("fetch", env.getEnvironmentConfiguration(),
 					new ConsumerConfiguration<>(env.getEnvironmentConfiguration().coreConsumerGroupId, gsonBuilder,
 							FetchRequest.class));
 		}
@@ -128,14 +151,10 @@ public class CoreBrokerClient {
 	}
 
 	public void startSpawnRequestConsumer(Consumer<SpawnRequest> handler) {
-		new Thread() {
-			public void run() {
-				getSpawnRequestBrokerClient().consume(env.node + SPAWN_REQUEST_SUFFIX, request -> {
-					Main.LOGGER.debug("" + request);
-					handler.accept(request);
-				});
-			}
-		}.start();
+		getSpawnRequestBrokerClient().consume(env.node + SPAWN_REQUEST_SUFFIX, request -> {
+			Main.LOGGER.debug("" + request);
+			handler.accept(request);
+		});
 	}
 
 	public void sendSpawnRequest(String targetNode, SpawnRequest request) {
@@ -143,14 +162,10 @@ public class CoreBrokerClient {
 	}
 
 	public void startFetchRequestConsumer(Consumer<FetchRequest> handler) {
-		new Thread() {
-			public void run() {
-				getFetchRequestBrokerClient().consume(env.node + FETCH_REQUEST_SUFFIX, request -> {
-					Main.LOGGER.debug("" + request);
-					handler.accept(request);
-				});
-			}
-		}.start();
+		getFetchRequestBrokerClient().consume(env.node + FETCH_REQUEST_SUFFIX, request -> {
+			Main.LOGGER.debug("" + request);
+			handler.accept(request);
+		});
 	}
 
 	public void sendFetchRequest(String targetNode, FetchRequest request) {
@@ -183,14 +198,28 @@ public class CoreBrokerClient {
 	}
 
 	public void startDeployRequestConsumer(Consumer<DeployRequest> handler) {
-		new Thread() {
-			public void run() {
-				getDeployRequestBrokerClient().consume(env.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
-					Main.LOGGER.debug("" + deployRequest);
-					handler.accept(deployRequest);
-				});
+		getDeployRequestBrokerClient().consume(env.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
+			Main.LOGGER.debug("" + deployRequest);
+			handler.accept(deployRequest);
+		});
+	}
+
+	@SuppressWarnings("unchecked")
+	private synchronized <T> BrokerClient<T> createDefaultInstance(IniEnv env) {
+		Main.LOGGER.debug("creating default remote broker client");
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
+			@Override
+			public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+					throws JsonParseException {
+				RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
+						.applyTypeInfo(gsonBuilder);
+				return data;
 			}
-		}.start();
+		});
+		return (BrokerClient<T>) new RabbitMQBrokerClient<>("default", env.getEnvironmentConfiguration(),
+				new ConsumerConfiguration<>(env.getEnvironmentConfiguration().consumerGroupId, gsonBuilder,
+						Data.class));
 	}
 
 }

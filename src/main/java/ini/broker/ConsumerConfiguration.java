@@ -11,7 +11,7 @@ public class ConsumerConfiguration<T> {
 	public ConsumerConfiguration() {
 		super();
 	}
-	
+
 	public ConsumerConfiguration(String consumerId, GsonBuilder gsonBuilder, Class<T> dataType) {
 		super();
 		this.consumerId = consumerId;
@@ -21,9 +21,9 @@ public class ConsumerConfiguration<T> {
 
 	private String consumerId;
 	private GsonBuilder gsonBuilder;
-	private ConsumeStrategy consumeStrategy = ConsumeStrategy.LATEST;
+	private ConsumeStrategy consumeStrategy = ConsumeStrategy.EARLIEST;
 	private Class<T> dataType;
-	private long maxPollTime = 100;
+	private long maxPollTime = 10000;
 
 	public GsonBuilder getGsonBuilder() {
 		return gsonBuilder;
@@ -43,6 +43,12 @@ public class ConsumerConfiguration<T> {
 
 	public String getConsumerId() {
 		return consumerId;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("consumerId=%s, builder=%s, strategy=%s, dataType=%s, timeout=%s", consumerId, gsonBuilder,
+				consumeStrategy, dataType, maxPollTime);
 	}
 
 }

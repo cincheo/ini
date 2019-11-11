@@ -41,6 +41,11 @@ import ini.type.Type;
 
 public class RawData implements Data {
 
+	@Override
+	public int compareTo(Object o) {
+		return toString().compareTo(o.toString());
+	}
+	
 	/*
 	 * public static void main(String[] args) { String test =
 	 * "coucou petit crétin ${i++} coucou {f(4)} tutu"; Pattern p =
@@ -743,7 +748,7 @@ public class RawData implements Data {
 				out.print((Object) getValue());
 			}
 		} else {
-			if (/*kind == Data.Kind.INT_SET || */isIndexedSet()) {
+			if (/*kind == Data.Kind.INT_SET || */isIndexedSet() || (references != null && references.containsKey(Data.LOWER_BOUND_KEY))) {
 				if (references != null && references.containsKey(Data.LOWER_BOUND_KEY)) {
 					int min = ((Number) minIndex()).intValue();
 					int max = ((Number) maxIndex()).intValue();

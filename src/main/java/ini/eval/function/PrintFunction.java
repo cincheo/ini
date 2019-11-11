@@ -1,5 +1,6 @@
 package ini.eval.function;
 
+import ini.Main;
 import ini.ast.Invocation;
 import ini.eval.IniEval;
 import ini.eval.data.Data;
@@ -16,18 +17,18 @@ public class PrintFunction extends BuiltInExecutable {
 	@Override
 	public void eval(IniEval eval) {
 		Data d = getArgument(eval, 0);
-		if(d==null) {
+		Main.LOGGER.debug("PRINT " + d + " - " + eval.parser.out + " : " + eval + " : " + eval.parser);
+		if (d == null) {
 			eval.parser.out.print("null");
 		} else {
 			d.prettyPrint(eval.parser.out);
 		}
 		eval.result = null;
 	}
-	
+
 	@Override
 	public Type getFunctionalType(AstAttrib attrib, Invocation invocation) {
 		return attrib.parser.types.createFunctionalType(attrib.parser.types.VOID, attrib.parser.types.ANY);
 	}
-	
-	
+
 }

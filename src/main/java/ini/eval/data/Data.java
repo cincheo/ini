@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 
-public interface Data {
+public interface Data extends Comparable<Object> {
 
 	public enum Kind {
 		REGULAR, INT_SET, EXECUTABLE

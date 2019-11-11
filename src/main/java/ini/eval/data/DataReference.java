@@ -13,6 +13,11 @@ public class DataReference implements Data {
 	}
 
 	@Override
+	public int compareTo(Object o) {
+		return toString().compareTo(o.toString());
+	}
+	
+	@Override
 	public Data get(Object key) {
 		// automatically fill pending reference
 		if (isPending()) {

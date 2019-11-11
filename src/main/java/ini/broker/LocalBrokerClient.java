@@ -1,86 +1,126 @@
 package ini.broker;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import ini.Main;
 
 public class LocalBrokerClient<T> implements BrokerClient<T> {
 
 	private static LocalBrokerClient<?> instance;
+	private String name;
 	private Map<String, BlockingQueue<Object>> channels = new Hashtable<>();
+	private Map<String, Collection<String>> channelConsumers = new Hashtable<>();
 	private Map<String, Thread> consumers = new Hashtable<>();
-	private Map<String, AtomicBoolean> consumerCloseStates = new Hashtable<>();
 	private ConsumerConfiguration<T> consumerConfiguration;
 
 	@SuppressWarnings("unchecked")
-	synchronized public static <T> LocalBrokerClient<T> getInstance(ConsumerConfiguration<T> consumerConfiguration) {
+	synchronized public static <T> LocalBrokerClient<T> getInstance(String name,
+			ConsumerConfiguration<T> consumerConfiguration) {
 		if (instance == null) {
-			instance = new LocalBrokerClient<>(consumerConfiguration);
+			Main.LOGGER.debug("creating local broker client");
+			instance = new LocalBrokerClient<>(name, consumerConfiguration);
 		}
 		return (LocalBrokerClient<T>) instance;
 	}
 
-	private LocalBrokerClient(ConsumerConfiguration<T> consumerConfiguration) {
+	private LocalBrokerClient(String name, ConsumerConfiguration<T> consumerConfiguration) {
+		this.name = name;
 		this.consumerConfiguration = consumerConfiguration;
 	}
 
 	@Override
-	synchronized public void stopConsumer(String channel) {
-		if (consumers.containsKey(channel)) {
-			Main.LOGGER.debug("stopping consumer for channel " + channel);
-			consumerCloseStates.get(channel).set(true);
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	synchronized public void stopConsumer(String consumerId) {
+		if (consumers.containsKey(consumerId)) {
+			Main.LOGGER.debug("stopping consumer " + consumerId);
+			consumers.get(consumerId).interrupt();
+		}
+	}
+
+	synchronized private Collection<String> getOrCreateChannelCustomerIds(String channel) {
+		Collection<String> consumerIds = channelConsumers.get(channel);
+		if (consumerIds == null) {
+			consumerIds = new ArrayList<>();
+			channelConsumers.put(channel, consumerIds);
+		}
+		return consumerIds;
+	}
+
+	@Override
+	synchronized public void stopConsumers(String channel) {
+		Collection<String> consumerIds = getOrCreateChannelCustomerIds(channel);
+		Main.LOGGER.debug("stopping consumers for channel " + channel);
+		for (String consumerId : consumerIds) {
+			stopConsumer(consumerId);
 		}
 	}
 
 	@Override
-	synchronized public boolean isConsumerRunning(String channel) {
-		return consumers.containsKey(channel);
+	synchronized public boolean isConsumerRunning(String consumerId) {
+		return consumers.containsKey(consumerId);
 	}
 
 	@SuppressWarnings("unchecked")
 	synchronized private BlockingQueue<T> getOrCreateChannel(String channel) {
 		BlockingQueue<Object> channelQueue = channels.get(channel);
 		if (channelQueue == null) {
-			channels.put(channel, channelQueue = new ArrayBlockingQueue<>(1000));
+			channels.put(channel, channelQueue = new LinkedBlockingQueue<>());
 		}
 		return (BlockingQueue<T>) channelQueue;
 	}
 
 	@Override
-	public void consume(String channel, java.util.function.Consumer<T> consumeHandler) {
+	synchronized public String consume(String channel, java.util.function.Consumer<T> consumeHandler) {
 		if (channel == null) {
 			throw new RuntimeException("Cannot create consumer for null channel");
 		}
-		consumers.put(channel, Thread.currentThread());
-		consumerCloseStates.put(channel, new AtomicBoolean(false));
+		String id = channel + "-" + UUID.randomUUID().toString();
+		getOrCreateChannelCustomerIds(channel).add(id);
 
 		Main.LOGGER.debug("consumer polling from topic '" + channel + "'...");
 
-		while (!consumerCloseStates.get(channel).get()) {
-			try {
-				T data = getOrCreateChannel(channel).poll(consumerConfiguration.getMaxPollTime(),
-						TimeUnit.MILLISECONDS);
-				if (data != null) {
-					Main.LOGGER.debug("consumed from '" + channel + "': " + data);
-					if (consumeHandler != null) {
-						consumeHandler.accept(data);
+		Thread thread = new Thread() {
+			public void run() {
+				while (true) {
+					try {
+						T data = getOrCreateChannel(channel).poll(consumerConfiguration.getMaxPollTime(),
+								TimeUnit.MILLISECONDS);
+						if (data != null) {
+							Main.LOGGER.debug("consumed from '" + channel + "': " + data);
+							if (consumeHandler != null) {
+								consumeHandler.accept(data);
+							}
+						}
+					} catch (InterruptedException e) {
+						Main.LOGGER.debug("woke up consumer for " + channel);
+						break;
+					} finally {
 					}
 				}
-			} catch (InterruptedException e) {
-				Main.LOGGER.debug("woke up consumer for " + channel);
-				consumerCloseStates.get(channel).set(true);
-			} finally {
+				Main.LOGGER.debug("consumer '" + id + "' out of consume loop");
+				getOrCreateChannelCustomerIds(channel).remove(id);
+				consumers.remove(id);
+				Main.LOGGER.debug("consumer '" + id + "' closed");
 			}
-		}
-		Main.LOGGER.debug("consumer '" + channel + "' out of consume loop");
-		consumers.remove(channel);
-		//consumerCloseStates.remove(channel);
-		Main.LOGGER.debug("consumer '" + channel + "' closed");
+		};
+
+		consumers.put(id, thread);
+
+		thread.start();
+
+		return id;
+
 	}
 
 	@Override
@@ -93,4 +133,8 @@ public class LocalBrokerClient<T> implements BrokerClient<T> {
 		}
 	}
 
+	@Override
+	synchronized public void stop() {
+		// TODO
+	}
 }

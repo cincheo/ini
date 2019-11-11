@@ -962,7 +962,8 @@ public class IniEval {
 		do {
 			try {
 				Thread.sleep(20);
-			} catch (Exception e) {
+			} catch (InterruptedException e) {
+				Main.LOGGER.error("failed", e);
 			}
 			result = getRootContext().get(executableName) == null ? null
 					: getRootContext().get(executableName).getValue();
@@ -988,11 +989,8 @@ public class IniEval {
 			}
 			arguments.add(argument);
 		}
-		// TODO: parse-time
-		if (!(executable instanceof Process)) {
-			throw new RuntimeException("cannot spawn a function... please only spawn processes");
-		}
 		Main.LOGGER.debug("spawn request to " + targetNode + " / " + executable.name + " - " + arguments);
+		// TODO: RESULT???
 		parser.env.coreBrokerClient.sendSpawnRequest(targetNode,
 				new SpawnRequest(parser.env.node, executable.name, arguments));
 	}

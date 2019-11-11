@@ -127,7 +127,7 @@ public class Main {
 			}
 		}
 
-		if (commandLineConfig.userSpecified("node") || commandLineConfig.userSpecified("deamon")) {
+		if (commandLineConfig.userSpecified("node")) {
 			parser.env.deamon = true;
 		}
 
@@ -382,6 +382,7 @@ public class Main {
 				});
 
 				parser.env.coreBrokerClient.startDeployRequestConsumer(request -> {
+					Main.LOGGER.debug("handling deployed function " + request.executable.name);
 					new Scanner() {
 						public void visitAstElement(AstElement element) {
 							super.visitAstElement(element);

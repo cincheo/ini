@@ -1,6 +1,7 @@
 package ini.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -17,20 +18,18 @@ public abstract class IniTestCase extends TestCase {
 
 	static final Logger logger = LoggerFactory.getLogger("test");
 
-	protected static boolean skipTestsUsingBroker = true;
+	protected static boolean skipTestsUsingBroker = false;
 	
-	private ByteArrayOutputStream outputStream;
-	private PrintStream out;
-
 	public IniTestCase(String name) {
 		super(name);
 	}
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		outputStream = new ByteArrayOutputStream();
-		out = new PrintStream(outputStream);
-		System.setOut(out);
+		Main.LOGGER.info("=====================================================");
+		//outputStream = new ByteArrayOutputStream();
+		//out = new PrintStream(outputStream);
+		//System.setOut(out);
 	}
 
 	protected void parseAndAttribCode(String code, Consumer<IniParser> parsingAssertions,
@@ -74,25 +73,41 @@ public abstract class IniTestCase extends TestCase {
 	}
 
 	protected void testFile(String file, BiConsumer<IniParser, String> assertions) {
-		testFile(file, 0, null, assertions);
+		testFile(file, 0, null, new ByteArrayOutputStream(), assertions);
 	}
 
 	protected void testFile(String file, String node, BiConsumer<IniParser, String> assertions) {
-		testFile(file, 0, node, assertions);
+		testFile(file, 0, node, new ByteArrayOutputStream(), assertions);
 	}
 
 	protected void testFile(String file, long sleepTime, BiConsumer<IniParser, String> assertions) {
-		testFile(file, sleepTime, null, assertions);
+		testFile(file, sleepTime, null, new ByteArrayOutputStream(), assertions);
+	}
+
+	protected void testFile(String file, OutputStream outputStream, BiConsumer<IniParser, String> assertions) {
+		testFile(file, 0, null, outputStream, assertions);
+	}
+
+	protected void testFile(String file, String node, OutputStream outputStream, BiConsumer<IniParser, String> assertions) {
+		testFile(file, 0, node, outputStream, assertions);
+	}
+
+	protected void testFile(String file, long sleepTime, OutputStream outputStream, BiConsumer<IniParser, String> assertions) {
+		testFile(file, sleepTime, null, outputStream, assertions);
 	}
 
 	protected void testFile(String file, long sleepTime, String node, BiConsumer<IniParser, String> assertions) {
-		outputStream = new ByteArrayOutputStream();
-		out = new PrintStream(outputStream);
-		System.setOut(out);
+		testFile(file, sleepTime, node, new ByteArrayOutputStream(), assertions);
+	}
+	
+	protected void testFile(String file, long sleepTime, String node, OutputStream outputStream, BiConsumer<IniParser, String> assertions) {
 		IniParser parser = null;
 		try {
 			parser = file == null ? IniParser.createParserForCode(null, null, "process main() {}")
 					: IniParser.createParserForFile(null, null, file);
+			parser.out = new PrintStream(outputStream);
+			//System.setOut(out);
+
 			if (node != null) {
 				parser.env.deamon = true;
 				parser.env.node = node;
@@ -117,10 +132,6 @@ public abstract class IniTestCase extends TestCase {
 			e.printStackTrace();
 			fail();
 		}
-	}
-
-	protected String getOut() {
-		return outputStream.toString();
 	}
 
 }

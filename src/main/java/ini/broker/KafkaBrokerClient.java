@@ -54,6 +54,11 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 		this.consumerConfiguration = consumerConfiguration;
 	}
 
+	@Override
+	public String getName() {
+		return null;
+	}
+	
 	private Consumer<Long, String> createConsumer(String channel) {
 		Main.LOGGER.debug("creating '" + consumerConfiguration.getConsumerId() + "' consumer for channel " + channel);
 		if (consumers.containsKey(channel)) {
@@ -108,13 +113,14 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 	}
 
 	@Override
-	public void consume(String channel, java.util.function.Consumer<T> consumeHandler) {
+	public String consume(String channel, java.util.function.Consumer<T> consumeHandler) {
 		if (channel == null) {
 			throw new RuntimeException("Cannot create consumer for null channel");
 		}
 		Consumer<Long, String> consumer = createConsumer(channel);
 
 		Main.LOGGER.debug("consumer polling from topic '" + channel + "'...");
+		Main.LOGGER.debug("configuration: "+consumerConfiguration);
 
 		while (!consumerCloseStates.get(channel).get()) {
 			try {
@@ -122,7 +128,7 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 						.poll(java.time.Duration.ofMillis(consumerConfiguration.getMaxPollTime()));
 
 				if (consumerRecords.count() == 0) {
-					// Main.LOGGER.debug("consumer timeout: "+channel);
+					//Main.LOGGER.debug("consumer timeout: "+channel);
 					continue;
 				} else {
 					Main.LOGGER.debug(
@@ -157,9 +163,15 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 			Main.LOGGER.error("consumer raised an exception while closing");
 		}
 		Main.LOGGER.debug("consumer '" + channel + "' closed");
-
+		return null;
 	}
 
+	@Override
+	public void stopConsumers(String channel) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Override
 	public void produce(String channel, Object data) {
 		long time = System.currentTimeMillis();
@@ -168,13 +180,15 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 			final ProducerRecord<Long, String> record = new ProducerRecord<>(channel, new Gson().toJson(data));
 
 			Main.LOGGER.debug("producing on channel " + channel);
-			RecordMetadata metadata = getProducerInstance(configuration).send(record).get();
+			Producer<Long,String> producer = getProducerInstance(configuration);
+			RecordMetadata metadata = producer.send(record).get();
 
 			long elapsedTime = System.currentTimeMillis() - time;
 			Main.LOGGER.debug(String.format(
 					"produced: (topic=%s, key=%s, value=%s) " + "meta(partition=%d, offset=%d) time=%d", channel,
 					record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime));
-
+			producer.flush();
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} // finally {
@@ -182,4 +196,9 @@ public class KafkaBrokerClient<T> implements BrokerClient<T> {
 			// }
 	}
 
+	@Override
+	public void stop() {
+		// TODO
+	}
+	
 }
