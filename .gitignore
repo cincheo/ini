@@ -2,4 +2,7 @@
 .svn
 *.class
 *.jar
+/.ini.history
+.DS_Store
+
 
