@@ -90,5 +90,25 @@ public class TestBroker extends IniTestCase {
 		});
 		assertEquals("hello remote 2\n", os.toString());
 	}
+
+	public void testChannels() {
+		// OK
+		if(skipTestsUsingBroker) {
+			return;
+		}
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		new Thread() {
+			@Override
+			public void run() {
+				testFile(null, 500, "n1", os, (p, out) -> {
+					p.env.coreBrokerClient.stop();
+				});
+			}
+		}.start();
+		testFile("ini/test/broker/channels.ini", 500, "main", os, (p, out) -> {
+			p.env.coreBrokerClient.stop();
+		});
+		assertEquals("consumed from chan: hello1\nconsumed from g: hello2\n", os.toString());
+	}
 	
 }

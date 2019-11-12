@@ -153,13 +153,10 @@ public class TestExamples extends IniTestCase {
 	}
 
 	public void testReduce2() {
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10; i++) {
 			final int it = i;
 			testFile("ini/examples/channels/reduce2.ini", (p, out) -> assertEquals("messed up at " + it,
 					"[ =[ , , ],a=[a],e=[e],h=[h],i=[i,i],s=[s,s],t=[t,t,t],x=[x]]\n", out));
-			// testFile("ini/examples/channels/reduce2.ini", (p, out) ->
-			// assertEquals("messed up at "+it,"[ =[ , ,
-			// ],a=[a],s=[s,s],t=[t,t,t],e=[e],h=[h],x=[x],i=[i,i]]\n", out));
 		}
 	}
 
