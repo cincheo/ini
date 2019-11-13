@@ -110,5 +110,25 @@ public class TestBroker extends IniTestCase {
 		});
 		assertEquals("consumed from chan: hello1\nconsumed from g: hello2\n", os.toString());
 	}
+
+	public void testRemoteLambda() {
+		// OK
+		if(skipTestsUsingBroker) {
+			return;
+		}
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		new Thread() {
+			@Override
+			public void run() {
+				testFile(null, 200, "n1", os, (p, out) -> {
+					p.env.coreBrokerClient.stop();
+				});
+			}
+		}.start();
+		testFile("ini/test/broker/remote_lambda.ini", 200, "main", os, (p, out) -> {
+			p.env.coreBrokerClient.stop();
+		});
+		assertEquals("hello remote 1\n", os.toString());
+	}
 	
 }

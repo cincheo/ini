@@ -3,6 +3,7 @@ package ini;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -368,16 +369,29 @@ public class Main {
 				parser.env.coreBrokerClient = new CoreBrokerClient(parser.env);
 				parser.env.coreBrokerClient.startSpawnRequestConsumer(request -> {
 					LOGGER.debug("processing " + request);
-					Invocation invocation = new Invocation(parser, null, request.spawnedProcessName, request.parameters
-							.stream().map(data -> RawData.dataToExpression(parser, data)).collect(Collectors.toList()));
-					invocation.owner = request.sourceNode;
-					invocation.token = new Token(-1, null, null, -1, -1, -1);
-					new Thread() {
-						public void run() {
-							// eval.evalCode(attrib, invocation);
-							eval.eval(invocation);
-						}
-					}.start();
+					if (request.spawnedExecutableName == null) {
+						// lambda case
+						new Thread() {
+							public void run() {
+								eval.invoke(request.executable,
+										request.parameters.stream()
+												.map(data -> data /*eval.eval(RawData.dataToExpression(parser, data))*/)
+												.collect(Collectors.toList()).toArray());
+							}
+						}.start();
+					} else {
+						Invocation invocation = new Invocation(parser, null, request.spawnedExecutableName,
+								request.parameters.stream().map(data -> RawData.dataToExpression(parser, data))
+										.collect(Collectors.toList()));
+						invocation.owner = request.sourceNode;
+						invocation.token = new Token(-1, null, null, -1, -1, -1);
+						new Thread() {
+							public void run() {
+								// eval.evalCode(attrib, invocation);
+								eval.eval(invocation);
+							}
+						}.start();
+					}
 				});
 
 				parser.env.coreBrokerClient.startFetchRequestConsumer(request -> {

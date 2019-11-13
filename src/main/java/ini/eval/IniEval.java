@@ -830,7 +830,8 @@ public class IniEval {
 					invocationStack.pop();
 				}
 			} else {
-				ctx.bind(executable.parameters.get(i).name, new RawData(params[i]));
+				ctx.bind(executable.parameters.get(i).name,
+						(params[i] instanceof Data) ? (Data) params[i] : new RawData(params[i]));
 			}
 		}
 		invocationStack.push(ctx);
@@ -992,7 +993,7 @@ public class IniEval {
 		Main.LOGGER.debug("spawn request to " + targetNode + " / " + executable.name + " - " + arguments);
 		// TODO: RESULT???
 		parser.env.coreBrokerClient.sendSpawnRequest(targetNode,
-				new SpawnRequest(parser.env.node, executable.name, arguments));
+				new SpawnRequest(parser.env.node, executable, arguments));
 	}
 
 	public void evalCode(AstAttrib attrib, String code) {
