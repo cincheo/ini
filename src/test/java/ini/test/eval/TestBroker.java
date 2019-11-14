@@ -128,7 +128,7 @@ public class TestBroker extends IniTestCase {
 		testFile("ini/test/broker/remote_lambda.ini", 200, "main", os, (p, out) -> {
 			p.env.coreBrokerClient.stop();
 		});
-		assertEquals("hello remote 1\nhello remote process 2\n", os.toString());
+		assertEquals("hello remote 1\nhello remote process 2\nhello remote indirect process 3\n", os.toString());
 	}
 	
 }
