@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import ini.ast.Binding;
-import ini.ast.Channel;
+import ini.ast.ChannelDeclaration;
 import ini.ast.Executable;
 import ini.ast.UserType;
 import ini.parser.Types;
@@ -18,7 +18,7 @@ public class Type {
 	public boolean constructorType = false;
 	public Executable executable = null;
 	private List<Binding> bindings = null;
-	public Channel channel = null;
+	public ChannelDeclaration channel = null;
 
 	public final void addBinding(Binding binding) {
 		if (bindings == null) {
@@ -344,7 +344,8 @@ public class Type {
 	}
 
 	public final boolean isChannel() {
-		return name != null && (name.equals("Channel") || (name.equals("Map") && typeParameters.get(1).isChannel()));
+		return name != null
+				&& (name.equals(Types.CHANNEL_TYPE_NAME) || (name.equals("Map") && typeParameters.get(1).isChannel()));
 	}
 
 	public final Map<String, Type> getFields() {

@@ -20,7 +20,7 @@ public abstract class AstElement implements AstNode {
 	public List<Expression> annotations;
 
 	@Override
-	public String getAnnotationValue(String... keys) {
+	public String getAnnotationStringValue(String... keys) {
 		if (annotations != null && !annotations.isEmpty()) {
 			for (Expression e : annotations) {
 				if (e instanceof Assignment) {
@@ -29,6 +29,24 @@ public abstract class AstElement implements AstNode {
 					if (ArrayUtils.contains(keys, name)) {
 						if (a.assignment instanceof StringLiteral) {
 							return ((StringLiteral) a.assignment).value;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Number getAnnotationNumberValue(String... keys) {
+		if (annotations != null && !annotations.isEmpty()) {
+			for (Expression e : annotations) {
+				if (e instanceof Assignment) {
+					Assignment a = (Assignment) e;
+					String name = a.assignee.toString();
+					if (ArrayUtils.contains(keys, name)) {
+						if (a.assignment instanceof NumberLiteral) {
+							return ((NumberLiteral) a.assignment).value;
 						}
 					}
 				}

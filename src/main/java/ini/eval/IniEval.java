@@ -21,7 +21,7 @@ import ini.ast.BinaryOperator;
 import ini.ast.Binding;
 import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
-import ini.ast.Channel;
+import ini.ast.ChannelDeclaration;
 import ini.ast.CharLiteral;
 import ini.ast.ConditionalExpression;
 import ini.ast.ConstructorMatchExpression;
@@ -154,15 +154,14 @@ public class IniEval {
 			case AstNode.ARRAY_ACCESS:
 				result = eval(((ArrayAccess) node).targetExpression);
 				if (result.getTypeInfo() == TypeInfo.CHANNEL) {
-					if (((Channel) result.getValue()).indexed) {
-						result = new RawData(((Channel) result.getValue())
+					if (((ChannelDeclaration) result.getValue()).indexed) {
+						result = new RawData(((ChannelDeclaration) result.getValue())
 								.getComponent((int) eval(((ArrayAccess) node).indexExpression).getValue()));
 					} else {
 						throw new EvalException(this, "cannot access indexed channel on regular channel");
 					}
 				} else {
-					result = eval(((ArrayAccess) node).targetExpression)
-							.get(eval(((ArrayAccess) node).indexExpression).getValue());
+					result = result.get(eval(((ArrayAccess) node).indexExpression).getValue());
 				}
 				break;
 
@@ -211,7 +210,7 @@ public class IniEval {
 				break;
 
 			case AstNode.CHANNEL:
-				getRootContext().bind(((Channel) node).name, new RawData((Channel) node));
+				getRootContext().bind(((ChannelDeclaration) node).name, new RawData((ChannelDeclaration) node));
 				break;
 
 			case AstNode.AT_BINDING:
@@ -375,6 +374,8 @@ public class IniEval {
 
 					if (!StringUtils.isEmpty(targetNode) && !targetNode.equals(parser.env.node)) {
 						spawnExecutable(invocation, f, targetNode);
+						// TODO: wait for result?
+						this.result = null;
 					} else {
 						if (f.parameters.size() < invocation.arguments.size()) {
 							throw new RuntimeException("wrong number of parameters at " + node);
@@ -443,6 +444,11 @@ public class IniEval {
 					result.setConstructor(RuntimeConstructor.BYTE);
 				} else if (((NumberLiteral) node).value instanceof Long) {
 					result.setConstructor(RuntimeConstructor.LONG);
+				} else {
+					throw new EvalException(this,
+							"unsupported number type: " + ((NumberLiteral) node).value
+									+ (((NumberLiteral) node).value != null
+											? " - " + ((NumberLiteral) node).value.getClass() : ""));
 				}
 				break;
 

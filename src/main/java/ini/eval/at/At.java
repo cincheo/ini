@@ -114,14 +114,14 @@ public abstract class At {
 
 	@Override
 	public String toString() {
-		return this.getClass().getName() + "-" + (async ? "async" : "sync");
+		return this.getClass().getName() + "@" + hashCode() + "-" + (async ? "async" : "sync");
 	}
 
 	public void execute(IniThread thread) {
 		// System.out.println(">>>> Excute: " + eval);
 		Main.LOGGER.debug("execute: " + this + " (active threads=" + currentThreadCount + ")");
 		pushThreadInQueue();
-		//safelyEnter();
+		// safelyEnter();
 		if (async) {
 			getThreadExecutor().execute(thread);
 		} else {
@@ -177,7 +177,7 @@ public abstract class At {
 		currentThreadCountInQueue++;
 		// System.out.println("push: " + this + "," + currentThreadCount);
 	}
-	
+
 	public synchronized void popThread() {
 		// System.out.println("exit " + this);
 		currentThreadCount--;
@@ -209,7 +209,7 @@ public abstract class At {
 			}
 		}
 	}
-	
+
 	synchronized private void isEmptySynchronizedAts() {
 		// System.out.println("all ats: " + synchronizedAts);
 		for (At at : synchronizedAts) {
@@ -257,7 +257,7 @@ public abstract class At {
 	}
 
 	public void setAtPredicate(AtPredicate atPredicate) {
-		this.async = "async".equals(atPredicate.getAnnotationValue("mode"));
+		this.async = "async".equals(atPredicate.getAnnotationStringValue("mode"));
 		this.atPredicate = atPredicate;
 	}
 

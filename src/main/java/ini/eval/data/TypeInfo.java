@@ -39,7 +39,7 @@ public class TypeInfo {
 			return FUNCTION;
 		case "ini.ast.Process":
 			return PROCESS;
-		case "ini.ast.Channel":
+		case "ini.ast.ChannelDeclaration":
 			return CHANNEL;
 		default:
 			return NULL;

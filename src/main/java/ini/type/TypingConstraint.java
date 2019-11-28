@@ -129,7 +129,7 @@ public class TypingConstraint {
 			result.add(new TypingConstraint(Kind.EQ, left, left, leftOrigin, leftOrigin));
 			return result;
 		}
-		if (left.hasVariablePart() || right.hasVariablePart()) {
+		if (left.hasTypeParameters() || right.hasTypeParameters()) {
 			if (left.getName() != null && left.getName().equals(right.getName())) {
 				if (left.getTypeParameters().size() == right.getTypeParameters().size()) {
 					for (int i = 0; i < left.getTypeParameters().size(); i++) {
@@ -174,20 +174,20 @@ public class TypingConstraint {
 					}
 				}
 			}
-			if (left.hasFields()) {
-				if (left.isVariable() && !right.isVariable()) {
-					for (String fieldName : left.fields.keySet()) {
-						if (right.fields == null || !right.fields.containsKey(fieldName)) {
-							errors.add(new TypingError(leftOrigin,
-									"undeclared field '" + fieldName + "' in type '" + right.name + "'"));
-						}
+		}
+		if (left.hasFields()) {
+			if (left.isVariable() && !right.isVariable()) {
+				for (String fieldName : left.fields.keySet()) {
+					if (right.fields == null || !right.fields.containsKey(fieldName)) {
+						errors.add(new TypingError(leftOrigin,
+								"undeclared field '" + fieldName + "' in type '" + right.name + "'"));
 					}
-					// return result;
 				}
-				List<String> reducedFields = new ArrayList<String>();
-				reduceFields(reducedFields, result, leftOrigin, rightOrigin, left, right, errors);
-				reduceFields(reducedFields, result, leftOrigin, rightOrigin, right, left, errors);
+				// return result;
 			}
+			List<String> reducedFields = new ArrayList<String>();
+			reduceFields(reducedFields, result, leftOrigin, rightOrigin, left, right, errors);
+			reduceFields(reducedFields, result, leftOrigin, rightOrigin, right, left, errors);
 		}
 		return result;
 	}

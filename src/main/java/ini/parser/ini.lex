@@ -84,7 +84,7 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
 
 O = [^()]*
 //FunctionalTypeEnding = {O} ({O} "(" {O} ({O} "(" {O} ({O} "(" {O} ")" {O})* {O} ")" {O})* {O} ")" {O})* {O} ")" {WhiteSpaceChar}* "=>"
-ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* ("," {WhiteSpace}* {Identifier} {WhiteSpace}*)* ")"
+ParameterList = {Identifier} | "(" {WhiteSpace}* {Identifier} {WhiteSpace}* ("," {WhiteSpace}* {Identifier} {WhiteSpace}*)* ")" | "(" {WhiteSpace}* ")"
 
 %% 
 

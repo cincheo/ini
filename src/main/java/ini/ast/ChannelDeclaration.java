@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ini.broker.ChannelConfiguration;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
 
-public class Channel extends NamedElement {
+public class ChannelDeclaration extends NamedElement {
 
 	public enum Visibility {
 		LOCAL, APPLICATION, GLOBAL
@@ -22,10 +23,11 @@ public class Channel extends NamedElement {
 	public boolean indexed = false;
 	public Visibility visibility;
 	public String mappedName;
-	private transient Map<Integer, Channel> components;
+	public Integer size;
+	private transient Map<Integer, ChannelDeclaration> components;
 
-	public Channel(IniParser parser, Token token, String name, TypeVariable typeVariable, Visibility visibility,
-			boolean indexed, List<Expression> annotations) {
+	public ChannelDeclaration(IniParser parser, Token token, String name, TypeVariable typeVariable,
+			Visibility visibility, boolean indexed, List<Expression> annotations) {
 		super(parser, token, name);
 		if (name == null) {
 			throw new RuntimeException("channel name cannot be null");
@@ -38,7 +40,8 @@ public class Channel extends NamedElement {
 		this.visibility = visibility == null ? Visibility.LOCAL : visibility;
 		this.indexed = indexed;
 		this.annotations = annotations;
-		this.mappedName = getAnnotationValue("name");
+		this.size = (Integer) getAnnotationNumberValue("capacity", "size");
+		this.mappedName = getAnnotationStringValue("name");
 		if (this.mappedName == null) {
 			this.mappedName = name;
 		}
@@ -57,17 +60,29 @@ public class Channel extends NamedElement {
 		}
 	}
 
-	public Channel getComponent(int i) {
+	public ChannelDeclaration getComponent(int i) {
 		if (!indexed) {
 			throw new RuntimeException("cannot access component on non-indexed channel");
 		}
 		if (components == null) {
-			components = new HashMap<Integer, Channel>();
+			components = new HashMap<Integer, ChannelDeclaration>();
 		}
 		if (!components.containsKey(i)) {
-			components.put(i, new Channel(parser, token, mappedName + i, typeVariable, visibility, false, null));
+			components.put(i, new ChannelDeclaration(parser, token, mappedName + i, typeVariable, visibility, false,
+					annotations));
 		}
 		return components.get(i);
+	}
+
+	public ChannelConfiguration getChannelConfiguration() {
+		if (indexed) {
+			throw new RuntimeException("illegal operation on indexed channels");
+		}
+		if (size != null) {
+			return new ChannelConfiguration(size);
+		} else {
+			return null;
+		}
 	}
 
 	@Override

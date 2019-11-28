@@ -167,7 +167,7 @@ public class TestExamples extends IniTestCase {
 	public void testMapReduce() {
 		testFile("ini/examples/distributed_computing/map_reduce.ini",
 				(p, out) -> assertEquals(
-						"[20=[Charlène,Fabien,Dany],21=[Sacha,Yann],22=[Yoann,Carlos],23=[Renaud,Joris,Laurentiu,Paul]]\n",
+						"[20=[Charlène,Dany,Fabien],21=[Sacha,Yann],22=[Carlos,Yoann],23=[Joris,Laurentiu,Paul,Renaud]]\n",
 						out));
 	}
 

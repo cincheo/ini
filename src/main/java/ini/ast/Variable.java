@@ -13,7 +13,7 @@ public class Variable extends NamedElement implements VariableAccess {
 	 * return the channel after the attribution phase (null otherwise or before
 	 * the attribution phase).
 	 */
-	public Channel channelLiteral;
+	public ChannelDeclaration channelLiteral;
 
 	public Variable(IniParser parser, Token token, String name) {
 		super(parser, token, name);

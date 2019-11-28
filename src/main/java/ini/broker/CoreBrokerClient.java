@@ -31,16 +31,27 @@ public class CoreBrokerClient {
 		this.env = env;
 	}
 
-	public static final String SPAWN_REQUEST_SUFFIX = "_spawn_request";
-	public static final String FETCH_REQUEST_SUFFIX = "_fetch_request";
-	public static final String DEPLOY_REQUEST_SUFFIX = "_deploy_request";
+	private static final String SPAWN_REQUEST_SUFFIX = "_spawn_request";
+	private static final String SPAWN_ACK_SUFFIX = "_spawn_ack";
+	private static final String FETCH_REQUEST_SUFFIX = "_fetch_request";
+	private static final String DEPLOY_REQUEST_SUFFIX = "_deploy_request";
 
-	private BrokerClient<SpawnRequest> spawnRequestBrokerClient;
-	private BrokerClient<FetchRequest> fetchRequestBrokerClient;
-	private BrokerClient<DeployRequest> deployRequestBrokerClient;
-	private BrokerClient<Data> defaultRemoteBrokerClient;
+	private BrokerClient coreRemoteBrokerClient;
+	private BrokerClient defaultRemoteBrokerClient;
 
-	public synchronized BrokerClient<Data> getDefaultRemoteBrokerClient() {
+	private Channel<SpawnRequest> getSpawnChannel(String node) {
+		return new Channel<>(node + SPAWN_REQUEST_SUFFIX, SpawnRequest.class, null);
+	}
+
+	private Channel<FetchRequest> getFetchChannel(String node) {
+		return new Channel<>(node + FETCH_REQUEST_SUFFIX, FetchRequest.class, null);
+	}
+
+	private Channel<DeployRequest> getDeployChannel(String node) {
+		return new Channel<>(node + DEPLOY_REQUEST_SUFFIX, DeployRequest.class, null);
+	}
+
+	public synchronized BrokerClient getDefaultRemoteBrokerClient() {
 		if (defaultRemoteBrokerClient == null) {
 			defaultRemoteBrokerClient = createDefaultInstance(env);
 		}
@@ -48,14 +59,8 @@ public class CoreBrokerClient {
 	}
 
 	public void stop() {
-		if (spawnRequestBrokerClient != null) {
-			spawnRequestBrokerClient.stop();
-		}
-		if (fetchRequestBrokerClient != null) {
-			fetchRequestBrokerClient.stop();
-		}
-		if (deployRequestBrokerClient != null) {
-			deployRequestBrokerClient.stop();
+		if (coreRemoteBrokerClient != null) {
+			coreRemoteBrokerClient.stop();
 		}
 		if (defaultRemoteBrokerClient != null) {
 			defaultRemoteBrokerClient.stop();
@@ -82,47 +87,23 @@ public class CoreBrokerClient {
 	 * e.printStackTrace(); } client.stopConsumer(topic); } } }
 	 */
 
-	private synchronized BrokerClient<SpawnRequest> getSpawnRequestBrokerClient() {
-		if (spawnRequestBrokerClient == null) {
-			GsonBuilder gsonBuilder = new GsonBuilder();
-			gsonBuilder.registerTypeAdapter(AstNode.class, new AstNodeDeserializer())
+	private synchronized BrokerClient getCoreRemoteBrokerClient() {
+		if (coreRemoteBrokerClient == null) {
+			GsonBuilder coreGsonBuilder = new GsonBuilder();
+			coreGsonBuilder.registerTypeAdapter(AstNode.class, new AstNodeDeserializer())
 					.registerTypeAdapter(VariableAccess.class, new AstNodeDeserializer())
 					.registerTypeAdapter(Expression.class, new AstNodeDeserializer())
 					.registerTypeAdapter(Executable.class, new AstNodeDeserializer())
 					.registerTypeAdapter(Statement.class, new AstNodeDeserializer());
-			gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
+			coreGsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
 				@Override
 				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 						throws JsonParseException {
-					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
-							.applyTypeInfo(gsonBuilder);
+					return coreGsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
+							.applyTypeInfo(coreGsonBuilder);
 				}
 			});
-			spawnRequestBrokerClient = new RabbitMQBrokerClient<>("spawn", env.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(gsonBuilder, SpawnRequest.class));
-		}
-		return spawnRequestBrokerClient;
-	}
-
-	private synchronized BrokerClient<DeployRequest> getDeployRequestBrokerClient() {
-		if (deployRequestBrokerClient == null) {
-			GsonBuilder gsonBuilder = new GsonBuilder();
-			gsonBuilder.registerTypeAdapter(AstNode.class, new AstNodeDeserializer())
-					.registerTypeAdapter(VariableAccess.class, new AstNodeDeserializer())
-					.registerTypeAdapter(Expression.class, new AstNodeDeserializer())
-					.registerTypeAdapter(Executable.class, new AstNodeDeserializer())
-					.registerTypeAdapter(Statement.class, new AstNodeDeserializer());
-
-			gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
-				@Override
-				public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
-						throws JsonParseException {
-					return gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
-							.applyTypeInfo(gsonBuilder);
-				}
-			});
-
-			gsonBuilder.registerTypeAdapter(NumberLiteral.class, new JsonDeserializer<NumberLiteral>() {
+			coreGsonBuilder.registerTypeAdapter(NumberLiteral.class, new JsonDeserializer<NumberLiteral>() {
 
 				@Override
 				public NumberLiteral deserialize(JsonElement json, Type type, JsonDeserializationContext context)
@@ -132,42 +113,45 @@ public class CoreBrokerClient {
 				}
 			});
 
-			deployRequestBrokerClient = new RabbitMQBrokerClient<>("deploy", env.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(gsonBuilder, DeployRequest.class));
+			coreRemoteBrokerClient = new RabbitMQBrokerClient("core", env.getEnvironmentConfiguration(),
+					new ChannelConfiguration(coreGsonBuilder, 1));
 		}
-		return deployRequestBrokerClient;
-	}
-
-	private synchronized BrokerClient<FetchRequest> getFetchRequestBrokerClient() {
-		if (fetchRequestBrokerClient == null) {
-			GsonBuilder gsonBuilder = new GsonBuilder();
-			fetchRequestBrokerClient = new RabbitMQBrokerClient<>("fetch", env.getEnvironmentConfiguration(),
-					new ConsumerConfiguration<>(gsonBuilder, FetchRequest.class));
-		}
-		return fetchRequestBrokerClient;
+		return coreRemoteBrokerClient;
 	}
 
 	public void startSpawnRequestConsumer(Consumer<SpawnRequest> handler) {
-		getSpawnRequestBrokerClient().consume(env.node + SPAWN_REQUEST_SUFFIX, request -> {
+		getCoreRemoteBrokerClient().consume(getSpawnChannel(env.node), request -> {
 			Main.LOGGER.debug("" + request);
 			handler.accept(request);
 		});
 	}
 
+	/*
+	 * public void startSpawnAckConsumer(Consumer<Ack> handler) {
+	 * getSpawnRequestBrokerClient().consume(env.node + SPAWN_ACK_SUFFIX,
+	 * request -> { Main.LOGGER.debug("" + request); handler.accept(request);
+	 * }); }
+	 */
+
 	public void sendSpawnRequest(String targetNode, SpawnRequest request) {
-		getSpawnRequestBrokerClient().produce(targetNode + SPAWN_REQUEST_SUFFIX, request);
+		getCoreRemoteBrokerClient().produce(getSpawnChannel(targetNode), request);
 	}
 
+	/*
+	 * public void sendSpawnAck(SpawnRequest request) {
+	 * getSpawnRequestBrokerClient().produce(request.sourceNode +
+	 * SPAWN_ACK_SUFFIX, new Ack(request)); }
+	 */
+
 	public void startFetchRequestConsumer(Consumer<FetchRequest> handler) {
-		getFetchRequestBrokerClient().consume(env.node + FETCH_REQUEST_SUFFIX, request -> {
+		getCoreRemoteBrokerClient().consume(getFetchChannel(env.node), request -> {
 			Main.LOGGER.debug("" + request);
 			handler.accept(request);
 		});
 	}
 
 	public void sendFetchRequest(String targetNode, FetchRequest request) {
-		Main.LOGGER.debug("send " + request + " to " + targetNode);
-		getFetchRequestBrokerClient().produce(targetNode + FETCH_REQUEST_SUFFIX, request);
+		getCoreRemoteBrokerClient().produce(getFetchChannel(targetNode), request);
 	}
 
 	private static class AstNodeDeserializer implements JsonDeserializer<AstNode> {
@@ -191,31 +175,30 @@ public class CoreBrokerClient {
 	}
 
 	public void sendDeployRequest(String targetNode, DeployRequest request) {
-		getDeployRequestBrokerClient().produce(targetNode + DEPLOY_REQUEST_SUFFIX, request);
+		getCoreRemoteBrokerClient().produce(getDeployChannel(targetNode), request);
 	}
 
 	public void startDeployRequestConsumer(Consumer<DeployRequest> handler) {
-		getDeployRequestBrokerClient().consume(env.node + DEPLOY_REQUEST_SUFFIX, deployRequest -> {
+		getCoreRemoteBrokerClient().consume(getDeployChannel(env.node), deployRequest -> {
 			Main.LOGGER.debug("" + deployRequest);
 			handler.accept(deployRequest);
 		});
 	}
 
-	@SuppressWarnings("unchecked")
-	private synchronized <T> BrokerClient<T> createDefaultInstance(IniEnv env) {
+	private synchronized BrokerClient createDefaultInstance(IniEnv env) {
 		Main.LOGGER.debug("creating default remote broker client");
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
+		GsonBuilder defaultGsonBuilder = new GsonBuilder();
+		defaultGsonBuilder.registerTypeAdapter(Data.class, new JsonDeserializer<RawData>() {
 			@Override
 			public RawData deserialize(JsonElement json, Type type, JsonDeserializationContext context)
 					throws JsonParseException {
-				RawData data = gsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
-						.applyTypeInfo(gsonBuilder);
+				RawData data = defaultGsonBuilder.create().fromJson(json, RawData.class).tryNumerizeKeys()
+						.applyTypeInfo(defaultGsonBuilder);
 				return data;
 			}
 		});
-		return (BrokerClient<T>) new RabbitMQBrokerClient<>("default", env.getEnvironmentConfiguration(),
-				new ConsumerConfiguration<>(gsonBuilder, Data.class));
+		return new RabbitMQBrokerClient("default-remote", env.getEnvironmentConfiguration(),
+				new ChannelConfiguration(defaultGsonBuilder, 1));
 	}
 
 }

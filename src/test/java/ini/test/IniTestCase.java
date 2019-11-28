@@ -16,6 +16,8 @@ import junit.framework.TestCase;
 
 public abstract class IniTestCase extends TestCase {
 
+	public static IniParser currentParser;
+	
 	static final Logger logger = LoggerFactory.getLogger("test");
 
 	protected static boolean skipTestsUsingBroker = false;
@@ -106,6 +108,7 @@ public abstract class IniTestCase extends TestCase {
 			parser = file == null ? IniParser.createParserForCode(null, null, "process main() {}")
 					: IniParser.createParserForFile(null, null, file);
 			parser.out = new PrintStream(outputStream);
+			currentParser = parser;
 			//System.setOut(out);
 
 			if (node != null) {

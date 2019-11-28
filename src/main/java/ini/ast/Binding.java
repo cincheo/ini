@@ -39,8 +39,8 @@ public class Binding extends NamedElement {
 				returnType.context = typeParameters;
 			}
 		}
-		this.className = getAnnotationValue("class");
-		this.member = getAnnotationValue("target");
+		this.className = getAnnotationStringValue("class");
+		this.member = getAnnotationStringValue("target");
 		if (member != null) {
 			this.memberName = this.member.split("\\(")[0];
 		}

@@ -65,8 +65,10 @@ public interface AstNode {
 
 	void setType(Type type);
 	
-	String getAnnotationValue(String... keys);
-	
+	String getAnnotationStringValue(String... keys);
+
+	Number getAnnotationNumberValue(String... keys);
+
 	<T extends AstNode> T getAnnotationNode(String... keys);
 
 	public static Class<?> getClass(int nodeTypeId) {
@@ -90,7 +92,7 @@ public interface AstNode {
 		case AstNode.CASE_STATEMENT:
 			return CaseStatement.class;
 		case AstNode.CHANNEL:
-			return Channel.class;
+			return ChannelDeclaration.class;
 		case AstNode.CHAR_LITERAL:
 			return CharLiteral.class;
 		case AstNode.CONSTRUCTOR:

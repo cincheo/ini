@@ -19,7 +19,7 @@ import ini.ast.AtPredicate;
 import ini.ast.BinaryOperator;
 import ini.ast.Binding;
 import ini.ast.CaseStatement;
-import ini.ast.Channel;
+import ini.ast.ChannelDeclaration;
 import ini.ast.ConditionalExpression;
 import ini.ast.Constructor;
 import ini.ast.ConstructorMatchExpression;
@@ -442,12 +442,13 @@ public class AstAttrib {
 			break;
 
 		case AstNode.CHANNEL:
-			result = parser.types.createDependentType("Channel", eval(((Channel) node).typeVariable));
-			if (((Channel) node).indexed) {
+			result = parser.types.createDependentType(Types.CHANNEL_TYPE_NAME,
+					eval(((ChannelDeclaration) node).typeVariable));
+			if (((ChannelDeclaration) node).indexed) {
 				result = parser.types.createArrayType(result);
 			}
-			result.channel = (Channel) node;
-			getRootContext().bind(((Channel) node).name, result);
+			result.channel = (ChannelDeclaration) node;
+			getRootContext().bind(((ChannelDeclaration) node).name, result);
 			break;
 
 		case AstNode.ARRAY_ACCESS:
@@ -1154,8 +1155,8 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
-			// System.err.println("has errors: " + hasErrors());
-			// printConstraints("", System.err);
+			//System.err.println("has errors: " + hasErrors());
+			//printConstraints("", System.err);
 
 			// remove wrong constraints
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1199,9 +1200,9 @@ public class AstAttrib {
 				}
 			}
 
-			// System.err.println("==================");
-			// System.err.println("has errors: " + hasErrors());
-			// printConstraints("", System.err);
+			//System.err.println("==================");
+			//System.err.println("has errors: " + hasErrors());
+			//printConstraints("", System.err);
 
 			return this;
 		} finally {

@@ -39,6 +39,7 @@ parser code {:
 			new ExitFunction(this), //
 			new FirstFunction(this), //
 			new KeyFunction(this), //
+			new KeysFunction(this), //
 			new KillAt(this), //
 			new NodeFunction(this), //
 			new PrintFunction(this), //
@@ -138,7 +139,7 @@ terminal LF, END;
 terminal IMPORT, FUNCTION, PROCESS, LAMBDA, OF, RETURN, TYPE, THIS, CASE, DEFAULT, ELSE, DECLARE, CHANNEL;
 terminal PREDICATE, ALWAYS, EVENTUALLY;
 
-non terminal lf, lf_opt;
+non terminal lf, lf_opt, lambda_opt;
 non terminal ini_program, program_elt_list_opt, program_elt_list, program_elt; 
 non terminal function, param_list_opt, param_list, param;
 non terminal import_decl;
@@ -192,6 +193,8 @@ lf ::= lf LF | LF;
 
 lf_opt ::= lf |;
 
+lambda_opt ::= LAMBDA |;
+
 ini_program ::= lf_opt program_elt_list_opt;
 
 program_elt_list_opt ::= program_elt_list lf_opt |;
@@ -216,13 +219,13 @@ import_decl ::= IMPORT:itoken STRING:filePath
 	:}
 ;
 
-binding ::= DECLARE:d IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
+binding ::= DECLARE:d IDENTIFIER:name lambda_opt LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
 	{:
 		Binding b = new Binding(parser, (Token)d, name.toString(), (List)null, (List)types, (TypeVariable)rtype, (List)a);
 		//parser.parsedBindingList.add(b);
 		RESULT = b;
 	:} 
-	| DECLARE:d LPAREN type_decl_list_opt:typedecls RPAREN IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
+	| DECLARE:d LPAREN type_decl_list_opt:typedecls lambda_opt  RPAREN IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLIES type:rtype annotations_opt:a
 	{:
 		Binding b = new Binding(parser, (Token)d, name.toString(), (List)typedecls, (List)types, (TypeVariable)rtype, (List)a);
 		RESULT = b;
@@ -231,11 +234,11 @@ binding ::= DECLARE:d IDENTIFIER:name LPAREN:ft type_list_opt:types RPAREN IMPLI
 
 channel_decl ::= CHANNEL:d visibility:v IDENTIFIER:name LPAREN type_opt:t RPAREN annotations_opt:a
 	{:
-		RESULT = new Channel(parser, (Token)d, name.toString(), (TypeVariable)t, (Channel.Visibility)v, false, (List)a);
+		RESULT = new ChannelDeclaration(parser, (Token)d, name.toString(), (TypeVariable)t, (ChannelDeclaration.Visibility)v, false, (List)a);
 	:}
 	| CHANNEL:d visibility:v IDENTIFIER:name LSPAREN RSPAREN LPAREN type_opt:t RPAREN annotations_opt:a
 	{:
-		RESULT = new Channel(parser, (Token)d, name.toString(), (TypeVariable)t, (Channel.Visibility)v, true, (List)a);
+		RESULT = new ChannelDeclaration(parser, (Token)d, name.toString(), (TypeVariable)t, (ChannelDeclaration.Visibility)v, true, (List)a);
 	:}
 ;
 
@@ -245,10 +248,10 @@ predicate_decl ::= PREDICATE:d IDENTIFIER:name ltl_expr:expression END
 	:}
 ;
 
-visibility ::= PLUS:v {: RESULT=Channel.Visibility.GLOBAL; :} 
-	| MINUS:v {: RESULT=Channel.Visibility.LOCAL; :}
+visibility ::= PLUS:v {: RESULT=ChannelDeclaration.Visibility.GLOBAL; :} 
+	| MINUS:v {: RESULT=ChannelDeclaration.Visibility.LOCAL; :}
 	|
-};
+;
 	
 at_binding_conf_type ::=
 | LSPAREN type_list_opt:ct RSPAREN

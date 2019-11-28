@@ -7,7 +7,6 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import com.google.gson.Gson;
-import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
@@ -15,23 +14,21 @@ import com.rabbitmq.client.DeliverCallback;
 import ini.EnvironmentConfiguration;
 import ini.Main;
 
-public class RabbitMQBrokerClient<T> implements BrokerClient<T> {
+public class RabbitMQBrokerClient implements BrokerClient {
 
 	private Connection connection;
-	private ConsumerConfiguration<T> consumerConfiguration;
 	private Map<String, String> tagToChannel = new HashMap<>();
-	private Map<String, Channel> channels = new HashMap<>();
+	private ChannelConfiguration defaultChannelConfiguration;
+	private Map<String, com.rabbitmq.client.Channel> channels = new HashMap<>();
 	private Map<String, Collection<String>> channelConsumers = new Hashtable<>();
 
 	private EnvironmentConfiguration configuration;
 	private String name;
 
-	public RabbitMQBrokerClient(String name, EnvironmentConfiguration configuration,
-			ConsumerConfiguration<T> consumerConfiguration) {
+	public RabbitMQBrokerClient(String name, EnvironmentConfiguration configuration, ChannelConfiguration defaultChannelConfiguration) {
 		Main.LOGGER.debug("creating broker client: " + name);
 		this.name = name;
 		this.configuration = configuration;
-		this.consumerConfiguration = consumerConfiguration;
 		ConnectionFactory factory = new ConnectionFactory();
 		try {
 			factory.setUri(this.configuration.brokerConnectionString);
@@ -47,6 +44,22 @@ public class RabbitMQBrokerClient<T> implements BrokerClient<T> {
 		return name;
 	}
 
+	/*
+	 * @Override public <T> void configureChannel(String channelName,
+	 * ChannelConfiguration<T> configuration) {
+	 * channelConfigurations.put(channelName, configuration); }
+	 * 
+	 * @SuppressWarnings("unchecked") private <T> ChannelConfiguration<T>
+	 * getChannelConfiguration(String channelName) { ChannelConfiguration<?>
+	 * configuration = channelConfigurations.get(channelName); if (configuration
+	 * == null) { configuration = defaultChannelConfiguration; } return
+	 * (ChannelConfiguration<T>)configuration; }
+	 */
+
+	public ChannelConfiguration getDefaultChannelConfiguration() {
+		return defaultChannelConfiguration;
+	}
+	
 	synchronized private Collection<String> getOrCreateChannelCustomerIds(String channel) {
 		Collection<String> consumerIds = channelConsumers.get(channel);
 		if (consumerIds == null) {
@@ -64,7 +77,6 @@ public class RabbitMQBrokerClient<T> implements BrokerClient<T> {
 				if (isConsumerRunning(consumerId)) {
 					Main.LOGGER.debug("stopping consumer for channel " + channel);
 					channels.get(channel).basicCancel(consumerId);
-					;
 				}
 			} catch (Exception e) {
 			} finally {
@@ -107,46 +119,60 @@ public class RabbitMQBrokerClient<T> implements BrokerClient<T> {
 		return channels.containsKey(channel);
 	}
 
+	private synchronized <T> com.rabbitmq.client.Channel getOrCreateChannel(Channel<T> channel) throws Exception {
+		com.rabbitmq.client.Channel rmqChannel = channels.get(channel.getName());
+		if (rmqChannel == null) {
+			if (channel.getConfiguration() != null) {
+				channel.getConfiguration().setParentConfiguration(defaultChannelConfiguration);
+			}
+			rmqChannel = connection.createChannel();
+			if (getConfiguration(channel).getSize() > 0) {
+				rmqChannel.basicQos(getConfiguration(channel).getSize());
+			}
+			channels.put(channel.getName(), rmqChannel);
+			rmqChannel.queueDeclare(channel.getName(), false, false, false, null);
+		}
+		return rmqChannel;
+	}
+
+	private ChannelConfiguration getConfiguration(Channel<?> channel) {
+		return channel.getConfiguration()==null?defaultChannelConfiguration:channel.getConfiguration();
+	}
+	
 	@Override
-	public String consume(String channelName, java.util.function.Consumer<T> consumeHandler) {
-		if (channelName == null) {
+	public <T> String consume(Channel<T> channel, java.util.function.Consumer<T> consumeHandler) {
+		if (channel == null) {
 			throw new RuntimeException("Cannot create consumer for null channel");
 		}
-		Channel channel = channels.get(channelName);
 		try {
 
-			if (channel == null) {
-				channel = connection.createChannel();
-				channels.put(channelName, channel);
-				channel.queueDeclare(channelName, false, false, false, null);
-			} else {
-				Main.LOGGER.error("consumer polling existing channel '" + channelName + "'...", new Exception());
-			}
-
+			com.rabbitmq.client.Channel rmqChannel = getOrCreateChannel(channel);
 			// System.out.println(" [*] Waiting for messages. To exit press
 			// CTRL+C");
 
-			Main.LOGGER.debug("consumer polling from queue '" + channelName + "'...");
-			Main.LOGGER.debug("configuration: " + consumerConfiguration);
+			Main.LOGGER.debug("consumer polling from queue '" + channel.getName() + "'...");
 
 			DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 				String message = new String(delivery.getBody(), "UTF-8");
-				Main.LOGGER.debug("consumer polled message from queue '" + channelName + "'");
+				Main.LOGGER.debug(String.format("consumed: (queue=%s, consumerId=%s, value=%s)",
+						channel.getName(), consumerTag, message));
+
 				try {
 					if (consumeHandler != null) {
-						consumeHandler.accept(consumerConfiguration.getGsonBuilder().create().fromJson(message,
-								consumerConfiguration.getDataType()));
+						consumeHandler.accept(getConfiguration(channel).getGsonBuilder().create()
+								.fromJson(message, channel.getDataType()));
 					}
 				} catch (Exception e) {
 					Main.LOGGER.error("error deserializing: " + message + " - ignoring", e);
 				}
 			};
 
-			String tag = channel.basicConsume(channelName, true, deliverCallback, consumerTag -> {
-			});
+			String tag = rmqChannel.basicConsume(channel.getName(), getConfiguration(channel).getSize() <= 0,
+					deliverCallback, consumerTag -> {
+					});
 
-			getOrCreateChannelCustomerIds(channelName).add(tag);
-			tagToChannel.put(tag, channelName);
+			getOrCreateChannelCustomerIds(channel.getName()).add(tag);
+			tagToChannel.put(tag, channel.getName());
 
 			return tag;
 
@@ -168,18 +194,15 @@ public class RabbitMQBrokerClient<T> implements BrokerClient<T> {
 	}
 
 	@Override
-	public void produce(String channelName, Object data) {
+	public <T> void produce(Channel<T> channel, T data) {
 		long time = System.currentTimeMillis();
 		try {
-			Main.LOGGER.debug("producing on channel " + channelName);
-			try (Channel channel = connection.createChannel()) {
-				channel.queueDeclare(channelName, false, false, false, null);
-				String message = new Gson().toJson(data);
-				channel.basicPublish("", channelName, null, message.getBytes());
-				long elapsedTime = System.currentTimeMillis() - time;
-				Main.LOGGER.debug(
-						String.format("produced: (queue=%s, value=%s) time=%d", channelName, message, elapsedTime));
-			}
+			com.rabbitmq.client.Channel rmqChannel = getOrCreateChannel(channel);
+			String message = new Gson().toJson(data);
+			rmqChannel.basicPublish("", channel.getName(), null, message.getBytes());
+			long elapsedTime = System.currentTimeMillis() - time;
+			Main.LOGGER.debug(String.format("produced: (queue=%s, value=%s) time=%d", channel.getName(), message,
+					elapsedTime));
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);

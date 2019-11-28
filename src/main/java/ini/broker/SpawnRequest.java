@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import ini.ast.Executable;
 import ini.eval.data.Data;
 
-public class SpawnRequest extends Request {
+public class SpawnRequest extends AckedRequest {
 
 	public String spawnedExecutableName;
 	public Executable executable;
@@ -16,7 +16,7 @@ public class SpawnRequest extends Request {
 	public SpawnRequest(String sourceNode, Executable executable, List<Data> parameters) {
 		super(sourceNode);
 		this.spawnedExecutableName = executable.name;
-		if(this.spawnedExecutableName==null) {
+		if (this.spawnedExecutableName == null) {
 			// lambda case
 			this.executable = executable;
 		}
@@ -28,7 +28,8 @@ public class SpawnRequest extends Request {
 
 	@Override
 	public String toString() {
-		return "spawn request for process " + spawnedExecutableName + " with parameters: " + parameters;
+		return "spawn request for exectutable " + (spawnedExecutableName == null ? executable : spawnedExecutableName)
+				+ " with parameters: " + parameters;
 	}
 
 }

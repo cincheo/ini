@@ -1,9 +1,11 @@
 package ini.test.utils;
 
+import ini.test.IniTestCase;
+
 public class Test1 {
 
 	public void m() {
-		System.out.println("method of test1");
+		IniTestCase.currentParser.out.println("method of test1");
 	}
-	
+
 }

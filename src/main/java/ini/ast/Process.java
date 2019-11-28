@@ -21,6 +21,7 @@ public class Process extends Executable {
 	public List<Rule> atRules = new ArrayList<Rule>();
 	public List<Rule> rules = new ArrayList<Rule>();
 	public List<Rule> endRules = new ArrayList<Rule>();
+	public List<Rule> readyRules = new ArrayList<Rule>();
 	public List<Rule> errorRules = new ArrayList<Rule>();
 
 	public Process(IniParser parser, Token token, String name, List<Parameter> parameters, List<Rule> rules) {
@@ -35,6 +36,10 @@ public class Process extends Executable {
 					break;
 				case END:
 					this.endRules.add(r);
+					this.rules.remove(r);
+					break;
+				case READY:
+					this.readyRules.add(r);
 					this.rules.remove(r);
 					break;
 				case ERROR:
@@ -64,6 +69,10 @@ public class Process extends Executable {
 			out.println();
 		}
 		for (Rule r : atRules) {
+			r.prettyPrint(out);
+			out.println();
+		}
+		for (Rule r : readyRules) {
 			r.prettyPrint(out);
 			out.println();
 		}
@@ -131,6 +140,7 @@ public class Process extends Executable {
 				evalAt.eval(eval);
 				eval.evaluationStack.pop();
 			}
+			onReady(eval);
 			do {
 				eval.invocationStack.peek().noRulesApplied = false;
 				while (!eval.invocationStack.peek().noRulesApplied) {
@@ -158,6 +168,18 @@ public class Process extends Executable {
 			 * finally { //At.destroyAll(ats); }
 			 */
 
+	}
+
+	private void onReady(IniEval eval) {
+		for (Rule rule : this.readyRules) {
+			if (rule.guard == null || eval.eval(rule.guard).isTrueOrDefined()) {
+				Sequence<Statement> s = rule.statements;
+				while (s != null) {
+					eval.eval(s.get());
+					s = s.next();
+				}
+			}
+		}
 	}
 
 	public void handleException(IniEval eval, RuntimeException e) throws RuntimeException {
@@ -190,5 +212,5 @@ public class Process extends Executable {
 	public void accept(Visitor visitor) {
 		visitor.visitProcess(this);
 	}
-	
+
 }

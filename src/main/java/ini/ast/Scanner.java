@@ -88,7 +88,7 @@ public class Scanner implements Visitor {
 		scan(caseStatement.defaultStatements);
 	}
 
-	public void visitChannel(Channel channel) {
+	public void visitChannel(ChannelDeclaration channel) {
 		visitAstElement(channel);
 		scan(channel.typeVariable);
 	}

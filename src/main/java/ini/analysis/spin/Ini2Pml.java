@@ -13,7 +13,7 @@ import ini.ast.AtPredicate;
 import ini.ast.BinaryOperator;
 import ini.ast.BooleanLiteral;
 import ini.ast.CaseStatement;
-import ini.ast.Channel;
+import ini.ast.ChannelDeclaration;
 import ini.ast.CharLiteral;
 import ini.ast.Expression;
 import ini.ast.Invocation;
@@ -323,7 +323,7 @@ public class Ini2Pml {
 
 		case AstNode.CHANNEL:
 			// getOrCreateChannelId(((Channel) node).name);
-			printLine("chan " + ((Channel) node).name + "=[10] of {byte}").endLine();
+			printLine("chan " + ((ChannelDeclaration) node).name + "=[10] of {byte}").endLine();
 			break;
 
 		case AstNode.USER_TYPE:

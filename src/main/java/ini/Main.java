@@ -374,9 +374,7 @@ public class Main {
 						new Thread() {
 							public void run() {
 								eval.invoke(request.executable,
-										request.parameters.stream()
-												.map(data -> data /*eval.eval(RawData.dataToExpression(parser, data))*/)
-												.collect(Collectors.toList()).toArray());
+										request.parameters.toArray());
 							}
 						}.start();
 					} else {

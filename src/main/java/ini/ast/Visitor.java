@@ -24,7 +24,7 @@ public interface Visitor {
 	
 	void visitCaseStatement(CaseStatement caseStatement);
 	
-	void visitChannel(Channel channel);
+	void visitChannel(ChannelDeclaration channel);
 	
 	void visitCharLiteral(CharLiteral charLiteral);
 	

@@ -3,7 +3,6 @@ package ini.broker;
 import java.util.function.Consumer;
 
 import ini.IniEnv;
-import ini.eval.data.Data;
 
 /**
  * A generic interface to produce or consume on channels (queues) managed by a
@@ -14,7 +13,7 @@ import ini.eval.data.Data;
  * @param <T>
  *            the type of data that will be produced or consumed on the channels
  */
-public interface BrokerClient<T> {
+public interface BrokerClient {
 
 	/**
 	 * Returns a default instance of this interface, to be used as a message
@@ -27,31 +26,39 @@ public interface BrokerClient<T> {
 	 *            return the local broker - for local-only channel)
 	 * @return the default INI message broker
 	 */
-	public static BrokerClient<Data> getDefaultInstance(IniEnv env, boolean global) {
+	public static BrokerClient getDefaultInstance(IniEnv env, boolean global) {
 		if (global && env.coreBrokerClient != null) {
 			return env.coreBrokerClient.getDefaultRemoteBrokerClient();
 			// return RabbitMQBrokerClient.getDefaultInstance(env);
 		} else {
-			return LocalBrokerClient.getInstance("local-default", new ConsumerConfiguration<>());
+			return LocalBrokerClient.getInstance("local-default");
 		}
 	}
 
 	/**
 	 * Gets the name this broker.
+	 * 
 	 * @return the name
 	 */
 	String getName();
-	
+
+	/**
+	 * Gets the default configuration applied to channels if the user does not provide one. 
+	 * 
+	 * @return the default channel configuration
+	 */
+	ChannelConfiguration getDefaultChannelConfiguration();
+
 	/**
 	 * Produce a data on a given channel (channel = queue).
 	 * 
 	 * @param channel
-	 *            the channel name
+	 *            the channel
 	 * @param data
 	 *            the data to be produced
 	 */
 
-	void produce(String channel, T data);
+	<T> void produce(Channel<T> channel, T data);
 
 	/**
 	 * Creates a consumer for the given channel (a thread that will consume from
@@ -66,7 +73,7 @@ public interface BrokerClient<T> {
 	 *            the handler to call when a data is read from the channel
 	 * @return a consumer id to stop the consumer with
 	 */
-	String consume(String channel, Consumer<T> consumeHandler);
+	<T> String consume(Channel<T> channel, Consumer<T> consumeHandler);
 
 	/**
 	 * Stops the given consumer.
@@ -83,7 +90,7 @@ public interface BrokerClient<T> {
 	 * @param channel
 	 *            the channel to stop the consumers
 	 */
-	void stopConsumers(String channel);
+	void stopConsumers(String channelName);
 
 	/**
 	 * Tells if the given consumer is running.

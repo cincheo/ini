@@ -1,11 +1,16 @@
 package ini.test.eval;
 
+import ini.broker.LocalBrokerClient;
 import ini.test.IniTestCase;
 
 public class TestChannels extends IniTestCase {
 
 	public TestChannels(String name) {
 		super(name);
+	}
+
+	public void testProdCons() {
+		testFile("ini/test/channels/prod_cons.ini", (p, out) -> assertEquals("end prod\nend cons\n", out));
 	}
 
 	public void testChannel1() {
@@ -47,7 +52,8 @@ public class TestChannels extends IniTestCase {
 	}
 
 	public void testPersonSyncPipeline() {
-		testFile("ini/test/channels/person_sync_pipeline.ini", 300,
+		LocalBrokerClient.getInstance("default-local").stop();
+		testFile("ini/test/channels/person_sync_pipeline.ini",
 				(p, out) -> assertEquals("Sending person Person[firstName=Jacques,lastName=Chirac] for enrichment\n"
 						+ "Sending person Person[firstName=Barack,lastName=Obama] for enrichment\n"
 						+ "Sending person Person[firstName=Albert,lastName=Einstein] for enrichment\n"
@@ -71,7 +77,7 @@ public class TestChannels extends IniTestCase {
 	}
 
 	public void testPersonBackPressurePipeline() {
-		testFile("ini/test/channels/person_back_pressure_pipeline.ini", 200,
+		testFile("ini/test/channels/person_back_pressure_pipeline.ini",
 				(p, out) -> assertEquals("Sending person Person[firstName=Jacques,lastName=Chirac] for enrichment\n"
 						+ "Wikipedia Enrichment for Jacques Chirac\n"
 						+ "Fetching Wikipedia page: https://en.wikipedia.org/wiki/Jacques_Chirac\n"
@@ -102,6 +108,5 @@ public class TestChannels extends IniTestCase {
 	public void testChannelOverload() {
 		testFile("ini/test/channels/channel_overload.ini", (p, out) -> assertEquals("2.0\nstopped\n", out));
 	}
-	
-	
+
 }

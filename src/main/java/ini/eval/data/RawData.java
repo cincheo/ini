@@ -26,7 +26,7 @@ import com.google.gson.GsonBuilder;
 import ini.Main;
 import ini.ast.Assignment;
 import ini.ast.BooleanLiteral;
-import ini.ast.Channel;
+import ini.ast.ChannelDeclaration;
 import ini.ast.Executable;
 import ini.ast.Expression;
 import ini.ast.Function;
@@ -45,7 +45,7 @@ public class RawData implements Data {
 	public int compareTo(Object o) {
 		return toString().compareTo(o.toString());
 	}
-	
+
 	/*
 	 * public static void main(String[] args) { String test =
 	 * "coucou petit crétin ${i++} coucou {f(4)} tutu"; Pattern p =
@@ -204,8 +204,8 @@ public class RawData implements Data {
 				return new NumberLiteral(parser, null, (Number) value);
 			} else if (value instanceof Boolean) {
 				return new BooleanLiteral(parser, null, (Boolean) value);
-			} else if (value instanceof Channel) {
-				Channel c = (Channel) value;
+			} else if (value instanceof ChannelDeclaration) {
+				ChannelDeclaration c = (ChannelDeclaration) value;
 				Variable v = new Variable(parser, null, c.name);
 				v.channelLiteral = c;
 				return v;
@@ -393,11 +393,11 @@ public class RawData implements Data {
 			if (!(o instanceof Integer)) {
 				return false;
 			} else {
-				if(((Integer)o).intValue() < min) {
-					min = ((Integer)o).intValue();
+				if (((Integer) o).intValue() < min) {
+					min = ((Integer) o).intValue();
 				}
-				if(((Integer)o).intValue() > max) {
-					max = ((Integer)o).intValue();
+				if (((Integer) o).intValue() > max) {
+					max = ((Integer) o).intValue();
 				}
 			}
 		}
@@ -454,7 +454,7 @@ public class RawData implements Data {
 		case TypeInfo.BOOLEAN:
 			break;
 		case TypeInfo.CHANNEL:
-			value = new Gson().fromJson(new Gson().toJson(value), Channel.class);
+			value = new Gson().fromJson(new Gson().toJson(value), ChannelDeclaration.class);
 			break;
 		case TypeInfo.FUNCTION:
 			value = b.create().fromJson(new Gson().toJson(value), Function.class);
@@ -721,12 +721,12 @@ public class RawData implements Data {
 			@SuppressWarnings("unchecked")
 			@Override
 			public int compare(Entry<Object, Data> o1, Entry<Object, Data> o2) {
-				return ((Comparable<Object>)o1.getKey()).compareTo((Comparable<Object>)o2.getKey());
+				return ((Comparable<Object>) o1.getKey()).compareTo((Comparable<Object>) o2.getKey());
 			}
 		});
 		return l;
 	}
-	
+
 	synchronized public void prettyPrint(PrintStream out) {
 		if (explodedString) {
 			implodeString();
@@ -748,7 +748,8 @@ public class RawData implements Data {
 				out.print((Object) getValue());
 			}
 		} else {
-			if (/*kind == Data.Kind.INT_SET || */isIndexedSet() || (references != null && references.containsKey(Data.LOWER_BOUND_KEY))) {
+			if (/* kind == Data.Kind.INT_SET || */isIndexedSet()
+					|| (references != null && references.containsKey(Data.LOWER_BOUND_KEY))) {
 				if (references != null && references.containsKey(Data.LOWER_BOUND_KEY)) {
 					int min = ((Number) minIndex()).intValue();
 					int max = ((Number) maxIndex()).intValue();
@@ -764,7 +765,7 @@ public class RawData implements Data {
 						}
 					}
 					out.print("]");
-					//out.print("](" + min + ".." + max + ")");
+					// out.print("](" + min + ".." + max + ")");
 				}
 			} else if (getReferences() == null) {
 				out.print("null");
@@ -831,7 +832,7 @@ public class RawData implements Data {
 	@Override
 	synchronized public boolean isPrimitive() {
 		return value != null && ((value instanceof Boolean) || (Number.class.isAssignableFrom(value.getClass()))
-				|| (value instanceof Character));
+				|| (value instanceof Character) || (typeInfo == TypeInfo.STRING));
 	}
 
 	@Override
