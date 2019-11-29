@@ -24,10 +24,10 @@ public class ChannelFunction extends BuiltInExecutable {
 	@Override
 	public void eval(IniEval eval) {
 		Data visibility = getArgument(eval, 0);
-		ChannelDeclaration channel = new ChannelDeclaration(parser, token,
-				"temp." + UUID.randomUUID().toString().replace('-', '.'), null,
-				"Global".equals(visibility.getConstructor().name) ? Visibility.GLOBAL : Visibility.LOCAL, false,
-				annotations);
+		Visibility v = "Global".equals(visibility.getConstructor().name) ? Visibility.GLOBAL : Visibility.LOCAL;
+		ChannelDeclaration channel = new ChannelDeclaration(parser, token, v == Visibility.GLOBAL
+				? "temp." + UUID.randomUUID().toString().replace('-', '.') : "local." + ChannelDeclaration.getLocalId(),
+				null, v, false, annotations);
 		eval.result = new RawData(channel);
 	}
 

@@ -12,6 +12,12 @@ import ini.parser.IniParser;
 
 public class ChannelDeclaration extends NamedElement {
 
+	private static long localId = 1;
+
+	public static long getLocalId() {
+		return localId++;
+	}
+
 	public enum Visibility {
 		LOCAL, APPLICATION, GLOBAL
 	}

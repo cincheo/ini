@@ -114,7 +114,7 @@ public class CoreBrokerClient {
 			});
 
 			coreRemoteBrokerClient = new RabbitMQBrokerClient("core", env.getEnvironmentConfiguration(),
-					new ChannelConfiguration(coreGsonBuilder, 1));
+					new ChannelConfiguration(coreGsonBuilder, -1));
 		}
 		return coreRemoteBrokerClient;
 	}
