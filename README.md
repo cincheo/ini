@@ -9,7 +9,7 @@ By default, INI uses *RabbitMQ* as a broker.
 
 INI is built around two first-class entities.
 
-- *Functions*, as in *functional programming*, used for pure and safe calculations.
+- *Functions*, as in *functional programming*, used for pure calculations.
 - *Processes*, which are asynchronous, multi-threaded, rule-based, communicate through channels, and react to their environment with events (as in *reactive programming*). Rules in processes, implying an implicit repetition loop, are inspired from Dijkstra's guarded-command language ([Guarded commands, non-determinacy and formal derivation of programs - Commun. ACM 18 (1975), 8: 453–457](http://www.cs.utexas.edu/users/EWD/ewd04xx/EWD472.PDF))
 
 INI natively support essential constructs for distributed programming:
@@ -277,7 +277,7 @@ function main() {
 
 Note that the binding of ``hello``, also defines the functional type ``(String) => String``, since INI cannot infer it from the function implementation.
 
-# Type Safety and Model Checking
+# WIP: Type Safety and Model Checking
 
 One of the most difficult point when building distributed applications (such as complex data pipelines and distributed computations), is  to ensure that they behave as expected. Since debugging them can be quite a complicated task, it is crucial to eliminate programming mistakes up-front as much as possible. To that purpose, INI provides two well-known mechanisms: strong typing through *Type Inference*, and formal validation through *Model Checking*.
 
@@ -369,6 +369,15 @@ ltl p1 { (<>(_var_start)-><>(_var_end)) }
 It is possible to write an LTL formula to ensure that the pipeline will terminate, i.e., that at some point in the process execution flow, the ``main``'s ``@consume`` event will be triggered on channel ``c0``. 
 
 Note that this is still work in progress and is not ready for production yet.
+
+# WIP: Functional Channel Operators
+
+We are currently working on a ``chanop.ini`` lib that provides a functional abstraction layer to build and deploy distributed computations using common operators on channels (map, reduce, filter, etc).
+
+Here are some examples using ``chanop.ini``:
+
+- [Distributed group-by usign map/reduce operators](https://github.com/cincheo/ini/blob/master/ini/examples/distributed_computing/map_reduce.ini)
+- [Distributed estimation of Pi using the Monte Carlo method](https://github.com/cincheo/ini/blob/master/ini/examples/distributed_computing/pi_estimation.ini)
 
 # License & contributing
 

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP.BasicProperties;
@@ -148,7 +149,7 @@ public class RabbitMQBrokerClient implements BrokerClient {
 	}
 
 	@Override
-	public <T> String consume(Channel<T> channel, java.util.function.Consumer<T> consumeHandler) {
+	public <T> String consume(Channel<T> channel, Function<T,Boolean> consumeHandler) {
 		if (channel == null) {
 			throw new RuntimeException("Cannot create consumer for null channel");
 		}
@@ -167,12 +168,17 @@ public class RabbitMQBrokerClient implements BrokerClient {
 							channel.getName(), consumerTag, message, getConfiguration(channel).getSize()));
 
 					try {
+						boolean result = true;
 						if (consumeHandler != null) {
-							consumeHandler.accept(getConfiguration(channel).getGsonBuilder().create().fromJson(message,
+							result = consumeHandler.apply(getConfiguration(channel).getGsonBuilder().create().fromJson(message,
 									channel.getDataType()));
 						}
-						if(getConfiguration(channel).getSize()>0) {
+						if(result) {
 							rmqChannel.basicAck(envelope.getDeliveryTag(), false);
+						} else {
+							Main.LOGGER.debug(String.format("reject: (queue=%s, consumerId=%s, value=%s)",
+									channel.getName(), consumerTag, message));
+							rmqChannel.basicReject(envelope.getDeliveryTag(), true);
 						}
 					} catch (Exception e) {
 						Main.LOGGER.error("error deserializing: " + message + " - ignoring", e);

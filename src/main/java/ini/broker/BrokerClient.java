@@ -1,6 +1,7 @@
 package ini.broker;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import ini.IniEnv;
 
@@ -73,7 +74,7 @@ public interface BrokerClient {
 	 *            the handler to call when a data is read from the channel
 	 * @return a consumer id to stop the consumer with
 	 */
-	<T> String consume(Channel<T> channel, Consumer<T> consumeHandler);
+	<T> String consume(Channel<T> channel, Function<T, Boolean> consumeHandler);
 
 	/**
 	 * Stops the given consumer.

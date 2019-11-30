@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import ini.Main;
 
@@ -94,7 +95,7 @@ public class LocalBrokerClient implements BrokerClient {
 	}
 
 	@Override
-	public <T> String consume(Channel<T> channel, java.util.function.Consumer<T> consumeHandler) {
+	public <T> String consume(Channel<T> channel, Function<T, Boolean> consumeHandler) {
 		if (channel == null) {
 			throw new RuntimeException("Cannot create consumer for null channel");
 		}
@@ -111,8 +112,13 @@ public class LocalBrokerClient implements BrokerClient {
 						T data = queue.poll(10000, TimeUnit.MILLISECONDS);
 						if (data != null) {
 							Main.LOGGER.debug("consumed from '" + channel + "': " + data);
+							boolean result = true;
 							if (consumeHandler != null) {
-								consumeHandler.accept(data);
+								result = consumeHandler.apply(data);
+							}
+							if(!result) {
+								// push back the rejected data
+								queue.put(data);
 							}
 						}
 					} catch (InterruptedException e) {

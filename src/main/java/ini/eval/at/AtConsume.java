@@ -23,6 +23,8 @@ public class AtConsume extends At {
 	Integer stop;
 	int stopCount = 0;
 	String consumerId;
+	// if true will reject new messages
+	boolean stopping = false;
 
 	@Override
 	public void eval(final IniEval eval) {
@@ -33,13 +35,17 @@ public class AtConsume extends At {
 		stop = getInContext().get("stop") == null ? 1 : getInContext().get("stop").getValue();
 		consumerId = brokerClient
 				.consume(new Channel<>(channel.mappedName, Data.class, channel.getChannelConfiguration()), value -> {
+					if(stopping) {
+						return false;
+					}
 					if (ChannelDeclaration.STOP_MESSAGE.equals(value)) {
 						Main.LOGGER.debug("recieved stop message: " + AtConsume.this);
 						stopCount++;
 						if (stop != 0 && stopCount >= stop) {
-							AtConsume.this.isEmptyQueue();
+							stopping = true;
+							isEmptyQueue();
 							Main.LOGGER.debug("stopping " + AtConsume.this);
-							AtConsume.this.terminate();
+							terminate();
 						}
 					} else {
 						Map<String, Data> variables = new HashMap<String, Data>();
@@ -49,12 +55,14 @@ public class AtConsume extends At {
 						Main.LOGGER.debug("starting event thread for " + AtConsume.this);
 						execute(ruleThread.fork(variables));
 					}
+					return true;
 				});
 
 	}
 
 	@Override
 	public void terminate() {
+		stopping = true;
 		super.terminate();
 		brokerClient.stopConsumer(consumerId);
 	}

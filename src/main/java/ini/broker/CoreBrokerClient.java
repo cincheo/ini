@@ -123,6 +123,7 @@ public class CoreBrokerClient {
 		getCoreRemoteBrokerClient().consume(getSpawnChannel(env.node), request -> {
 			Main.LOGGER.debug("" + request);
 			handler.accept(request);
+			return true;
 		});
 	}
 
@@ -147,6 +148,7 @@ public class CoreBrokerClient {
 		getCoreRemoteBrokerClient().consume(getFetchChannel(env.node), request -> {
 			Main.LOGGER.debug("" + request);
 			handler.accept(request);
+			return true;
 		});
 	}
 
@@ -182,6 +184,7 @@ public class CoreBrokerClient {
 		getCoreRemoteBrokerClient().consume(getDeployChannel(env.node), deployRequest -> {
 			Main.LOGGER.debug("" + deployRequest);
 			handler.accept(deployRequest);
+			return true;
 		});
 	}
 
