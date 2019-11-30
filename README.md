@@ -376,7 +376,7 @@ We are currently working on a ``chanop.ini`` lib that provides a functional abst
 
 Here are some examples using ``chanop.ini``:
 
-- [Distributed group-by usign map/reduce operators](https://github.com/cincheo/ini/blob/master/ini/examples/distributed_computing/map_reduce.ini)
+- [Distributed group-by using map/reduce operators](https://github.com/cincheo/ini/blob/master/ini/examples/distributed_computing/map_reduce.ini)
 - [Distributed estimation of Pi using the Monte Carlo method](https://github.com/cincheo/ini/blob/master/ini/examples/distributed_computing/pi_estimation.ini)
 
 # License & contributing
