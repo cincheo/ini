@@ -600,6 +600,10 @@ public class AstAttrib {
 		case AstNode.CONSTRUCTOR_MATCH_EXPRESSION:
 			Constructor constr = parser.types.getConstructor(((ConstructorMatchExpression) node).name);
 			if (constr == null) {
+				if (parser.types.isRegistered(((ConstructorMatchExpression) node).name)) {
+					result = parser.types.getSimpleType(((ConstructorMatchExpression) node).name);
+					break;
+				}
 				addError(new TypingError(node,
 						"undeclared constructor '" + ((ConstructorMatchExpression) node).name + "'"));
 				result = parser.types.createType();
@@ -1155,8 +1159,8 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
-			//System.err.println("has errors: " + hasErrors());
-			//printConstraints("", System.err);
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
 			// remove wrong constraints
 			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
@@ -1200,9 +1204,9 @@ public class AstAttrib {
 				}
 			}
 
-			//System.err.println("==================");
-			//System.err.println("has errors: " + hasErrors());
-			//printConstraints("", System.err);
+			// System.err.println("==================");
+			// System.err.println("has errors: " + hasErrors());
+			// printConstraints("", System.err);
 
 			return this;
 		} finally {

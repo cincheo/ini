@@ -10,7 +10,7 @@ public class TestCore extends IniTestCase {
 
 	public void testOperators() {
 		testFile("ini/test/core/operators.ini",
-				(p, out) -> assertEquals("F\n[C,D,F]\n[C,D,F]\n", out));
+				(p, out) -> assertEquals("F\n[C,D,F]\n[C,D,F]\ntrue\nfalse\nfalse\ntrue\n", out));
 	}
 
 }
