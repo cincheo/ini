@@ -600,10 +600,17 @@ public class AstAttrib {
 		case AstNode.CONSTRUCTOR_MATCH_EXPRESSION:
 			Constructor constr = parser.types.getConstructor(((ConstructorMatchExpression) node).name);
 			if (constr == null) {
-				if (parser.types.isRegistered(((ConstructorMatchExpression) node).name)) {
-					result = parser.types.getSimpleType(((ConstructorMatchExpression) node).name);
+				if (parser.types.isRegistered(((ConstructorMatchExpression) node).name)
+						&& ((ConstructorMatchExpression) node).type != null) {
+					result = ((ConstructorMatchExpression) node).type.getType();
 					break;
 				}
+				/*
+				 * if (parser.types.isRegistered(((ConstructorMatchExpression)
+				 * node).name)) { result =
+				 * parser.types.getSimpleType(((ConstructorMatchExpression)
+				 * node).name); break; }
+				 */
 				addError(new TypingError(node,
 						"undeclared constructor '" + ((ConstructorMatchExpression) node).name + "'"));
 				result = parser.types.createType();

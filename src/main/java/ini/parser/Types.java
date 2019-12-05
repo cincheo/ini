@@ -157,7 +157,7 @@ public class Types {
 
 	public boolean isRegistered(String name) {
 		return DICT_TYPE_NAME.equals(name) || types.containsKey(name) || aliases.containsKey(name)
-				|| constructors.containsKey(name);
+				|| constructors.containsKey(name) || name.equals(DICT_TYPE_NAME) || name.equals(CHANNEL_TYPE_NAME);
 	}
 
 	public final Type ANY;

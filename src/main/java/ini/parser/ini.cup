@@ -502,9 +502,9 @@ constructor_expr ::= TIDENTIFIER:s LSPAREN lf_opt assignment_list_opt:l lf_opt R
 constructor_match_expr ::= TIDENTIFIER:s LSPAREN field_match_expr_list_opt:l RSPAREN 
 	{:
 		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),(List)l);	
-	:} | TIDENTIFIER:s 
+	:} | type:t
 	{:
-		RESULT = new ConstructorMatchExpression(parser,(Token)s,s.toString(),null);	
+		RESULT = new ConstructorMatchExpression(parser,(TypeVariable)t);	
 	:}
 ;
 

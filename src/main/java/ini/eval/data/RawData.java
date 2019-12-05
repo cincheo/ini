@@ -82,6 +82,11 @@ public class RawData implements Data {
 
 	@Override
 	public RuntimeConstructor getConstructor() {
+		if(constructor==null) {
+			if(value instanceof ChannelDeclaration) {
+				return RuntimeConstructor.CHANNEL;
+			}
+		}
 		return constructor;
 	}
 

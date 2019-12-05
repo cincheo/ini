@@ -15,6 +15,7 @@ public class RuntimeConstructor {
 	public static final RuntimeConstructor LONG = new RuntimeConstructor("Long");
 	public static final RuntimeConstructor CHAR = new RuntimeConstructor("Char");
 	public static final RuntimeConstructor BYTE = new RuntimeConstructor("Byte");
+	public static final RuntimeConstructor CHANNEL = new RuntimeConstructor("Channel");
 
 	public String name;
 	public Collection<String> fields;
