@@ -9,6 +9,8 @@ import ini.broker.ChannelConfiguration;
 import ini.eval.data.Data;
 import ini.eval.data.RawData;
 import ini.parser.IniParser;
+import ini.parser.Types;
+import ini.type.Type;
 
 public class ChannelDeclaration extends NamedElement {
 
@@ -64,6 +66,20 @@ public class ChannelDeclaration extends NamedElement {
 		if (annotations != null) {
 			out.print(" " + annotations);
 		}
+	}
+
+	@Override
+	public Type getType() {
+		if (this.type != null) {
+			return this.type;
+		}
+		Type t = parser.types.createDependentType(Types.CHANNEL_TYPE_NAME, typeVariable.getType());
+		if (indexed) {
+			this.type = parser.types.createArrayType(t);
+		} else {
+			this.type = t;
+		}
+		return this.type;
 	}
 
 	public ChannelDeclaration getComponent(int i) {

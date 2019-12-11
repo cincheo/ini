@@ -33,10 +33,12 @@ import ini.ast.Function;
 import ini.ast.ListExpression;
 import ini.ast.NumberLiteral;
 import ini.ast.StringLiteral;
+import ini.ast.TypeVariable;
 import ini.ast.Variable;
 import ini.eval.EvalException;
 import ini.eval.IniEval;
 import ini.parser.IniParser;
+import ini.parser.Types;
 import ini.type.Type;
 
 public class RawData implements Data {
@@ -68,7 +70,7 @@ public class RawData implements Data {
 
 	private transient List<DataObserver> dataObservers;
 
-	private RuntimeConstructor constructor;
+	private TypeVariable constructor;
 
 	@Override
 	public boolean isExecutable() {
@@ -81,17 +83,42 @@ public class RawData implements Data {
 	}
 
 	@Override
-	public RuntimeConstructor getConstructor() {
-		if(constructor==null) {
-			if(value instanceof ChannelDeclaration) {
-				return RuntimeConstructor.CHANNEL;
-			}
-		}
+	public TypeVariable getConstructor() {
 		return constructor;
 	}
 
 	@Override
-	public void setConstructor(RuntimeConstructor constructor) {
+	public Type getRuntimeType(Types types) {
+		if (constructor == null) {
+			switch (this.typeInfo) {
+			case TypeInfo.BOOLEAN:
+				return types.BOOLEAN;
+			case TypeInfo.DOUBLE:
+				return types.DOUBLE;
+			case TypeInfo.FLOAT:
+				return types.FLOAT;
+			case TypeInfo.INTEGER:
+				return types.INT;
+			case TypeInfo.LONG:
+				return types.LONG;
+			case TypeInfo.STRING:
+				return types.STRING;
+			case TypeInfo.CHAR:
+				return types.CHAR;
+			case TypeInfo.BYTE:
+				return types.BYTE;
+			case TypeInfo.CHANNEL:
+				return ((ChannelDeclaration)value).getType();
+			}
+			// TODO: is this correct?
+			return types.ANY;
+		} else {
+			return constructor.getType();
+		}
+	}
+
+	@Override
+	public void setConstructor(TypeVariable constructor) {
 		this.constructor = constructor;
 	}
 
@@ -773,7 +800,11 @@ public class RawData implements Data {
 					// out.print("](" + min + ".." + max + ")");
 				}
 			} else if (getReferences() == null) {
-				out.print("null");
+				if (constructor != null) {
+					out.print(constructor.name);
+				} else {
+					out.print("null");
+				}
 			} else {
 				if (constructor != null) {
 					out.print(constructor.name);

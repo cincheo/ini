@@ -4,6 +4,10 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 
+import ini.ast.TypeVariable;
+import ini.parser.Types;
+import ini.type.Type;
+
 public interface Data extends Comparable<Object> {
 
 	public enum Kind {
@@ -65,9 +69,21 @@ public interface Data extends Comparable<Object> {
 
 	void setKind(Kind kind);
 
-	RuntimeConstructor getConstructor();
+	//RuntimeConstructor getConstructor();
 	 
-	void setConstructor(RuntimeConstructor constructor);
+	//void setConstructor(RuntimeConstructor constructor);
+
+	/**
+	 * This is used for the "matches" operator. 
+	 */
+	TypeVariable getConstructor();
+	 
+	/**
+	 * This is used for the "matches" operator. 
+	 */
+	void setConstructor(TypeVariable constructor);
+
+	Type getRuntimeType(Types types);
 	
 	void addDataObserver(DataObserver observer);
 

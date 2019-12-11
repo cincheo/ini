@@ -1166,51 +1166,13 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
+			
 			// System.err.println("has errors: " + hasErrors());
 			// printConstraints("", System.err);
 
-			// remove wrong constraints
-			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
-				if (c.left == null || c.right == null) {
-					constraints.remove(c);
-				}
-			}
-
-			// do substitution
-			boolean allUsed = false;
-			while (!allUsed) {
-				allUsed = true;
-				for (TypingConstraint substitution : constraints) {
-					substitution.normalize();
-					if (substitution.kind != TypingConstraint.Kind.EQ) {
-						continue;
-					}
-					if ((!substitution.left.isVariable() && !substitution.right.isVariable()) || substitution.used) {
-						continue;
-					}
-					for (TypingConstraint current : constraints) {
-						current.substitute(substitution);
-					}
-					allUsed = false;
-					substitution.used = true;
-				}
-				// System.out.println("===> after substitution");
-				// printConstraints(System.out);
-				simplify();
-				// System.out.println("===> after simplification");
-				// printConstraints(System.out);
-			}
-			for (TypingConstraint c : constraints) {
-				if (!c.left.isVariable() && !c.right.isVariable() && !c.left.equals(c.right)) {
-					addError(new TypingError(c.leftOrigin,
-							"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
-					if (c.leftOrigin != c.rightOrigin) {
-						addError(new TypingError(c.rightOrigin,
-								"type mismatch: '" + c.left + "' is not compatible with '" + c.right + "'"));
-					}
-				}
-			}
-
+			TypeChecker typeChecker = new TypeChecker(false, parser.types, constraints);
+			typeChecker.unify(error -> addError(error));
+			
 			// System.err.println("==================");
 			// System.err.println("has errors: " + hasErrors());
 			// printConstraints("", System.err);
@@ -1219,62 +1181,6 @@ public class AstAttrib {
 		} finally {
 			if (!hasErrors()) {
 				commit();
-			}
-		}
-
-	}
-
-	private void simplify() {
-		boolean simplified = true;
-		while (simplified) {
-			simplified = false;
-			for (TypingConstraint c : new ArrayList<TypingConstraint>(constraints)) {
-				// remove tautologies
-				if (c.left.equals(c.right)) {
-					constraints.remove(c);
-					simplified = true;
-					continue;
-				}
-				if (c.kind != TypingConstraint.Kind.EQ) {
-					if (!c.left.isVariable() && !c.left.isVariable()) {
-						// System.out.println("===> " + c + "===> "
-						// + c.left.isLTE(c.right) + "===> "
-						// + c.left.isGTE(c.right));
-						// System.out.println("===> " + c.left.superType);
-						if (c.kind == TypingConstraint.Kind.LTE && c.left.isLTE(c.right)) {
-							constraints.remove(c);
-						}
-						if (c.kind == TypingConstraint.Kind.GTE && c.left.isGTE(c.right)) {
-							constraints.remove(c);
-						}
-					}
-					if (c.left.hasFields() || c.right.hasFields()) {
-						c.kind = TypingConstraint.Kind.EQ;
-					}
-					// continue;
-				}
-
-				// skip
-				if (((c.left.getFields() == null || c.left.getFields().isEmpty())
-						&& (c.right.getFields() == null || c.right.getFields().isEmpty()))
-						&& (c.left.isVariable() && c.left.getName() != null && c.left.getName().startsWith("_")
-						/*
-						 * || c.left.isVariable() &&
-						 * c.left.getName().startsWith("_")
-						 */)) {
-					continue;
-				}
-				List<TypingError> errors = new ArrayList<TypingError>();
-				List<TypingConstraint> subConstraints = c.reduce(parser.types, errors);
-				if (!errors.isEmpty()) {
-					for (TypingError e : errors) {
-						addError(e);
-					}
-				} else if (!subConstraints.isEmpty()) {
-					constraints.remove(c);
-					constraints.addAll(subConstraints);
-					simplified = true;
-				}
 			}
 		}
 	}

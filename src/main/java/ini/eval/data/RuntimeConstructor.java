@@ -2,8 +2,12 @@ package ini.eval.data;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
+import ini.ast.ChannelDeclaration;
 import ini.ast.Constructor;
+import ini.ast.TypeVariable;
+import ini.type.Type;
 
 public class RuntimeConstructor {
 
@@ -15,10 +19,10 @@ public class RuntimeConstructor {
 	public static final RuntimeConstructor LONG = new RuntimeConstructor("Long");
 	public static final RuntimeConstructor CHAR = new RuntimeConstructor("Char");
 	public static final RuntimeConstructor BYTE = new RuntimeConstructor("Byte");
-	public static final RuntimeConstructor CHANNEL = new RuntimeConstructor("Channel");
 
 	public String name;
 	public Collection<String> fields;
+	public List<RuntimeConstructor> dependentConstructors;
 
 	public RuntimeConstructor(Constructor constructor) {
 		this.name = constructor.name;
@@ -29,10 +33,28 @@ public class RuntimeConstructor {
 		this.name = name;
 		this.fields = Collections.emptyList();
 	}
-	
-	public RuntimeConstructor(String name, Collection<String> fields) {
+
+	public RuntimeConstructor(String name, List<RuntimeConstructor> dependentConstructors, Collection<String> fields) {
 		this.name = name;
-		this.fields = fields;
+		this.dependentConstructors = dependentConstructors;
+		this.fields = fields == null ? Collections.emptyList() : fields;
+	}
+
+	public boolean matches(Type type) {
+		if (!type.getName().equals(name)) {
+			return false;
+		}
+		if (type.hasTypeParameters()) {
+			if (dependentConstructors == null || type.getTypeParameters().size() != dependentConstructors.size()) {
+				return false;
+			}
+			for (int i = 0; i < type.getTypeParameters().size(); i++) {
+				if (!dependentConstructors.get(i).matches(type.getTypeParameters().get(i))) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 }

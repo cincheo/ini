@@ -12,6 +12,8 @@ public class TypeInfo {
 	public static final int FUNCTION = 7;
 	public static final int PROCESS = 8;
 	public static final int CHANNEL = 9;
+	public static final int CHAR = 10;
+	public static final int BYTE = 11;
 	
 	public static int getTypeInfoForInstance(Object object) {
 		if(object == null) {
@@ -33,6 +35,10 @@ public class TypeInfo {
 			return FLOAT;
 		case "java.lang.String":
 			return STRING;
+		case "java.lang.Character":
+			return CHAR;
+		case "java.lang.Byte":
+			return BYTE;
 		case "java.lang.Boolean":
 			return BOOLEAN;
 		case "ini.ast.Function":

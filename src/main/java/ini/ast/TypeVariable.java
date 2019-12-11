@@ -1,6 +1,9 @@
 package ini.ast;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import ini.parser.IniParser;
@@ -13,8 +16,16 @@ public class TypeVariable extends Variable {
 	public TypeVariable superType;
 	public List<TypeVariable> context;
 	public List<TypeVariable> typeParameters;
+	public Collection<String> fields;
 	public boolean parameter = false;
 
+	public static TypeVariable create(String name, Collection<String> fields, TypeVariable... dependentTypes) {
+		TypeVariable t = new TypeVariable(null, null, name);
+		t.fields = fields;
+		t.typeParameters = new ArrayList<>(Arrays.asList(dependentTypes));
+		return t;
+	}
+	
 	public TypeVariable(IniParser parser, Token token, String name) {
 		super(parser, token, name);
 		nodeTypeId = TYPE_VARIABLE;

@@ -100,7 +100,7 @@ public class TypingConstraint {
 		}
 	}
 
-	public List<TypingConstraint> reduce(Types types, List<TypingError> errors) {
+	public List<TypingConstraint> reduce(boolean strict, Types types, List<TypingError> errors) {
 		List<TypingConstraint> result = new ArrayList<TypingConstraint>();
 		// remove union types if possible
 		if (left instanceof UnionType) {
@@ -116,18 +116,20 @@ public class TypingConstraint {
 			}
 		}
 
-		// remove super type equalities...
-		if (left.superType == right) {
-			result.add(new TypingConstraint(Kind.EQ, left, left, leftOrigin, leftOrigin));
-			return result;
-		}
-		if (right.superType == left) {
-			result.add(new TypingConstraint(Kind.EQ, right, right, rightOrigin, rightOrigin));
-			return result;
-		}
-		if (left.superType != null && right.superType != null && left.superType == right.superType) {
-			result.add(new TypingConstraint(Kind.EQ, left, left, leftOrigin, leftOrigin));
-			return result;
+		if (!strict) {
+			// remove super type equalities... => this is wrong: algebraic types must be dealt with like union types
+			if (left.superType == right) {
+				result.add(new TypingConstraint(Kind.EQ, left, left, leftOrigin, leftOrigin));
+				return result;
+			}
+			if (right.superType == left) {
+				result.add(new TypingConstraint(Kind.EQ, right, right, rightOrigin, rightOrigin));
+				return result;
+			}
+			if (left.superType != null && right.superType != null && left.superType == right.superType) {
+				result.add(new TypingConstraint(Kind.EQ, left, left, leftOrigin, leftOrigin));
+				return result;
+			}
 		}
 		if (left.hasTypeParameters() || right.hasTypeParameters()) {
 			if (left.getName() != null && left.getName().equals(right.getName())) {

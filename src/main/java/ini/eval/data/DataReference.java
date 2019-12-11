@@ -4,6 +4,10 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 
+import ini.ast.TypeVariable;
+import ini.parser.Types;
+import ini.type.Type;
+
 public class DataReference implements Data {
 
 	Data referencedData;
@@ -218,16 +222,22 @@ public class DataReference implements Data {
 		referencedData.setKind(kind);
 	}
 
-	public RuntimeConstructor getConstructor() {
+	public TypeVariable getConstructor() {
 		if (isPending())
 			return null;
 		return referencedData.getConstructor();
 	}
 
-	public void setConstructor(RuntimeConstructor constructor) {
+	public Type getRuntimeType(Types types) {
+		if (isPending())
+			return null;
+		return referencedData.getRuntimeType(types);
+	}
+	
+	public void setConstructor(TypeVariable runtimeType) {
 		if (isPending())
 			throw new RuntimeException("Data reference is pending");
-		referencedData.setConstructor(constructor);
+		referencedData.setConstructor(runtimeType);
 	}
 
 	public Data getReferencedData() {

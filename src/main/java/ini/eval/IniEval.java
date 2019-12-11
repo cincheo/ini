@@ -42,6 +42,7 @@ import ini.ast.SetExpression;
 import ini.ast.Statement;
 import ini.ast.StringLiteral;
 import ini.ast.SubArrayAccess;
+import ini.ast.TypeVariable;
 import ini.ast.UnaryOperator;
 import ini.ast.Variable;
 import ini.ast.VariableAccess;
@@ -52,11 +53,15 @@ import ini.eval.data.Data;
 import ini.eval.data.DataReference;
 import ini.eval.data.FutureData;
 import ini.eval.data.RawData;
-import ini.eval.data.RuntimeConstructor;
 import ini.eval.data.TypeInfo;
 import ini.eval.function.BoundExecutable;
 import ini.parser.IniParser;
 import ini.type.AstAttrib;
+import ini.type.Type;
+import ini.type.TypeChecker;
+import ini.type.TypingConstraint;
+import ini.type.TypingConstraint.Kind;
+import ini.type.TypingError;
 
 public class IniEval {
 
@@ -317,12 +322,10 @@ public class IniEval {
 
 			case AstNode.BOOLEAN_LITERAL:
 				result = new RawData(((BooleanLiteral) node).value);
-				result.setConstructor(RuntimeConstructor.BOOLEAN);
 				break;
 
 			case AstNode.CHAR_LITERAL:
 				result = new RawData(((CharLiteral) node).value);
-				result.setConstructor(RuntimeConstructor.CHAR);
 				break;
 
 			case AstNode.FIELD_ACCESS:
@@ -434,22 +437,6 @@ public class IniEval {
 
 			case AstNode.NUMBER_LITERAL:
 				result = new RawData(((NumberLiteral) node).value);
-				if (((NumberLiteral) node).value instanceof Integer) {
-					result.setConstructor(RuntimeConstructor.INT);
-				} else if (((NumberLiteral) node).value instanceof Float) {
-					result.setConstructor(RuntimeConstructor.FLOAT);
-				} else if (((NumberLiteral) node).value instanceof Double) {
-					result.setConstructor(RuntimeConstructor.DOUBLE);
-				} else if (((NumberLiteral) node).value instanceof Byte) {
-					result.setConstructor(RuntimeConstructor.BYTE);
-				} else if (((NumberLiteral) node).value instanceof Long) {
-					result.setConstructor(RuntimeConstructor.LONG);
-				} else {
-					throw new EvalException(this,
-							"unsupported number type: " + ((NumberLiteral) node).value
-									+ (((NumberLiteral) node).value != null
-											? " - " + ((NumberLiteral) node).value.getClass() : ""));
-				}
 				break;
 
 			case AstNode.RETURN_STATEMENT:
@@ -505,14 +492,15 @@ public class IniEval {
 			case AstNode.SET_CONSTRUCTOR:
 				String constructorName = ((SetConstructor) node).name;
 				d = new RawData(null);
-				RuntimeConstructor c = new RuntimeConstructor(constructorName, new ArrayList<>());
+				TypeVariable constructor = TypeVariable.create(constructorName, new ArrayList<>());
+				constructor.parser = parser;
 				if (((SetConstructor) node).fieldAssignments != null) {
 					for (Assignment a : ((SetConstructor) node).fieldAssignments) {
 						d.set(((Variable) a.assignee).name, eval(a.assignment));
-						c.fields.add(((Variable) a.assignee).name);
+						constructor.fields.add(((Variable) a.assignee).name);
 					}
 				}
-				d.setConstructor(c);
+				d.setConstructor(constructor);
 				if (constructorName != null) {
 					Data set = invocationStack.peek().getOrCreate(constructorName);
 					set.set(d, d);
@@ -565,7 +553,6 @@ public class IniEval {
 				d = new RawData(((StringLiteral) node).value);
 				d.setKind(Data.Kind.INT_SET);
 				result = d;
-				result.setConstructor(RuntimeConstructor.STRING);
 				break;
 
 			case AstNode.SUB_ARRAY_ACCESS:
@@ -752,29 +739,45 @@ public class IniEval {
 				return;
 			}
 		} else if (matchExpression instanceof ConstructorMatchExpression) {
-			ConstructorMatchExpression e = (ConstructorMatchExpression) matchExpression;
-			RuntimeConstructor toMatch = dataToMatch.getConstructor();
-			// Constructor constructor = null;
-			// if (e.name != null) {
-			// constructor = parser.types.getFirstLevelConstructor(e.name);
-			// }
-			// System.out.println("1: "+dataToMatch);
-			if (toMatch == null) {
-				result = new RawData(false);
-				return;
-			}
-			// if (constructor == null) {
-			// throw new RuntimeException("type '" + e.name + "' does not
-			// exist");
-			// }
-			// if (toMatch != null && constructor != null && constructor !=
-			// toMatch) {
-			// result = new RawData(false);
-			// return;
-			// }
 			Data d = new RawData(false);
 			result = d;
-			if (!toMatch.name.equals(e.name)) {
+			ConstructorMatchExpression constructorMatchExpression = (ConstructorMatchExpression) matchExpression;
+			if (constructorMatchExpression.type != null) {
+				Type typeToMatch = dataToMatch.getRuntimeType(parser.types);
+				if (typeToMatch == null) {
+					// should not happen...
+					d.setValue(false);
+					return;
+				}
+				TypeChecker typeChecker = new TypeChecker(true, parser.types, new TypingConstraint(Kind.EQ, typeToMatch, constructorMatchExpression.type.getType(),
+						matchExpression, null));
+				List<TypingError> errors = new ArrayList<>();
+				typeChecker.unify(error -> errors.add(error));
+				
+/*				List<TypingConstraint> constraints = new ArrayList<>();
+				constraints.add(new TypingConstraint(Kind.EQ, typeToMatch, constructorMatchExpression.type.getType(),
+						matchExpression, null));
+				while (!constraints.isEmpty() && errors.isEmpty()) {
+					List<TypingConstraint> result = new ArrayList<>();
+					for (TypingConstraint c : constraints) {
+						c.normalize();
+						for (TypingConstraint tc : c.reduce(parser.types, errors)) {
+							if (!tc.left.equals(tc.right)) {
+								result.add(tc);
+							}
+						}
+					}
+					constraints = result;
+				}*/
+				d.setValue(errors.isEmpty());
+				return;
+			}
+			TypeVariable constructor = dataToMatch.getConstructor();
+			d.setValue(false);
+			if (constructor == null) {
+				return;
+			}
+			if (!constructor.name.equals(constructorMatchExpression.name)) {
 				return;
 			}
 			Context c = new Context(invocationStack.peek());
@@ -787,8 +790,8 @@ public class IniEval {
 				}
 				invocationStack.push(c);
 				d.setValue(true);
-				if (e.fieldMatchExpressions != null) {
-					for (Expression fe : e.fieldMatchExpressions) {
+				if (constructorMatchExpression.fieldMatchExpressions != null) {
+					for (Expression fe : constructorMatchExpression.fieldMatchExpressions) {
 						if (!eval(fe).isTrueOrDefined()) {
 							// System.out.println("2: "+fe);
 							d.setValue(false);
@@ -799,7 +802,7 @@ public class IniEval {
 				invocationStack.pop();
 				result = d;
 			} else {
-				throw new RuntimeException("constructor '" + e.name + "' does not exist");
+				throw new RuntimeException("constructor '" + constructorMatchExpression.name + "' does not exist");
 			}
 			/*
 			 * System.out.println("===> "+c); System.out.println("===>
