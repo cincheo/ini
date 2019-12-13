@@ -600,8 +600,8 @@ public class AstAttrib {
 		case AstNode.CONSTRUCTOR_MATCH_EXPRESSION:
 			Constructor constr = parser.types.getConstructor(((ConstructorMatchExpression) node).name);
 			if (constr == null) {
-				if (parser.types.isRegistered(((ConstructorMatchExpression) node).name)
-						&& ((ConstructorMatchExpression) node).type != null) {
+				if (/*parser.types.isRegistered(((ConstructorMatchExpression) node).name)
+						&&*/ ((ConstructorMatchExpression) node).type != null) {
 					result = ((ConstructorMatchExpression) node).type.getType();
 					break;
 				}

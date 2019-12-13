@@ -108,7 +108,16 @@ public class RawData implements Data {
 			case TypeInfo.BYTE:
 				return types.BYTE;
 			case TypeInfo.CHANNEL:
-				return ((ChannelDeclaration)value).getType();
+				return ((ChannelDeclaration) value).getType();
+			case TypeInfo.NULL:
+				if (isIndexedSet()) {
+					Data first = first();
+					if (first != null) {
+						return types.createArrayType(first.getRuntimeType(types));
+					} else {
+						return types.createArrayType(types.ANY);
+					}
+				}
 			}
 			// TODO: is this correct?
 			return types.ANY;
