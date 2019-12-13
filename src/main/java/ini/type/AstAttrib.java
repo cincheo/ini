@@ -600,9 +600,16 @@ public class AstAttrib {
 		case AstNode.CONSTRUCTOR_MATCH_EXPRESSION:
 			Constructor constr = parser.types.getConstructor(((ConstructorMatchExpression) node).name);
 			if (constr == null) {
-				if (/*parser.types.isRegistered(((ConstructorMatchExpression) node).name)
-						&&*/ ((ConstructorMatchExpression) node).type != null) {
-					result = ((ConstructorMatchExpression) node).type.getType();
+				if (/*
+					 * parser.types.isRegistered(((ConstructorMatchExpression)
+					 * node).name) &&
+					 */ ((ConstructorMatchExpression) node).type != null) {
+					if (!((ConstructorMatchExpression) node).type.isTypeRegistered(this)) {
+						addError(new TypingError(node, "undeclared type '" + ((ConstructorMatchExpression) node).type + "'"));
+						result = null;
+					} else {
+						result = ((ConstructorMatchExpression) node).type.getType();
+					}
 					break;
 				}
 				/*
@@ -1166,13 +1173,13 @@ public class AstAttrib {
 	public AstAttrib unify() {
 
 		try {
-			
+
 			// System.err.println("has errors: " + hasErrors());
 			// printConstraints("", System.err);
 
 			TypeChecker typeChecker = new TypeChecker(false, parser.types, constraints);
 			typeChecker.unify(error -> addError(error));
-			
+
 			// System.err.println("==================");
 			// System.err.println("has errors: " + hasErrors());
 			// printConstraints("", System.err);

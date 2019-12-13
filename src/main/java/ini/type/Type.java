@@ -375,4 +375,19 @@ public class Type {
 		return false;
 	}
 
+	public boolean isRegistered() {
+		if (typeParameters != null) {
+			for (Type t : typeParameters) {
+				if (!t.isRegistered()) {
+					return false;
+				}
+			}
+		}
+		if (name != null) {
+			return types.isRegistered(name);
+		} else {
+			return false;
+		}
+	}
+
 }
