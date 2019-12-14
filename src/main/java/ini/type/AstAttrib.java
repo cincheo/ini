@@ -567,7 +567,7 @@ public class AstAttrib {
 				 * variable")); break; }
 				 */
 
-				if (b.left instanceof Variable) {
+				if (b.left instanceof Variable && t2 != null) {
 					Variable v = (Variable) b.left;
 					invocationStack.peek().bind(v.name, t2);
 				}
@@ -605,7 +605,8 @@ public class AstAttrib {
 					 * node).name) &&
 					 */ ((ConstructorMatchExpression) node).type != null) {
 					if (!((ConstructorMatchExpression) node).type.isTypeRegistered(this)) {
-						addError(new TypingError(node, "undeclared type '" + ((ConstructorMatchExpression) node).type + "'"));
+						addError(new TypingError(node,
+								"undeclared type '" + ((ConstructorMatchExpression) node).type + "'"));
 						result = null;
 					} else {
 						result = ((ConstructorMatchExpression) node).type.getType();
