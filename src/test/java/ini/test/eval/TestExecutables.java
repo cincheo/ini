@@ -24,13 +24,15 @@ public class TestExecutables extends IniTestCase {
 	}
 
 	public void testOverride() {
-		testFile("ini/test/executables/override.ini",
-				(p, out) -> assertEquals("prefix2\n", out));
+		testFile("ini/test/executables/override.ini", (p, out) -> assertEquals("prefix2\n", out));
 	}
 
 	public void testLegalOverload1() {
-		testFile("ini/test/executables/legalOverload1.ini",
-				(p, out) -> assertEquals("prefix1\nprefix2\n", out));
+		testFile("ini/test/executables/legalOverload1.ini", (p, out) -> assertEquals("prefix1\nprefix2\n", out));
+	}
+
+	public void testExplicitExtension() {
+		testFile("ini/test/executables/explicit_extension.ini", (p, out) -> assertEquals("prefix_suffix\n3\n", out));
 	}
 
 }
